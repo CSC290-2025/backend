@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "migrate": "prisma migrate dev",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'No linter configured yet'",
+    "test": "echo 'No tests configured yet'"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.3",
+    "@prisma/client": "6.16.2",
+    "@prisma/extension-accelerate": "^2.0.2",
+    "dotenv": "^17.2.2",
+    "hono": "^4.9.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "prisma": "^6.16.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}
