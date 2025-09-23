@@ -22,5 +22,5 @@ export function successResponse<T>(
     timestamp: new Date().toISOString(),
   };
 
-  return c.json(response, statusCode as any);
+  return c.json(response, statusCode);
 }
