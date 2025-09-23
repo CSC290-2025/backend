@@ -1,3 +1,4 @@
+import config from "@/config/env";
 import { BaseError } from "./base";
 
 export class ValidationError extends BaseError {
@@ -74,7 +75,7 @@ export class InternalServerError extends BaseError {
       name: this.name,
       message: this.message,
       statusCode: this.statusCode,
-      ...(process.env.NODE_ENV === "development" && { stack: this.stack }),
+      ...(config.nodeEnv === "development" && { stack: this.stack }),
     };
   }
 }
