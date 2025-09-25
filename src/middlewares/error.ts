@@ -1,6 +1,6 @@
-import type { Context } from "hono";
-import { BaseError, InternalServerError } from "@/errors";
-import config from "@/config/env";
+import type { Context } from 'hono';
+import { BaseError, InternalServerError } from '@/errors';
+import config from '@/config/env';
 
 export function errorHandler(err: Error, c: Context) {
   if (err instanceof BaseError) {
@@ -8,11 +8,11 @@ export function errorHandler(err: Error, c: Context) {
   }
 
   const internalError = new InternalServerError(
-    config.nodeEnv === "development" ? err.message : "Something went wrong",
+    config.nodeEnv === 'development' ? err.message : 'Something went wrong'
   );
 
-  if (config.nodeEnv === "development") {
-    console.error("Unhandled error:", {
+  if (config.nodeEnv === 'development') {
+    console.error('Unhandled error:', {
       message: err.message,
       stack: err.stack,
       name: err.name,
