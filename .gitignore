@@ -16,7 +16,17 @@
 /build
 
 # misc
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.pem
 
 # debug
@@ -44,3 +54,9 @@ src/generated/
 
 *.db
 *.db-journal
+
+# Package Manager Lock File
+package-lock.json
+yarn.lock
+bun.lockb
+!pnpm-lock.yaml
