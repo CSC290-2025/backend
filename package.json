@@ -7,7 +7,10 @@
     "start": "node dist/index.js",
     "migrate": "prisma migrate dev",
     "type-check": "tsc --noEmit",
-    "lint": "echo 'No linter configured yet'",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write .",
+    "check": "eslint . && prettier --check .",
     "test": "echo 'No tests configured yet'"
   },
   "dependencies": {
@@ -19,11 +22,15 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
+    "prettier": "^3.6.2",
     "prisma": "^6.16.2",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.0",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.44.1",
     "vitest": "^3.2.4"
   }
 }

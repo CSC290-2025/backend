@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+
+# Docs
+docs/
+
+# Build & Output
+dist
+dist-ssr
+coverage
+
+# Cache
+.eslintcache
+.vite
+.turbo
+.parcel-cache
+
+# Git / Hooks / Config
+.husky
+.prettierignore
+.gitignore
+
+# Package manager lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Logs and environment
+*.log
+.env*
+!/.env.example
+
+# Assets
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+*.mp4
+*.woff
+*.woff2
