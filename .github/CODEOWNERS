@@ -2,7 +2,10 @@
 
 # package config
 package.json @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
+package-lock.json @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 pnpm-lock.yaml @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
+yarn.lock @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
+bun.lockb @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 
 # build and bundler config
 vite.config.ts @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
