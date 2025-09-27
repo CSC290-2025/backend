@@ -1,10 +1,11 @@
 import type { Context } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { BaseError, InternalServerError } from '@/errors';
 import config from '@/config/env';
 
 export function errorHandler(err: Error, c: Context) {
   if (err instanceof BaseError) {
-    return c.json(err.toJSON(), err.statusCode as any);
+    return c.json(err.toJSON(), err.statusCode as ContentfulStatusCode);
   }
 
   const internalError = new InternalServerError(
@@ -19,5 +20,8 @@ export function errorHandler(err: Error, c: Context) {
     });
   }
 
-  return c.json(internalError.toJSON(), internalError.statusCode as any);
+  return c.json(
+    internalError.toJSON(),
+    internalError.statusCode as ContentfulStatusCode
+  );
 }
