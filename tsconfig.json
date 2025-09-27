@@ -16,15 +16,13 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["*"]
     }
   },
-  "include": ["src/**/*", "prisma/**/*"],
+  "include": ["src/**/*", "prisma/**/*", "tsup.config.ts"],
   "exclude": ["node_modules", "dist", "src/generated"]
 }
