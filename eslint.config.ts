@@ -8,7 +8,7 @@ export default tseslint.config([
 
   // TypeScript config
   {
-    files: ['**/*.{ts,mts,cts}'],
+    files: ['src/**/*.{ts,mts,cts}'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       globals: globals.node,
@@ -16,6 +16,7 @@ export default tseslint.config([
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
+        allowDefaultProject: true,
       },
     },
     rules: {
