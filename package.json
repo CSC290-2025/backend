@@ -11,7 +11,7 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write .",
     "check": "eslint . && prettier --check .",
-    "test": "echo 'No tests configured yet'",
+    "test": "vitest",
     "prepare": "husky"
   },
   "dependencies": {
