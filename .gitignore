@@ -59,4 +59,9 @@ src/generated/
 package-lock.json
 yarn.lock
 bun.lockb
-!pnpm-lock.yaml
+pnpm-lock.yaml
+
+# Caches
+.npm
+.eslintcache
+.prettiercache

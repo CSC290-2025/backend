@@ -1,4 +1,4 @@
-export { BaseError } from "./base";
+export { BaseError } from './base';
 export {
   ValidationError,
   NotFoundError,
@@ -7,5 +7,5 @@ export {
   ConflictError,
   DatabaseError,
   InternalServerError,
-} from "./types";
-export { handlePrismaError } from "./prisma";
+} from './types';
+export { handlePrismaError } from './prisma';
