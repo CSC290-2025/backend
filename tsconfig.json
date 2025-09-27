@@ -23,6 +23,6 @@
       "@/*": ["*"]
     }
   },
-  "include": ["src/**/*", "prisma/**/*", "tsup.config.ts"],
-  "exclude": ["node_modules", "dist", "src/generated"]
+  "include": ["src/**/*", "prisma/**/*"],
+  "exclude": ["node_modules", "dist", "src/generated", "*.config.*"]
 }
