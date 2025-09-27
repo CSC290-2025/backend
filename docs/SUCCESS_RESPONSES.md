@@ -13,6 +13,9 @@ return successResponse(c, { user });
 // Custom status code
 return successResponse(c, { id: "123" }, 201);
 
+// With custom message
+return successResponse(c, { user }, 200, "User retrieved successfully");
+
 // Empty success response
 return successResponse(c, null);
 ```
@@ -23,11 +26,13 @@ return successResponse(c, null);
 export function successResponse<T>(
   c: Context,
   data: T,
-  statusCode: number = 200,
+  statusCode: ContentfulStatusCode = 200,
+  message?: string,
 ): Response {
   const response: ApiResponse<T> = {
     success: true,
     data,
+    ...(message && { message }),
     timestamp: new Date().toISOString(),
   };
 
@@ -40,13 +45,13 @@ export function successResponse<T>(
 ```typescript
 // GET /users/123
 return successResponse(c, {
-  user: { id: "123", name: "John" }
+  user: { id: "123", name: "John" },
 });
 // Response: { "success": true, "data": { "user": {...} }, "timestamp": "..." }
 
-// POST /users
-return successResponse(c, { id: "456" }, 201);
-// Response: { "success": true, "data": { "id": "456" }, "timestamp": "..." }
+// POST /users with custom message
+return successResponse(c, { id: "456" }, 201, "User created successfully");
+// Response: { "success": true, "data": { "id": "456" }, "message": "User created successfully", "timestamp": "..." }
 
 // DELETE /users/123
 return successResponse(c, null);
