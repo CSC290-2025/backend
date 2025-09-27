@@ -24,13 +24,13 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       # - name: Type check
       #   run: pnpm type-check
-      #
-      # - name: Lint
-      #   run: pnpm lint
+
+      - name: Lint
+        run: pnpm lint
 
       - name: Generate Prisma client
         run: pnpm prisma generate
