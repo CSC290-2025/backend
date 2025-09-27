@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           run_install: false
 
@@ -24,7 +24,9 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install --lockfile-only
+          pnpm install --frozen-lockfile
 
       # - name: Type check
       #   run: pnpm type-check
