@@ -13,3 +13,215 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Enums
+enum Gender {
+  MALE
+  FEMALE
+  NONE
+}
+
+enum ReportLevel {
+  near_miss
+  minor
+  moderate
+  major
+  lethal
+}
+
+enum ReportStatus {
+  pending
+  verified
+  resolved
+}
+
+enum SosStatus {
+  open
+  closed
+}
+
+enum AlertStatus {
+  read
+  unread
+  sent
+}
+
+// Models
+model Role {
+  id       Int    @id @default(autoincrement())
+  roleName String @map("role_name")
+
+  users User[]
+}
+
+model Department {
+  id             Int       @id @default(autoincrement())
+  departmentName String    @map("department_name")
+  createdAt      DateTime? @map("created_at")
+  updatedAt      DateTime? @map("updated_at")
+
+  users UsersDepartments[]
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  username          String?   @db.VarChar(25)
+  firstName         String?   @map("first_name")
+  middleName        String?   @map("middle_name")
+  lastName          String?   @map("last_name")
+  gender            Gender?
+  roleId            Int
+  passwordHash      String    @map("password_hash")
+  email             String?   @unique
+  phone             String?   @unique
+  province          String?
+  district          String?
+  subdistrict       String?
+  zipCode           String?   @map("zip_code")
+  moreAddressDetail String?   @map("more_address_detail")
+  birthDate         DateTime
+  createdAt         DateTime?
+  updatedAt         DateTime?
+
+  role              Role                      @relation(fields: [roleId], references: [id])
+  departments       UsersDepartments[]
+  emergencyReports  EmergencyReport[]
+  emergencyContacts EmergencyContact[]
+  alerts            Alert[]
+  sosRecords        Sos[]
+  fcmTokens         FcmToken[]
+  messagesSent      Message[]
+  conversationLinks ConversationParticipant[]
+  session           Session[]
+  refreshToken      RefreshToken[]
+}
+
+model UsersDepartments {
+  userId       Int
+  departmentId Int
+
+  user       User       @relation(fields: [userId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  @@id([userId, departmentId])
+}
+
+model Session {
+  sessionId    String   @id @map("session_id")
+  userId       Int
+  createdAt    DateTime @map("created_at")
+  expiresAt    DateTime @map("expires_at")
+  lastAccessed DateTime @map("last_accessed")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model RefreshToken {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  refreshToken String   @map("refresh_token") @db.VarChar(512)
+  createdAt    DateTime @map("created_at")
+  expiresAt    DateTime @map("expires_at")
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ReportCategory {
+  id        Int       @id @default(autoincrement())
+  name      String?
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @map("updated_at")
+
+  reports EmergencyReport[]
+}
+
+model EmergencyReport {
+  id               Int           @id @default(autoincrement())
+  userId           Int
+  imageUrl         String?       @map("image_url")
+  description      String?
+  location         Bytes
+  ambulanceService Boolean?      @map("ambulance_service")
+  isSos            Boolean?      @map("is_sos")
+  level            ReportLevel?
+  status           ReportStatus?
+  reportCategoryId Int           @map("report_category_id")
+  createdAt        DateTime?     @map("created_at")
+  updatedAt        DateTime?     @map("updated_at")
+
+  user     User           @relation(fields: [userId], references: [id])
+  category ReportCategory @relation(fields: [reportCategoryId], references: [id])
+  alerts   Alert[]
+}
+
+model EmergencyContact {
+  id          Int     @id @default(autoincrement())
+  userId      Int
+  contactName String? @map("contact_name")
+  phone       String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Alert {
+  id       Int          @id @default(autoincrement())
+  reportId Int
+  userId   Int
+  message  String?
+  area     Bytes
+  status   AlertStatus?
+  sentAt   DateTime?    @map("sent_at")
+
+  report EmergencyReport @relation(fields: [reportId], references: [id])
+  user   User            @relation(fields: [userId], references: [id])
+}
+
+model Sos {
+  sosId     Int       @id @default(autoincrement()) @map("sos_id")
+  userId    Int
+  location  Bytes
+  status    SosStatus @default(open)
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model FcmToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  fcmTokens String?   @map("fcm_tokens")
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id               Int                       @id @default(autoincrement())
+  conversationName String?                   @map("conversation_name")
+  createdAt        DateTime?                 @map("created_at")
+  participants     ConversationParticipant[]
+  messages         Message[]
+}
+
+model ConversationParticipant {
+  conversationId Int
+  userId         Int
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@id([conversationId, userId])
+}
+
+model Message {
+  id             Int       @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  messageText    String?   @map("message_text")
+  sentAt         DateTime? @map("sent_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+}
