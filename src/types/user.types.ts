@@ -1,33 +1,25 @@
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { z } from 'zod';
+import type {
+  UserSchema,
+  CreateUserSchema,
+  UserIdParam,
+  UserQuery,
+} from '@/schemas/user.schemas';
 
-interface CreateUserData {
-  email: string;
-  name: string;
-  avatar?: string;
-}
+type User = z.infer<typeof UserSchema>;
 
-interface UpdateUserData {
-  email?: string;
-  name?: string;
-  avatar?: string;
-}
+type CreateUserData = z.infer<typeof CreateUserSchema>;
 
-interface UserQueryParams {
-  page?: number;
-  limit?: number;
-  search?: string;
+type UpdateUserData = Partial<CreateUserData>;
+
+type UserIdParams = z.infer<typeof UserIdParam>;
+
+type UserQueryParams = z.infer<typeof UserQuery> & {
   sortBy?: 'name' | 'email' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
-}
+};
 
-interface PaginatedUsers {
+type PaginatedUsers = {
   users: User[];
   pagination: {
     page: number;
@@ -35,12 +27,13 @@ interface PaginatedUsers {
     total: number;
     pages: number;
   };
-}
+};
 
 export type {
   User,
   CreateUserData,
   UpdateUserData,
+  UserIdParams,
   UserQueryParams,
   PaginatedUsers,
 };
