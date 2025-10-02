@@ -50,8 +50,8 @@ node --version  # Should show >=20.19.0
 
 3. **Update database schema** (if needed or schema is updated)
 
-   > [!CAUTION]
-   > Always run migrations when schema changes are pulled! (i.e. `schema.prisma`)
+> [!CAUTION]
+> Always run migrations when schema changes are pulled! (i.e. `schema.prisma`)
 
    ```bash
    pnpm migrate
