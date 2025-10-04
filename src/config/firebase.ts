@@ -1,14 +1,13 @@
-import config from '@/config/env.ts';
-import firebaseAdmin from 'firebase-admin';
+import config from '@/config/env';
+import admin from 'firebase-admin';
 
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert({
+admin.initializeApp({
+  credential: admin.credential.cert({
     projectId: config.projectId,
-    privateKey: config.privateKey,
+    privateKey: config.privateKey.replace(/\\n/g, '\n'),
     clientEmail: config.clientEmail,
   }),
 });
 
-const firebaseMessaging = firebaseAdmin.messaging(firebaseAdmin.app());
-
-export default firebaseMessaging;
+const firebaseMessaging = admin.messaging();
+export { firebaseMessaging };

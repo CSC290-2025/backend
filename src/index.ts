@@ -1,15 +1,13 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import config from './config/env';
-import { errorHandler } from './middlewares/error';
+import { errorHandler } from '@/middlewares';
+import { fcmRoutes } from '@/routes';
 
 const app = new Hono();
 
 app.onError(errorHandler);
-
-app.get('/', (c) => {
-  return c.text('Hello Hono!');
-});
+app.route('/notifications', fcmRoutes);
 
 const server = serve(
   {

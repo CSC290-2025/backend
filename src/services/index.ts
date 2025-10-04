@@ -1,1 +1,1 @@
-export * as UserService from './user.service';
+export * as FcmService from './fcm.service';

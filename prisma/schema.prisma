@@ -127,10 +127,10 @@ model RefreshToken {
 }
 
 model ReportCategory {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String?
-  createdAt DateTime? @map("created_at")
-  updatedAt DateTime? @map("updated_at")
+  createdAt DateTime @map("created_at")
+  expiresAt DateTime @map("expires_at")
 
   reports EmergencyReport[]
 }
@@ -146,8 +146,8 @@ model EmergencyReport {
   level            ReportLevel?
   status           ReportStatus?
   reportCategoryId Int           @map("report_category_id")
-  createdAt        DateTime?     @map("created_at")
-  updatedAt        DateTime?     @map("updated_at")
+  createdAt        DateTime      @map("created_at")
+  updatedAt        DateTime      @map("updated_at")
 
   user     User           @relation(fields: [userId], references: [id])
   category ReportCategory @relation(fields: [reportCategoryId], references: [id])
@@ -170,7 +170,7 @@ model Alert {
   message  String?
   area     Bytes
   status   AlertStatus?
-  sentAt   DateTime?    @map("sent_at")
+  sentAt   DateTime     @map("sent_at")
 
   report EmergencyReport @relation(fields: [reportId], references: [id])
   user   User            @relation(fields: [userId], references: [id])
@@ -181,18 +181,18 @@ model Sos {
   userId    Int
   location  Bytes
   status    SosStatus @default(open)
-  createdAt DateTime?
-  updatedAt DateTime?
+  createdAt DateTime
+  updatedAt DateTime
 
   user User @relation(fields: [userId], references: [id])
 }
 
 model FcmToken {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   userId    Int
-  fcmTokens String?   @map("fcm_tokens")
-  createdAt DateTime?
-  updatedAt DateTime?
+  fcmTokens String   @map("fcm_tokens")
+  createdAt DateTime @map("created_at")
+  updateAt  DateTime @map("update_at")
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -216,11 +216,11 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             Int       @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   conversationId Int
   senderId       Int
-  messageText    String?   @map("message_text")
-  sentAt         DateTime? @map("sent_at")
+  messageText    String?  @map("message_text")
+  sentAt         DateTime @map("sent_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id])
   sender       User         @relation(fields: [senderId], references: [id])
