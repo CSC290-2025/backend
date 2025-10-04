@@ -1,1 +1,1 @@
-export { userRoutes } from './user.routes';
+export { fcmRoutes } from '@/routes/fcm.route';

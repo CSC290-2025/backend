@@ -1,1 +1,1 @@
-export * as UserController from './user.controller';
+export * as FcmController from '@/controllers/fcm.controller';

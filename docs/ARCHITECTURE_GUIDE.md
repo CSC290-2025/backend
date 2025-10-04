@@ -29,7 +29,7 @@ Substitue [feature] with specific names.
 
 Feel free to use my example User structure (available in `/src`) as a guideline.
 
-- `types/user.types.ts` (defines interfaces, exports at end)
+- `types/user.type.ts` (defines interfaces, exports at end)
 - `models/user.model.ts` (imports from `@/types`, exports functions at end)
 - `services/user.service.ts` (imports from `@/models, @/types`, exports at end)
 - `controllers/user.controller.ts` (imports from `@/services`, exports at end)
@@ -37,7 +37,7 @@ Feel free to use my example User structure (available in `/src`) as a guideline.
 
 ### 3. CODE PATTERNS
 
-#### TYPES PATTERN (user.types.ts)
+#### TYPES PATTERN (user.type.ts)
 
 ```typescript
 interface User {

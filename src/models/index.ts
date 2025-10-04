@@ -1,1 +1,1 @@
-export * as UserModel from './user.model';
+export * as FcmModel from './fcm.model.ts';
