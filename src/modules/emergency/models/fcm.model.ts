@@ -1,6 +1,6 @@
-import type { fcmToken } from '@/types/fcm.type';
+import type { fcmToken } from '@/modules/emergency/types/fcm.type.ts';
 import { handlePrismaError } from '@/errors';
-import prisma from '@/config/client';
+import prisma from '@/config/client.ts';
 
 const getAllFcmToken = async (): Promise<fcmToken[]> => {
   try {

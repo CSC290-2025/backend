@@ -1,4 +1,4 @@
-import { FcmController } from '@/controllers';
+import { FcmController } from '@/modules/emergency/controllers';
 import { Hono } from 'hono';
 
 const fcmRoutes = new Hono();

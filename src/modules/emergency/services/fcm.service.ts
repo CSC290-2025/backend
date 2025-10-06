@@ -1,6 +1,9 @@
-import { FcmModel } from '@/models';
-import { firebaseMessaging } from '@/config/firebase';
-import type { Notification, NotificationResponse } from '@/types/fcm.type.ts';
+import { FcmModel } from '@/modules/emergency/models';
+import { firebaseMessaging } from '@/config/firebase.ts';
+import type {
+  Notification,
+  NotificationResponse,
+} from '@/modules/emergency/types/fcm.type.ts';
 
 export const sendAllNotificationService = async (
   notification: Notification

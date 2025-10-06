@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import config from './config/env';
 import { errorHandler } from '@/middlewares';
-import { fcmRoutes } from '@/routes';
+import { fcmRoutes } from '@/modules/emergency/routes';
 
 const app = new Hono();
 
