@@ -49,6 +49,7 @@ pnpm-debug.log*
 prisma/generated/
 prisma/dev.db
 prisma/dev.db-journal
+prisma/migrations
 
 src/generated/
 
