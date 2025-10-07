@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/orgs/CSC290-2025/discussions
+    about: Ask questions and discuss ideas (Or report serious bugs)
