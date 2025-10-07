@@ -76,8 +76,8 @@
 
 4. **Update database schema** (if needed or schema is updated)
 
-   > [!CAUTION]
-   > Always run migrations when schema changes are pulled! (i.e. `schema.prisma`)
+> [!CAUTION]
+> Always run migrations when schema changes are pulled! (i.e. `schema.prisma`)
 
    ```bash
    pnpm run migrate
