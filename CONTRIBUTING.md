@@ -1,12 +1,14 @@
-# Contributing to Smart City Backend
+# Contributing Guidelines
 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Development Workflow](#development-workflow)
+- [Daily Workflow](#daily-workflow)
+- [Branch Naming](#branch-naming-convention)
 - [Code Standards](#code-standards)
 - [Architecture Guidelines](#architecture-guidelines)
 - [Pull Request Process](#pull-request-process)
+- [Dev Commands](#dev-commands-can-omit-run)
 - [Testing](#testing)
 - [Common Tasks](#common-tasks)
 
@@ -47,17 +49,39 @@
    pnpm install
    ```
 
+## Daily Workflow
+
+> [!TIP]
+> Follow this workflow every day to stay in sync and maintain code quality.
+
+### Start of Day
+
+1. **Pull latest changes**
+
+   ```bash
+   git pull origin main
+   ```
+
+2. **Install/update dependencies**
+
+   ```bash
+   pnpm install
+   ```
+
 3. Set up environment variables
 
    ```bash
    cp .env.example .env
    ```
 
-4. Run database migrations
+4. **Update database schema** (if needed or schema is updated)
 
-   ```bash
-   pnpm run migrate
-   ```
+> [!CAUTION]
+> Always run migrations when schema changes are pulled! (i.e. `schema.prisma`)
+
+```bash
+pnpm run migrate
+```
 
 5. Start development server
 
@@ -65,11 +89,84 @@
    pnpm run dev
    ```
 
-## Development Workflow
+### During Development
 
-### Branch Naming Convention
+#### Creating a Feature Branch
 
-Use descriptive branch names with prefixes: (It's okay to name in a different format, just add `Feature` name)
+```bash
+git checkout -b feature/[feature-name]
+# or
+git checkout -b fix/[bug-fix]
+```
+
+#### Staying in Sync (Do this frequently!)
+
+**Merge workflow:**
+
+```bash
+# Fetch latest main and merge into your branch
+git fetch origin main
+git merge origin/main
+```
+
+**When to sync:**
+
+- Before starting work each day
+- Before creating a PR
+- When main has important updates
+- If your branch is getting behind
+
+#### Before Committing
+
+1. **Run type checking**
+
+   ```bash
+   pnpm type-check
+   ```
+
+2. **Run linting and formatting**
+
+   ```bash
+   pnpm check
+   ```
+
+3. **Run tests** (If tests are available for specific features)
+
+   ```bash
+   pnpm test
+   ```
+
+#### Committing Changes
+
+```bash
+git add .
+git commit -m "type: concise description of changes"
+# (e.g. git commit -m "feat: add new user type")
+```
+
+> [!NOTE]
+> **Commit message format:** (If possible, please use [Conventional Commits](https://www.conventionalcommits.org/))
+>
+> - `feat:` - new feature
+> - `fix:` - bug fix
+> - `refactor:` - code refactoring
+> - `docs:` - documentation changes
+> - `test:` - adding or updating tests
+> - `chore:` - housekeeping tasks (no new functions or feats)
+
+### End of Day
+
+1. **Push your branch**
+
+   ```bash
+   git push origin your-branch-name
+   ```
+
+2. **Create pull request** (if feature is complete or Once a week)
+
+## Branch Naming Convention
+
+Use descriptive branch names with prefixes: (It's okay to name in a different format, just don't forget to add `Feature` name)
 
 - `feat/` - New features (e.g., `feat/user-authentication`)
 - `fix/` - Bug fixes (e.g., `fix/login-validation`)
@@ -77,55 +174,20 @@ Use descriptive branch names with prefixes: (It's okay to name in a different fo
 - `refactor/` - Code refactoring (e.g., `refactor/error-handling`)
 - `test/` - Adding tests (e.g., `test/user-service`)
 
-### Making Changes
-
-1. **Create a new branch** from `main`
-
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
-
-2. **Make your changes** following the [architecture guidelines](#architecture-guidelines)
-
-3. **Test your changes**: (If there's one)
-
-   ```bash
-   pnpm run dev          # Run development server
-   pnpm run test         # Run tests
-   pnpm run type-check   # Check TypeScript types
-   pnpm run check        # Run linting and formatting checks
-   ```
-
-4. **Commit your changes** with clear, descriptive messages
-
-   ```bash
-   git add .
-   git commit -m "feat: add user authentication endpoint"
-   ```
-
-5. **Push to your branch**
-
-   ```bash
-   git push origin feat/your-feature-name
-   ```
-
-6. **Create a Pull Request** using the provided template
-
 ## Code Standards
 
 ### Formatting & Linting
 
-We use **Prettier** and **ESLint** with automatic formatting on commit.
+> [!TIP]
+> Code quality is automatically enforced, but understanding the tools helps debug issues.
+
+- **Pre-commit hooks** are configured with Husky and lint-staged
+- **ESLint** and **Prettier** will auto-fix on commits
 
 > [!NOTE]
-> These checks are enforced by pre-commit hooks, but run them manually to catch issues early.
+> Ping @psst on discord if any error shows up
 
-```bash
-pnpm run format      # Format all files
-pnpm run lint        # Check for linting errors
-pnpm run lint:fix    # Auto-fix linting errors
-pnpm run check       # Run both ESLint and Prettier checks
-```
+- **TypeScript** only for consistency across frontend & backend
 
 ### Code Style
 
@@ -133,7 +195,7 @@ pnpm run check       # Run both ESLint and Prettier checks
 - Use **PascalCase** for types, interfaces, and classes
 - Use **kebab-case** for file names
 - Use **descriptive names** (avoid single-letter variables except in loops)
-- Add **JSDoc comments** for complex functions
+- Add **JSDoc comments** for complex functions (If applicable) [Reference](https://jsdoc.app/)
 - Keep functions **small and focused** (single responsibility)
 
 ### Import Organization
@@ -163,7 +225,7 @@ Following a **modular architecture**, please refer to the [Architecture Guide](.
 
 ### Quick Reference
 
-Folder structure
+#### Folder structure
 
 ```tree
 src/
@@ -179,7 +241,7 @@ src/
 └── utils/                # Shared utilities
 ```
 
-Layer responsibilities
+#### Layer responsibilities
 
 - **Types**: Define data structures and interfaces
 - **Models**: Direct database interactions (Prisma queries)
@@ -187,7 +249,7 @@ Layer responsibilities
 - **Controllers**: Handle HTTP requests/responses
 - **Routes**: Define API endpoints
 
-Flow
+#### Flow
 
 ```text
 Routes → Controllers → Services → Models → Database
@@ -231,7 +293,37 @@ import { successResponse } from '@/utils/response';
 return successResponse(c, { user }, 200, 'User retrieved successfully');
 ```
 
-See [Success Responses Guide](./docs/SUCCESS_RESPONSES.md) for more details.
+See [Success Responses Guide](./docs/SUCCESS_RESPONSES.md) for more details
+
+## Tech Stack
+
+### Hono & Node.js
+
+### Prisma
+
+> [!CAUTION]
+> **Schema changes:** Always create migrations - never modify the database directly!
+
+```bash
+pnpm migrate
+```
+
+- **Database queries:** Use proper error handling (more at [Error Handling Guide](./docs/ERROR_HANDLING.md))
+
+## Dev Commands (Can omit `run`)
+
+| Command               | Purpose                                  |
+| --------------------- | ---------------------------------------- |
+| `pnpm run dev`        | Start development server with hot reload |
+| `pnpm run build`      | Build for production                     |
+| `pnpm run start`      | Start production server                  |
+| `pnpm run migrate`    | Run database migrations                  |
+| `pnpm run type-check` | Check TypeScript types                   |
+| `pnpm run lint`       | Lint code                                |
+| `pnpm run lint:fix`   | Lint and auto-fix issues                 |
+| `pnpm run format`     | Format code with Prettier                |
+| `pnpm run check`      | Run both linting and format checking     |
+| `pnpm run test`       | Run tests                                |
 
 ## Pull Request Process
 
@@ -278,7 +370,7 @@ describe('UserService.getUserById', () => {
 });
 ```
 
-Refer to this [Website](https://arrangeactassert.com/what-is-aaa/) if you wanna learn more.
+Refer to this [website](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices) if you wanna learn more.
 
 ## Common Tasks
 

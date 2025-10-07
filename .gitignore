@@ -46,9 +46,19 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 # Prisma
-prisma/generated/
+prisma/.env
+prisma/migrations/
 prisma/dev.db
 prisma/dev.db-journal
+prisma/generated/
+prisma/.dbml
+prisma/.graphql
+prisma/*.sqlite
+prisma/*.sqlite-journal
+prisma/**/generated/
+prisma/**/migrations/
+prisma/**/*.db
+prisma/**/*.db-journal
 
 src/generated/
 
