@@ -13,18 +13,18 @@ export interface ApiResponse<T = unknown> {
   timestamp: string;
 }
 
-export function successResponse<T>(
+export function successResponse<T, S extends ContentfulStatusCode = 200>(
   c: Context,
   data: T,
-  statusCode: ContentfulStatusCode = 200,
+  statusCode?: S,
   message?: string
-): Response {
-  const response: ApiResponse<T> = {
+) {
+  const response = {
     success: true,
     data,
     ...(message && { message }),
     timestamp: new Date().toISOString(),
   };
 
-  return c.json(response, statusCode);
+  return c.json(response, statusCode || 200);
 }
