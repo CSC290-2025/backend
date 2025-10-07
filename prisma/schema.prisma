@@ -1129,3 +1129,1124 @@ enum booking_status {
   confirmed
   cancelled
 }
+
+model addresses {
+  id               Int                      @id @default(autoincrement())
+  address_line     String?
+  province         String?                  @db.VarChar(255)
+  district         String?                  @db.VarChar(255)
+  subdistrict      String?                  @db.VarChar(255)
+  postal_code      String?                  @db.VarChar(20)
+  location         Unsupported("geometry")?
+  created_at       DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime                 @default(now()) @db.Timestamptz(6)
+  air_quality      air_quality[]
+  apartment        apartment[]
+  emergency_calls  emergency_calls[]
+  events           events[]
+  facilities       facilities[]
+  onsite_sessions  onsite_sessions[]
+  user_profiles    user_profiles[]
+  volunteer_events volunteer_events[]
+  weather_data     weather_data[]
+
+  @@index([location], map: "idx_addresses_location", type: Gist)
+}
+
+model air_quality {
+  id          Int                   @id @default(autoincrement())
+  location_id Int?
+  aqi         Decimal?              @db.Decimal(6, 2)
+  pm25        Decimal?              @db.Decimal(8, 3)
+  pm10        Decimal?              @db.Decimal(8, 3)
+  co          Decimal?              @db.Decimal(8, 3)
+  no2         Decimal?              @db.Decimal(8, 3)
+  so2         Decimal?              @db.Decimal(8, 3)
+  o3          Decimal?              @db.Decimal(8, 3)
+  category    air_quality_category?
+  measured_at DateTime              @default(now()) @db.Timestamptz(6)
+  addresses   addresses?            @relation(fields: [location_id], references: [id], onUpdate: NoAction)
+}
+
+model alerts {
+  id                Int                      @id @default(autoincrement())
+  report_id         Int?
+  user_id           Int?
+  message           String
+  status            alert_status?            @default(unread)
+  location          Unsupported("geometry")?
+  sent_at           DateTime?                @default(now()) @db.Timestamptz(6)
+  emergency_reports emergency_reports?       @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users             users?                   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model ambulances {
+  id               Int                      @id @default(autoincrement())
+  vehicle_number   String?                  @unique @db.VarChar(50)
+  status           String?                  @db.VarChar(50)
+  current_location Unsupported("geometry")?
+  base_facility_id Int?
+  created_at       DateTime                 @default(now()) @db.Timestamptz(6)
+  facilities       facilities?              @relation(fields: [base_facility_id], references: [id], onUpdate: NoAction)
+  emergency_calls  emergency_calls[]
+}
+
+model apartment {
+  id                 Int                 @id @default(autoincrement())
+  name               String?             @db.VarChar(255)
+  phone              String?             @db.VarChar(10)
+  description        String?
+  rating_id          Int?
+  electric_price     Float?
+  water_price        Float?
+  internet           apartment_internet?
+  apartment_type     apartment_type?
+  apartment_location apartment_location?
+  address_id         Int?
+  addresses          addresses?          @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rating             rating?             @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  apartment_owner    apartment_owner[]
+  apartment_picture  apartment_picture[]
+  room               room[]
+}
+
+model apartment_booking {
+  id             Int             @id @default(autoincrement())
+  user_id        Int
+  check_in       DateTime?       @db.Timestamptz(6)
+  booking_status booking_status? @default(pending)
+  created_at     DateTime?       @db.Timestamptz(6)
+  updated_at     DateTime?       @db.Timestamptz(6)
+  users          users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model apartment_owner {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  apartment_id Int
+  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model apartment_picture {
+  id           Int       @id @default(autoincrement())
+  name         String?   @db.VarChar(255)
+  file_path    String
+  apartment_id Int
+  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model appointments {
+  id             Int         @id @default(autoincrement())
+  patient_id     Int?
+  facility_id    Int?
+  staff_user_id  Int?
+  appointment_at DateTime?   @db.Timestamptz(6)
+  type           String?     @db.VarChar(50)
+  status         String?     @db.VarChar(50)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  facilities     facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
+  patients       patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
+  users          users?      @relation(fields: [staff_user_id], references: [id], onUpdate: NoAction)
+}
+
+model beds {
+  id             Int         @id @default(autoincrement())
+  facility_id    Int?
+  bed_number     String?     @db.VarChar(50)
+  bed_type       String?     @db.VarChar(50)
+  status         String?     @db.VarChar(50)
+  patient_id     Int?
+  admission_date DateTime?   @db.Timestamptz(6)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  facilities     facilities? @relation(fields: [facility_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  patients       patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
+}
+
+model card_transactions {
+  id                   Int                    @id @default(autoincrement())
+  card_id              Int
+  card_type            String?                @db.VarChar(50)
+  transaction_type     card_transaction_type?
+  transaction_category transaction_category?
+  reference            String?                @db.VarChar(100)
+  amount               Decimal?               @default(0) @db.Decimal(12, 2)
+  description          String?                @db.VarChar(255)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+}
+
+model conversation_participants {
+  conversation_id Int
+  user_id         Int
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([conversation_id, user_id])
+}
+
+model conversations {
+  id                        Int                         @id @default(autoincrement())
+  conversation_name         String?                     @db.VarChar(255)
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  conversation_participants conversation_participants[]
+  messages                  messages[]
+}
+
+model course_videos {
+  id                Int      @id @default(autoincrement())
+  course_id         Int?
+  video_name        String   @db.VarChar(255)
+  video_description String?
+  duration_minutes  Int
+  video_order       Int
+  video_file_path   String?
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @default(now()) @db.Timestamptz(6)
+  courses           courses? @relation(fields: [course_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([course_id, video_order])
+}
+
+model courses {
+  id                 Int               @id @default(autoincrement())
+  author_id          Int?
+  course_name        String            @db.VarChar(255)
+  course_description String?
+  course_type        course_type
+  course_status      course_status     @default(pending)
+  cover_image        String?
+  created_at         DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime          @default(now()) @db.Timestamptz(6)
+  course_videos      course_videos[]
+  users              users?            @relation(fields: [author_id], references: [id], onUpdate: NoAction)
+  onsite_sessions    onsite_sessions[]
+}
+
+model departments {
+  id                Int                 @id @default(autoincrement())
+  department_name   String              @unique @db.VarChar(255)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  events            events[]
+  facilities        facilities[]
+  freecycle_posts   freecycle_posts[]
+  users_departments users_departments[]
+  volunteer_events  volunteer_events[]
+}
+
+model digital_cards {
+  id                          Int                           @id @default(autoincrement())
+  user_id                     Int?
+  status                      String                        @default("active") @db.VarChar(20)
+  users                       users?                        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  transportation_transactions transportation_transactions[]
+}
+
+model dim_category {
+  category_id          Int                @id
+  category_name        String?            @db.VarChar(255)
+  category_description String?
+  reports_metadata     reports_metadata[]
+}
+
+model dim_facility {
+  facility_id     Int               @id
+  facility_name   String?           @db.VarChar(255)
+  location_id     Int?
+  dim_location    dim_location?     @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location")
+  fact_healthcare fact_healthcare[]
+}
+
+model dim_location {
+  location_id     Int                      @id
+  district        String?                  @db.VarChar(255)
+  coordinates     Unsupported("geometry")?
+  dim_facility    dim_facility[]
+  fact_population fact_population[]
+  fact_traffic    fact_traffic[]
+  fact_waste      fact_waste[]
+  fact_weather    fact_weather[]
+}
+
+model dim_time {
+  time_id         Int               @id
+  date_actual     DateTime?         @db.Date
+  year_val        Int?
+  month_val       Int?
+  day_val         Int?
+  hour_val        Int?
+  fact_healthcare fact_healthcare[]
+  fact_population fact_population[]
+  fact_traffic    fact_traffic[]
+  fact_waste      fact_waste[]
+  fact_weather    fact_weather[]
+}
+
+model dim_user {
+  user_id          Int                @id
+  full_name        String?            @db.VarChar(255)
+  email            String?            @unique @db.VarChar(255)
+  role_string      String?            @db.VarChar(100)
+  reports_metadata reports_metadata[]
+}
+
+model dim_waste_type {
+  waste_type_id   Int          @id
+  waste_type_name String?      @db.VarChar(255)
+  fact_waste      fact_waste[]
+}
+
+model emergency_calls {
+  id             Int         @id @default(autoincrement())
+  patient_id     Int?
+  caller_phone   String?     @db.VarChar(20)
+  emergency_type String?     @db.VarChar(100)
+  severity       String?     @db.VarChar(50)
+  address_id     Int?
+  ambulance_id   Int?
+  facility_id    Int?
+  status         String?     @db.VarChar(50)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  addresses      addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  ambulances     ambulances? @relation(fields: [ambulance_id], references: [id], onUpdate: NoAction)
+  facilities     facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
+  patients       patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
+}
+
+model emergency_contacts {
+  id           Int     @id @default(autoincrement())
+  user_id      Int?
+  contact_name String  @db.VarChar(255)
+  phone        String? @db.VarChar(20)
+  users        users?  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model emergency_reports {
+  id                 Int                      @id @default(autoincrement())
+  user_id            Int?
+  image_url          String?                  @db.VarChar(1024)
+  description        String?
+  location           Unsupported("geometry")?
+  ambulance_service  Boolean?                 @default(false)
+  level              report_level?
+  status             report_status?           @default(pending)
+  report_category_id Int?
+  created_at         DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime                 @default(now()) @db.Timestamptz(6)
+  alerts             alerts[]
+  report_categories  report_categories?       @relation(fields: [report_category_id], references: [id], onUpdate: NoAction)
+  users              users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([location], map: "idx_emergency_reports_location", type: Gist)
+}
+
+model event_bookmarks {
+  user_id    Int
+  event_id   Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  events     events   @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, event_id])
+}
+
+model events {
+  id                     Int                      @id @default(autoincrement())
+  host_user_id           Int?
+  department_id          Int?
+  image_url              String?
+  title                  String?                  @db.VarChar(255)
+  description            String?
+  total_seats            Int?                     @default(0)
+  start_at               DateTime?                @db.Timestamptz(6)
+  end_at                 DateTime?                @db.Timestamptz(6)
+  address_id             Int?
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  event_bookmarks        event_bookmarks[]
+  addresses              addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  departments            departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
+  users                  users?                   @relation(fields: [host_user_id], references: [id], onUpdate: NoAction)
+  waste_event_statistics waste_event_statistics[]
+
+  @@index([start_at], map: "idx_events_start_at")
+}
+
+model facilities {
+  id                 Int                      @id @default(autoincrement())
+  name               String                   @db.VarChar(255)
+  facility_type      String?                  @db.VarChar(100)
+  address_id         Int?
+  phone              String?                  @db.VarChar(20)
+  location           Unsupported("geometry")?
+  emergency_services Boolean?                 @default(false)
+  department_id      Int?
+  created_at         DateTime                 @default(now()) @db.Timestamptz(6)
+  ambulances         ambulances[]
+  appointments       appointments[]
+  beds               beds[]
+  emergency_calls    emergency_calls[]
+  addresses          addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  departments        departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
+  payments           payments[]
+  prescriptions      prescriptions[]
+
+  @@index([location], map: "idx_facilities_location", type: Gist)
+}
+
+model fact_healthcare {
+  health_id                     Int           @id
+  time_id                       Int?
+  facility_id                   Int?
+  avg_wait_time_minutes_numeric Decimal?      @db.Decimal(10, 2)
+  bed_occupancy_percent_numeric Decimal?      @db.Decimal(5, 2)
+  total_revenue_numeric         Decimal?      @db.Decimal(15, 2)
+  dim_facility                  dim_facility? @relation(fields: [facility_id], references: [facility_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_facility")
+  dim_time                      dim_time?     @relation(fields: [time_id], references: [time_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time")
+}
+
+model fact_population {
+  population_id              Int           @id
+  time_id                    Int?
+  location_id                Int?
+  total_population           Int?
+  population_density_numeric Decimal?      @db.Decimal(10, 2)
+  median_age_numeric         Decimal?      @db.Decimal(5, 2)
+  dim_location               dim_location? @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location")
+  dim_time                   dim_time?     @relation(fields: [time_id], references: [time_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time")
+}
+
+model fact_traffic {
+  traffic_id            Int           @id
+  time_id               Int?
+  location_id           Int?
+  vehicle_count         Int?
+  has_accident_flag     Boolean?
+  density_level_numeric Decimal?      @db.Decimal(10, 2)
+  dim_location          dim_location? @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location")
+  dim_time              dim_time?     @relation(fields: [time_id], references: [time_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time")
+}
+
+model fact_waste {
+  waste_id                     Int             @id
+  time_id                      Int?
+  location_id                  Int?
+  waste_type_id                Int?
+  collection_weight_kg_numeric Decimal?        @db.Decimal(10, 2)
+  dim_location                 dim_location?   @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location")
+  dim_time                     dim_time?       @relation(fields: [time_id], references: [time_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time")
+  dim_waste_type               dim_waste_type? @relation(fields: [waste_type_id], references: [waste_type_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_waste_type")
+}
+
+model fact_weather {
+  weather_id              Int           @id
+  time_id                 Int?
+  location_id             Int?
+  avg_aqi_numeric         Decimal?      @db.Decimal(10, 2)
+  max_pm25_numeric        Decimal?      @db.Decimal(10, 2)
+  avg_temperature_numeric Decimal?      @db.Decimal(5, 2)
+  dim_location            dim_location? @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_location")
+  dim_time                dim_time?     @relation(fields: [time_id], references: [time_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time")
+}
+
+model fcm_token {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model freecycle_categories {
+  id                         Int                          @id @default(autoincrement())
+  category_name              String                       @unique @db.VarChar(100)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  freecycle_posts_categories freecycle_posts_categories[]
+}
+
+model freecycle_posts {
+  id                         Int                          @id @default(autoincrement())
+  item_name                  String                       @db.VarChar(255)
+  item_weight                Decimal?                     @db.Decimal(10, 3)
+  photo_url                  String?
+  description                String?
+  donater_id                 Int?
+  donate_to_department_id    Int?
+  is_given                   Boolean                      @default(false)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  departments                departments?                 @relation(fields: [donate_to_department_id], references: [id], onUpdate: NoAction)
+  users                      users?                       @relation(fields: [donater_id], references: [id], onUpdate: NoAction)
+  freecycle_posts_categories freecycle_posts_categories[]
+  receiver_requests          receiver_requests[]
+}
+
+model freecycle_posts_categories {
+  post_id              Int
+  category_id          Int
+  freecycle_categories freecycle_categories @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  freecycle_posts      freecycle_posts      @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([post_id, category_id])
+}
+
+model insurance_cards {
+  id          Int            @id @default(autoincrement())
+  user_id     Int?
+  balance     Decimal?       @default(0) @db.Decimal(14, 2)
+  card_number String?        @unique @db.VarChar(50)
+  status      wallet_status? @default(active)
+  created_at  DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime       @default(now()) @db.Timestamptz(6)
+  users       users?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model intersections {
+  id                                               Int                      @id @default(autoincrement())
+  location                                         Unsupported("geometry")?
+  roads_roads_end_intersection_idTointersections   roads[]                  @relation("roads_end_intersection_idTointersections")
+  roads_roads_start_intersection_idTointersections roads[]                  @relation("roads_start_intersection_idTointersections")
+  traffic_lights                                   traffic_lights[]
+}
+
+model light_requests {
+  id               Int             @id @default(autoincrement())
+  traffic_light_id Int?
+  requested_at     DateTime        @default(now()) @db.Timestamptz(6)
+  traffic_lights   traffic_lights? @relation(fields: [traffic_light_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model marker {
+  id             Int                      @id @default(autoincrement())
+  marker_type_id Int?
+  description    String?
+  location       Unsupported("geometry")?
+  created_at     DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime                 @default(now()) @db.Timestamptz(6)
+  marker_type    marker_type?             @relation(fields: [marker_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model marker_type {
+  id                Int      @id @default(autoincrement())
+  marker_type_icon  String?  @db.VarChar(255)
+  marker_type_color String?  @db.VarChar(255)
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @default(now()) @db.Timestamptz(6)
+  marker            marker[]
+}
+
+model messages {
+  id              Int            @id @default(autoincrement())
+  conversation_id Int?
+  sender_id       Int?
+  message_text    String?
+  sent_at         DateTime       @default(now()) @db.Timestamptz(6)
+  conversations   conversations? @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users?         @relation(fields: [sender_id], references: [id], onUpdate: NoAction)
+}
+
+model metro_cards {
+  id          Int            @id @default(autoincrement())
+  user_id     Int?
+  balance     Decimal?       @default(0) @db.Decimal(14, 2)
+  card_number String?        @unique @db.VarChar(50)
+  status      wallet_status? @default(active)
+  created_at  DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime       @default(now()) @db.Timestamptz(6)
+  users       users?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model onsite_enrollments {
+  id              Int              @id @default(autoincrement())
+  onsite_id       Int?
+  user_id         Int?
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  onsite_sessions onsite_sessions? @relation(fields: [onsite_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users?           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([onsite_id, user_id])
+}
+
+model onsite_sessions {
+  id                    Int                  @id @default(autoincrement())
+  course_id             Int?
+  address_id            Int?
+  duration_hours        Decimal?             @db.Decimal(6, 2)
+  event_at              DateTime             @db.Timestamptz(6)
+  registration_deadline DateTime             @db.Timestamptz(6)
+  total_seats           Int                  @default(1)
+  created_at            DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime             @default(now()) @db.Timestamptz(6)
+  onsite_enrollments    onsite_enrollments[]
+  addresses             addresses?           @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  courses               courses?             @relation(fields: [course_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model patients {
+  id                Int               @id @default(autoincrement())
+  user_id           Int?
+  emergency_contact String?           @db.VarChar(200)
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  appointments      appointments[]
+  beds              beds[]
+  emergency_calls   emergency_calls[]
+  users             users?            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  payments          payments[]
+  prescriptions     prescriptions[]
+}
+
+model payments {
+  id                 Int         @id @default(autoincrement())
+  patient_id         Int?
+  facility_id        Int?
+  service_type       String?     @db.VarChar(100)
+  service_id         Int?
+  amount             Decimal?    @default(0) @db.Decimal(12, 2)
+  currency           String?     @default("THB") @db.Char(3)
+  payment_method     String?     @db.VarChar(50)
+  insurance_coverage Decimal?    @default(0) @db.Decimal(12, 2)
+  patient_copay      Decimal?    @default(0) @db.Decimal(12, 2)
+  status             String?     @db.VarChar(50)
+  payment_date       DateTime?   @db.Timestamptz(6)
+  created_at         DateTime    @default(now()) @db.Timestamptz(6)
+  facilities         facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
+  patients           patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
+}
+
+model power_bi_reports {
+  id                       Int                     @id @default(autoincrement())
+  waste_event_statistic_id Int?
+  report_type              String?                 @db.VarChar(255)
+  report_date              DateTime?               @db.Timestamptz(6)
+  created_at               DateTime                @default(now()) @db.Timestamptz(6)
+  waste_event_statistics   waste_event_statistics? @relation(fields: [waste_event_statistic_id], references: [id], onUpdate: NoAction)
+}
+
+model prescriptions {
+  id                 Int         @id @default(autoincrement())
+  patient_id         Int?
+  prescriber_user_id Int?
+  facility_id        Int?
+  medication_name    String?     @db.VarChar(255)
+  quantity           Int?
+  status             String?     @db.VarChar(50)
+  created_at         DateTime    @default(now()) @db.Timestamptz(6)
+  facilities         facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
+  patients           patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
+  users              users?      @relation(fields: [prescriber_user_id], references: [id], onUpdate: NoAction)
+}
+
+model questions {
+  id             Int              @id @default(autoincrement())
+  question       String
+  level          Int?
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @db.Timestamptz(6)
+  user_exercises user_exercises[]
+}
+
+model rating {
+  id         Int         @id @default(autoincrement())
+  user_id    Int
+  rating     Float?
+  comment    String?
+  created_at DateTime?   @db.Timestamptz(6)
+  apartment  apartment[]
+  users      users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model receiver_requests {
+  id              Int                      @id @default(autoincrement())
+  post_id         Int?
+  receiver_id     Int?
+  status          freecycle_request_status @default(pending)
+  created_at      DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime                 @default(now()) @db.Timestamptz(6)
+  freecycle_posts freecycle_posts?         @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users?                   @relation(fields: [receiver_id], references: [id], onUpdate: NoAction)
+}
+
+model refresh_tokens {
+  id            Int       @id @default(autoincrement())
+  user_id       Int?
+  refresh_token String
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at    DateTime? @db.Timestamptz(6)
+  users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model report_categories {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique @db.VarChar(255)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  emergency_reports emergency_reports[]
+}
+
+model reports_metadata {
+  report_id                 Int           @id
+  title_string              String?       @db.VarChar(255)
+  description_string        String?
+  category_id               Int?
+  created_by                Int?
+  last_updated_datetime     DateTime?     @db.Timestamptz(6)
+  power_bi_report_id_string String?       @db.VarChar(255)
+  dim_category              dim_category? @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
+  dim_user                  dim_user?     @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
+}
+
+model roads {
+  id                                                       Int            @id @default(autoincrement())
+  name                                                     String?        @db.VarChar(255)
+  start_intersection_id                                    Int?
+  end_intersection_id                                      Int?
+  length_meters                                            Int?
+  intersections_roads_end_intersection_idTointersections   intersections? @relation("roads_end_intersection_idTointersections", fields: [end_intersection_id], references: [id], onUpdate: NoAction)
+  intersections_roads_start_intersection_idTointersections intersections? @relation("roads_start_intersection_idTointersections", fields: [start_intersection_id], references: [id], onUpdate: NoAction)
+}
+
+model roles {
+  id        Int     @id @default(autoincrement())
+  role_name String  @unique @db.VarChar(50)
+  users     users[]
+}
+
+model room {
+  id           Int          @id @default(autoincrement())
+  name         String?      @db.VarChar(255)
+  type         String?      @db.VarChar(255)
+  size         String?      @db.VarChar(50)
+  room_status  room_status?
+  price_start  Float?
+  price_end    Float?
+  apartment_id Int?
+  apartment    apartment?   @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model route_stops {
+  id                       Int     @id @default(autoincrement())
+  route_id                 Int?
+  stop_id                  Int?
+  stop_order               Int?
+  travel_time_to_next_stop Int?
+  routes                   routes? @relation(fields: [route_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  stops                    stops?  @relation(fields: [stop_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model routes {
+  id                           Int                           @id @default(autoincrement())
+  route_name                   String?                       @db.VarChar(255)
+  vehicle_type_id              Int?
+  route_stops                  route_stops[]
+  transportation_vehicle_types transportation_vehicle_types? @relation(fields: [vehicle_type_id], references: [id], onUpdate: NoAction)
+  transportation_transactions  transportation_transactions[]
+}
+
+model sessions {
+  session_id    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       Int?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at    DateTime? @db.Timestamptz(6)
+  last_accessed DateTime? @db.Timestamptz(6)
+  users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model sos {
+  id         Int                      @id @default(autoincrement())
+  user_id    Int?
+  location   Unsupported("geometry")?
+  status     sos_status?              @default(open)
+  created_at DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?                @default(now()) @db.Timestamptz(6)
+  users      users?                   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model specialty {
+  id             Int    @id @default(autoincrement())
+  specialty_name String @unique @db.VarChar(50)
+}
+
+model stops {
+  id          Int                      @id @default(autoincrement())
+  name        String?                  @db.VarChar(255)
+  location    Unsupported("geometry")?
+  route_stops route_stops[]
+}
+
+model team_integrations {
+  id              Int      @id @default(autoincrement())
+  team_name       String?  @db.VarChar(100)
+  external_table  String?  @db.VarChar(100)
+  external_id     String?  @db.VarChar(100)
+  data_type       String?  @db.VarChar(50)
+  status          String?  @db.VarChar(50)
+  additional_data Json?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model traffic_emergencies {
+  id                   Int                      @id @default(autoincrement())
+  user_id              Int?
+  accident_location    Unsupported("geometry")?
+  destination_hospital String?                  @db.VarChar(255)
+  status               String?                  @db.VarChar(50)
+  ambulance_vehicle_id Int?
+  created_at           DateTime                 @default(now()) @db.Timestamptz(6)
+  vehicles             vehicles?                @relation(fields: [ambulance_vehicle_id], references: [id], onUpdate: NoAction)
+  users                users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+model traffic_lights {
+  id              Int                      @id @default(autoincrement())
+  intersection_id Int?
+  ip_address      String?                  @db.Inet
+  location        Unsupported("geometry")?
+  status          Int?                     @default(0)
+  current_color   Int?                     @db.SmallInt
+  density_level   Int?                     @db.SmallInt
+  auto_mode       Boolean?                 @default(true)
+  last_updated    DateTime                 @default(now()) @db.Timestamptz(6)
+  light_requests  light_requests[]
+  intersections   intersections?           @relation(fields: [intersection_id], references: [id], onUpdate: NoAction)
+
+  @@index([location], map: "idx_traffic_lights_location", type: Gist)
+}
+
+model transportation_transactions {
+  id            Int            @id @default(autoincrement())
+  card_id       Int?
+  route_id      Int?
+  amount        Decimal?       @db.Decimal(12, 2)
+  status        String?        @db.VarChar(50)
+  created_at    DateTime       @default(now()) @db.Timestamptz(6)
+  digital_cards digital_cards? @relation(fields: [card_id], references: [id], onUpdate: NoAction)
+  routes        routes?        @relation(fields: [route_id], references: [id], onUpdate: NoAction)
+}
+
+model transportation_vehicle_types {
+  id     Int      @id @default(autoincrement())
+  name   String   @db.VarChar(100)
+  routes routes[]
+}
+
+model user_exercises {
+  id          Int        @id @default(autoincrement())
+  user_id     Int?
+  question_id Int?
+  user_answer String?
+  is_correct  Boolean?
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  questions   questions? @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users       users?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user_levels {
+  user_id       Int   @id
+  current_level Int   @default(1)
+  users         users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user_profiles {
+  user_id             Int        @id
+  first_name          String?    @db.VarChar(255)
+  middle_name         String?    @db.VarChar(255)
+  last_name           String?    @db.VarChar(255)
+  birth_date          DateTime?  @db.Date
+  gender              gender?
+  address_id          Int?
+  more_address_detail String?
+  addresses           addresses? @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  users               users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  id                            Int                             @id @default(autoincrement())
+  username                      String                          @unique @db.VarChar(50)
+  email                         String                          @unique @db.VarChar(255)
+  phone                         String?                         @unique @db.VarChar(20)
+  password_hash                 String                          @db.VarChar(512)
+  role_id                       Int?
+  created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  last_login                    DateTime?                       @db.Timestamptz(6)
+  alerts                        alerts[]
+  apartment_booking             apartment_booking[]
+  apartment_owner               apartment_owner[]
+  appointments                  appointments[]
+  conversation_participants     conversation_participants[]
+  courses                       courses[]
+  digital_cards                 digital_cards[]
+  emergency_contacts            emergency_contacts[]
+  emergency_reports             emergency_reports[]
+  event_bookmarks               event_bookmarks[]
+  events                        events[]
+  fcm_token                     fcm_token[]
+  freecycle_posts               freecycle_posts[]
+  insurance_cards               insurance_cards[]
+  messages                      messages[]
+  metro_cards                   metro_cards[]
+  onsite_enrollments            onsite_enrollments[]
+  patients                      patients[]
+  prescriptions                 prescriptions[]
+  rating                        rating[]
+  receiver_requests             receiver_requests[]
+  refresh_tokens                refresh_tokens[]
+  sessions                      sessions[]
+  sos                           sos[]
+  traffic_emergencies           traffic_emergencies[]
+  user_exercises                user_exercises[]
+  user_levels                   user_levels?
+  user_profiles                 user_profiles?
+  roles                         roles?                          @relation(fields: [role_id], references: [id], onUpdate: NoAction)
+  users_departments             users_departments[]
+  vehicles                      vehicles[]
+  volunteer_event_participation volunteer_event_participation[]
+  volunteer_events              volunteer_events[]
+  wallets                       wallets[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([phone], map: "idx_users_phone")
+}
+
+model users_departments {
+  user_id       Int
+  department_id Int
+  departments   departments @relation(fields: [department_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, department_id])
+}
+
+model vehicles {
+  id                  Int                      @id @default(autoincrement())
+  user_id             Int?
+  current_location    Unsupported("geometry")?
+  vehicle_plate       String?                  @db.VarChar(20)
+  traffic_emergencies traffic_emergencies[]
+  users               users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+model volunteer_event_participation {
+  id                 Int               @id @default(autoincrement())
+  volunteer_event_id Int?
+  user_id            Int?
+  created_at         DateTime          @default(now()) @db.Timestamptz(6)
+  users              users?            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  volunteer_events   volunteer_events? @relation(fields: [volunteer_event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model volunteer_events {
+  id                            Int                             @id @default(autoincrement())
+  created_by_user_id            Int?
+  department_id                 Int?
+  image_url                     String?
+  title                         String                          @db.VarChar(255)
+  description                   String?
+  current_participants          Int                             @default(0)
+  total_seats                   Int                             @default(1)
+  start_at                      DateTime?                       @db.Timestamptz(6)
+  end_at                        DateTime?                       @db.Timestamptz(6)
+  registration_deadline         DateTime?                       @db.Timestamptz(6)
+  address_id                    Int?
+  status                        volunteer_event_status          @default(draft)
+  created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  volunteer_event_participation volunteer_event_participation[]
+  addresses                     addresses?                      @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  users                         users?                          @relation(fields: [created_by_user_id], references: [id], onUpdate: NoAction)
+  departments                   departments?                    @relation(fields: [department_id], references: [id], onUpdate: NoAction)
+
+  @@index([start_at], map: "idx_volunteer_events_start_at")
+}
+
+model wallet_transactions {
+  id                                                    Int               @id @default(autoincrement())
+  wallet_id                                             Int?
+  transaction_type                                      transaction_type?
+  amount                                                Decimal           @db.Decimal(14, 2)
+  target_wallet_id                                      Int?
+  target_service                                        String?           @db.VarChar(50)
+  description                                           String?           @db.VarChar(255)
+  created_at                                            DateTime          @default(now()) @db.Timestamptz(6)
+  wallets_wallet_transactions_target_wallet_idTowallets wallets?          @relation("wallet_transactions_target_wallet_idTowallets", fields: [target_wallet_id], references: [id], onUpdate: NoAction)
+  wallets_wallet_transactions_wallet_idTowallets        wallets?          @relation("wallet_transactions_wallet_idTowallets", fields: [wallet_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model wallets {
+  id                                                                Int                   @id @default(autoincrement())
+  owner_id                                                          Int?
+  wallet_type                                                       wallet_type?
+  organization_type                                                 String?               @db.VarChar(100)
+  balance                                                           Decimal?              @default(0) @db.Decimal(14, 2)
+  status                                                            wallet_status?        @default(active)
+  created_at                                                        DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at                                                        DateTime              @default(now()) @db.Timestamptz(6)
+  wallet_transactions_wallet_transactions_target_wallet_idTowallets wallet_transactions[] @relation("wallet_transactions_target_wallet_idTowallets")
+  wallet_transactions_wallet_transactions_wallet_idTowallets        wallet_transactions[] @relation("wallet_transactions_wallet_idTowallets")
+  users                                                             users?                @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([owner_id, wallet_type])
+}
+
+model waste_event_statistics {
+  id                      Int                @id @default(autoincrement())
+  event_id                Int?
+  waste_type_id           Int?
+  collection_date         DateTime?          @db.Timestamptz(6)
+  total_collection_weight Decimal?           @db.Decimal(12, 3)
+  power_bi_reports        power_bi_reports[]
+  events                  events?            @relation(fields: [event_id], references: [id], onUpdate: NoAction)
+  waste_types             waste_types?       @relation(fields: [waste_type_id], references: [id], onUpdate: NoAction)
+}
+
+model waste_types {
+  id                     Int                      @id @default(autoincrement())
+  type_name              String                   @db.VarChar(255)
+  typical_weight_kg      Decimal?                 @db.Decimal(10, 3)
+  waste_event_statistics waste_event_statistics[]
+}
+
+model weather_data {
+  id                   Int        @id @default(autoincrement())
+  location_id          Int?
+  temperature          Decimal?   @db.Decimal(6, 2)
+  feel_temperature     Decimal?   @db.Decimal(6, 2)
+  humidity             Decimal?   @db.Decimal(6, 2)
+  wind_speed           Decimal?   @db.Decimal(6, 2)
+  wind_direction       String?    @db.VarChar(50)
+  rainfall_probability Decimal?   @db.Decimal(5, 2)
+  created_at           DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime   @default(now()) @db.Timestamptz(6)
+  addresses            addresses? @relation(fields: [location_id], references: [id], onUpdate: NoAction)
+}
+
+enum air_quality_category {
+  good
+  moderate
+  unhealthy
+  hazardous
+}
+
+enum alert_status {
+  unread
+  read
+  sent
+}
+
+enum apartment_internet {
+  free
+  not_free
+  none
+}
+
+enum apartment_location {
+  asoke
+  prachauthit
+  phathumwan
+}
+
+enum apartment_type {
+  dormitory
+  apartment
+}
+
+enum booking_status {
+  pending
+  confirmed
+  cancelled
+}
+
+enum card_transaction_type {
+  top_up
+  charge
+  refund
+}
+
+enum course_status {
+  pending
+  approve
+  not_approve
+}
+
+enum course_type {
+  online
+  onsite
+  online_and_onsite
+}
+
+enum freecycle_request_status {
+  pending
+  accepted
+  rejected
+}
+
+enum gender {
+  male
+  female
+  none
+}
+
+enum report_level {
+  near_miss
+  minor
+  moderate
+  major
+  lethal
+}
+
+enum report_status {
+  pending
+  verified
+  resolved
+}
+
+enum room_status {
+  occupied
+  pending
+  available
+}
+
+enum sos_status {
+  open
+  closed
+}
+
+enum transaction_category {
+  insurance
+  metro
+}
+
+enum transaction_type {
+  top_up
+  transfer_in
+  transfer_out
+  transfer_to_service
+}
+
+enum volunteer_event_status {
+  draft
+  pending
+  approved
+  rejected
+}
+
+enum wallet_status {
+  active
+  suspended
+}
+
+enum wallet_type {
+  individual
+  organization
+}
