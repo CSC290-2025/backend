@@ -79,9 +79,9 @@
 > [!CAUTION]
 > Always run migrations when schema changes are pulled! (i.e. `schema.prisma`)
 
-   ```bash
-   pnpm run migrate
-   ```
+```bash
+pnpm run migrate
+```
 
 5. Start development server
 
