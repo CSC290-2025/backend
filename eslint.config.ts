@@ -8,7 +8,6 @@ export default tseslint.config([
       'node_modules/',
       'src/generated/',
       'src/modules/_example/',
-      'src/**/user.*',
     ],
   },
 

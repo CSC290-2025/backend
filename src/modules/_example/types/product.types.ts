@@ -1,14 +1,18 @@
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-}
+import { z } from 'zod';
+import { ProductSchemas } from '../schemas';
 
-interface CreateProductData {
-  name: string;
-  price: number;
-  category: string;
-}
+type Product = z.infer<typeof ProductSchemas.ProductSchema>;
+type CreateProductData = z.infer<typeof ProductSchemas.CreateProductSchema>;
+type UpdateProductData = z.infer<typeof ProductSchemas.UpdateProductSchema>;
+type ProductFilterOptions = z.infer<typeof ProductSchemas.ProductFilterSchema>;
+type PaginationOptions = z.infer<typeof ProductSchemas.PaginationSchema>;
+type PaginatedProducts = z.infer<typeof ProductSchemas.PaginatedProductsSchema>;
 
-export type { Product, CreateProductData };
+export type {
+  Product,
+  CreateProductData,
+  UpdateProductData,
+  ProductFilterOptions,
+  PaginationOptions,
+  PaginatedProducts,
+};
