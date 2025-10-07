@@ -1,15 +1,37 @@
-# OpenAPI Setup Guide
+# Routing Guide
+
+This guide covers both **OpenAPI routes** (documented in Swagger) and **Normal Hono routes** (not documented).
 
 ## Structure
 
 ```tree
 src/
-├── schemas/          # Zod schemas + routes
-├── routes/           # Route setup
-└── utils/openapi-helpers.ts
+├── schemas/                    # Zod schemas + OpenAPI route definitions
+├── routes/                     # Route setup (both types)
+│   └── index.ts                # Mounts both types
+├── modules/
+│   └── _example/               # Example module with normal Hono routes
+│       └── routes/
+│           └── product.routes.ts
+└── utils/openapi-helpers.ts    # OpenAPI helper functions
 ```
 
-## Adding New Resource
+## Route Types
+
+### 1. OpenAPI Routes (Documented in Swagger)
+
+- Defined using `app.openapi()` with Zod schemas
+- Automatically appear in `/swagger` UI
+- Type-safe with request/response validation
+
+### 2. Normal Hono Routes (Not Documented)
+
+- Defined using standard Hono methods (`app.get()`, `app.post()`, etc.)
+- Still fully functional but won't appear in Swagger
+
+---
+
+## Adding New Resource (OpenAPI)
 
 ### 1. Create Schema File
 
@@ -120,14 +142,52 @@ export { setupPostRoutes };
 
 ### 4. Register Routes
 
-Add to `src/routes/index.ts`
+Add to `src/routes/index.ts`:
 
 ```typescript
-import { setupPostRoutes } from './post.routes';
+import { setupPostRoutes } from './post.openapi.routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  // previous routes;
+  // ============================================
+  // OpenAPI Routes (documented in Swagger)
+  // ============================================
   setupPostRoutes(app);
+};
+```
+
+---
+
+## Adding New Resource (Normal Hono Routes)
+
+### 1. Create Routes File
+
+`src/routes/product.routes.ts`:
+
+```typescript
+import { Hono } from 'hono';
+import { ProductController } from '@/controllers';
+
+const productRoutes = new Hono();
+
+productRoutes.get('/:id', ProductController.getProduct);
+productRoutes.post('/', ProductController.createProduct);
+
+export { productRoutes };
+```
+
+### 2. Register Routes
+
+Add to `src/routes/index.ts`:
+
+```typescript
+import { productRoutes } from '@/modules/_example';
+
+export const setupRoutes = (app: OpenAPIHono) => {
+  // OpenAPI Routes (documented in Swagger)
+  // setupPostRoutes(app);
+
+  // Normal Hono Routes (not in Swagger docs)
+  app.route('/products', productRoutes);
 };
 ```
 
@@ -143,19 +203,19 @@ export const setupRoutes = (app: OpenAPIHono) => {
 All helper functions support an optional `tags` parameter for OpenAPI documentation organization:
 
 ```typescript
-const getUsersRoute = createGetRoute({
-  path: '/users',
-  summary: 'Get all users',
-  responseSchema: z.array(UserSchema),
-  tags: ['Users'], // Groups endpoints in OpenAPI docs
+const getPostsRoute = createGetRoute({
+  path: '/posts',
+  summary: 'Get all posts',
+  responseSchema: z.array(PostSchema),
+  tags: ['Posts'], // Groups endpoints in OpenAPI docs
 });
 
-const createUserRoute = createPostRoute({
-  path: '/users',
-  summary: 'Create user',
-  requestSchema: CreateUserSchema,
-  responseSchema: UserSchema,
-  tags: ['Users', 'Authentication'], // Multiple tags supported
+const createPostRoute = createPostRoute({
+  path: '/posts',
+  summary: 'Create post',
+  requestSchema: CreatePostSchema,
+  responseSchema: PostSchema,
+  tags: ['Posts', 'Content'], // Multiple tags supported
 });
 ```
 
@@ -184,4 +244,3 @@ export type PostId = z.infer<typeof PostIdParam>;
 export type ResourceName = z.infer<typeof ResourceSchema>;
 export type CreateResourceName = z.infer<typeof CreateResourceSchema>;
 ```
-
