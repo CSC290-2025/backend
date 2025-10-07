@@ -1,23 +1,31 @@
-// export { userRoutes } from './user.routes';
+// Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { setupUserRoutes } from './user.openapi.routes';
-import { createRoute } from '@hono/zod-openapi';
-import { z } from 'zod';
 
-// for future routes
+// ============================================
+// ROUTING OPTIONS:
+// Choose ONE approach per module that you're comfortable with:
+// 1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
+// 2. Normal Hono Routes - Simple, no Swagger docs
+// ============================================
 
-// import { setupAuthRoutes } from '@/modules/auth/auth.routes';
-// import { setupPaymentRoutes } from '@/modules/payment/payment.routes';
-// import { setupEmergencyRoutes } from '@/modules/emergency/emergency.routes';
-// etc, etc.
+// OpenAPI Routes (documented in Swagger)
+// import { setupAuthRoutes } from '@/modules/auth/routes';
+// import { setupPaymentRoutes } from '@/modules/payment/routes';
+// import { setupProductRoutes } from '@/modules/_example';
+
+// Normal Hono Routes (not in Swagger docs)
+// import { productRoutes } from '@/modules/_example';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  setupUserRoutes(app);
-
-  // team modules:
-
+  // ============================================
+  // OpenAPI Routes (documented in Swagger)
+  // ============================================
   // setupAuthRoutes(app);
   // setupPaymentRoutes(app);
-  // setupEmergencyRoutes(app);
-  // etc, etc.
+  // setupProductRoutes(app);
+  //
+  // ============================================
+  // Normal Hono Routes (not in Swagger docs)
+  // ============================================
+  // app.route('/products', productRoutes);
 };
