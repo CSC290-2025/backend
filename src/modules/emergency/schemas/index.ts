@@ -1,1 +1,1 @@
-export * as FcmSchemas from './fcm.schema.ts';
+export { FcmSchemas } from './fcm.schema.ts';

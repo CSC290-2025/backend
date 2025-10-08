@@ -2,12 +2,13 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import config from './config/env';
 import { errorHandler } from '@/middlewares';
-import { fcmRoutes } from '@/modules/emergency/routes';
+import { fcmRoutes, tokenRoutes } from '@/modules/emergency/routes';
 
 const app = new Hono();
 
 app.onError(errorHandler);
 app.route('/notifications', fcmRoutes);
+app.route('/tokens', tokenRoutes);
 
 const server = serve(
   {

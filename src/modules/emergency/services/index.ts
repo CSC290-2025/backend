@@ -1,1 +1,2 @@
-export * as FcmService from './fcm.service.ts';
+export * as FcmService from './fcm.service';
+export * as TokenService from './token.service';

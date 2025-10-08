@@ -1,13 +1,10 @@
 import type * as z from 'zod';
 import type { BatchResponse } from 'firebase-admin/messaging';
-import type { fcmSchema } from '@/modules/emergency/schemas/fcm.schema.ts';
+import type { FcmSchemas } from '@/modules/emergency/schemas/fcm.schema.ts';
 
-type fcmToken = z.infer<typeof fcmSchema>;
-type NotificationResponse = BatchResponse;
+type FcmResponse = z.infer<typeof FcmSchemas.FcmResponseSchema>;
+type createTokenFcm = z.infer<typeof FcmSchemas.CreateTokenFcmSchema>;
+type notification = z.infer<typeof FcmSchemas.NotificationSchema>;
+type notificationResponse = BatchResponse;
 
-interface Notification {
-  title: string;
-  body: string;
-}
-
-export type { fcmToken, Notification, NotificationResponse };
+export type { FcmResponse, createTokenFcm, notification, notificationResponse };

@@ -10,19 +10,19 @@ Substitue [feature] with specific names.
 [team-module]/
 ├── types/
 │   ├── [feature].types.ts
-│   └── index.ts (export * from './[feature].types')
+│   └── env.ts (export * from './[feature].types')
 ├── models/ (interacting with DB)
 │   ├── [feature].model.ts
-│   └── index.ts (export * as [Feature]Model from './[feature].model')
+│   └── env.ts (export * as [Feature]Model from './[feature].model')
 ├── services/ (mostly business logic)
 │   ├── [feature].service.ts
-│   └── index.ts (export * as [Feature]Service from './[feature].service')
+│   └── env.ts (export * as [Feature]Service from './[feature].service')
 ├── controllers/
 │   ├── [feature].controller.ts
-│   └── index.ts (export * as [Feature]Controller from './[feature].controller')
+│   └── env.ts (export * as [Feature]Controller from './[feature].controller')
 └── routes/
     ├── [feature].routes.ts
-    └── index.ts (export { [feature]Routes } from './[feature].routes')
+    └── env.ts (export { [feature]Routes } from './[feature].routes')
 ```
 
 ### 2. IMPORT STRUCTURE
@@ -133,19 +133,19 @@ export { userRoutes };
 #### INDEX FILES PATTERN
 
 ```typescript
-// [team-module]/types/index.ts
+// [team-module]/types/env.ts
 export * from "./[feature].types";
 
-// [team-module]/models/index.ts
+// [team-module]/models/env.ts
 export * as [Feature]Model from "./[feature].model";
 
-// [team-module]/services/index.ts
+// [team-module]/services/env.ts
 export * as [Feature]Service from "./[feature].service";
 
-// [team-module]/controllers/index.ts
+// [team-module]/controllers/env.ts
 export * as [Feature]Controller from "./[feature].controller";
 
-// [team-module]/routes/index.ts
+// [team-module]/routes/env.ts
 export { [Feature]Routes } from "./[feature].routes";
 ```
 
