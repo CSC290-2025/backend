@@ -1,10 +1,25 @@
 import * as z from 'zod';
 
-const fcmSchema = z.object({
+const FcmResponseSchema = z.object({
   id: z.number(),
-  userId: z.number(),
-  fcmTokens: z.string(),
-  createdAt: z.coerce.date(),
-  updateAt: z.coerce.date(),
+  user_id: z.number().nullable(),
+  tokens: z.string().nullable(),
+  created_at: z.coerce.date().nullable(),
+  updated_at: z.coerce.date().nullable(),
 });
-export { fcmSchema };
+
+const CreateTokenFcmSchema = z.object({
+  tokens: z.string(),
+  user_id: z.number().optional(),
+});
+
+const NotificationSchema = z.object({
+  title: z.string(),
+  body: z.string(),
+});
+
+export const FcmSchemas = {
+  FcmResponseSchema,
+  CreateTokenFcmSchema,
+  NotificationSchema,
+};

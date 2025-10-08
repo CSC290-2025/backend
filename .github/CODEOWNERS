@@ -11,7 +11,7 @@ bun.lockb @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 vite.config.ts @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 
 # entry files
-src/index.ts @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
+src/env.ts @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 
 # CI/CD config
 .github/ @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
@@ -28,7 +28,7 @@ tsconfig.json @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 # documentation
 /docs/ @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 /README.md @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
-/src/index.ts @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
+/src/env.ts @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 /src/config/ @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 /src/middlewares/ @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads
 /src/utils/ @CSC290-2025/development-leads @CSC290-2025/infrastructure-leads

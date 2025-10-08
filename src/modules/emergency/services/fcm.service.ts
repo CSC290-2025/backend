@@ -1,16 +1,18 @@
 import { FcmModel } from '@/modules/emergency/models';
 import { firebaseMessaging } from '@/config/firebase.ts';
 import type {
-  Notification,
-  NotificationResponse,
+  notification,
+  notificationResponse,
 } from '@/modules/emergency/types/fcm.type.ts';
 
 export const sendAllNotificationService = async (
-  notification: Notification
-): Promise<NotificationResponse> => {
+  notification: notification
+): Promise<notificationResponse> => {
   try {
     const tokens = await FcmModel.getAllFcmToken();
-    const registrationTokens = tokens.map((token) => token.fcmTokens);
+    const registrationTokens = tokens
+      .map((token) => token.tokens)
+      .filter((token) => token !== null);
 
     const message = {
       notification: {
