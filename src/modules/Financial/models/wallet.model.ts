@@ -2,6 +2,15 @@ import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { Wallet, CreateWalletData } from '../types';
 
+// Helper to DRY
+const transformWallet = (wallet: any): Wallet => ({
+  ...wallet,
+  owner_id: wallet.owner_id!,
+  wallet_type: wallet.wallet_type as 'individual' | 'organization',
+  balance: Number(wallet.balance || 0),
+  status: wallet.status as 'active' | 'suspended',
+});
+
 // Wallet operations
 const createWallet = async (
   ownerId: number,
@@ -17,13 +26,7 @@ const createWallet = async (
         status: 'active',
       },
     });
-    return {
-      ...wallet,
-      owner_id: wallet.owner_id!,
-      wallet_type: wallet.wallet_type as 'individual' | 'organization',
-      balance: Number(wallet.balance || 0),
-      status: wallet.status as 'active' | 'suspended',
-    };
+    return transformWallet(wallet);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -34,13 +37,7 @@ const findWalletsByUserId = async (userId: number): Promise<Wallet[]> => {
     const wallets = await prisma.wallets.findMany({
       where: { owner_id: userId },
     });
-    return wallets.map((wallet) => ({
-      ...wallet,
-      owner_id: wallet.owner_id!,
-      wallet_type: wallet.wallet_type as 'individual' | 'organization',
-      balance: Number(wallet.balance || 0),
-      status: wallet.status as 'active' | 'suspended',
-    }));
+    return wallets.map(transformWallet);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -51,15 +48,7 @@ const findWalletById = async (id: number): Promise<Wallet | null> => {
     const wallet = await prisma.wallets.findUnique({
       where: { id },
     });
-    return wallet
-      ? {
-          ...wallet,
-          owner_id: wallet.owner_id!,
-          wallet_type: wallet.wallet_type as 'individual' | 'organization',
-          balance: Number(wallet.balance || 0),
-          status: wallet.status as 'active' | 'suspended',
-        }
-      : null;
+    return wallet ? transformWallet(wallet) : null;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -74,13 +63,7 @@ const updateWallet = async (id: number, data: any): Promise<Wallet> => {
         updated_at: new Date(),
       },
     });
-    return {
-      ...wallet,
-      owner_id: wallet.owner_id!,
-      wallet_type: wallet.wallet_type as 'individual' | 'organization',
-      balance: Number(wallet.balance || 0),
-      status: wallet.status as 'active' | 'suspended',
-    };
+    return transformWallet(wallet);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -98,13 +81,7 @@ const updateWalletBalance = async (
         updated_at: new Date(),
       },
     });
-    return {
-      ...wallet,
-      owner_id: wallet.owner_id!,
-      wallet_type: wallet.wallet_type as 'individual' | 'organization',
-      balance: Number(wallet.balance || 0),
-      status: wallet.status as 'active' | 'suspended',
-    };
+    return transformWallet(wallet);
   } catch (error) {
     handlePrismaError(error);
   }
