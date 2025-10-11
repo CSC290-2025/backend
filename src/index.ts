@@ -3,10 +3,19 @@ import { Hono } from 'hono';
 import config from './config/env';
 import { errorHandler } from '@/middlewares';
 import { fcmRoutes, tokenRoutes } from '@/modules/emergency/routes';
+import { cors } from 'hono/cors';
 
 const app = new Hono();
 
 app.onError(errorHandler);
+app.use(
+  '*',
+  cors({
+    origin: `http://localhost:5173`,
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    credentials: true,
+  })
+);
 app.route('/notifications', fcmRoutes);
 app.route('/tokens', tokenRoutes);
 

@@ -7,7 +7,7 @@ import prisma from '@/config/client.ts';
 
 const getAllFcmToken = async (): Promise<FcmResponse[]> => {
   try {
-    return await prisma.fcm_token.findMany();
+    return await prisma.fcm_token.findMany({});
   } catch (error) {
     handlePrismaError(error);
   }
@@ -29,7 +29,8 @@ const checkFcmTokenExist = async (token: string): Promise<boolean> => {
       where: { tokens: token },
       select: { id: true },
     });
-    return !existingToken;
+
+    return !!existingToken;
   } catch (error) {
     handlePrismaError(error);
   }
