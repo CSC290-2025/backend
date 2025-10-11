@@ -1,5 +1,6 @@
 import { FcmModel } from '@/modules/emergency/models';
 import { firebaseMessaging } from '@/config/firebase.ts';
+import { ValidationError } from '@/errors';
 import type {
   notification,
   notificationResponse,
@@ -10,9 +11,14 @@ export const sendAllNotificationService = async (
 ): Promise<notificationResponse> => {
   try {
     const tokens = await FcmModel.getAllFcmToken();
+
     const registrationTokens = tokens
       .map((token) => token.tokens)
       .filter((token) => token !== null);
+
+    if (registrationTokens.length === 0) {
+      throw new ValidationError('No valid token');
+    }
 
     const message = {
       notification: {
