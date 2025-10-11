@@ -250,6 +250,22 @@ Authorization: Bearer <token>
 
 ---
 
+## Testing Setup
+
+Before testing your new endpoint, you might need test data in your database:
+
+```sql
+-- Create a test user if you don't have one
+INSERT INTO users (username, email, phone, password_hash)
+VALUES ('testuser', 'test@example.com', '1234567890', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
+
+-- Create a test wallet for the user (adjust owner_id as needed)
+INSERT INTO wallets (owner_id, wallet_type, balance, status)
+VALUES (1, 'individual', 100.00, 'active');
+```
+
+_Run these SQL commands in your database client to create test data for your endpoint testing._
+
 ## Next Steps
 
 After implementation:

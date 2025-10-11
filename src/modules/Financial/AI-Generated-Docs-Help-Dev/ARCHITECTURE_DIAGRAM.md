@@ -138,4 +138,20 @@ E2E Tests:
 └── Complete user workflows
 ```
 
+## Development Environment Setup
+
+### Database Test Data
+
+Before testing APIs, create test users in your database:
+
+```sql
+-- Create test users for API development
+INSERT INTO users (username, email, phone, password_hash)
+VALUES
+  ('testuser', 'test@example.com', '1234567890', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW'),
+  ('developer', 'dev@example.com', '0987654321', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
+```
+
+This allows you to test user-related wallet operations during development.
+
 This architecture ensures maintainable, scalable, and testable code!

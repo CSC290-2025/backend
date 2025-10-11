@@ -252,6 +252,27 @@ const setupWalletRoutes = (app: OpenAPIHono) => {
 
 ## Additional Considerations
 
+### Test Data Setup
+
+Before testing your new endpoints, you may need to create test users in the database:
+
+```sql
+-- Create a test user for API testing
+INSERT INTO users (
+    username,
+    email,
+    phone,
+    password_hash
+) VALUES (
+    'testuser',
+    'test@example.com',
+    '1234567890',
+    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW' -- password: 'secret123'
+);
+```
+
+You can run this SQL command in your database client (psql, pgAdmin, etc.) to create test data for development and testing purposes.
+
 ### Error Handling
 
 Use consistent error types throughout the application:

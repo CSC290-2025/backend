@@ -51,6 +51,24 @@ Financial/
 └── README.md                    # This file
 ```
 
+## Development Setup
+
+### Test Data
+
+For testing the wallet APIs, you'll need users in your database. You can create test users with:
+
+```sql
+-- Basic test user
+INSERT INTO users (username, email, phone, password_hash)
+VALUES ('testuser', 'test@example.com', '1234567890', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
+
+-- Additional test user for transfers/multi-user scenarios
+INSERT INTO users (username, email, phone, password_hash)
+VALUES ('testuser2', 'test2@example.com', '0987654321', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
+```
+
+_Note: Password hash is for 'secret123' - update as needed for your development environment._
+
 ## Usage
 
 The module exports only OpenAPI routes. Import and use like this:

@@ -8,6 +8,23 @@ Use this checklist when adding new API endpoints to ensure you follow the correc
 - [ ] **Check if endpoint already exists** - Avoid duplication
 - [ ] **Plan the data flow** - Request → Validation → Business Logic → Database → Response
 - [ ] **Identify database changes needed** - New tables, columns, relationships?
+- [ ] **Setup test data** - Create test users if needed for testing APIs
+
+### Test User Creation (Optional)
+
+If your API endpoints require user authentication or user-related operations, you can create test users in your database:
+
+```sql
+-- Example test user for development/testing
+INSERT INTO users (username, email, phone, password_hash)
+VALUES ('testuser', 'test@example.com', '1234567890', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
+
+-- You can create multiple test users with different data as needed
+INSERT INTO users (username, email, phone, password_hash)
+VALUES ('developer', 'dev@example.com', '0987654321', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW');
+```
+
+_Note: The password hash above corresponds to 'secret123' - adjust as needed for your testing requirements._
 
 ---
 
