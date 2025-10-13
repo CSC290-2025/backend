@@ -27,40 +27,41 @@ Substitue [feature] with specific names.
 
 ### 2. IMPORT STRUCTURE
 
-Feel free to use my example User structure (available in `/src`) as a guideline.
+Example structure for a feature module:
 
-- `types/user.types.ts` (defines interfaces, exports at end)
-- `models/user.model.ts` (imports from `@/types`, exports functions at end)
-- `services/user.service.ts` (imports from `@/models, @/types`, exports at end)
-- `controllers/user.controller.ts` (imports from `@/services`, exports at end)
-- `routes/user.routes.ts` (imports from `@/controllers`)
+- `types/[feature].types.ts` (defines interfaces, exports at end)
+- `models/[feature].model.ts` (imports from `@/types`, exports functions at end)
+- `services/[feature].service.ts` (imports from `@/models, @/types`, exports at end)
+- `controllers/[feature].controller.ts` (imports from `@/services`, exports at end)
+- `routes/[feature].openapi.routes.ts` (imports from `@/controllers`, `@/schemas`) for OpenAPI
+- `routes/[feature].routes.ts` (imports from `@/controllers`) for Normal Hono routes
 
 ### 3. CODE PATTERNS
 
-#### TYPES PATTERN (user.types.ts)
+#### TYPES PATTERN (product.types.ts)
 
 ```typescript
-interface User {
+interface Product {
   id: string;
-  email: string;
-  name: string;
+  title: string;
+  price: number;
 }
-interface CreateUserData {
-  email: string;
-  name: string;
+interface CreateProductData {
+  title: string;
+  price: number;
 }
-export { User, CreateUserData };
+export { Product, CreateProductData };
 ```
 
-#### MODELS PATTERN (user.model.ts)
+#### MODELS PATTERN (product.model.ts)
 
 ```typescript
-import type { User, CreateUserData } from "@/types";
+import type { Product, CreateProductData } from "@/types";
 
-const findById = async (id: string): Promise<User | null> => {
+const findById = async (id: string): Promise<Product | null> => {
   // db logic here
 };
-const create = async (data: CreateUserData): Promise<User> => {
+const create = async (data: CreateProductData): Promise<Product> => {
   // db logic here
 };
 
@@ -68,66 +69,102 @@ const create = async (data: CreateUserData): Promise<User> => {
 export { findById, create };
 ```
 
-#### SERVICES PATTERN (user.service.ts)
+#### SERVICES PATTERN (product.service.ts)
 
 ```typescript
-import { UserModel } from "@/models";
-import type { User, CreateUserData } from "@/types";
+import { ProductModel } from "@/models";
+import type { Product, CreateProductData } from "@/types";
 import { NotFoundError, ValidationError, ConflictError } from "@/errors";
 
-const getUserById = async (id: string): Promise<User> => {
-  const user = await UserModel.findById(id);
-  if (!user) throw new NotFoundError("User not found");
-  return user;
+const getProductById = async (id: string): Promise<Product> => {
+  const product = await ProductModel.findById(id);
+  if (!product) throw new NotFoundError("Product not found");
+  return product;
 };
-const createUser = async (data: CreateUserData): Promise<User> => {
-  const existingUser = await UserModel.findByEmail(data.email);
+const createProduct = async (data: CreateProductData): Promise<Product> => {
+  const existingProduct = await ProductModel.findByTitle(data.title);
 
   // (actually, prisma will handle this type of conflict error automatically
   // via handlePrismaError(error), just adding to show as an example
   // you have to catch err using handlePrismaError in model tho)
-  if (existingUser) throw new ConflictError("Email already exists");
+  if (existingProduct) throw new ConflictError("Product title already exists");
 
-  if (!data.email || !data.email.includes("@")) {
-    throw new ValidationError("Invalid email format");
+  if (!data.title || data.title.trim().length < 2) {
+    throw new ValidationError("Title must be at least 2 characters");
   }
 
-  return await UserModel.create(data);
+  return await ProductModel.create(data);
 };
-export { getUserById, createUser };
+export { getProductById, createProduct };
 ```
 
-#### CONTROLLERS PATTERN (user.controller.ts)
+#### CONTROLLERS PATTERN (product.controller.ts)
 
 ```typescript
 import type { Context } from "hono";
-import { UserService } from "@/services";
+import { ProductService } from "@/services";
 import { successResponse } from "@/utils/response";
-import { NotFoundError } from "@/errors";
 
-const getUser = async (c: Context) => {
+const getProduct = async (c: Context) => {
   const id = c.req.param("id");
-  const user = await UserService.getUserById(id);
-  return successResponse(c, { user });
+  const product = await ProductService.getProductById(id);
+  return successResponse(c, { product });
 };
-const createUser = async (c: Context) => {
+const createProduct = async (c: Context) => {
   const body = await c.req.json();
-  const user = await UserService.createUser(body);
-  return successResponse(c, { user }, 201, "User created successfully");
+  const product = await ProductService.createProduct(body);
+  return successResponse(c, { product }, 201, "Product created successfully");
 };
-export { getUser, createUser };
+export { getProduct, createProduct };
 ```
 
-#### ROUTES PATTERN (user.routes.ts)
+#### ROUTES PATTERN
+
+Learn details in [Routing Guide](/docs/ROUTING_GUIDE.md)
+
+**Option 1: Normal Hono Routes** (product.routes.ts) - Not documented in Swagger:
 
 ```typescript
 import { Hono } from "hono";
-import { UserController } from "@/controllers";
+import { ProductController } from "@/controllers";
 
-const userRoutes = new Hono();
-userRoutes.get("/:id", UserController.getUser);
-userRoutes.post("/", UserController.createUser);
-export { userRoutes };
+const productRoutes = new Hono();
+
+productRoutes.get("/:id", ProductController.getProduct);
+productRoutes.post("/", ProductController.createProduct);
+
+export { productRoutes };
+```
+
+**Option 2: OpenAPI Routes** (post.openapi.routes.ts) - Documented in Swagger:
+
+```typescript
+import type { OpenAPIHono } from "@hono/zod-openapi";
+import { PostSchemas } from "@/schemas";
+import { PostController } from "@/controllers";
+
+const setupPostRoutes = (app: OpenAPIHono) => {
+  app.openapi(PostSchemas.getPostRoute, PostController.getPost);
+  app.openapi(PostSchemas.createPostRoute, PostController.createPost);
+};
+
+export { setupPostRoutes };
+```
+
+**Mounting Routes** (src/routes/index.ts):
+
+```typescript
+import type { OpenAPIHono } from "@hono/zod-openapi";
+import { setupPostRoutes } from "./post.openapi.routes";
+import { productRoutes } from "@/modules/_example";
+
+export const setupRoutes = (app: OpenAPIHono) => {
+  // OpenAPI Routes (in Swagger)
+  setupPostRoutes(app);
+
+  // Normal Hono Routes (not in Swagger)
+  app.route("/products", productRoutes);
+};
 ```
 
 #### INDEX FILES PATTERN
@@ -154,10 +191,10 @@ export { [Feature]Routes } from "./[feature].routes";
 #### Custom errors (throw directly, middleware catches)
 
 ```typescript
-const getUser = async (c: Context) => {
-  const user = await UserService.getUserById(id);
-  if (!user) throw new NotFoundError("User not found");
-  return successResponse(c, { user });
+const getProduct = async (c: Context) => {
+  const product = await ProductService.getProductById(id);
+  if (!product) throw new NotFoundError("Product not found");
+  return successResponse(c, { product });
 };
 ```
 
@@ -166,10 +203,10 @@ const getUser = async (c: Context) => {
 (mostly in model where DB interactions are; unique constraint, conflict errors etc.)
 
 ```typescript
-const createUser = async (c: Context) => {
+const createProduct = async (c: Context) => {
   try {
-    const user = await prisma.user.create({ data: userData });
-    return successResponse(c, user, 201, "User created successfully");
+    const product = await prisma.product.create({ data: productData });
+    return successResponse(c, product, 201, "Product created successfully");
   } catch (error) {
     handlePrismaError(error);
   }
@@ -190,13 +227,13 @@ const validateData = async (c: Context) => {
 
 ```typescript
 // Clean imports using index files:
-import { UserModel } from "@/models"; // Gets UserModel namespace
-import { UserService } from "@/services"; // Gets UserService namespace
-import { UserController } from "@/controllers"; // Gets UserController namespace
-import type { User, CreateUserData } from "@/types"; // Gets specific types
+import type { Product, CreateProductData } from "@/types"; // Gets specific types
+import { ProductModel } from "@/models"; // Gets ProductModel namespace
+import { ProductService } from "@/services"; // Gets ProductService namespace
+import { ProductController } from "@/controllers"; // Gets ProductController namespace
 
 // Usage:
-UserModel.findById(id);
-UserService.getUserById(id);
-UserController.getUser;
+ProductModel.findById(id);
+ProductService.getProductById(id);
+ProductController.getProduct;
 ```

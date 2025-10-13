@@ -24,5 +24,11 @@
     }
   },
   "include": ["src/**/*", "prisma/**/*"],
-  "exclude": ["node_modules", "dist", "src/generated", "*.config.*"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/generated",
+    "*.config.*",
+    "src/modules/_example"
+  ]
 }
