@@ -1,50 +1,50 @@
 import type {
-  Roles,
-  Departments,
-  Specialty,
-  Addresses,
-  Users,
-  User_profiles,
-  Users_departments,
-  Air_quality,
-  Weather_data,
-  Patients,
-  Facilities,
-  Beds,
-  Appointments,
-  Prescriptions,
-  Ambulances,
-  Emergency_calls,
-  Payments,
-  Team_integrations,
-  Waste_types,
-  Waste_event_statistics,
-  Power_bi_reports,
+  roles,
+  departments,
+  specialty,
+  addresses,
+  users,
+  user_profiles,
+  users_departments,
+  air_quality,
+  weather_data,
+  patients,
+  facilities,
+  beds,
+  appointments,
+  prescriptions,
+  ambulances,
+  emergency_calls,
+  payments,
+  team_integrations,
+  waste_types,
+  waste_event_statistics,
+  power_bi_reports,
   Prisma,
 } from '@/generated/prisma';
 
 type ExtractedData = {
-  roles: Roles[];
-  departments: Departments[];
-  specialties: Specialty[];
-  addresses: Addresses[];
-  users: Users[];
-  userProfiles: User_profiles[];
-  usersDepartments: Users_departments[];
-  airQuality: Air_quality[];
-  weatherData: Weather_data[];
-  patients: Patients[];
-  facilities: Facilities[];
-  beds: Beds[];
-  appointments: Appointments[];
-  prescriptions: Prescriptions[];
-  ambulances: Ambulances[];
-  emergencyCalls: Emergency_calls[];
-  payments: Payments[];
-  teamIntegrations: Team_integrations[];
-  wasteTypes: Waste_types[];
-  wasteEventStatistics: Waste_event_statistics[];
-  powerBiReports: Power_bi_reports[];
+  roles: roles[];
+  departments: departments[];
+  specialties: specialty[];
+  addresses: addresses[];
+  users: users[];
+  userProfiles: user_profiles[];
+  usersDepartments: users_departments[];
+  airQuality: air_quality[];
+  weatherData: weather_data[];
+  patients: patients[];
+  facilities: facilities[];
+  beds: beds[];
+  appointments: appointments[];
+  prescriptions: prescriptions[];
+  ambulances: ambulances[];
+  emergencyCalls: emergency_calls[];
+  payments: payments[];
+  teamIntegrations: team_integrations[];
+  wasteTypes: waste_types[];
+  wasteEventStatistics: waste_event_statistics[];
+  powerBiReports: power_bi_reports[];
 };
 
 type DimTime = {

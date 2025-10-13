@@ -7,4 +7,11 @@ const getExtractedData = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-export { getExtractedData };
+const transformWeatherData = async (c: Context) => {
+  const data = await ETLService.transformWeatherData(
+    await ETLService.getExtractedData()
+  );
+  return successResponse(c, { data });
+};
+
+export { getExtractedData, transformWeatherData };
