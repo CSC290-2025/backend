@@ -1,9 +1,10 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { Wallet, CreateWalletData } from '../types';
+import type { wallets } from '@/generated/prisma';
+import type { Wallet, CreateWalletData, UpdateWalletData } from '../types';
 
 // Helper to DRY
-const transformWallet = (wallet: any): Wallet => ({
+const transformWallet = (wallet: wallets): Wallet => ({
   ...wallet,
   owner_id: wallet.owner_id!,
   wallet_type: wallet.wallet_type as 'individual' | 'organization',
@@ -54,7 +55,10 @@ const findWalletById = async (id: number): Promise<Wallet | null> => {
   }
 };
 
-const updateWallet = async (id: number, data: any): Promise<Wallet> => {
+const updateWallet = async (
+  id: number,
+  data: UpdateWalletData
+): Promise<Wallet> => {
   try {
     const wallet = await prisma.wallets.update({
       where: { id },
