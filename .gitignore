@@ -111,6 +111,7 @@ CLAUDE.md
 .vscode/.ai/
 .vscode-ai/
 
-# Firebase Service Account Files
+# G07 Firebase Service Account Files  
 config/
 !config/README.md
+

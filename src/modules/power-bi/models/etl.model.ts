@@ -8,7 +8,11 @@ import type {
   ExtractedWeatherData,
 } from '../types';
 
+<<<<<<< HEAD
 const extractUserData = async (): Promise<ExtractedUserData> => {
+=======
+const extractUserData = async () => {
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   try {
     const [
       roles,
@@ -46,7 +50,11 @@ const extractUserData = async (): Promise<ExtractedUserData> => {
   }
 };
 
+<<<<<<< HEAD
 const extractHealthcareData = async (): Promise<ExtractedHealthcareData> => {
+=======
+const extractHealthcareData = async () => {
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   try {
     const [
       patients,
@@ -87,7 +95,11 @@ const extractHealthcareData = async (): Promise<ExtractedHealthcareData> => {
   }
 };
 
+<<<<<<< HEAD
 const extractWeatherData = async (): Promise<ExtractedWeatherData> => {
+=======
+const extractWeatherData = async () => {
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   try {
     const [airQuality, weatherData] = await Promise.all([
       prisma.air_quality.findMany(),
@@ -104,7 +116,11 @@ const extractWeatherData = async (): Promise<ExtractedWeatherData> => {
   }
 };
 
+<<<<<<< HEAD
 const extractWasteData = async (): Promise<ExtractedWasteData> => {
+=======
+const extractWasteData = async () => {
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   try {
     const [wasteTypes, wasteEventStatistics, powerBiReports] =
       await Promise.all([
@@ -125,6 +141,10 @@ const extractWasteData = async (): Promise<ExtractedWasteData> => {
 };
 
 export {
+<<<<<<< HEAD
+=======
+  extractAllData,
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   extractUserData,
   extractHealthcareData,
   extractWeatherData,

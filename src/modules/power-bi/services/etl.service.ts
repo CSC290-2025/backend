@@ -1,5 +1,9 @@
 import { ETLModel } from '../models';
 import type {
+<<<<<<< HEAD
+=======
+  ExtractedData,
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   ExtractedUserData,
   ExtractedHealthcareData,
   ExtractedWeatherData,
@@ -10,6 +14,15 @@ import type {
 import { NotFoundError, ValidationError } from '@/errors';
 import fs from 'fs';
 import admin from 'firebase-admin';
+<<<<<<< HEAD
+=======
+
+const getExtractedData = async (): Promise<ExtractedData> => {
+  const data = await ETLModel.extractAllData();
+  if (!data) throw new NotFoundError('No data found');
+  return data;
+};
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
 
 const transformWeatherData = async ({
   airQuality,
@@ -193,11 +206,26 @@ const getWasteData = async (): Promise<ExtractedWasteData> => {
   return data;
 };
 
+<<<<<<< HEAD
 export {
+=======
+const getTeamIntegrations = async (): Promise<ExtractedTeamIntegrations> => {
+  const data = await ETLModel.extractTeamIntegrations();
+  if (!data) throw new NotFoundError('No team integrations data found');
+  return data;
+};
+
+export {
+  getExtractedData,
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   getUserData,
   getHealthcareData,
   getWeatherData,
   getWasteData,
+<<<<<<< HEAD
+=======
+  getTeamIntegrations,
+>>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   transformWeatherData,
   loadWeatherDataToG7FBDB,
 };
