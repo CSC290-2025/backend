@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import config from './config/env';
 import { errorHandler } from './middlewares/error';
+import { cleanAirRoutes } from './modules/clean-air';
 
 const app = new Hono();
 
@@ -10,6 +11,8 @@ app.onError(errorHandler);
 app.get('/', (c) => {
   return c.text('Hello Hono!');
 });
+
+app.route('/api', cleanAirRoutes);
 
 const server = serve(
   {
