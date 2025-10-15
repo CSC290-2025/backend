@@ -7,11 +7,71 @@ const getExtractedData = async (c: Context) => {
   return successResponse(c, { data });
 };
 
+const getUserData = async (c: Context) => {
+  const data = await ETLService.getUserData();
+  return successResponse(c, { data });
+};
+
+const getHealthcareData = async (c: Context) => {
+  const data = await ETLService.getHealthcareData();
+  return successResponse(c, { data });
+};
+
+const getWeatherData = async (c: Context) => {
+  const data = await ETLService.getWeatherData();
+  return successResponse(c, { data });
+};
+
+const getWasteData = async (c: Context) => {
+  const data = await ETLService.getWasteData();
+  return successResponse(c, { data });
+};
+
+const getTeamIntegrations = async (c: Context) => {
+  const data = await ETLService.getTeamIntegrations();
+  return successResponse(c, { data });
+};
+
 const transformWeatherData = async (c: Context) => {
   const data = await ETLService.transformWeatherData(
-    await ETLService.getExtractedData()
+    await ETLService.getWeatherData()
   );
   return successResponse(c, { data });
 };
 
-export { getExtractedData, transformWeatherData };
+const loadWeatherDataToG7FBDB = async (c: Context) => {
+  const serviceAccountPath = process.env.G7_SERVICE_ACCOUNT_PATH;
+  const databaseUrl = process.env.G7_DATABASE_URL;
+
+  if (!serviceAccountPath) {
+    return c.json(
+      { error: 'G7_SERVICE_ACCOUNT_PATH environment variable is required' },
+      400
+    );
+  }
+
+  if (!databaseUrl) {
+    return c.json(
+      { error: 'G7_DATABASE_URL environment variable is required' },
+      400
+    );
+  }
+
+  const result = await ETLService.loadWeatherDataToG7FBDB(
+    await ETLService.transformWeatherData(await ETLService.getWeatherData()),
+    serviceAccountPath,
+    databaseUrl
+  );
+  return successResponse(c, { result });
+};
+
+export {
+  getExtractedData,
+  getUserData,
+  getHealthcareData,
+  getWeatherData,
+  getWasteData,
+  getTeamIntegrations,
+  transformWeatherData,
+  loadWeatherDataToG7FBDB,
+};

@@ -6,6 +6,7 @@ import type {
   users,
   user_profiles,
   users_departments,
+  users_specialty,
   air_quality,
   weather_data,
   patients,
@@ -23,16 +24,20 @@ import type {
   Prisma,
 } from '@/generated/prisma';
 
-type ExtractedData = {
+// Extraction Types
+type ExtractedUserData = {
   roles: roles[];
   departments: departments[];
   specialties: specialty[];
   addresses: addresses[];
+  usersSpecialities: users_specialty[];
   users: users[];
   userProfiles: user_profiles[];
   usersDepartments: users_departments[];
-  airQuality: air_quality[];
-  weatherData: weather_data[];
+};
+
+type ExtractedHealthcareData = {
+  specialties: specialty[];
   patients: patients[];
   facilities: facilities[];
   beds: beds[];
@@ -41,12 +46,20 @@ type ExtractedData = {
   ambulances: ambulances[];
   emergencyCalls: emergency_calls[];
   payments: payments[];
-  teamIntegrations: team_integrations[];
+};
+
+type ExtractedWeatherData = {
+  airQuality: air_quality[];
+  weatherData: weather_data[];
+};
+
+type ExtractedWasteData = {
   wasteTypes: waste_types[];
   wasteEventStatistics: waste_event_statistics[];
   powerBiReports: power_bi_reports[];
 };
 
+// Fact and Dimension Table Types (firebase)
 type DimTime = {
   id: number;
   date: Date;
@@ -138,6 +151,10 @@ type ReportMetadata = {
 };
 
 export type {
+  ExtractedUserData,
+  ExtractedHealthcareData,
+  ExtractedWeatherData,
+  ExtractedWasteData,
   DimTime,
   DimLocation,
   DimFacility,
@@ -149,5 +166,4 @@ export type {
   FactWeather,
   FactPopulation,
   ReportMetadata,
-  ExtractedData,
 };

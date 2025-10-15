@@ -1,20 +1,54 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 
-import type { ExtractedData } from '../types';
+import type {
+  ExtractedHealthcareData,
+  ExtractedUserData,
+  ExtractedWasteData,
+  ExtractedWeatherData,
+} from '../types';
 
-const extractAllData = async (): Promise<ExtractedData> => {
+const extractUserData = async () => {
   try {
     const [
       roles,
       departments,
       specialties,
       addresses,
+      usersSpecialities,
       users,
       userProfiles,
       usersDepartments,
-      airQuality,
-      weatherData,
+    ] = await Promise.all([
+      prisma.roles.findMany(),
+      prisma.departments.findMany(),
+      prisma.specialty.findMany(),
+      prisma.addresses.findMany(),
+      prisma.users_specialty.findMany(),
+      prisma.users.findMany(),
+      prisma.user_profiles.findMany(),
+      prisma.users_departments.findMany(),
+    ]);
+
+    return {
+      roles,
+      departments,
+      specialties,
+      addresses,
+      usersSpecialities,
+      users,
+      userProfiles,
+      usersDepartments,
+    };
+  } catch (error) {
+    handlePrismaError(error);
+    throw error;
+  }
+};
+
+const extractHealthcareData = async () => {
+  try {
+    const [
       patients,
       facilities,
       beds,
@@ -24,19 +58,7 @@ const extractAllData = async (): Promise<ExtractedData> => {
       emergencyCalls,
       payments,
       teamIntegrations,
-      wasteTypes,
-      wasteEventStatistics,
-      powerBiReports,
     ] = await Promise.all([
-      prisma.roles.findMany(),
-      prisma.departments.findMany(),
-      prisma.specialty.findMany(),
-      prisma.addresses.findMany(),
-      prisma.users.findMany(),
-      prisma.user_profiles.findMany(),
-      prisma.users_departments.findMany(),
-      prisma.air_quality.findMany(),
-      prisma.weather_data.findMany(),
       prisma.patients.findMany(),
       prisma.facilities.findMany(),
       prisma.beds.findMany(),
@@ -46,21 +68,9 @@ const extractAllData = async (): Promise<ExtractedData> => {
       prisma.emergency_calls.findMany(),
       prisma.payments.findMany(),
       prisma.team_integrations.findMany(),
-      prisma.waste_types.findMany(),
-      prisma.waste_event_statistics.findMany(),
-      prisma.power_bi_reports.findMany(),
     ]);
 
     return {
-      roles,
-      departments,
-      specialties,
-      addresses,
-      users,
-      userProfiles,
-      usersDepartments,
-      airQuality,
-      weatherData,
       patients,
       facilities,
       beds,
@@ -70,6 +80,40 @@ const extractAllData = async (): Promise<ExtractedData> => {
       emergencyCalls,
       payments,
       teamIntegrations,
+    };
+  } catch (error) {
+    handlePrismaError(error);
+    throw error;
+  }
+};
+
+const extractWeatherData = async () => {
+  try {
+    const [airQuality, weatherData] = await Promise.all([
+      prisma.air_quality.findMany(),
+      prisma.weather_data.findMany(),
+    ]);
+
+    return {
+      airQuality,
+      weatherData,
+    };
+  } catch (error) {
+    handlePrismaError(error);
+    throw error;
+  }
+};
+
+const extractWasteData = async () => {
+  try {
+    const [wasteTypes, wasteEventStatistics, powerBiReports] =
+      await Promise.all([
+        prisma.waste_types.findMany(),
+        prisma.waste_event_statistics.findMany(),
+        prisma.power_bi_reports.findMany(),
+      ]);
+
+    return {
       wasteTypes,
       wasteEventStatistics,
       powerBiReports,
@@ -80,4 +124,10 @@ const extractAllData = async (): Promise<ExtractedData> => {
   }
 };
 
-export { extractAllData };
+export {
+  extractAllData,
+  extractUserData,
+  extractHealthcareData,
+  extractWeatherData,
+  extractWasteData,
+};
