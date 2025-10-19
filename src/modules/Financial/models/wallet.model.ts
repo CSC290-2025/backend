@@ -44,12 +44,12 @@ const findWalletsByUserId = async (userId: number): Promise<Wallet[]> => {
   }
 };
 
-const findWalletById = async (id: number): Promise<Wallet | null> => {
+const findWalletById = async (id: number): Promise<Wallet> => {
   try {
-    const wallet = await prisma.wallets.findUnique({
+    const wallet = await prisma.wallets.findUniqueOrThrow({
       where: { id },
     });
-    return wallet ? transformWallet(wallet) : null;
+    return transformWallet(wallet);
   } catch (error) {
     handlePrismaError(error);
   }
