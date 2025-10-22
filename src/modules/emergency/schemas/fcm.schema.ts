@@ -2,7 +2,7 @@ import * as z from 'zod';
 
 const FcmResponseSchema = z.object({
   id: z.number(),
-  user_id: z.number().nullable(),
+  user_id: z.number().int().nullable(),
   tokens: z.string().nullable(),
   created_at: z.coerce.date().nullable(),
   updated_at: z.coerce.date().nullable(),

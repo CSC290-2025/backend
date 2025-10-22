@@ -1,5 +1,5 @@
 import type {
-  createTokenFcm,
+  CreateTokenFcm,
   FcmResponse,
 } from '@/modules/emergency/types/fcm.type';
 import { handlePrismaError } from '@/errors';
@@ -13,7 +13,7 @@ const getAllFcmToken = async (): Promise<FcmResponse[]> => {
   }
 };
 
-const createFcmToken = async (data: createTokenFcm): Promise<FcmResponse> => {
+const createFcmToken = async (data: CreateTokenFcm): Promise<FcmResponse> => {
   try {
     return prisma.fcm_token.create({
       data,

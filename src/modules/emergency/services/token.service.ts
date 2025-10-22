@@ -1,9 +1,9 @@
 import { ValidationError } from '@/errors';
 import { FcmModel } from '@/modules/emergency/models';
-import type { createTokenFcm, FcmResponse } from '@/modules/emergency/types';
+import type { CreateTokenFcm, FcmResponse } from '@/modules/emergency/types';
 
 export const storeTokenToDB = async (
-  data: createTokenFcm
+  data: CreateTokenFcm
 ): Promise<FcmResponse> => {
   if (!data.tokens) {
     throw new ValidationError('Token is required');

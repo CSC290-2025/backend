@@ -1,3 +1,3 @@
-export * as FcmController from '@/modules/emergency/controllers/fcm.controller.ts';
-export * as TokenController from '@/modules/emergency/controllers/token.controller.ts';
-export * from './emergency.controller';
+export * as FcmController from './fcm.controller.ts';
+export * as TokenController from './token.controller.ts';
+export * as ReportController from './report.controller.ts';

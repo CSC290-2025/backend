@@ -2,13 +2,13 @@ import { FcmModel } from '@/modules/emergency/models';
 import { firebaseMessaging } from '@/config/firebase.ts';
 import { ValidationError } from '@/errors';
 import type {
-  notification,
-  notificationResponse,
+  Notification,
+  NotificationResponse,
 } from '@/modules/emergency/types/fcm.type.ts';
 
 export const sendAllNotificationService = async (
-  notification: notification
-): Promise<notificationResponse> => {
+  notification: Notification
+): Promise<NotificationResponse> => {
   try {
     const tokens = await FcmModel.getAllFcmToken();
 

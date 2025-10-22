@@ -3,8 +3,8 @@ import type { BatchResponse } from 'firebase-admin/messaging';
 import type { FcmSchemas } from '@/modules/emergency/schemas/fcm.schema.ts';
 
 type FcmResponse = z.infer<typeof FcmSchemas.FcmResponseSchema>;
-type createTokenFcm = z.infer<typeof FcmSchemas.CreateTokenFcmSchema>;
-type notification = z.infer<typeof FcmSchemas.NotificationSchema>;
-type notificationResponse = BatchResponse;
+type CreateTokenFcm = z.infer<typeof FcmSchemas.CreateTokenFcmSchema>;
+type Notification = z.infer<typeof FcmSchemas.NotificationSchema>;
+type NotificationResponse = BatchResponse;
 
-export type { FcmResponse, createTokenFcm, notification, notificationResponse };
+export type { FcmResponse, CreateTokenFcm, Notification, NotificationResponse };
