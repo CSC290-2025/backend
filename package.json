@@ -22,9 +22,7 @@
     "@prisma/extension-accelerate": "^2.0.2",
     "dotenv": "^17.2.2",
     "hono": "^4.9.8",
-    "zod": "^4.1.11",
-    "firebase": "^12.3.0",
-    "firebase-admin": "^13.5.0"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
