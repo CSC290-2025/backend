@@ -1,5 +1,7 @@
 // Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
+import { detectRoutes } from '../modules/G16-CommunitySupportMap/routes/detect.routes.js';
+import markerRoutes from '../modules/G16-CommunitySupportMap/routes/marker.routes.js';
 
 // ============================================
 // ROUTING OPTIONS:
@@ -12,7 +14,6 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 // import { setupAuthRoutes } from '@/modules/auth/routes';
 // import { setupPaymentRoutes } from '@/modules/payment/routes';
 // import { setupProductRoutes } from '@/modules/_example';
-
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
 
@@ -28,4 +29,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Normal Hono Routes (not in Swagger docs)
   // ============================================
   // app.route('/products', productRoutes);
+  app.route('/api', detectRoutes);
+  app.route('/api', markerRoutes);
 };
