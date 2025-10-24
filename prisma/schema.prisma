@@ -753,8 +753,9 @@ model spatial_ref_sys {
 }
 
 model specialty {
-  id             Int    @id @default(autoincrement())
-  specialty_name String @unique @db.VarChar(50)
+  id              Int               @id @default(autoincrement())
+  specialty_name  String            @unique @db.VarChar(50)
+  users_specialty users_specialty[]
 }
 
 model stops {
@@ -890,6 +891,7 @@ model users {
   user_profiles                 user_profiles?
   roles                         roles?                          @relation(fields: [role_id], references: [id], onUpdate: NoAction)
   users_departments             users_departments[]
+  users_specialty               users_specialty[]
   vehicles                      vehicles[]
   volunteer_event_participation volunteer_event_participation[]
   volunteer_events              volunteer_events[]
@@ -1012,6 +1014,15 @@ model weather_data {
   addresses            addresses? @relation(fields: [location_id], references: [id], onUpdate: NoAction)
 }
 
+model users_specialty {
+  user_id      Int
+  specialty_id Int
+  specialty    specialty @relation(fields: [specialty_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@id([user_id, specialty_id])
+}
+
 enum air_quality_category {
   good
   moderate
@@ -1130,4 +1141,14 @@ enum wallet_status {
 enum wallet_type {
   individual
   organization
+}
+
+// Example model for reference (src/modules/_example)
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  price     Float
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
