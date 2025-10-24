@@ -1,7 +1,7 @@
 // Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { detectRoutes } from '../modules/G16-CommunitySupportMap/routes/detect.routes.js';
-import markerRoutes from '../modules/G16-CommunitySupportMap/routes/marker.routes.js';
+import { detectRoutes } from '../modules/G-16/routes/detect.routes.js';
+import markerRoutes from '../modules/G-16/routes/marker.routes.js';
 
 // ============================================
 // ROUTING OPTIONS:

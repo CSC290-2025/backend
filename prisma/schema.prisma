@@ -1151,4 +1151,8 @@ model Product {
   category  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/feature/supportMap
