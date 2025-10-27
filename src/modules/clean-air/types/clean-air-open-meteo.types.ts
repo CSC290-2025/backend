@@ -69,53 +69,8 @@ export type AirQualityCategory =
   | 'VERY_UNHEALTHY'
   | 'HAZARDOUS';
 
-export interface Air4ThaiStation {
-  areaEN: string;
-  lat: string;
-  long: string;
-  AQILast: {
-    date: string;
-    time: string;
-    PM25: {
-      color_id: string;
-      aqi: string;
-      value: string;
-    };
-    PM10: {
-      color_id: string;
-      aqi: string;
-      value: string;
-    };
-    O3: {
-      color_id: string;
-      aqi: string;
-      value: string;
-    };
-    CO: {
-      color_id: string;
-      aqi: string;
-      value: string;
-    };
-    NO2: {
-      color_id: string;
-      aqi: string;
-      value: string;
-    };
-    SO2: {
-      color_id: string;
-      aqi: string;
-      value: string;
-    };
-    AQI: {
-      color_id: string;
-      aqi: string;
-      param: string;
-    };
-  };
-}
-
 export interface GetDistrictsQuery {
-  limit?: number; // เก็บแค่ limit ไว้
+  limit?: number;
 }
 
 export interface SearchDistrictQuery {
@@ -127,5 +82,6 @@ export interface CleanAirService {
   getDistrictDetail(district: string): Promise<DistrictDetail>;
   getDistrictHistory(district: string): Promise<DistrictHistory>;
   getDistrictSummary(district: string): Promise<DistrictSummary>;
+  getHealthTips(district: string): Promise<string[]>;
   searchDistricts(query: SearchDistrictQuery): Promise<DistrictAirQuality[]>;
 }

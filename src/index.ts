@@ -27,7 +27,7 @@ app.doc('/doc', {
   ],
 });
 
-app.route('/api', cleanAirRoutes);
+app.route('/clean-air', cleanAirRoutes);
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 app.get('/', (c) => {
