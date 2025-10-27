@@ -1,10 +1,10 @@
 // src/modules/_example/services/gemini.service.ts
 import { GoogleGenAI } from '@google/genai';
-const apiKey = process.env.GEMINI_API_KEY!;
+const apiKey = process.env.G_16_GOOGLE_GEMINI_API_KEY!;
 const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1' });
 import { ValidationError, InternalServerError } from '@/errors';
 
-const RAW = process.env.GEMINI_MODEL || 'models/gemini-2.0-flash-001';
+const RAW = process.env.G_16_GEMINI_MODEL || 'models/gemini-2.0-flash-001';
 // .trim()
 // .replace(/^['"]|['"]$/g, "");
 const MODEL = RAW.startsWith('models/') ? RAW : `models/${RAW}`;
