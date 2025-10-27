@@ -4,7 +4,7 @@ import type { CreateReport, ReportResponse } from '@/modules/emergency/types';
 
 const createReport = async (data: CreateReport): Promise<ReportResponse> => {
   try {
-    return prisma.emergency_reports.create({
+    return await prisma.emergency_reports.create({
       data,
     });
   } catch (error) {

@@ -151,7 +151,7 @@ const setupPostRoutes = (app: OpenAPIHono) => {
 export { setupPostRoutes };
 ```
 
-**Mounting Routes** (src/routes/index.ts):
+**Mounting Routes** (src/routes/index.tsx):
 
 ```typescript
 import type { OpenAPIHono } from "@hono/zod-openapi";

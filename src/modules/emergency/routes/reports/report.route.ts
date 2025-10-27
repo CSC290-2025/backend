@@ -1,5 +1,5 @@
-import { ReportController } from '@/modules/emergency/controllers';
 import { Hono } from 'hono';
+import { ReportController } from '@/modules/emergency/controllers';
 
 const reportRoutes = new Hono();
 

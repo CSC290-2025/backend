@@ -18,8 +18,4 @@ const NotificationSchema = z.object({
   body: z.string(),
 });
 
-export const FcmSchemas = {
-  FcmResponseSchema,
-  CreateTokenFcmSchema,
-  NotificationSchema,
-};
+export { FcmResponseSchema, CreateTokenFcmSchema, NotificationSchema };
