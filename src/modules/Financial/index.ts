@@ -4,13 +4,13 @@
 export type * from './types';
 
 // Export model
-export { WalletModel } from './models';
+export { WalletModel, MetroCardModel } from './models';
 
 // Export service functions for buss
-export { WalletService } from './services';
+export { WalletService, MetroCardService } from './services';
 
 // Export schemas
-export { WalletSchemas } from './schemas';
+export { WalletSchemas, MetroCardSchemas } from './schemas';
 
 // Export OpenAPI routes for  main app
-export { setupWalletRoutes } from './routes';
+export { setupWalletRoutes, setupMetroCardRoutes } from './routes';
