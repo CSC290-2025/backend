@@ -75,4 +75,5 @@ pnpm-lock.yaml
 .npm
 .eslintcache
 .prettiercache
-.serviceAccqaqqqount.json
+
+serviceAccount.json
