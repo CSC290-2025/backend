@@ -27,7 +27,6 @@ const getUserMetroCards = async (c: Context) => {
 
 const updateMetroCard = async (c: Context) => {
   const metroCardId = Number(c.req.param('metroCardId'));
-
   const body = await c.req.json();
   const metroCard = await MetroCardService.updateMetroCard(metroCardId, body);
   return successResponse(
@@ -38,4 +37,26 @@ const updateMetroCard = async (c: Context) => {
   );
 };
 
-export { getMetroCard, createMetroCard, getUserMetroCards, updateMetroCard };
+const topUpBalance = async (c: Context) => {
+  const metroCardId = Number(c.req.param('metroCardId'));
+
+  const body = await c.req.json();
+  const metroCard = await MetroCardService.topUpBalance(
+    metroCardId,
+    body.amount
+  );
+  return successResponse(
+    c,
+    { metroCard },
+    200,
+    'Balance topped up successfully'
+  );
+};
+
+export {
+  getMetroCard,
+  createMetroCard,
+  getUserMetroCards,
+  updateMetroCard,
+  topUpBalance,
+};

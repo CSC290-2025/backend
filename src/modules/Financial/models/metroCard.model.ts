@@ -79,9 +79,30 @@ const updateMetroCard = async (
   }
 };
 
+const updateMetroCardBalance = async (
+  id: number,
+  balance: number
+): Promise<MetroCard> => {
+  console.log(balance);
+  try {
+    const metroCard = await prisma.metro_cards.update({
+      where: { id },
+      data: {
+        balance: balance,
+        updated_at: new Date(),
+      },
+    });
+
+    return transformMetroCard(metroCard);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createMetroCard,
   findMetroCardsByUserId,
   findMetroCardById,
   updateMetroCard,
+  updateMetroCardBalance,
 };

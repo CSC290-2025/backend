@@ -23,6 +23,10 @@ const UpdateMetroCardSchema = z.object({
   status: z.enum(['active', 'suspended']).optional(),
 });
 
+const TopUpMetroCardSchema = z.object({
+  amount: z.number(),
+});
+
 const MetroCardListSchema = z.object({
   products: z.array(MetroCardSchema),
 });
@@ -70,10 +74,20 @@ const updateMetroCardRoute = createPutRoute({
   tags: ['MetroCards'],
 });
 
+const topUpBalanceRoute = createPutRoute({
+  path: '/metro-cards/{metroCardId}/top-up',
+  summary: 'Top up metro card balance',
+  requestSchema: TopUpMetroCardSchema,
+  responseSchema: MetroCardSchema,
+  params: MetroCardIdParam,
+  tags: ['MetroCards'],
+});
+
 export const MetroCardSchemas = {
   MetroCardSchema,
   CreateMetroCardSchema,
   UpdateMetroCardSchema,
+  TopUpMetroCardSchema,
   MetroCardListSchema,
   UserIdParam,
   MetroCardIdParam,
@@ -81,4 +95,5 @@ export const MetroCardSchemas = {
   getUserMetroCardRoute,
   getMetroCardRoute,
   updateMetroCardRoute,
+  topUpBalanceRoute,
 };
