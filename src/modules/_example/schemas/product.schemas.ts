@@ -83,30 +83,6 @@ const getProductRoute = createGetRoute({
   tags: ['Products'],
 });
 
-const createProductRoute = createPostRoute({
-  path: '/products',
-  summary: 'Create new product',
-  requestSchema: CreateProductSchema,
-  responseSchema: ProductSchema,
-  tags: ['Products'],
-});
-
-const updateProductRoute = createPutRoute({
-  path: '/products/{id}',
-  summary: 'Update product',
-  requestSchema: UpdateProductSchema,
-  responseSchema: ProductSchema,
-  params: ProductIdParam,
-  tags: ['Products'],
-});
-
-const deleteProductRoute = createDeleteRoute({
-  path: '/products/{id}',
-  summary: 'Delete product',
-  params: ProductIdParam,
-  tags: ['Products'],
-});
-
 const listProductsRoute = createGetRoute({
   path: '/products',
   summary: 'List products with pagination and filters',
@@ -140,6 +116,30 @@ const getPriceStatsRoute = createGetRoute({
   tags: ['Products', 'Statistics'],
 });
 
+const adminCreateProductRoute = createPostRoute({
+  path: '/products',
+  summary: 'Create new product (Admin)',
+  requestSchema: CreateProductSchema,
+  responseSchema: ProductSchema,
+  tags: ['Admin', 'Products'],
+});
+
+const adminUpdateProductRoute = createPutRoute({
+  path: '/products/{id}',
+  summary: 'Update product (Admin)',
+  requestSchema: UpdateProductSchema,
+  responseSchema: ProductSchema,
+  params: ProductIdParam,
+  tags: ['Admin', 'Products'],
+});
+
+const adminDeleteProductRoute = createDeleteRoute({
+  path: '/products/{id}',
+  summary: 'Delete product (Admin)',
+  params: ProductIdParam,
+  tags: ['Admin', 'Products'],
+});
+
 export const ProductSchemas = {
   ProductSchema,
   CreateProductSchema,
@@ -153,11 +153,11 @@ export const ProductSchemas = {
   ProductIdParam,
   CategoryParam,
   getProductRoute,
-  createProductRoute,
-  updateProductRoute,
-  deleteProductRoute,
   listProductsRoute,
   getProductsByCategoryRoute,
   getCategoryStatsRoute,
   getPriceStatsRoute,
+  adminCreateProductRoute,
+  adminUpdateProductRoute,
+  adminDeleteProductRoute,
 };
