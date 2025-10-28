@@ -21,8 +21,21 @@ const createMetroCard = async (c: Context) => {
 
 const getUserMetroCards = async (c: Context) => {
   const userId = Number(c.req.param('userId'));
-  const wallets = await MetroCardService.getUserMetroCards(userId);
-  return successResponse(c, { wallets });
+  const metroCards = await MetroCardService.getUserMetroCards(userId);
+  return successResponse(c, { metroCards });
 };
 
-export { getMetroCard, createMetroCard, getUserMetroCards };
+const updateMetroCard = async (c: Context) => {
+  const metroCardId = Number(c.req.param('metroCardId'));
+
+  const body = await c.req.json();
+  const metroCard = await MetroCardService.updateMetroCard(metroCardId, body);
+  return successResponse(
+    c,
+    { metroCard },
+    200,
+    'Metro card updated successfully'
+  );
+};
+
+export { getMetroCard, createMetroCard, getUserMetroCards, updateMetroCard };

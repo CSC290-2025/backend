@@ -1,6 +1,6 @@
 import prisma from '@/config/client';
 import type { metro_cards } from '@/generated/prisma';
-import type { MetroCard } from '../types';
+import type { MetroCard, UpdateMetroCardData } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
 
@@ -50,15 +50,38 @@ const findMetroCardsByUserId = async (userId: number): Promise<MetroCard[]> => {
   }
 };
 
-const findMetroCardById = async (id: number): Promise<MetroCard> => {
+const findMetroCardById = async (id: number): Promise<MetroCard | null> => {
   try {
-    const wallet = await prisma.metro_cards.findUniqueOrThrow({
+    const metroCard = await prisma.metro_cards.findUnique({
       where: { id },
     });
-    return transformMetroCard(wallet);
+    return metroCard ? transformMetroCard(metroCard) : null;
   } catch (error) {
     handlePrismaError(error);
   }
 };
 
-export { createMetroCard, findMetroCardsByUserId, findMetroCardById };
+const updateMetroCard = async (
+  id: number,
+  data: UpdateMetroCardData
+): Promise<MetroCard> => {
+  try {
+    const metroCard = await prisma.metro_cards.update({
+      where: { id },
+      data: {
+        ...data,
+        updated_at: new Date(),
+      },
+    });
+    return transformMetroCard(metroCard);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  createMetroCard,
+  findMetroCardsByUserId,
+  findMetroCardById,
+  updateMetroCard,
+};

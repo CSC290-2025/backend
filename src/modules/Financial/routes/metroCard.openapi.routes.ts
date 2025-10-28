@@ -16,6 +16,10 @@ const setupMetroCardRoutes = (app: OpenAPIHono) => {
     MetroCardSchemas.getUserMetroCardRoute,
     MetroCardController.getUserMetroCards
   );
+  app.openapi(
+    MetroCardSchemas.updateMetroCardRoute,
+    MetroCardController.updateMetroCard
+  );
 };
 
 export { setupMetroCardRoutes };

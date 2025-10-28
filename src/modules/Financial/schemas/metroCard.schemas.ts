@@ -1,4 +1,8 @@
-import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+} from '@/utils/openapi-helpers';
 import { z } from 'zod';
 
 const MetroCardSchema = z.object({
@@ -15,6 +19,10 @@ const CreateMetroCardSchema = z.object({
   user_id: z.number(),
 });
 
+const UpdateMetroCardSchema = z.object({
+  status: z.enum(['active', 'suspended']).optional(),
+});
+
 const MetroCardListSchema = z.object({
   products: z.array(MetroCardSchema),
 });
@@ -24,7 +32,7 @@ const UserIdParam = z.object({
   userId: z.coerce.number(),
 });
 
-const WalletIdParam = z.object({
+const MetroCardIdParam = z.object({
   metroCardId: z.coerce.number(),
 });
 
@@ -49,16 +57,28 @@ const getMetroCardRoute = createGetRoute({
   path: '/metro-cards/{metroCardId}',
   summary: 'Get metro card by ID',
   responseSchema: MetroCardSchema,
-  params: WalletIdParam,
+  params: MetroCardIdParam,
+  tags: ['MetroCards'],
+});
+
+const updateMetroCardRoute = createPutRoute({
+  path: '/metro-cards/{metroCardId}',
+  summary: 'Update metro card',
+  requestSchema: UpdateMetroCardSchema,
+  responseSchema: MetroCardSchema,
+  params: MetroCardIdParam,
   tags: ['MetroCards'],
 });
 
 export const MetroCardSchemas = {
   MetroCardSchema,
   CreateMetroCardSchema,
-  createMetroCardRoute,
-  UserIdParam,
+  UpdateMetroCardSchema,
   MetroCardListSchema,
+  UserIdParam,
+  MetroCardIdParam,
+  createMetroCardRoute,
   getUserMetroCardRoute,
   getMetroCardRoute,
+  updateMetroCardRoute,
 };

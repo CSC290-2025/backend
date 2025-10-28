@@ -5,5 +5,8 @@ type MetroCard = z.infer<typeof MetroCardSchemas.MetroCardSchema>;
 type CreateMetroCardData = z.infer<
   typeof MetroCardSchemas.CreateMetroCardSchema
 >;
+type UpdateMetroCardData = z.infer<
+  typeof MetroCardSchemas.UpdateMetroCardSchema
+>;
 
-export type { MetroCard, CreateMetroCardData };
+export type { MetroCard, CreateMetroCardData, UpdateMetroCardData };
