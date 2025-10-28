@@ -74,6 +74,5 @@ CLAUDE.md
 .ai_cache/
 
 # VSCode AI integrations cache
-.vscode/.history/
 .vscode/.ai/
 .vscode-ai/
