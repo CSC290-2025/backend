@@ -1,25 +1,18 @@
 import prisma from '@/config/client';
 import type { metro_cards } from '@/generated/prisma';
-import type { CreateMetroCardData, MetroCard } from '../types';
+import type { MetroCard } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
 
 //Helper
-export const generateMetroCard = (prefix = '01') => {
+export const generateMetroCard = (user_id: number) => {
   const nanoid = customAlphabet('0123456789', 11);
 
-  const luhnCheckDigit = (num: string) => {
-    const arr = num.split('').reverse().map(Number);
-    const sum = arr.reduce(
-      (acc, n, i) => acc + (i % 2 ? (n * 2 > 9 ? n * 2 - 9 : n * 2) : n),
-      0
-    );
-    return (10 - (sum % 10)) % 10;
-  };
+  const prefix = user_id.toString().padStart(4, '0');
 
   const base = prefix + nanoid();
-  const check = luhnCheckDigit(base);
-  return base + check;
+
+  return 'MET-' + base;
 };
 
 const transformMetroCard = (metroCard: metro_cards): MetroCard => ({
@@ -36,7 +29,7 @@ const createMetroCard = async (user_id: number): Promise<MetroCard> => {
     const metroCard = await prisma.metro_cards.create({
       data: {
         user_id: user_id,
-        card_number: generateMetroCard(),
+        card_number: generateMetroCard(user_id),
         balance: 0,
       },
     });
@@ -46,4 +39,26 @@ const createMetroCard = async (user_id: number): Promise<MetroCard> => {
   }
 };
 
-export { createMetroCard };
+const findMetroCardsByUserId = async (userId: number): Promise<MetroCard[]> => {
+  try {
+    const metroCards = await prisma.metro_cards.findMany({
+      where: { user_id: userId },
+    });
+    return metroCards.map(transformMetroCard);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const findMetroCardById = async (id: number): Promise<MetroCard> => {
+  try {
+    const wallet = await prisma.metro_cards.findUniqueOrThrow({
+      where: { id },
+    });
+    return transformMetroCard(wallet);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { createMetroCard, findMetroCardsByUserId, findMetroCardById };

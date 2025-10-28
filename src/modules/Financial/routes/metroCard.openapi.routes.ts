@@ -8,6 +8,14 @@ const setupMetroCardRoutes = (app: OpenAPIHono) => {
     MetroCardSchemas.createMetroCardRoute,
     MetroCardController.createMetroCard
   );
+  app.openapi(
+    MetroCardSchemas.getMetroCardRoute,
+    MetroCardController.getMetroCard
+  );
+  app.openapi(
+    MetroCardSchemas.getUserMetroCardRoute,
+    MetroCardController.getUserMetroCards
+  );
 };
 
 export { setupMetroCardRoutes };
