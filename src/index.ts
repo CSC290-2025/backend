@@ -1,12 +1,11 @@
 import { serve } from '@hono/node-server';
-// import { Hono } from 'hono';
 import config from '@/config/env';
 import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
+import 'dotenv/config';
 
-// const app = new Hono();
 const app = new OpenAPIHono();
 
 app.onError(errorHandler);
@@ -23,7 +22,6 @@ app.doc('/doc', {
       url: `http://localhost:${config.port}`,
       description: 'Local development server',
     },
-    // can add live api server after
   ],
 });
 
