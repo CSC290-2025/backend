@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { LightRequestSchemas } from '../schemas';
+import type { z } from 'zod';
+import type { LightRequestSchemas } from '../schemas';
 
 export type LightRequest = z.infer<
   typeof LightRequestSchemas.LightRequestSchema

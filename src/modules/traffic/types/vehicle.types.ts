@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { VehicleSchemas } from '../schemas';
+import type { z } from 'zod';
+import type { VehicleSchemas } from '../schemas';
 
 export type VehicleLocation = z.infer<typeof VehicleSchemas.LocationSchema>;
 export type UpdateVehicleLocationDTO = z.infer<
