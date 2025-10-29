@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { AuthMiddleware } from '@/middlewares';
 
 // Zod schemas
 const ProductSchema = z.object({
@@ -81,6 +82,7 @@ const getProductRoute = createGetRoute({
   responseSchema: ProductSchema,
   params: ProductIdParam,
   tags: ['Products'],
+  middleware: [AuthMiddleware.isUser],
 });
 
 const listProductsRoute = createGetRoute({
@@ -92,6 +94,7 @@ const listProductsRoute = createGetRoute({
     ...PaginationSchema.shape,
   }),
   tags: ['Products'],
+  middleware: [AuthMiddleware.isUser],
 });
 
 const getProductsByCategoryRoute = createGetRoute({
@@ -117,27 +120,30 @@ const getPriceStatsRoute = createGetRoute({
 });
 
 const adminCreateProductRoute = createPostRoute({
-  path: '/products',
+  path: '/admin/products',
   summary: 'Create new product (Admin)',
   requestSchema: CreateProductSchema,
   responseSchema: ProductSchema,
   tags: ['Admin', 'Products'],
+  middleware: [AuthMiddleware.isAdmin],
 });
 
 const adminUpdateProductRoute = createPutRoute({
-  path: '/products/{id}',
+  path: '/admin/products/{id}',
   summary: 'Update product (Admin)',
   requestSchema: UpdateProductSchema,
   responseSchema: ProductSchema,
   params: ProductIdParam,
   tags: ['Admin', 'Products'],
+  middleware: [AuthMiddleware.isAdmin],
 });
 
 const adminDeleteProductRoute = createDeleteRoute({
-  path: '/products/{id}',
+  path: '/admin/products/{id}',
   summary: 'Delete product (Admin)',
   params: ProductIdParam,
   tags: ['Admin', 'Products'],
+  middleware: [AuthMiddleware.isAdmin],
 });
 
 export const ProductSchemas = {
