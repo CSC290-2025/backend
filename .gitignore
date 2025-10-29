@@ -110,6 +110,7 @@ CLAUDE.md
 # VSCode AI integrations cache
 .vscode/.ai/
 .vscode-ai/
+
 # Firebase Service Account Files
 config/
 !config/README.md
