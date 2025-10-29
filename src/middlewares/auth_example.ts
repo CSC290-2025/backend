@@ -3,6 +3,7 @@ import type { MiddlewareHandler } from 'hono';
 
 const isAdmin: MiddlewareHandler = async (c, next) => {
   console.log('Checking for admin role...');
+  // just example demo
   const isAdminUser = c.req.query('admin') === 'true';
 
   if (!isAdminUser) {
@@ -14,6 +15,7 @@ const isAdmin: MiddlewareHandler = async (c, next) => {
 
 const isUser: MiddlewareHandler = async (c, next) => {
   console.log('Checking for user role...');
+  // just example demo
   const isAuthUser = c.req.query('user') === 'true';
 
   if (!isAuthUser) {
