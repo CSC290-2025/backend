@@ -2,43 +2,36 @@ import type { Context } from 'hono';
 import { ETLService } from '../services';
 import { successResponse } from '@/utils/response';
 
-const getExtractedData = async (c: Context) => {
-  const data = await ETLService.getExtractedData();
-  return successResponse(c, { data });
-};
-
+// Extraction
 const getUserData = async (c: Context) => {
   const data = await ETLService.getUserData();
-  return successResponse(c, { data });
+  return successResponse(c, data);
 };
 
 const getHealthcareData = async (c: Context) => {
   const data = await ETLService.getHealthcareData();
-  return successResponse(c, { data });
+  return successResponse(c, data);
 };
 
 const getWeatherData = async (c: Context) => {
   const data = await ETLService.getWeatherData();
-  return successResponse(c, { data });
+  return successResponse(c, data);
 };
 
 const getWasteData = async (c: Context) => {
   const data = await ETLService.getWasteData();
-  return successResponse(c, { data });
+  return successResponse(c, data);
 };
 
-const getTeamIntegrations = async (c: Context) => {
-  const data = await ETLService.getTeamIntegrations();
-  return successResponse(c, { data });
-};
-
+// Transformation
 const transformWeatherData = async (c: Context) => {
   const data = await ETLService.transformWeatherData(
     await ETLService.getWeatherData()
   );
-  return successResponse(c, { data });
+  return successResponse(c, data);
 };
 
+// Loading
 const loadWeatherDataToG7FBDB = async (c: Context) => {
   const serviceAccountPath = process.env.G7_SERVICE_ACCOUNT_PATH;
   const databaseUrl = process.env.G7_DATABASE_URL;
@@ -66,12 +59,10 @@ const loadWeatherDataToG7FBDB = async (c: Context) => {
 };
 
 export {
-  getExtractedData,
   getUserData,
   getHealthcareData,
   getWeatherData,
   getWasteData,
-  getTeamIntegrations,
   transformWeatherData,
   loadWeatherDataToG7FBDB,
 };

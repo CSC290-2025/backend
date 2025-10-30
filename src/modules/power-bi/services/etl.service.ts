@@ -1,6 +1,5 @@
 import { ETLModel } from '../models';
 import type {
-  ExtractedData,
   ExtractedUserData,
   ExtractedHealthcareData,
   ExtractedWeatherData,
@@ -11,12 +10,6 @@ import type {
 import { NotFoundError, ValidationError } from '@/errors';
 import fs from 'fs';
 import admin from 'firebase-admin';
-
-const getExtractedData = async (): Promise<ExtractedData> => {
-  const data = await ETLModel.extractAllData();
-  if (!data) throw new NotFoundError('No data found');
-  return data;
-};
 
 const transformWeatherData = async ({
   airQuality,
@@ -200,19 +193,11 @@ const getWasteData = async (): Promise<ExtractedWasteData> => {
   return data;
 };
 
-const getTeamIntegrations = async (): Promise<ExtractedTeamIntegrations> => {
-  const data = await ETLModel.extractTeamIntegrations();
-  if (!data) throw new NotFoundError('No team integrations data found');
-  return data;
-};
-
 export {
-  getExtractedData,
   getUserData,
   getHealthcareData,
   getWeatherData,
   getWasteData,
-  getTeamIntegrations,
   transformWeatherData,
   loadWeatherDataToG7FBDB,
 };

@@ -8,7 +8,7 @@ import type {
   ExtractedWeatherData,
 } from '../types';
 
-const extractUserData = async () => {
+const extractUserData = async (): Promise<ExtractedUserData> => {
   try {
     const [
       roles,
@@ -46,7 +46,7 @@ const extractUserData = async () => {
   }
 };
 
-const extractHealthcareData = async () => {
+const extractHealthcareData = async (): Promise<ExtractedHealthcareData> => {
   try {
     const [
       patients,
@@ -87,7 +87,7 @@ const extractHealthcareData = async () => {
   }
 };
 
-const extractWeatherData = async () => {
+const extractWeatherData = async (): Promise<ExtractedWeatherData> => {
   try {
     const [airQuality, weatherData] = await Promise.all([
       prisma.air_quality.findMany(),
@@ -104,7 +104,7 @@ const extractWeatherData = async () => {
   }
 };
 
-const extractWasteData = async () => {
+const extractWasteData = async (): Promise<ExtractedWasteData> => {
   try {
     const [wasteTypes, wasteEventStatistics, powerBiReports] =
       await Promise.all([
@@ -125,7 +125,6 @@ const extractWasteData = async () => {
 };
 
 export {
-  extractAllData,
   extractUserData,
   extractHealthcareData,
   extractWeatherData,

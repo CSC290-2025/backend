@@ -37,7 +37,6 @@ type ExtractedUserData = {
 };
 
 type ExtractedHealthcareData = {
-  specialties: specialty[];
   patients: patients[];
   facilities: facilities[];
   beds: beds[];
@@ -46,6 +45,7 @@ type ExtractedHealthcareData = {
   ambulances: ambulances[];
   emergencyCalls: emergency_calls[];
   payments: payments[];
+  teamIntegrations: team_integrations[];
 };
 
 type ExtractedWeatherData = {
