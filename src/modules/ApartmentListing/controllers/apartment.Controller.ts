@@ -1,5 +1,5 @@
 import { successResponse } from '@/utils/response';
-import * as apartmentModel from '../models/apartment.model.ts';
+import * as apartmentModel from '../models/apartment.Model.ts';
 import type { Context } from 'hono';
 
 export async function getAllApartment(c: Context) {
