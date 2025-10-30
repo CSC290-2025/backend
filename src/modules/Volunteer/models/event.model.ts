@@ -1,6 +1,7 @@
 import prisma from '../../../config/client';
 import { handlePrismaError } from '../../../errors';
 import type { CreateEventInput, UpdateEventInput } from '../types';
+import { NotFoundError } from '../../../errors'; // Import NotFoundError
 
 const findMany = async (page: number, limit: number) => {
   try {
@@ -22,7 +23,7 @@ const findMany = async (page: number, limit: number) => {
           start_at: true,
           end_at: true,
           registration_deadline: true,
-          status: true,
+          //status: true,
           created_at: true,
           updated_at: true,
           created_by_user_id: true,
@@ -108,4 +109,106 @@ const remove = async (id: number) => {
   }
 };
 
-export { findMany, findById, create, update, remove };
+const performJoinTransaction = async (eventId: number, userId: number) => {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await tx.volunteer_event_participation.create({
+        data: {
+          volunteer_event_id: eventId,
+          user_id: userId,
+        },
+      });
+
+      const updatedEvent = await tx.volunteer_events.update({
+        where: { id: eventId },
+        data: {
+          current_participants: {
+            increment: 1,
+          },
+        },
+      });
+
+      return updatedEvent;
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const leave = async (eventId: number, userId: number) => {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const deletedRecord = await tx.volunteer_event_participation.deleteMany({
+        where: {
+          volunteer_event_id: eventId,
+          user_id: userId,
+        },
+      });
+
+      if (deletedRecord.count === 0) {
+        throw new NotFoundError('User was not registered for this event.');
+      }
+
+      return await tx.volunteer_events.update({
+        where: { id: eventId },
+        data: {
+          current_participants: {
+            decrement: 1,
+          },
+        },
+      });
+    });
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    handlePrismaError(error);
+  }
+};
+
+const findParticipantsByEventId = async (eventId: number) => {
+  try {
+    const users = await prisma.users.findMany({
+      where: {
+        volunteer_event_participation: {
+          some: {
+            volunteer_event_id: eventId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      },
+    });
+    return users;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const findParticipation = async (eventId: number, userId: number) => {
+  try {
+    return await prisma.volunteer_event_participation.findFirst({
+      where: {
+        volunteer_event_id: eventId,
+        user_id: userId,
+      },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  findMany,
+  findById,
+  create,
+  update,
+  remove,
+  performJoinTransaction,
+  leave,
+  findParticipantsByEventId,
+  findParticipation,
+};

@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { EventService } from '../services';
 import { successResponse } from '../../../utils/response';
 import { EventIdParam, PaginationSchema } from '../schemas';
+import { z } from 'zod';
 
 const getAllEvents = async (c: Context) => {
   const query = PaginationSchema.parse(c.req.query());
@@ -44,4 +45,84 @@ const deleteEvent = async (c: Context) => {
   return successResponse(c, null, 200, 'Event deleted successfully');
 };
 
-export { getAllEvents, getEventById, createEvent, updateEvent, deleteEvent };
+const JoinBodySchema = z.object({
+  userId: z.number().int().positive('User ID must be a positive integer'),
+});
+
+const GetParticipantsQuerySchema = z.object({
+  requesterId: z.coerce
+    .number()
+    .int()
+    .positive('Requester ID must be a positive integer'),
+});
+
+const joinEvent = async (c: Context) => {
+  try {
+    const params = EventIdParam.parse(c.req.param());
+    const eventId = params.id;
+
+    const body = await c.req.json();
+    const validatedBody = JoinBodySchema.parse(body);
+    const userId = validatedBody.userId;
+
+    const updatedEvent = await EventService.joinEvent(eventId, userId);
+
+    return successResponse(
+      c,
+      { event: updatedEvent },
+      200,
+      'Successfully joined event!'
+    );
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+const leaveEvent = async (c: Context) => {
+  try {
+    const params = EventIdParam.parse(c.req.param());
+
+    const body = await c.req.json();
+    const validatedBody = JoinBodySchema.parse(body);
+    const userId = validatedBody.userId;
+
+    const updatedEvent = await EventService.leaveEvent(params.id, userId);
+
+    return successResponse(
+      c,
+      { event: updatedEvent },
+      200,
+      'Successfully left event.'
+    );
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+const getEventParticipants = async (c: Context) => {
+  try {
+    const params = EventIdParam.parse(c.req.param());
+
+    const query = GetParticipantsQuerySchema.parse(c.req.query());
+
+    const participants = await EventService.getParticipants(
+      params.id,
+      query.requesterId
+    );
+
+    return successResponse(c, { count: participants.length, participants });
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+export {
+  getAllEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  joinEvent,
+  leaveEvent,
+  getEventParticipants,
+};

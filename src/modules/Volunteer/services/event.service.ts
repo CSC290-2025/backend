@@ -5,7 +5,11 @@ import type {
   PaginationOptions,
   PaginatedEvents,
 } from '../types';
-import { NotFoundError, ValidationError } from '../../../errors';
+import {
+  NotFoundError,
+  ValidationError,
+  ForbiddenError,
+} from '../../../errors';
 
 const getAll = async (
   pagination: PaginationOptions
@@ -55,4 +59,59 @@ const remove = async (id: number) => {
   }
 };
 
-export { getAll, getById, create, update, remove };
+const joinEvent = async (eventId: number, userId: number) => {
+  await getById(eventId);
+
+  const existingParticipation = await EventModel.findParticipation(
+    eventId,
+    userId
+  );
+
+  if (existingParticipation) {
+    throw new ValidationError('You have already joined this event.');
+  }
+
+  try {
+    const updatedEvent = await EventModel.performJoinTransaction(
+      eventId,
+      userId
+    );
+    return updatedEvent;
+  } catch (error) {
+    if ((error as any).code === 'P2002') {
+      throw new ValidationError('You have already joined this event.');
+    }
+    throw error;
+  }
+};
+
+const leaveEvent = async (eventId: number, userId: number) => {
+  await getById(eventId);
+
+  const result = await EventModel.leave(eventId, userId);
+
+  return result;
+};
+
+const getParticipants = async (eventId: number, requesterId: number) => {
+  const event = await getById(eventId);
+
+  if (event.created_by_user_id !== requesterId) {
+    throw new ForbiddenError(
+      'You do not have permission to view participants.'
+    );
+  }
+
+  return await EventModel.findParticipantsByEventId(eventId);
+};
+
+export {
+  getAll,
+  getById,
+  create,
+  update,
+  remove,
+  joinEvent,
+  leaveEvent,
+  getParticipants,
+};
