@@ -1,5 +1,19 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.tabSize": 2
+  "editor.fontFamily": "OMORI_GAME",
+  "editor.inlineSuggest.fontFamily": "OMORI_GAME",
+  "debug.console.fontFamily": "OMORI_GAME",
+  "scm.inputFontFamily": "OMORI_GAME",
+  "terminal.integrated.fontFamily": "OMORI_GAME",
+  "vscode-pets.petColor": "akita",
+  "vscode-pets.petSize": "medium",
+  "vscode-pets.petType": "fox",
+  "editor.fontLigatures": false,
+  "terminal.integrated.fontSize": 18,
+  "chat.fontFamily": "OMORI_GAME",
+  "chat.editor.fontWeight": "default",
+  "chat.editor.fontSize": 15,
+  "chat.fontSize": 14,
+  "chat.editor.fontFamily": "OMORI_GAME",
+  "editor.codeLensFontFamily": "OMORI_GAME",
+  "editor.fontVariations": false
 }
