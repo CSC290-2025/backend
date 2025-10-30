@@ -28,7 +28,7 @@ const getEnrollment = createGetRoute({
   summary: 'Get enrollment',
   responseSchema: enrollmentOnsite,
   params: enrollmentOnsiteId,
-  tags: ['Enrollments'],
+  tags: ['Know-AI'],
 });
 
 const createEnrollmentRoute = createPostRoute({
@@ -36,7 +36,7 @@ const createEnrollmentRoute = createPostRoute({
   summary: 'Create enrollment',
   requestSchema: createEnrollmentOnsite,
   responseSchema: enrollmentOnsite,
-  tags: ['Enrollments'],
+  tags: ['Know-AI'],
 });
 
 export {
