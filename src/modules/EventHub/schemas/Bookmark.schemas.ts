@@ -1,94 +1,103 @@
-import { z } from 'zod';
-import {
-  createGetRoute,
-  createPostRoute,
-  createDeleteRoute,
-} from '@/utils/openapi-helpers';
+import { z, createRoute } from '@hono/zod-openapi';
 
-const BookmarkSchema = z.object({
-  user_id: z.number(),
-  event_id: z.number(),
-  created_at: z.string().datetime(),
+export const EventBookmarkSchema = z
+  .object({
+    user_id: z.number().int(),
+    event_id: z.number().int(),
+    created_at: z.coerce.date(),
+  })
+  .openapi('EventBookmark');
+
+export const CreateBookmarkSchema = z
+  .object({
+    event_id: z.number().int().positive(),
+  })
+  .openapi('CreateBookmark');
+
+const EventIdParam = z
+  .object({
+    event_id: z.coerce.number().int().positive(),
+  })
+  .openapi('EventIdParam');
+
+const Pagination = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+  })
+  .openapi('Pagination');
+
+const ListBookmarksResponse = z.object({
+  items: z.array(EventBookmarkSchema),
+  page: z.number().int(),
+  limit: z.number().int(),
+  total: z.number().int(),
 });
 
-const BookmarkListItemSchema = z.object({
-  event_id: z.number(),
-  title: z.string(),
-  description: z.string(),
-  image_url: z.string().url().nullable(),
-  start_at: z.string().datetime(),
-  end_at: z.string().datetime(),
-  organization_id: z.number().nullable().optional(),
-  bookmarked_at: z.string().datetime(),
-});
-
-const BookmarkQuerySchema = z.object({
-  page: z.string().transform(Number).pipe(z.number().int().min(1)).default('1'),
-  limit: z
-    .string()
-    .transform(Number)
-    .pipe(z.number().int().min(1).max(100))
-    .default('10'),
-});
-
-const BookmarkEventIdParam = z.object({
-  id: z.string().transform(Number).pipe(z.number().int()),
-});
-
-const listBookmarksRoute = createGetRoute({
-  path: '/events/bookmarks',
-  summary: "Get user's bookmarked events",
-  responseSchema: z.object({
-    bookmarks: z.array(BookmarkListItemSchema),
-    pagination: z.object({
-      current_page: z.number(),
-      total_pages: z.number(),
-      total_items: z.number(),
-      items_per_page: z.number(),
-    }),
+export const BookmarkSchemas = {
+  listBookmarksRoute: createRoute({
+    method: 'get',
+    path: '/bookmarks',
+    request: { query: Pagination },
+    responses: {
+      200: {
+        description: "List current user's bookmarks",
+        content: { 'application/json': { schema: ListBookmarksResponse } },
+      },
+    },
+    tags: ['Bookmarks'],
   }),
-  query: BookmarkQuerySchema,
-  tags: ['Event Bookmarks'],
-});
 
-const createBookmarkRoute = createPostRoute({
-  path: '/events/{id}/bookmark',
-  summary: 'Bookmark an event',
-  requestSchema: z.object({}),
-  responseSchema: z.object({
-    event_id: z.number(),
-    bookmarked_at: z.string().datetime(),
+  createBookmarkRoute: createRoute({
+    method: 'post',
+    path: '/bookmarks',
+    request: {
+      body: {
+        content: { 'application/json': { schema: CreateBookmarkSchema } },
+      },
+    },
+    responses: {
+      201: {
+        description: 'Created',
+        content: {
+          'application/json': {
+            schema: z.object({ bookmark: EventBookmarkSchema }),
+          },
+        },
+      },
+    },
+    tags: ['Bookmarks'],
   }),
-  params: BookmarkEventIdParam,
-  tags: ['Event Bookmarks'],
-});
 
-const deleteBookmarkRoute = createDeleteRoute({
-  path: '/events/{id}/bookmark',
-  summary: 'Remove bookmark',
-  params: BookmarkEventIdParam,
-  tags: ['Event Bookmarks'],
-});
-
-const checkBookmarkStatusRoute = createGetRoute({
-  path: '/events/{id}/bookmark/status',
-  summary: 'Check if event is bookmarked',
-  responseSchema: z.object({
-    event_id: z.number(),
-    is_bookmarked: z.boolean(),
-    bookmarked_at: z.string().datetime().nullable(),
+  deleteBookmarkRoute: createRoute({
+    method: 'delete',
+    path: '/bookmarks/{event_id}',
+    request: { params: EventIdParam },
+    responses: {
+      200: {
+        description: 'Deleted',
+        content: {
+          'application/json': {
+            schema: z.object({ success: z.literal(true) }),
+          },
+        },
+      },
+    },
+    tags: ['Bookmarks'],
   }),
-  params: BookmarkEventIdParam,
-  tags: ['Event Bookmarks'],
-});
 
-export {
-  BookmarkSchema,
-  BookmarkListItemSchema,
-  BookmarkQuerySchema,
-  BookmarkEventIdParam,
-  listBookmarksRoute,
-  createBookmarkRoute,
-  deleteBookmarkRoute,
-  checkBookmarkStatusRoute,
+  checkBookmarkStatusRoute: createRoute({
+    method: 'get',
+    path: '/bookmarks/status/{event_id}',
+    request: { params: EventIdParam },
+    responses: {
+      200: {
+        description: 'Check if user bookmarked event',
+        content: {
+          'application/json': { schema: z.object({ bookmarked: z.boolean() }) },
+        },
+      },
+    },
+    tags: ['Bookmarks'],
+  }),
 };

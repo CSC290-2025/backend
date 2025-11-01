@@ -1,167 +1,179 @@
-import { z } from 'zod';
-import {
-  createGetRoute,
-  createPostRoute,
-  createPutRoute,
-  createDeleteRoute,
-} from '@/utils/openapi-helpers';
+import { z, createRoute } from '@hono/zod-openapi';
 
-const OrgSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  email: z.string().email().nullable().optional(),
-  phone_number: z.string().nullable().optional(),
+export const EventSchema = z
+  .object({
+    id: z.number().int(),
+    host_user_id: z.number().int().nullable(),
+    organization_id: z.number().int().nullable(),
+    image_url: z.string().nullable(),
+    title: z.string(),
+    description: z.string().nullable(),
+    total_seats: z.number().int().default(0),
+    start_at: z.coerce.date(),
+    end_at: z.coerce.date(),
+    address_id: z.number().int().nullable(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+  })
+  .openapi('Event');
+
+export const CreateEventSchema = z
+  .object({
+    host_user_id: z.number().int().positive(),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    image_url: z.string().optional(),
+    total_seats: z.number().int().min(0).optional(),
+    start_at: z.string().datetime({ message: 'Must be ISO date-time' }),
+    end_at: z.string().datetime({ message: 'Must be ISO date-time' }),
+    address_id: z.number().int().positive().optional(),
+    organization_id: z.number().int().positive().optional(),
+  })
+  .openapi('CreateEvent');
+
+export const UpdateEventSchema = z
+  .object({
+    host_user_id: z.number().int().positive().optional(),
+    title: z.string().min(1).optional(),
+    description: z.string().optional().nullable(),
+    image_url: z.string().optional().nullable(),
+    total_seats: z.number().int().min(0).optional(),
+    start_at: z.string().datetime().optional(),
+    end_at: z.string().datetime().optional(),
+    address_id: z.number().int().positive().optional().nullable(),
+    organization_id: z.number().int().positive().optional().nullable(),
+  })
+  .openapi('UpdateEvent');
+
+const IdParam = z
+  .object({
+    id: z.coerce.number().int().positive(),
+  })
+  .openapi('IdParam');
+
+const EventListQuery = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    q: z.string().max(255).optional(),
+    organization_id: z.coerce.number().int().optional(),
+    from: z.string().datetime().optional(),
+    to: z.string().datetime().optional(),
+  })
+  .openapi('EventListQuery');
+
+const ListEventsResponse = z.object({
+  items: z.array(EventSchema),
+  page: z.number().int(),
+  limit: z.number().int(),
+  total: z.number().int(),
 });
 
-const AddressSchema = z.object({
-  id: z.number(),
-  street: z.string().nullable().optional(),
-  city: z.string().nullable().optional(),
-  province: z.string(),
-  postal_code: z.string(),
+const DayEventCountItem = z.object({
+  date: z.string().openapi({ example: '2025-11-02' }),
+  count: z.number().int().nonnegative(),
 });
 
-const TagSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-});
-
-const EventSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  description: z.string(),
-  image_url: z.string().url().nullable(),
-  total_seats: z.number().int().min(0),
-  start_at: z.string().datetime(),
-  end_at: z.string().datetime(),
-  host_user_id: z.number(),
-  address_id: z.number(),
-  organization_id: z.number(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-});
-
-const EventWithRelationsSchema = EventSchema.extend({
-  event_organization: OrgSchema.optional(),
-  addresses: AddressSchema.optional(),
-  event_tags: z.array(z.object({ event_tag_name: TagSchema })).default([]),
-});
-
-const CreateEventSchema = z.object({
-  title: z.string().min(1).max(255),
-  description: z.string(),
-  image_url: z.string().url().nullable().optional(),
-  total_seats: z.number().int().min(0).default(0),
-  start_at: z.string().datetime(),
-  end_at: z.string().datetime(),
-  address_id: z.number(),
-  organization_id: z.number(),
-  tag_ids: z.array(z.number()).optional(),
-});
-
-const UpdateEventSchema = CreateEventSchema.partial();
-
-const EventIdParam = z.object({
-  id: z.string().transform(Number).pipe(z.number().int()),
-});
-
-const PaginationQuerySchema = z.object({
-  page: z.string().transform(Number).pipe(z.number().int().min(1)).default('1'),
-  limit: z
-    .string()
-    .transform(Number)
-    .pipe(z.number().int().min(1).max(100))
-    .default('10'),
-});
-
-const ListEventsFilterSchema = z.object({
-  search: z.string().optional(),
-  organization_id: z
-    .string()
-    .transform(Number)
-    .pipe(z.number().int())
-    .optional(),
-  tag: z.string().optional(),
-  start_date: z.string().datetime().optional(),
-});
-
-const DayEventCountQuerySchema = z.object({
-  start_date: z.string().datetime(),
-  end_date: z.string().datetime(),
-});
-
-const listEventsRoute = createGetRoute({
-  path: '/events',
-  summary: 'Get all events',
-  responseSchema: z.object({
-    events: z.array(EventWithRelationsSchema),
-    pagination: z.object({
-      current_page: z.number(),
-      total_pages: z.number(),
-      total_items: z.number(),
-      items_per_page: z.number(),
-    }),
+export const EventSchemas = {
+  listEventsRoute: createRoute({
+    method: 'get',
+    path: '/events',
+    request: { query: EventListQuery },
+    responses: {
+      200: {
+        description: 'List events',
+        content: { 'application/json': { schema: ListEventsResponse } },
+      },
+    },
+    tags: ['Events'],
   }),
-  query: PaginationQuerySchema.merge(ListEventsFilterSchema),
-  tags: ['Events'],
-});
 
-const getEventRoute = createGetRoute({
-  path: '/events/{id}',
-  summary: 'Get event by ID',
-  responseSchema: EventWithRelationsSchema,
-  params: EventIdParam,
-  tags: ['Events'],
-});
+  getEventRoute: createRoute({
+    method: 'get',
+    path: '/events/{id}',
+    request: { params: IdParam },
+    responses: {
+      200: {
+        description: 'Get a single event',
+        content: {
+          'application/json': { schema: z.object({ event: EventSchema }) },
+        },
+      },
+    },
+    tags: ['Events'],
+  }),
 
-const createEventRoute = createPostRoute({
-  path: '/events',
-  summary: 'Create new event (Admin only)',
-  requestSchema: CreateEventSchema,
-  responseSchema: EventSchema,
-  tags: ['Events'],
-});
+  createEventRoute: createRoute({
+    method: 'post',
+    path: '/events',
+    request: {
+      body: { content: { 'application/json': { schema: CreateEventSchema } } },
+    },
+    responses: {
+      201: {
+        description: 'Created',
+        content: {
+          'application/json': { schema: z.object({ event: EventSchema }) },
+        },
+      },
+    },
+    tags: ['Events'],
+  }),
 
-const updateEventRoute = createPutRoute({
-  path: '/events/{id}',
-  summary: 'Update event (Admin only)',
-  requestSchema: UpdateEventSchema,
-  responseSchema: EventSchema,
-  params: EventIdParam,
-  tags: ['Events'],
-});
+  updateEventRoute: createRoute({
+    method: 'put',
+    path: '/events/{id}',
+    request: {
+      params: IdParam,
+      body: { content: { 'application/json': { schema: UpdateEventSchema } } },
+    },
+    responses: {
+      200: {
+        description: 'Updated',
+        content: {
+          'application/json': { schema: z.object({ event: EventSchema }) },
+        },
+      },
+    },
+    tags: ['Events'],
+  }),
 
-const deleteEventRoute = createDeleteRoute({
-  path: '/events/{id}',
-  summary: 'Delete event (Admin only)',
-  params: EventIdParam,
-  tags: ['Events'],
-});
+  deleteEventRoute: createRoute({
+    method: 'delete',
+    path: '/events/{id}',
+    request: { params: IdParam },
+    responses: {
+      200: {
+        description: 'Deleted',
+        content: {
+          'application/json': {
+            schema: z.object({ success: z.literal(true) }),
+          },
+        },
+      },
+    },
+    tags: ['Events'],
+  }),
 
-const dayEventCountRoute = createGetRoute({
-  path: '/events/day-count',
-  summary: 'Get daily event count',
-  responseSchema: z.array(z.object({ date: z.string(), count: z.number() })),
-  query: DayEventCountQuerySchema,
-  tags: ['Events'],
-});
-
-export {
-  OrgSchema,
-  AddressSchema,
-  TagSchema,
-  EventSchema,
-  EventWithRelationsSchema,
-  CreateEventSchema,
-  UpdateEventSchema,
-  EventIdParam,
-  PaginationQuerySchema,
-  ListEventsFilterSchema,
-  DayEventCountQuerySchema,
-  listEventsRoute,
-  getEventRoute,
-  createEventRoute,
-  updateEventRoute,
-  deleteEventRoute,
-  dayEventCountRoute,
+  dayEventCountRoute: createRoute({
+    method: 'get',
+    path: '/events/day-count',
+    request: {
+      query: z.object({
+        from: z.string().date(),
+        to: z.string().date(),
+      }),
+    },
+    responses: {
+      200: {
+        description: 'Daily event counts',
+        content: {
+          'application/json': {
+            schema: z.object({ data: z.array(DayEventCountItem) }),
+          },
+        },
+      },
+    },
+    tags: ['Events'],
+  }),
 };
