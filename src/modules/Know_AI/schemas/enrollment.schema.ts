@@ -10,8 +10,8 @@ const enrollmentOnsite = z.object({
   id: z.number(),
   onsite_id: z.number().nullable(),
   user_id: z.number().nullable(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
+  created_at: z.date(),
+  updated_at: z.date().optional(),
 });
 
 const enrollmentOnsiteId = z.object({

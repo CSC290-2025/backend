@@ -10,7 +10,7 @@ const createEnrollment = async (
   data: CreateEnrollment
 ): Promise<EnrollmentOnsite> => {
   try {
-    return await prisma.knowAI_enrollment.create({
+    return await prisma.onsite_enrollments.create({
       data,
     });
   } catch (error) {
@@ -20,11 +20,17 @@ const createEnrollment = async (
 
 const getEnrollment = async (id: number): Promise<EnrollmentOnsite> => {
   try {
-    return await prisma.knowAI_enrollment.findUnique({
+    const enrollment = await prisma.onsite_enrollments.findUnique({
       where: {
         id,
       },
     });
+
+    if (!enrollment) {
+      throw new Error(`Enrollment with id ${id} not found`);
+    }
+
+    return enrollment;
   } catch (error) {
     handlePrismaError(error);
   }
