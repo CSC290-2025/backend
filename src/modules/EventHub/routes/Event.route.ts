@@ -2,7 +2,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { EventSchemas } from '../schemas';
 import { EventController } from '../controllers';
 
-export const setupEventRoutes = (app: OpenAPIHono) => {
+const setupEventRoutes = (app: OpenAPIHono) => {
   // Event Routes
 
   // List all events (public)

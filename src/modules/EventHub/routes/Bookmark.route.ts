@@ -2,7 +2,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { BookmarkSchemas } from '../schemas';
 import { BookmarkController } from '../controllers';
 
-export const setupBookmarkRoutes = (app: OpenAPIHono) => {
+const setupBookmarkRoutes = (app: OpenAPIHono) => {
   // Bookmark Routes
 
   // Get all bookmarks (auth required)
