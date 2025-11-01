@@ -340,10 +340,13 @@ model events {
   address_id             Int?
   created_at             DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  organization_id        Int?
   event_bookmarks        event_bookmarks[]
+  event_tag              event_tag[]              @ignore
   addresses              addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   departments            departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
   users                  users?                   @relation(fields: [host_user_id], references: [id], onUpdate: NoAction)
+  event_organization     event_organization?      @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "organization_id")
   waste_event_statistics waste_event_statistics[]
 
   @@index([start_at], map: "idx_events_start_at")
@@ -868,6 +871,8 @@ model users {
   emergency_contacts            emergency_contacts[]
   emergency_reports             emergency_reports[]
   event_bookmarks               event_bookmarks[]
+  event_organization            event_organization?
+  event_tag_name                event_tag_name?
   events                        events[]
   fcm_token                     fcm_token[]
   freecycle_posts               freecycle_posts[]
@@ -1018,6 +1023,33 @@ model users_specialty {
   users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@id([user_id, specialty_id])
+}
+
+model event_organization {
+  id           Int      @id
+  name         String?  @db.VarChar(255)
+  email        String?  @db.VarChar(255)
+  phone_number String?  @db.VarChar(255)
+  users        users    @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  events       events[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model event_tag {
+  event_id       Int?
+  event_tag_id   Int?
+  name           String?         @db.VarChar(255)
+  events         events?         @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_tag_name event_tag_name? @relation(fields: [event_tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@ignore
+}
+
+model event_tag_name {
+  id        Int         @id
+  name      String?     @db.VarChar(255)
+  event_tag event_tag[] @ignore
+  users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 enum air_quality_category {
