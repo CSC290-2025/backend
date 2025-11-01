@@ -1,3 +1,4 @@
+import { randomUUID, publicEncrypt, publicDecrypt, constants } from 'crypto';
 import type { ScbToken } from '../types';
 import { handlePrismaError } from '@/errors';
 
@@ -5,7 +6,7 @@ const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
 
 // We wont need to store this since scb uses it for their own tracking
 const generateRequestUId = () => {
-  return crypto.randomUUID();
+  return randomUUID();
 };
 
 // In-memory token storage
@@ -59,4 +60,32 @@ const getOAuthToken = async (): Promise<ScbToken> => {
   }
 };
 
-export { getOAuthToken };
+const encryptData = (data: string, publicKey: string): string => {
+  try {
+    const formattedKey = `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`;
+    const buffer = Buffer.from(data, 'utf-8');
+    const encrypted = publicEncrypt(
+      { key: formattedKey, padding: constants.RSA_PKCS1_PADDING },
+      buffer
+    );
+    return encrypted.toString('base64');
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const decryptData = (cipherText: string, publicKey: string): string => {
+  try {
+    const formattedKey = `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`;
+    const buffer = Buffer.from(cipherText, 'base64');
+    const decrypted = publicDecrypt(
+      { key: formattedKey, padding: constants.RSA_PKCS1_PADDING },
+      buffer
+    );
+    return decrypted.toString('utf8');
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { getOAuthToken, encryptData, decryptData };
