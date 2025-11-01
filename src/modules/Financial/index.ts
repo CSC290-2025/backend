@@ -3,14 +3,14 @@
 // Export types
 export type * from './types';
 
-// Export model
-export { WalletModel } from './models';
+// Export models
+export { WalletModel, ScbModel } from './models';
 
-// Export service functions for buss
-export { WalletService } from './services';
+// Export services
+export { WalletService, ScbService } from './services';
 
-// Export schemas
-export { WalletSchemas } from './schemas';
+// Export schemas for OpenAPI routes
+export { WalletSchemas, ScbSchemas } from './schemas';
 
-// Export OpenAPI routes for  main app
+// Export OpenAPI routes for main app
 export { setupWalletRoutes } from './routes';
