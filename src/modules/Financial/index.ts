@@ -4,13 +4,13 @@
 export type * from './types';
 
 // Export models
-export { WalletModel, ScbModel } from './models';
+export { WalletModel, InsuranceCardModel, ScbModel } from './models';
 
 // Export services
-export { WalletService, ScbService } from './services';
+export { WalletService, InsuranceCardService, ScbService } from './services';
 
 // Export schemas for OpenAPI routes
-export { WalletSchemas, ScbSchemas } from './schemas';
+export { WalletSchemas, InsuranceCardSchemas, ScbSchemas } from './schemas';
 
 // Export OpenAPI routes for main app
-export { setupWalletRoutes } from './routes';
+export { setupWalletRoutes, setupInsuranceCardRoutes } from './routes';

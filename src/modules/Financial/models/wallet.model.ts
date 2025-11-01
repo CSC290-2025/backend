@@ -44,12 +44,12 @@ const findWalletsByUserId = async (userId: number): Promise<Wallet[]> => {
   }
 };
 
-const findWalletById = async (id: number): Promise<Wallet | null> => {
+const findWalletById = async (id: number): Promise<Wallet> => {
   try {
-    const wallet = await prisma.wallets.findUnique({
+    const wallet = await prisma.wallets.findUniqueOrThrow({
       where: { id },
     });
-    return wallet ? transformWallet(wallet) : null;
+    return transformWallet(wallet);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -91,10 +91,41 @@ const updateWalletBalance = async (
   }
 };
 
+// Transaction operations
+const createTransaction = async (data: {
+  wallet_id: number;
+  transaction_type:
+    | 'top_up'
+    | 'transfer_in'
+    | 'transfer_out'
+    | 'transfer_to_service';
+  amount: number;
+  target_wallet_id?: number;
+  target_service?: string;
+  description?: string;
+}): Promise<number> => {
+  try {
+    const transaction = await prisma.wallet_transactions.create({
+      data: {
+        wallet_id: data.wallet_id,
+        transaction_type: data.transaction_type,
+        amount: data.amount,
+        target_wallet_id: data.target_wallet_id || null,
+        target_service: data.target_service || null,
+        description: data.description || null,
+      },
+    });
+    return transaction.id;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createWallet,
   findWalletsByUserId,
   findWalletById,
   updateWallet,
   updateWalletBalance,
+  createTransaction,
 };
