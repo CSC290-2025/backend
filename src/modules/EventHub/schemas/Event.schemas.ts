@@ -1,6 +1,6 @@
 import { z, createRoute } from '@hono/zod-openapi';
 
-export const EventSchema = z
+const EventSchema = z
   .object({
     id: z.number().int(),
     host_user_id: z.number().int().nullable(),
@@ -17,7 +17,7 @@ export const EventSchema = z
   })
   .openapi('Event');
 
-export const CreateEventSchema = z
+const CreateEventSchema = z
   .object({
     host_user_id: z.number().int().positive(),
     title: z.string().min(1),
@@ -31,7 +31,7 @@ export const CreateEventSchema = z
   })
   .openapi('CreateEvent');
 
-export const UpdateEventSchema = z
+const UpdateEventSchema = z
   .object({
     host_user_id: z.number().int().positive().optional(),
     title: z.string().min(1).optional(),
@@ -74,7 +74,7 @@ const DayEventCountItem = z.object({
   count: z.number().int().nonnegative(),
 });
 
-export const EventSchemas = {
+const EventSchemas = {
   listEventsRoute: createRoute({
     method: 'get',
     path: '/events',
@@ -176,4 +176,15 @@ export const EventSchemas = {
     },
     tags: ['Events'],
   }),
+};
+
+export {
+  EventSchema,
+  CreateEventSchema,
+  UpdateEventSchema,
+  EventSchemas,
+  EventListQuery,
+  ListEventsResponse,
+  DayEventCountItem,
+  IdParam,
 };

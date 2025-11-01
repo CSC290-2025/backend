@@ -1,6 +1,6 @@
 import { z, createRoute } from '@hono/zod-openapi';
 
-export const EventBookmarkSchema = z
+const EventBookmarkSchema = z
   .object({
     user_id: z.number().int(),
     event_id: z.number().int(),
@@ -8,7 +8,7 @@ export const EventBookmarkSchema = z
   })
   .openapi('EventBookmark');
 
-export const CreateBookmarkSchema = z
+const CreateBookmarkSchema = z
   .object({
     event_id: z.number().int().positive(),
   })
@@ -34,7 +34,7 @@ const ListBookmarksResponse = z.object({
   total: z.number().int(),
 });
 
-export const BookmarkSchemas = {
+const BookmarkSchemas = {
   listBookmarksRoute: createRoute({
     method: 'get',
     path: '/bookmarks',
@@ -100,4 +100,13 @@ export const BookmarkSchemas = {
     },
     tags: ['Bookmarks'],
   }),
+};
+
+export {
+  EventBookmarkSchema,
+  CreateBookmarkSchema,
+  EventIdParam,
+  Pagination,
+  ListBookmarksResponse,
+  BookmarkSchemas,
 };
