@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { AuthMiddleware } from '@/middlewares';
 
 // Zod schemas
 const ProductSchema = z.object({
@@ -81,30 +82,7 @@ const getProductRoute = createGetRoute({
   responseSchema: ProductSchema,
   params: ProductIdParam,
   tags: ['Products'],
-});
-
-const createProductRoute = createPostRoute({
-  path: '/products',
-  summary: 'Create new product',
-  requestSchema: CreateProductSchema,
-  responseSchema: ProductSchema,
-  tags: ['Products'],
-});
-
-const updateProductRoute = createPutRoute({
-  path: '/products/{id}',
-  summary: 'Update product',
-  requestSchema: UpdateProductSchema,
-  responseSchema: ProductSchema,
-  params: ProductIdParam,
-  tags: ['Products'],
-});
-
-const deleteProductRoute = createDeleteRoute({
-  path: '/products/{id}',
-  summary: 'Delete product',
-  params: ProductIdParam,
-  tags: ['Products'],
+  middleware: [AuthMiddleware.isUser],
 });
 
 const listProductsRoute = createGetRoute({
@@ -116,6 +94,7 @@ const listProductsRoute = createGetRoute({
     ...PaginationSchema.shape,
   }),
   tags: ['Products'],
+  middleware: [AuthMiddleware.isUser],
 });
 
 const getProductsByCategoryRoute = createGetRoute({
@@ -140,6 +119,33 @@ const getPriceStatsRoute = createGetRoute({
   tags: ['Products', 'Statistics'],
 });
 
+const adminCreateProductRoute = createPostRoute({
+  path: '/admin/products',
+  summary: 'Create new product (Admin)',
+  requestSchema: CreateProductSchema,
+  responseSchema: ProductSchema,
+  tags: ['Admin', 'Products'],
+  middleware: [AuthMiddleware.isAdmin],
+});
+
+const adminUpdateProductRoute = createPutRoute({
+  path: '/admin/products/{id}',
+  summary: 'Update product (Admin)',
+  requestSchema: UpdateProductSchema,
+  responseSchema: ProductSchema,
+  params: ProductIdParam,
+  tags: ['Admin', 'Products'],
+  middleware: [AuthMiddleware.isAdmin],
+});
+
+const adminDeleteProductRoute = createDeleteRoute({
+  path: '/admin/products/{id}',
+  summary: 'Delete product (Admin)',
+  params: ProductIdParam,
+  tags: ['Admin', 'Products'],
+  middleware: [AuthMiddleware.isAdmin],
+});
+
 export const ProductSchemas = {
   ProductSchema,
   CreateProductSchema,
@@ -153,11 +159,11 @@ export const ProductSchemas = {
   ProductIdParam,
   CategoryParam,
   getProductRoute,
-  createProductRoute,
-  updateProductRoute,
-  deleteProductRoute,
   listProductsRoute,
   getProductsByCategoryRoute,
   getCategoryStatsRoute,
   getPriceStatsRoute,
+  adminCreateProductRoute,
+  adminUpdateProductRoute,
+  adminDeleteProductRoute,
 };
