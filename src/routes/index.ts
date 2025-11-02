@@ -17,6 +17,7 @@ import {
   setupWalletRoutes,
   setupInsuranceCardRoutes,
   setupMetroCardRoutes,
+  setupScbRoutes,
 } from '@/modules/Financial';
 
 // Normal Hono Routes (not in Swagger docs)
@@ -32,6 +33,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWalletRoutes(app);
   setupInsuranceCardRoutes(app);
   setupMetroCardRoutes(app);
+  setupScbRoutes(app);
   //
   // ============================================
   // Normal Hono Routes (not in Swagger docs)

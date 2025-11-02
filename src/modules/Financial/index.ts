@@ -32,4 +32,5 @@ export {
   setupWalletRoutes,
   setupMetroCardRoutes,
   setupInsuranceCardRoutes,
+  setupScbRoutes,
 } from './routes';
