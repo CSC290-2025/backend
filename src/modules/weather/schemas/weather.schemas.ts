@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Decimal } from '@prisma/client/runtime/library';
 import {
   createGetRoute,
   createPostRoute,
@@ -6,43 +7,49 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
-const decimalField = z
-  .union([z.number(), z.string()])
-  .transform((v) => (typeof v === 'string' ? Number(v) : v))
+const PrismaDecimal = z.instanceof(Decimal);
+
+const decimalInput = z
+  .union([z.instanceof(Decimal), z.number(), z.string()])
+  .transform((val) => {
+    if (val instanceof Decimal) return val;
+    return new Decimal(val);
+  })
   .nullable()
   .optional();
 
 const WeatherDataSchema = z.object({
   id: z.number().int(),
-  location_id: z.number().int().nullable().optional(),
-  temperature: z.number().nullable(),
-  feel_temperature: z.number().nullable(),
-  humidity: z.number().nullable(),
-  wind_speed: z.number().nullable(),
+  location_id: z.number().int().nullable(),
+  temperature: PrismaDecimal.nullable(),
+  feel_temperature: PrismaDecimal.nullable(),
+  humidity: PrismaDecimal.nullable(),
+  wind_speed: PrismaDecimal.nullable(),
   wind_direction: z.string().nullable(),
-  rainfall_probability: z.number().nullable(),
+  rainfall_probability: PrismaDecimal.nullable(),
   created_at: z.date(),
   updated_at: z.date(),
+  addresses: z.any().nullable().optional(),
 });
 
 const CreateWeatherDataSchema = z.object({
-  location_id: z.number().int().optional().nullable(),
-  temperature: decimalField,
-  feel_temperature: decimalField,
-  humidity: decimalField,
-  wind_speed: decimalField,
-  wind_direction: z.string().max(50).optional().nullable(),
-  rainfall_probability: decimalField,
+  location_id: z.number().int().nullable().optional(),
+  temperature: decimalInput,
+  feel_temperature: decimalInput,
+  humidity: decimalInput,
+  wind_speed: decimalInput,
+  wind_direction: z.string().max(50).nullable().optional(),
+  rainfall_probability: decimalInput,
 });
 
 const UpdateWeatherDataSchema = z.object({
-  location_id: z.number().int().optional().nullable(),
-  temperature: decimalField,
-  feel_temperature: decimalField,
-  humidity: decimalField,
-  wind_speed: decimalField,
-  wind_direction: z.string().max(50).optional().nullable(),
-  rainfall_probability: decimalField,
+  location_id: z.number().int().nullable().optional(),
+  temperature: decimalInput,
+  feel_temperature: decimalInput,
+  humidity: decimalInput,
+  wind_speed: decimalInput,
+  wind_direction: z.string().max(50).nullable().optional(),
+  rainfall_probability: decimalInput,
 });
 
 const WeatherIdParam = z.object({
@@ -51,6 +58,10 @@ const WeatherIdParam = z.object({
 
 const WeatherDataListSchema = z.object({
   data: z.array(WeatherDataSchema),
+});
+
+const WeatherLocationParam = z.object({
+  location_id: z.string(),
 });
 
 const listWeatherDataRoute = createGetRoute({
@@ -98,6 +109,7 @@ export const WeatherSchemas = {
   UpdateWeatherDataSchema,
   WeatherDataListSchema,
   WeatherIdParam,
+  WeatherLocationParam,
   listWeatherDataRoute,
   getWeatherDataRoute,
   createWeatherDataRoute,
