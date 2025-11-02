@@ -1,15 +1,16 @@
 import type { Event, CreateEventInput, UpdateEventInput } from '../types';
 
-const findById = async (id: number): Promise<Event | null> => {
+const findById = async (_id: number): Promise<Event | null> => {
   return null;
 };
 
 const list = async (
-  page: number,
-  limit: number
+  _page: number,
+  _limit: number
 ): Promise<{ items: Event[]; total: number }> => {
   return { items: [], total: 0 };
 };
+
 const create = async (data: CreateEventInput): Promise<Event> => {
   const now = new Date();
   const event: Event = {
@@ -31,19 +32,19 @@ const create = async (data: CreateEventInput): Promise<Event> => {
 };
 
 const update = async (
-  id: number,
-  data: UpdateEventInput
+  _id: number,
+  _data: UpdateEventInput
 ): Promise<Event | null> => {
   return null;
 };
 
-const remove = async (id: number): Promise<boolean> => {
+const remove = async (_id: number): Promise<boolean> => {
   return true;
 };
 
 const countByDay = async (
-  from: string,
-  to: string
+  _from: string,
+  _to: string
 ): Promise<Array<{ date: string; count: number }>> => {
   return [];
 };
