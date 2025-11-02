@@ -14,6 +14,7 @@ const EventSchema = z
     address_id: z.number().int().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
+    event_tag_id: z.number().int().nullable(),
   })
   .openapi('Event');
 
@@ -28,6 +29,7 @@ const CreateEventSchema = z
     end_at: z.string().datetime({ message: 'Must be ISO date-time' }),
     address_id: z.number().int().positive().optional(),
     organization_id: z.number().int().positive().optional(),
+    event_tag_id: z.number().int().positive().optional(),
   })
   .openapi('CreateEvent');
 
@@ -42,6 +44,7 @@ const UpdateEventSchema = z
     end_at: z.string().datetime().optional(),
     address_id: z.number().int().positive().optional().nullable(),
     organization_id: z.number().int().positive().optional().nullable(),
+    event_tag_id: z.number().int().positive().optional().nullable(),
   })
   .openapi('UpdateEvent');
 
@@ -57,6 +60,7 @@ const EventListQuery = z
     limit: z.coerce.number().int().min(1).max(100).default(10),
     q: z.string().max(255).optional(),
     organization_id: z.coerce.number().int().optional(),
+    event_tag_id: z.coerce.number().int().optional(),
     from: z.string().datetime().optional(),
     to: z.string().datetime().optional(),
   })

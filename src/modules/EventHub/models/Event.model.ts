@@ -10,7 +10,6 @@ const list = async (
 ): Promise<{ items: Event[]; total: number }> => {
   return { items: [], total: 0 };
 };
-
 const create = async (data: CreateEventInput): Promise<Event> => {
   const now = new Date();
   const event: Event = {
@@ -24,6 +23,7 @@ const create = async (data: CreateEventInput): Promise<Event> => {
     start_at: new Date(data.start_at),
     end_at: new Date(data.end_at),
     address_id: data.address_id ?? null,
+    event_tag_id: data.event_tag_id ?? null,
     created_at: now,
     updated_at: now,
   };
