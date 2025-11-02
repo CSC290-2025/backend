@@ -1,14 +1,16 @@
-import { Hono } from 'hono';
+import { RoomSchemas } from '../schemas';
 import * as roomController from '../controllers/room.Controller.ts';
+import type { OpenAPIHono } from '@hono/zod-openapi';
 
-const roomRoutes = new Hono();
-roomRoutes.get('/:id', roomController.getRoomByID);
-roomRoutes.get('/', roomController.getAllRoom); //get all rooms in the apartment
-roomRoutes.get('/status', roomController.getRoomByStatus); // fetch only available rooms
-
-//admin
-roomRoutes.post('/', roomController.createRoom); //create room in the apartment
-roomRoutes.patch('/:id', roomController.updateRoom);
-roomRoutes.delete('/:id', roomController.deleteRoom);
-
-export { roomRoutes };
+const setupRoomRoutes = (app: OpenAPIHono) => {
+  app.openapi(RoomSchemas.createRoomRoute, roomController.createRoom);
+  app.openapi(RoomSchemas.getAllRoomsRoute, roomController.getAllRoom);
+  app.openapi(
+    RoomSchemas.getRoomsByStatusRoute,
+    roomController.getRoomByStatus
+  );
+  app.openapi(RoomSchemas.getRoomByIDRoute, roomController.getRoomByID);
+  app.openapi(RoomSchemas.updateRoomRoute, roomController.updateRoom);
+  app.openapi(RoomSchemas.deleteRoomRoute, roomController.deleteRoom);
+};
+export { setupRoomRoutes };
