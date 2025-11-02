@@ -6,7 +6,6 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { LocationSchema } from './vehicle.schemas';
 
 // Enums
 const TrafficLightColorEnum = z.enum(['RED', 'YELLOW', 'GREEN']);
@@ -33,7 +32,8 @@ const TrafficLightSchema = z.object({
   intersection_id: z.number().int().positive().nullable(),
   road_id: z.number().int().positive().nullable(),
   ip_address: z.ipv4().nullable(),
-  location: LocationSchema.nullable(),
+  latitude: z.number().min(-90).max(90).nullable(),
+  longitude: z.number().min(-180).max(180).nullable(),
   status: z.number().int().nullable(),
   current_color: z.number().int().min(1).max(3), // 1=Red, 2=Yellow, 3=Green
   density_level: z.number().int().min(1).max(4), // 1=Low, 2=Moderate, 3=High, 4=Severe
@@ -46,7 +46,8 @@ const CreateTrafficLightSchema = z.object({
   intersection_id: z.number().int().positive(),
   road_id: z.number().int().positive(),
   ip_address: z.ipv4(),
-  location: LocationSchema.nullable(),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
   status: z.number().int().default(1),
   auto_mode: z.boolean().default(true),
 });
@@ -57,7 +58,8 @@ const UpdateTrafficLightSchema = z.object({
   current_color: z.number().int().min(1).max(3).optional(),
   auto_mode: z.boolean().optional(),
   ip_address: z.ipv4().optional(),
-  location: LocationSchema.nullable(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
   density_level: z.number().int().min(1).max(4).optional(),
 });
 

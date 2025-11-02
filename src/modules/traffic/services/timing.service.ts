@@ -1,4 +1,4 @@
-// source/services/timing.service.ts
+// source/traffic/services/timing.service.ts
 import type { TrafficLightCycleConfig, DensityLevel } from '../types';
 
 /**
@@ -125,7 +125,7 @@ const calculateAdaptiveTiming = (params: {
   speedKmh?: number;
   timeOfDay?: Date;
 }): TrafficLightCycleConfig => {
-  const { densityLevel, speedKmh, timeOfDay } = params;
+  const { densityLevel, vehicleCount, speedKmh, timeOfDay } = params;
 
   // Start with density-based calculation
   const timing = calculateTimingByDensity(densityLevel);

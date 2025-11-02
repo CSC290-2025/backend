@@ -1,7 +1,7 @@
-// source/services/traffic-light.service.ts
+// source/traffic/services/traffic-light.service.ts
 import { TrafficLightModel } from '../models';
 import * as GoogleMapsService from './google-maps.service';
-import * as TimingService from './timing.service';
+import * as TimingService from './timing.service.ts';
 import type {
   TrafficLight,
   CreateTrafficLightData,
@@ -44,30 +44,25 @@ const getTrafficLightById = async (
 const createTrafficLight = async (
   data: CreateTrafficLightData
 ): Promise<TrafficLight> => {
-  // Validate location exists
-  if (!data.location) {
-    throw new ValidationError('Location is required');
-  }
-
   // Validate location
-  const [longitude, latitude] = data.location.coordinates;
-  if (latitude < -90 || latitude > 90) {
+  if (data.latitude < -90 || data.latitude > 90) {
     throw new ValidationError('Latitude must be between -90 and 90');
   }
 
-  if (longitude < -180 || longitude > 180) {
+  if (data.longitude < -180 || data.longitude > 180) {
     throw new ValidationError('Longitude must be between -180 and 180');
   }
 
   // Validate IP address format (INET type)
-  if (data.ip_address) {
-    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipRegex.test(data.ip_address)) {
-      throw new ValidationError('Invalid IP address format');
-    }
+  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (!ipRegex.test(data.ip_address)) {
+    throw new ValidationError('Invalid IP address format');
   }
 
-  return await TrafficLightModel.create(data);
+  // const intersection = await prisma.intersection.findUnique({ where: { id: data.intersection_id } });
+  // if (!intersection) throw new NotFoundError('Intersection not found');
+
+  return TrafficLightModel.create(data);
 };
 
 /**
@@ -83,20 +78,15 @@ const updateTrafficLight = async (
   }
 
   // Validate location if provided
-  if (data.location !== undefined) {
-    if (data.location === null) {
-      // Allow setting location to null if that's intended
-      // Otherwise, you could throw an error here
-    } else {
-      const [longitude, latitude] = data.location.coordinates;
+  if (data.latitude !== undefined) {
+    if (data.latitude < -90 || data.latitude > 90) {
+      throw new ValidationError('Latitude must be between -90 and 90');
+    }
+  }
 
-      if (latitude < -90 || latitude > 90) {
-        throw new ValidationError('Latitude must be between -90 and 90');
-      }
-
-      if (longitude < -180 || longitude > 180) {
-        throw new ValidationError('Longitude must be between -180 and 180');
-      }
+  if (data.longitude !== undefined) {
+    if (data.longitude < -180 || data.longitude > 180) {
+      throw new ValidationError('Longitude must be between -180 and 180');
     }
   }
 
@@ -112,35 +102,6 @@ const updateTrafficLight = async (
 };
 
 /**
- * Delete a traffic light
- */
-const deleteTrafficLight = async (id: number): Promise<void> => {
-  const existing = await TrafficLightModel.findById(id);
-  if (!existing) {
-    throw new NotFoundError('Traffic light not found');
-  }
-
-  await TrafficLightModel.deleteById(id);
-};
-
-/**
- * List all traffic lights with filters
- */
-const listTrafficLights = async (filters?: {
-  intersection_id?: number;
-  road_id?: number;
-  status?: number;
-  auto_mode?: boolean;
-  min_density?: number;
-  max_density?: number;
-}): Promise<{ trafficLights: TrafficLight[]; total: number }> => {
-  const trafficLights = await TrafficLightModel.findAll(filters);
-  const total = await TrafficLightModel.count(filters);
-
-  return { trafficLights, total };
-};
-
-/**
  * Get traffic lights by intersection
  */
 const getTrafficLightsByIntersection = async (
@@ -148,20 +109,6 @@ const getTrafficLightsByIntersection = async (
 ): Promise<{ trafficLights: TrafficLight[]; total: number }> => {
   const trafficLights =
     await TrafficLightModel.findByIntersection(intersection_id);
-
-  return {
-    trafficLights,
-    total: trafficLights.length,
-  };
-};
-
-/**
- * Get traffic lights by road
- */
-const getTrafficLightsByRoad = async (
-  road_id: number
-): Promise<{ trafficLights: TrafficLight[]; total: number }> => {
-  const trafficLights = await TrafficLightModel.findByRoad(road_id);
 
   return {
     trafficLights,
@@ -185,23 +132,15 @@ const calculateAndUpdateDensity = async (
     throw new NotFoundError('Traffic light not found');
   }
 
-  // Check if location exists
-  if (!trafficLight.location) {
-    throw new ValidationError('Traffic light location is not set');
-  }
-
   // Check if auto mode is enabled
   if (!trafficLight.auto_mode) {
     throw new ValidationError('Traffic light is not in auto mode');
   }
 
-  // Extract coordinates from location
-  const [longitude, latitude] = trafficLight.location.coordinates;
-
   // Get traffic data from Google Maps
   const trafficData = await GoogleMapsService.calculateTrafficDensity(
-    latitude,
-    longitude
+    trafficLight.latitude,
+    trafficLight.longitude
   );
 
   // Calculate recommended timing
@@ -287,12 +226,7 @@ const updateTrafficLightColor = async (
     );
   }
 
-  const result = await TrafficLightModel.updateColor(id, color);
-  if (!result) {
-    throw new NotFoundError('Traffic light not found');
-  }
-
-  return result;
+  return await TrafficLightModel.updateColor(id, color);
 };
 
 /**
@@ -308,10 +242,12 @@ const getIntersectionCoordinatedTiming = async (
     throw new NotFoundError('No traffic lights found at this intersection');
   }
 
-  const lightData = trafficLights.map((tl) => ({
-    id: tl.id,
-    densityLevel: tl.density_level,
-  }));
+  const lightData = trafficLights.map(
+    (tl: { id: any; density_level: any }) => ({
+      id: tl.id,
+      densityLevel: tl.density_level,
+    })
+  );
 
   return TimingService.calculateCoordinatedTiming(lightData);
 };
@@ -320,10 +256,7 @@ export {
   getTrafficLightById,
   createTrafficLight,
   updateTrafficLight,
-  deleteTrafficLight,
-  listTrafficLights,
   getTrafficLightsByIntersection,
-  getTrafficLightsByRoad,
   calculateAndUpdateDensity,
   updateTrafficLightTiming,
   updateTrafficLightColor,

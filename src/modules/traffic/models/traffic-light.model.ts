@@ -1,477 +1,124 @@
+// source/traffic/models/traffic-light.model.ts
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type {
-  TrafficLight,
-  CreateTrafficLightData,
-  UpdateTrafficLightData,
-} from '../types';
+import type { TrafficLight, UpdateTrafficLightData } from '../types';
 
-// Helper function to convert lat/lng to location object
-const createLocation = (
-  latitude: number | null,
-  longitude: number | null
-): { type: 'Point'; coordinates: [number, number] } | null => {
-  if (latitude === null || longitude === null) return null;
-  return {
-    type: 'Point',
-    coordinates: [longitude, latitude],
-  };
-};
-
-// ---------------------- FIND BY ID ----------------------
-const findById = async (id: number): Promise<TrafficLight | null> => {
-  try {
-    const result = await prisma.$queryRaw<any[]>`SELECT
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated
-      FROM traffic_lights
-      WHERE id = ${id};`;
-
-    const tl = result[0];
-    if (!tl) return null;
-
-    return {
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
-    };
-  } catch (error) {
-    handlePrismaError(error);
-    throw error;
-  }
-};
-
-// ---------------------- FIND ALL ----------------------
-const findAll = async (filters?: {
-  intersection_id?: number;
-  road_id?: number;
-  status?: number;
-  auto_mode?: boolean;
-  min_density?: number;
-  max_density?: number;
-}): Promise<TrafficLight[]> => {
-  try {
-    const conditions: string[] = [];
-    const params: any[] = [];
-
-    if (filters?.intersection_id) {
-      params.push(filters.intersection_id);
-      conditions.push(`intersection_id = $${params.length}`);
-    }
-    if (filters?.road_id) {
-      params.push(filters.road_id);
-      conditions.push(`road_id = $${params.length}`);
-    }
-    if (filters?.status !== undefined) {
-      params.push(filters.status);
-      conditions.push(`status = $${params.length}`);
-    }
-    if (filters?.auto_mode !== undefined) {
-      params.push(filters.auto_mode);
-      conditions.push(`auto_mode = $${params.length}`);
-    }
-    if (filters?.min_density) {
-      params.push(filters.min_density);
-      conditions.push(`density_level >= $${params.length}`);
-    }
-    if (filters?.max_density) {
-      params.push(filters.max_density);
-      conditions.push(`density_level <= $${params.length}`);
-    }
-
-    const whereClause =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const result = await prisma.$queryRawUnsafe<any[]>(
-      `
-      SELECT
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated
-      FROM traffic_lights
-      ${whereClause}
-      ORDER BY last_updated DESC;
-    `,
-      ...params
-    );
-
-    return result.map((tl) => ({
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
-    }));
-  } catch (error) {
-    handlePrismaError(error);
-    return [];
-  }
-};
-
-// ---------------------- FIND BY INTERSECTION ----------------------
-const findByIntersection = async (
-  intersection_id: number
-): Promise<TrafficLight[]> => {
-  try {
-    const result = await prisma.$queryRaw<any[]>`SELECT
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated
-      FROM traffic_lights
-      WHERE intersection_id = ${intersection_id}
-      ORDER BY id ASC;`;
-
-    return result.map((tl) => ({
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
-    }));
-  } catch (error) {
-    handlePrismaError(error);
-    return [];
-  }
-};
-
-// ---------------------- FIND BY ROAD ----------------------
-const findByRoad = async (road_id: number): Promise<TrafficLight[]> => {
-  try {
-    const result = await prisma.$queryRaw<any[]>`SELECT
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated
-      FROM traffic_lights
-      WHERE road_id = ${road_id}
-      ORDER BY id ASC;`;
-
-    return result.map((tl) => ({
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
-    }));
-  } catch (error) {
-    handlePrismaError(error);
-    return [];
-  }
-};
-
-// ---------------------- CREATE ----------------------
-const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
-  try {
-    const params: any[] = [];
-    const columns: string[] = [];
-    const values: string[] = [];
-
-    if (data.intersection_id != null) {
-      params.push(data.intersection_id);
-      columns.push('intersection_id');
-      values.push(`$${params.length}`);
-    }
-
-    if (data.road_id != null) {
-      params.push(data.road_id);
-      columns.push('road_id');
-      values.push(`$${params.length}`);
-    }
-
-    if (data.ip_address) {
-      params.push(data.ip_address);
-      columns.push('ip_address');
-      values.push(`$${params.length}::inet`);
-    }
-
-    if (data.location) {
-      params.push(data.location.coordinates[0]); // lon
-      const lonIndex = params.length;
-      params.push(data.location.coordinates[1]); // lat
-      const latIndex = params.length;
-      columns.push('location');
-      values.push(`ST_SetSRID(ST_MakePoint($${lonIndex}, $${latIndex}), 4326)`);
-    }
-
-    params.push(data.status ?? 0);
-    columns.push('status');
-    values.push(`$${params.length}`);
-
-    params.push(1);
-    columns.push('current_color');
-    values.push(`$${params.length}`);
-
-    params.push(1);
-    columns.push('density_level');
-    values.push(`$${params.length}`);
-
-    params.push(data.auto_mode ?? true);
-    columns.push('auto_mode');
-    values.push(`$${params.length}`);
-
-    const sql = `
-      INSERT INTO traffic_lights (${columns.join(', ')})
-      VALUES (${values.join(', ')})
-      RETURNING
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated
-    `;
-
-    const result = await prisma.$queryRawUnsafe<any[]>(sql, ...params);
-
-    const tl = result[0];
-    if (!tl) throw new Error('Failed to create traffic light');
-
-    return {
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
-    };
-  } catch (error) {
-    handlePrismaError(error);
-  }
-};
-
-// ---------------------- UPDATE ----------------------
 const update = async (
   id: number,
   data: UpdateTrafficLightData
 ): Promise<TrafficLight> => {
   try {
-    const updates: string[] = [];
+    const updateData: any = {};
 
-    if (data.status !== undefined) updates.push(`status = ${data.status}`);
+    if (data.status !== undefined) updateData.status = data.status;
     if (data.current_color !== undefined)
-      updates.push(`current_color = ${data.current_color}`);
-    if (data.auto_mode !== undefined)
-      updates.push(`auto_mode = ${data.auto_mode}`);
-    if (data.ip_address !== undefined)
-      updates.push(
-        `ip_address = ${data.ip_address ? `'${data.ip_address}'` : 'NULL'}`
-      );
-    if (data.location !== undefined) {
-      const locationValue = data.location
-        ? `ST_SetSRID(ST_MakePoint(${data.location.coordinates[0]}, ${data.location.coordinates[1]}), 4326)`
-        : 'NULL';
-      updates.push(`location = ${locationValue}`);
-    }
+      updateData.current_color = data.current_color;
+    if (data.auto_mode !== undefined) updateData.auto_mode = data.auto_mode;
+    if (data.ip_address !== undefined) updateData.ip_address = data.ip_address;
+    if (data.latitude !== undefined) updateData.latitude = data.latitude;
+    if (data.longitude !== undefined) updateData.longitude = data.longitude;
     if (data.density_level !== undefined)
-      updates.push(`density_level = ${data.density_level}`);
+      updateData.density_level = data.density_level;
 
-    if (updates.length === 0) throw new Error('No update fields provided.');
-
-    const result = await prisma.$queryRawUnsafe<any[]>(`
-      UPDATE traffic_lights
-      SET ${updates.join(', ')}
-      WHERE id = ${id}
-      RETURNING
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated;
-    `);
-
-    const tl = result[0];
-    if (!tl) {
-      throw new Error('Traffic light not found');
-    }
+    const trafficLight = await prisma.traffic_lights.update({
+      where: { id },
+      data: updateData,
+    });
 
     return {
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
+      id: trafficLight.id,
+      intersection_id: trafficLight.intersection_id,
+      road_id: trafficLight.road_id,
+      ip_address: trafficLight.ip_address,
+      latitude: Number(trafficLight.latitude),
+      longitude: Number(trafficLight.longitude),
+      status: trafficLight.status,
+      current_color: trafficLight.current_color,
+      density_level: trafficLight.density_level,
+      auto_mode: trafficLight.auto_mode,
+      last_updated: trafficLight.last_updated.toISOString(),
     };
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
-// ---------------------- UPDATE DENSITY ----------------------
 const updateDensity = async (
   id: number,
   density_level: number,
   current_color?: number
 ): Promise<TrafficLight> => {
   try {
-    const result = await prisma.$queryRaw<any[]>`UPDATE traffic_lights
-      SET
-        density_level = ${density_level},
-        current_color = COALESCE(${current_color}, current_color)
-      WHERE id = ${id}
-      RETURNING
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated;`;
+    const updateData: any = {
+      density_level,
+    };
 
-    const tl = result[0];
-    if (!tl) {
-      throw new Error('Traffic light not found');
+    if (current_color !== undefined) {
+      updateData.current_color = current_color;
     }
 
+    const trafficLight = await prisma.traffic_lights.update({
+      where: { id },
+      data: updateData,
+    });
+
     return {
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
+      id: trafficLight.id,
+      intersection_id: trafficLight.intersection_id,
+      road_id: trafficLight.road_id,
+      ip_address: trafficLight.ip_address,
+      latitude: Number(trafficLight.latitude),
+      longitude: Number(trafficLight.longitude),
+      status: trafficLight.status,
+      current_color: trafficLight.current_color,
+      density_level: trafficLight.density_level,
+      auto_mode: trafficLight.auto_mode,
+      last_updated: trafficLight.last_updated.toISOString(),
     };
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
-// ---------------------- UPDATE COLOR ----------------------
 const updateColor = async (
   id: number,
   color: number
 ): Promise<TrafficLight | null> => {
   try {
-    const result = await prisma.$queryRaw<any[]>`UPDATE traffic_lights
-      SET current_color = ${color}
-      WHERE id = ${id}
-      RETURNING
-        id,
-        intersection_id,
-        road_id,
-        ip_address,
-        ST_Y(location::geometry) AS latitude,
-        ST_X(location::geometry) AS longitude,
-        status,
-        current_color,
-        density_level,
-        auto_mode,
-        last_updated;`;
+    const existing = await prisma.traffic_lights.findUnique({ where: { id } });
+    if (!existing) return null; // no record found
 
-    const tl = result[0];
-    if (!tl) return null;
+    const trafficLight = await prisma.traffic_lights.update({
+      where: { id },
+      data: { current_color: color },
+    });
 
     return {
-      id: tl.id,
-      intersection_id: tl.intersection_id,
-      road_id: tl.road_id,
-      ip_address: tl.ip_address,
-      location: createLocation(tl.latitude, tl.longitude),
-      status: tl.status,
-      current_color: tl.current_color,
-      density_level: tl.density_level,
-      auto_mode: tl.auto_mode,
-      last_updated: tl.last_updated?.toISOString() || null,
+      id: trafficLight.id,
+      intersection_id: trafficLight.intersection_id,
+      road_id: trafficLight.road_id,
+      ip_address: trafficLight.ip_address,
+      latitude: Number(trafficLight.latitude),
+      longitude: Number(trafficLight.longitude),
+      status: trafficLight.status,
+      current_color: trafficLight.current_color,
+      density_level: trafficLight.density_level,
+      auto_mode: trafficLight.auto_mode,
+      last_updated: trafficLight.last_updated.toISOString(),
     };
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
-// ---------------------- DELETE ----------------------
 const deleteById = async (id: number): Promise<void> => {
   try {
-    await prisma.$executeRaw`DELETE FROM traffic_lights WHERE id = ${id};`;
+    await prisma.traffic_lights.delete({ where: { id } });
   } catch (error) {
     handlePrismaError(error);
   }
 };
 
-// ---------------------- COUNT ----------------------
 const count = async (filters?: {
   intersection_id?: number;
   road_id?: number;
@@ -479,38 +126,28 @@ const count = async (filters?: {
   auto_mode?: boolean;
 }): Promise<number> => {
   try {
-    const conditions: string[] = [];
-    if (filters?.intersection_id)
-      conditions.push(`intersection_id = ${filters.intersection_id}`);
-    if (filters?.road_id) conditions.push(`road_id = ${filters.road_id}`);
-    if (filters?.status !== undefined)
-      conditions.push(`status = ${filters.status}`);
-    if (filters?.auto_mode !== undefined)
-      conditions.push(`auto_mode = ${filters.auto_mode}`);
+    const where: any = {};
 
-    const whereClause = conditions.length
-      ? `WHERE ${conditions.join(' AND ')}`
-      : '';
+    if (filters?.intersection_id) {
+      where.intersection_id = filters.intersection_id;
+    }
 
-    const result = await prisma.$queryRawUnsafe<{ count: bigint }[]>(`
-      SELECT COUNT(*)::bigint AS count FROM traffic_lights ${whereClause};
-    `);
+    if (filters?.road_id) {
+      where.road_id = filters.road_id;
+    }
 
-    return Number(result[0]?.count || 0);
+    if (filters?.status !== undefined) {
+      where.status = filters.status;
+    }
+
+    if (filters?.auto_mode !== undefined) {
+      where.auto_mode = filters.auto_mode;
+    }
+
+    return await prisma.traffic_lights.count({ where });
   } catch (error) {
     handlePrismaError(error);
   }
 };
 
-export {
-  findById,
-  findAll,
-  findByIntersection,
-  findByRoad,
-  create,
-  update,
-  updateDensity,
-  updateColor,
-  deleteById,
-  count,
-};
+export { update, updateDensity, updateColor, deleteById, count };
