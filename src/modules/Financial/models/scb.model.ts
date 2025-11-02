@@ -1,16 +1,47 @@
 import { randomUUID, publicEncrypt, publicDecrypt, constants } from 'crypto';
-import type { ScbToken } from '../types';
+import type {
+  ScbToken,
+  ScbQrRequestSchema,
+  ScbQrResponseSchema,
+} from '../types';
 import { handlePrismaError } from '@/errors';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
 
+// In-memory token storage
+let cachedToken: ScbToken | null;
 // We wont need to store this since scb uses it for their own tracking
 const generateRequestUId = () => {
   return randomUUID();
 };
 
-// In-memory token storage
-let cachedToken: ScbToken | null;
+// Reusable header builder
+const buildScbHeaders = async (includeAuth = false): Promise<HeadersInit> => {
+  try {
+    const apiKey = process.env.G11_SCB_API_KEY;
+
+    if (!apiKey) {
+      throw new Error('G11_SCB_API_KEY not configured');
+    }
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'accept-language': 'EN',
+      requestUId: generateRequestUId(),
+      resourceOwnerId: apiKey,
+    };
+
+    if (includeAuth) {
+      // Auto-generate or refresh token if expired
+      const token = await getOAuthToken();
+      headers.authorization = `Bearer ${token.accessToken}`;
+    }
+
+    return headers;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
 
 // to get/refresh OAuth token automatically
 // call this in your scb api when you need a token
@@ -23,11 +54,11 @@ const getOAuthToken = async (): Promise<ScbToken> => {
       return cachedToken;
     }
 
-    const apiKey = process.env.G11_SCB_API_KEY || '';
-    const apiSecret = process.env.G11_SCB_API_SECRET || '';
+    const apiKey = process.env.G11_SCB_API_KEY;
+    const apiSecret = process.env.G11_SCB_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      handlePrismaError(new Error('API credentials 404, check your env😭🥀'));
+      throw new Error('SCB API credentials not configured');
     }
 
     // call scb oauth token api
@@ -35,26 +66,26 @@ const getOAuthToken = async (): Promise<ScbToken> => {
     // body from .env
     const response = await fetch(`${SCB_BASE_URL}/v1/oauth/token`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'accept-language': 'EN',
-        requestUId: generateRequestUId(),
-        resourceOwnerId: apiKey,
-      },
+      headers: await buildScbHeaders(false),
       body: JSON.stringify({
         applicationKey: apiKey,
         applicationSecret: apiSecret,
       }),
     });
 
+    if (!response.ok) {
+      throw new Error('SCB OAuth failed');
+    }
+
     const result = await response.json();
 
     // Cache token
     // calculate expire date from the duration returned from scb api
     const expiresAt = Date.now() + result.data.expiresIn * 1000;
-    cachedToken = { ...result.data, expiresAt };
+    const token: ScbToken = { ...result.data, expiresAt };
+    cachedToken = token;
 
-    return cachedToken as ScbToken;
+    return token;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -88,4 +119,21 @@ const decryptData = (cipherText: string, publicKey: string): string => {
   }
 };
 
-export { getOAuthToken, encryptData, decryptData };
+const createQr = async (
+  data: ScbQrRequestSchema
+): Promise<ScbQrResponseSchema> => {
+  try {
+    const response = await fetch(`${SCB_BASE_URL}/v2/payment/qrcode/create`, {
+      method: 'POST',
+      headers: await buildScbHeaders(true),
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { getOAuthToken, encryptData, decryptData, createQr };
