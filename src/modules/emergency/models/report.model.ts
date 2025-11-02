@@ -8,6 +8,7 @@ const createReport = async (data: CreateReport): Promise<ReportResponse> => {
       data,
     });
   } catch (error) {
+    console.error(error);
     handlePrismaError(error);
   }
 };

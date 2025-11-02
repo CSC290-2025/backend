@@ -2,8 +2,8 @@ import { createPostRoute } from '@/utils/openapi-helpers.ts';
 import { ReportSchemas } from '@/modules/emergency/schemas';
 
 const createReportRoute = createPostRoute({
-  path: '/reports',
-  summary: 'Create new reports',
+  path: '/report',
+  summary: 'Create new report',
   requestSchema: ReportSchemas.CreateReportSchema,
   responseSchema: ReportSchemas.ReportResponseSchema,
   tags: [`report`],

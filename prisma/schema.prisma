@@ -305,13 +305,12 @@ model emergency_reports {
   ambulance_service      Boolean?                 @default(false)
   level                  report_level?
   status                 report_status?           @default(pending)
-  report_category_id     Int?
+  report_category        report_type?
   created_at             DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
   title                  String
   contact_center_service Boolean?                 @default(false)
   alerts                 alerts[]
-  report_categories      report_categories?       @relation(fields: [report_category_id], references: [id], onUpdate: NoAction)
   users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([location], map: "idx_emergency_reports_location", type: Gist)
@@ -652,14 +651,6 @@ model refresh_tokens {
   created_at    DateTime  @default(now()) @db.Timestamptz(6)
   expires_at    DateTime? @db.Timestamptz(6)
   users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model report_categories {
-  id                Int                 @id @default(autoincrement())
-  name              String              @unique @db.VarChar(255)
-  created_at        DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
-  emergency_reports emergency_reports[]
 }
 
 model reports_metadata {
@@ -1138,4 +1129,10 @@ enum wallet_status {
 enum wallet_type {
   individual
   organization
+}
+
+enum report_type {
+  traffic
+  accident
+  disaster
 }

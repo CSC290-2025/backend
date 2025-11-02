@@ -5,11 +5,19 @@ import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
+import { cors } from 'hono/cors';
 
 // const app = new Hono();
 const app = new OpenAPIHono();
 
 app.onError(errorHandler);
+app.use(
+  '*',
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
 
 app.doc('/doc', {
   openapi: '3.0.0',
