@@ -40,6 +40,32 @@ app.get('/', (c) => {
   });
 });
 
+app.get('/doc', (c) => {
+  let port = config.port;
+  const addr = serverInstance?.address();
+
+  if (addr && typeof addr !== 'string') {
+    port = addr.port;
+  }
+
+  const doc = app.getOpenAPIDocument({
+    openapi: '3.0.0',
+    info: {
+      title: 'Smart City Hub',
+      version: '1.0.0',
+      description: 'A comprehensive API',
+    },
+    servers: [
+      {
+        url: `http://localhost:${port}`,
+        description: 'Local development server',
+      },
+    ],
+  });
+
+  return c.json(doc);
+});
+
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 setupRoutes(app);
@@ -66,53 +92,26 @@ async function shutdown() {
 process.on('SIGINT', () => shutdown());
 process.on('SIGTERM', () => shutdown());
 
-async function startServer(startPort: number) {
+async function startServer(startPort: number, maxRetries = 10) {
   let port = startPort;
 
-  while (true) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      serverInstance = serve(
-        {
-          fetch: app.fetch,
-          port,
-        },
-        (info) => {
-          const actualPort = info.port;
-          app.get('/doc', (c) => {
-            const doc = app.getOpenAPIDocument({
-              openapi: '3.0.0',
-              info: {
-                title: 'Smart City Hub',
-                version: '1.0.0',
-                description: 'A comprehensive API',
-              },
-              servers: [
-                {
-                  url: `http://localhost:${actualPort}`,
-                  description: 'Local development server',
-                },
-              ],
-            });
+      serverInstance = serve({ fetch: app.fetch, port }, (info) => {
+        console.log(`Server is running on http://localhost:${info.port}`);
+        console.log(
+          `API Documentation on http://localhost:${info.port}/swagger`
+        );
+        console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
+      });
 
-            return c.json(doc);
-          });
-
-          console.log(`Server is running on http://localhost:${actualPort}`);
-          console.log(
-            `API Documentation on http://localhost:${actualPort}/swagger`
-          );
-          console.log(`OpenAPI Spec on http://localhost:${actualPort}/doc`);
-        }
-      );
-
-      break; // Successfully started server
+      return;
     } catch (err: unknown) {
       if (
         typeof err === 'object' &&
         err !== null &&
         'code' in err &&
-        typeof (err as { code?: unknown }).code === 'string' &&
-        (err as { code: string }).code === 'EADDRINUSE'
+        (err as { code: unknown }).code === 'EADDRINUSE'
       ) {
         console.warn(`Port ${port} is in use, trying next port...`);
         port++;
@@ -122,6 +121,9 @@ async function startServer(startPort: number) {
       }
     }
   }
+
+  console.error(`Failed to start server after ${maxRetries} attempts.`);
+  process.exit(1);
 }
 
 startServer(config.port);
