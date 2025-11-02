@@ -1,22 +1,32 @@
-import { Hono } from 'hono';
+import { RatingSchemas } from '../schemas';
 import * as RatingController from '../controllers/rating.Controller';
+import type { OpenAPIHono } from '@hono/zod-openapi';
 
-const ratingRoutes = new Hono();
-ratingRoutes.get(
-  '/apartment/:apartmentId/comments',
-  RatingController.getCommentsByApartment
-);
-ratingRoutes.get(
-  '/apartment/:apartmentId/average-rating',
-  RatingController.getAverageRatingByApartment
-);
-ratingRoutes.get(
-  '/overall-average-rating',
-  RatingController.getOverallAverageRating
-);
-ratingRoutes.get('/', RatingController.getAllRatings);
-ratingRoutes.post('/', RatingController.addRating);
-ratingRoutes.patch('/', RatingController.updateRating);
-ratingRoutes.delete('/', RatingController.deleteRating);
-
-export { ratingRoutes };
+const setupRatingRoutes = (app: OpenAPIHono) => {
+  app.openapi(
+    RatingSchemas.createRatingRoute,
+    RatingController.createRatingController
+  );
+  app.openapi(
+    RatingSchemas.getAverageRatingByApartmentRoute,
+    RatingController.getAverageRatingByApartment
+  );
+  app.openapi(
+    RatingSchemas.updateRatingRoute,
+    RatingController.updateRatingController
+  );
+  app.openapi(
+    RatingSchemas.deleteRatingRoute,
+    RatingController.deleteRatingController
+  );
+  app.openapi(
+    RatingSchemas.getCommentsByApartmentRoute,
+    RatingController.getCommentsByApartment
+  );
+  app.openapi(
+    RatingSchemas.getAverageRatingByApartmentRoute,
+    RatingController.getAverageRatingByApartment
+  );
+  app.openapi(RatingSchemas.getAllRatingsRoute, RatingController.getAllRatings);
+};
+export { setupRatingRoutes };

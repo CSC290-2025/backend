@@ -1,6 +1,11 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { createRoomData } from '../schemas';
+import type {
+  createRoomData,
+  updateRoomData,
+  RoomStatus,
+} from '../types/room.types';
+import { RoomSchemas } from '../schemas';
 
 export async function getAllRooms(apartmentId: number) {
   try {
@@ -14,7 +19,7 @@ export async function getAllRooms(apartmentId: number) {
     throw handlePrismaError(error);
   }
 }
-export async function getRoomByID(id: string) {
+export async function getRoomByID(id: number) {
   try {
     const room = await prisma.room.findUnique({
       where: { id },
@@ -24,12 +29,15 @@ export async function getRoomByID(id: string) {
     throw handlePrismaError(error);
   }
 }
-export async function getRoomByStatus(apartmentId: number, status: string) {
+export async function getRoomByStatus(apartmentId: number, status: RoomStatus) {
   try {
     const rooms = await prisma.room.findMany({
       where: {
         apartment: { id: apartmentId },
-        room_status: status || 'available',
+        room_status:
+          RoomSchemas.RoomStatus[
+            status as keyof typeof RoomSchemas.RoomStatus
+          ] || RoomSchemas.RoomStatus.available,
       },
     });
     return rooms;
@@ -39,11 +47,13 @@ export async function getRoomByStatus(apartmentId: number, status: string) {
 }
 export async function createRoom(data: createRoomData, apartmentId: number) {
   try {
+    const { size, ...rest } = data as any;
     const room = await prisma.room.create({
       data: {
-        ...data,
-        apartment: { connect: { id: apartmentId } },
-        status: 'available',
+        ...rest,
+        size: size !== undefined && size !== null ? String(size) : null,
+        apartment_id: apartmentId,
+        room_status: RoomSchemas.RoomStatus.available,
       },
     });
     return room;
@@ -51,18 +61,23 @@ export async function createRoom(data: createRoomData, apartmentId: number) {
     throw handlePrismaError(error);
   }
 }
-export async function updateRoom(id: string, data: Partial<createRoomData>) {
+export async function updateRoom(id: number, data: updateRoomData) {
   try {
+    const { size, ...rest } = data as any;
+    const updateData = {
+      ...rest,
+      size: size !== undefined && size !== null ? String(size) : undefined,
+    };
     const room = await prisma.room.update({
       where: { id },
-      data,
+      data: updateData,
     });
     return room;
   } catch (error) {
     throw handlePrismaError(error);
   }
 }
-export async function deleteRoom(id: string) {
+export async function deleteRoom(id: number) {
   try {
     await prisma.room.delete({
       where: { id },

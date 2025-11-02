@@ -1,5 +1,6 @@
 import prisma from '@/config/client';
 import { ConflictError, handlePrismaError } from '@/errors';
+import type { createRatingData, updateRatingData } from '../types';
 
 export const getCommentsByApartment = async (apartmentId: number) => {
   try {
@@ -49,27 +50,13 @@ export const getAllComments = async () => {
   }
 };
 
-export const getOverallAverageRating = async () => {
-  try {
-    const agg = await prisma.rating.aggregate({
-      where: { rating: { not: null } },
-      _avg: { rating: true },
-    });
-    return agg._avg.rating ?? 0;
-  } catch (error) {
-    throw handlePrismaError(error);
-  }
-};
-
-export const createRating = async (
-  user_id: number,
-  apartmentId: number,
-  ratingValue: number,
-  comment?: string
-) => {
+export const createRating = async (data: createRatingData) => {
   try {
     const existing = await prisma.rating.findFirst({
-      where: { user_id: user_id, apartmentId: apartmentId },
+      where: {
+        apartment: { some: { id: data.apartmentId } },
+        user_id: data.userId,
+      },
     });
     if (existing) {
       throw new ConflictError(
@@ -79,10 +66,10 @@ export const createRating = async (
 
     return await prisma.rating.create({
       data: {
-        user_id: user_id,
-        apartmentId,
-        rating: ratingValue,
-        comment: comment ?? '',
+        user_id: data.userId,
+        apartment: { connect: { id: data.apartmentId } },
+        rating: data.rating,
+        comment: data.comment ?? '',
       },
     });
   } catch (error) {
@@ -90,25 +77,37 @@ export const createRating = async (
   }
 };
 
-export const updateRating = async (
-  ratingId: number,
-  ratingValue: number,
-  comment?: string
-) => {
+export const updateRating = async (data: updateRatingData) => {
   try {
+    const rating = await prisma.rating.findUnique({
+      where: { id: data.ratingId },
+      include: { apartment: true },
+    });
+
+    if (!rating) {
+      throw new Error('Rating not found');
+    }
+
     return await prisma.rating.update({
-      where: { id: ratingId },
-      data: { rating: ratingValue, comment },
+      where: { id: data.ratingId },
+      data: {
+        rating: data.rating,
+        comment: data.comment,
+      },
+      include: {
+        apartment: true,
+        users: true,
+      },
     });
   } catch (error) {
     throw handlePrismaError(error);
   }
 };
 
-export const deleteRating = async (ratingId: number) => {
+export const deleteRating = async (id: number) => {
   try {
     return await prisma.rating.delete({
-      where: { id: ratingId },
+      where: { id },
     });
   } catch (error) {
     throw handlePrismaError(error);

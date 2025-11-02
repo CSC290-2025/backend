@@ -12,27 +12,33 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 // import { setupAuthRoutes } from '@/modules/auth/routes';
 // import { setupPaymentRoutes } from '@/modules/payment/routes';
 // import { setupProductRoutes } from '@/modules/_example';
+// import { productRoutes } from '@/modules/_example';
+import { setupApartmentRoutes } from '@/modules/ApartmentListing';
+import { setupRatingRoutes } from '@/modules/ApartmentListing';
+import { setupRoomRoutes } from '@/modules/ApartmentListing';
 
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
-import { apartmentRoutes } from '@/modules/ApartmentListing/routes/apartment.route';
-import { bookingRoute } from '@/modules/ApartmentListing/routes/booking.route';
-import { ratingRoutes } from '@/modules/ApartmentListing/routes/rating.route';
-import { roomRoutes } from '@/modules/ApartmentListing/routes/room.route';
+// import { apartmentRoutes } from '@/modules/ApartmentListing/routes/apartment.route';
+// import { bookingRoute } from '@/modules/ApartmentListing/routes/booking.route';
+// import { ratingRoutes } from '@/modules/ApartmentListing/routes/rating.route';
+// import { roomRoutes } from '@/modules/ApartmentListing/routes/room.route';
+
 export const setupRoutes = (app: OpenAPIHono) => {
   // ============================================
   // OpenAPI Routes (documented in Swagger)
   // ============================================
-  // setupAuthRoutes(app);
-  // setupPaymentRoutes(app);
-  // setupProductRoutes(app);
+  setupApartmentRoutes(app);
+  setupRatingRoutes(app);
+  setupRoomRoutes(app);
+
   //
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
   // ============================================
   // app.route('/products', productRoutes);
-  app.route('/apartments', apartmentRoutes);
-  app.route('/bookings', bookingRoute);
-  app.route('/ratings', ratingRoutes);
-  app.route('/rooms', roomRoutes);
+  // app.route('/apartments', apartmentRoutes);
+  // app.route('/bookings', bookingRoute);
+  // app.route('/ratings', ratingRoutes);
+  // app.route('/rooms', roomRoutes);
 };
