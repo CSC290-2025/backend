@@ -43,6 +43,7 @@ const topUpBalance = async (c: Context) => {
   const body = await c.req.json();
   const metroCard = await MetroCardService.topUpBalance(
     metroCardId,
+    body.walletId,
     body.amount
   );
   return successResponse(

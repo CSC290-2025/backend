@@ -3,6 +3,7 @@ import type { metro_cards } from '@/generated/prisma';
 import type { MetroCard, UpdateMetroCardData } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
+import type { Prisma } from '@prisma/client/scripts/default-index';
 
 //Helper
 export const generateMetroCard = (user_id: number) => {
@@ -81,11 +82,11 @@ const updateMetroCard = async (
 
 const updateMetroCardBalance = async (
   id: number,
-  balance: number
+  balance: number,
+  trx: Prisma.TransactionClient
 ): Promise<MetroCard> => {
-  console.log(balance);
   try {
-    const metroCard = await prisma.metro_cards.update({
+    const metroCard = await trx.metro_cards.update({
       where: { id },
       data: {
         balance: balance,
