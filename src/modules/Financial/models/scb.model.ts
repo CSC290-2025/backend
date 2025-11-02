@@ -82,7 +82,7 @@ const decryptData = (cipherText: string, publicKey: string): string => {
       { key: formattedKey, padding: constants.RSA_PKCS1_PADDING },
       buffer
     );
-    return decrypted.toString('utf8');
+    return decrypted.toString('utf-8');
   } catch (error) {
     handlePrismaError(error);
   }
