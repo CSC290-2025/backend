@@ -5,7 +5,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
-import prisma from '@/config/client.ts';
+import prisma from '@/config/client';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
@@ -30,14 +30,30 @@ app.notFound((c) => {
   );
 });
 
+app.get('/', (c) => {
+  return c.json({
+    name: 'Smart City Hub API',
+    version: '1.0.0',
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    docs: `/swagger`,
+  });
+});
+
+app.get('/swagger', swaggerUI({ url: '/doc' }));
+
 setupRoutes(app);
 
-async function shutdown(server: ReturnType<typeof serve>) {
+let serverInstance: ReturnType<typeof serve> | null = null;
+
+async function shutdown() {
   console.log('Shutting down server...');
   try {
-    server.close((err) => {
-      if (err) console.error('Error closing server:', err);
-    });
+    if (serverInstance) {
+      serverInstance.close((err) => {
+        if (err) console.error('Error closing server:', err);
+      });
+    }
     await prisma.$disconnect();
     console.log('Prisma disconnected');
   } catch (err) {
@@ -47,45 +63,39 @@ async function shutdown(server: ReturnType<typeof serve>) {
   }
 }
 
+process.on('SIGINT', () => shutdown);
+process.on('SIGTERM', () => shutdown);
+
 async function startServer(startPort: number) {
   let port = startPort;
 
   while (true) {
     try {
-      const server = serve(
+      serverInstance = serve(
         {
           fetch: app.fetch,
           port,
         },
         (info) => {
           const actualPort = info.port;
-
-          app.get('/', (c) => {
-            return c.json({
-              name: 'Smart City Hub API',
-              version: '1.0.0',
-              status: 'healthy',
-              timestamp: new Date().toISOString(),
-              docs: `http://localhost:${actualPort}/swagger`,
-            });
-          });
-
-          app.doc('/doc', {
-            openapi: '3.0.0',
-            info: {
-              version: '1.0.0',
-              title: 'Smart City Hub',
-              description: 'A comprehensive API',
-            },
-            servers: [
-              {
-                url: `http://localhost:${actualPort}`,
-                description: 'Local development server',
+          app.get('/doc', (c) => {
+            const doc = app.getOpenAPIDocument({
+              openapi: '3.0.0',
+              info: {
+                title: 'Smart City Hub',
+                version: '1.0.0',
+                description: 'A comprehensive API',
               },
-            ],
-          });
+              servers: [
+                {
+                  url: `http://localhost:${actualPort}`,
+                  description: 'Local development server',
+                },
+              ],
+            });
 
-          app.get('/swagger', swaggerUI({ url: '/doc' }));
+            return c.json(doc);
+          });
 
           console.log(`Server is running on http://localhost:${actualPort}`);
           console.log(
@@ -94,9 +104,6 @@ async function startServer(startPort: number) {
           console.log(`OpenAPI Spec on http://localhost:${actualPort}/doc`);
         }
       );
-
-      process.on('SIGINT', () => shutdown(server));
-      process.on('SIGTERM', () => shutdown(server));
 
       break; // Successfully started server
     } catch (err: any) {
