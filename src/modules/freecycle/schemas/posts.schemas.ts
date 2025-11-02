@@ -6,7 +6,6 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 import { AuthMiddleware } from '@/middlewares';
-import { Decimal } from '@prisma/client/runtime/library';
 
 const FreecyclePostsSchema = z.object({
   id: z.number(),
