@@ -1,5 +1,4 @@
-enum room_status {
-  available = 'available',
-  occupied = 'occupied',
-}
-export { room_status };
+export * from './apartment.types';
+export * from './room.types';
+//export * from './booking.types';
+export * from './rating.types';
