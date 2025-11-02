@@ -3,7 +3,7 @@ import { z } from 'zod';
 const CreateReportSchema = z.object({
   user_id: z.number().int().nullable().optional(),
   title: z.string(),
-  image_url: z.string(),
+  image_url: z.string().optional().nullable(),
   description: z.string().min(5).max(1000),
   location: z
     .object({
