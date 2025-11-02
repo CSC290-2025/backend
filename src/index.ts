@@ -106,8 +106,14 @@ async function startServer(startPort: number) {
       );
 
       break; // Successfully started server
-    } catch (err: any) {
-      if (err.code === 'EADDRINUSE') {
+    } catch (err: unknown) {
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        typeof (err as { code?: unknown }).code === 'string' &&
+        (err as { code: string }).code === 'EADDRINUSE'
+      ) {
         console.warn(`Port ${port} is in use, trying next port...`);
         port++;
       } else {
