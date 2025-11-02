@@ -13,4 +13,4 @@ export { WalletService, ScbService } from './services';
 export { WalletSchemas, ScbSchemas } from './schemas';
 
 // Export OpenAPI routes for main app
-export { setupWalletRoutes } from './routes';
+export { setupWalletRoutes, setupScbRoutes } from './routes';
