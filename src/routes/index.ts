@@ -15,6 +15,10 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
+import {
+  setupFreecyclePostsRoutes,
+  setupCategoryRoutes,
+} from '@/modules/freecycle';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   // ============================================
@@ -23,6 +27,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupAuthRoutes(app);
   // setupPaymentRoutes(app);
   // setupProductRoutes(app);
+  setupFreecyclePostsRoutes(app);
+  setupCategoryRoutes(app);
   //
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
