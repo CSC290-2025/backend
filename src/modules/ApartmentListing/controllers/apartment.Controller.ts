@@ -13,37 +13,16 @@ export async function getApartmentByID(c: Context) {
   return successResponse(c, { apartment });
 }
 export async function createApartment(c: Context) {
-  const formData = await c.req.parseBody();
-
-  // Handle files
-  const files = Array.isArray(formData.apartment_pictures)
-    ? (formData.apartment_pictures as File[])
-    : formData.apartment_pictures
-      ? ([formData.apartment_pictures] as File[])
-      : [];
-
-  if (files.length === 0) {
-    return c.json({ error: 'At least one apartment picture is required' }, 400);
-  }
-
-  try {
-    const apartmentData = {
-      ...JSON.parse(formData.data as string),
-      apartment_pictures: files,
-    };
-
-    const apartment = await apartmentService.createApartment(apartmentData);
-    return successResponse(
-      c,
-      { apartment },
-      201,
-      'Apartment created successfully'
-    );
-  } catch (err) {
-    console.error('Create apartment error:', err);
-    return c.json({ error: 'Failed to create apartment' }, 500);
-  }
+  const data = await c.req.json();
+  const apartment = await apartmentService.createApartment(data);
+  return successResponse(
+    c,
+    { apartment },
+    201,
+    'Apartment created successfully'
+  );
 }
+
 export async function updateApartment(c: Context) {
   const id = Number(c.req.param('id'));
   const data = await c.req.json();
