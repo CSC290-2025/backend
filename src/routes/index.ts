@@ -1,5 +1,6 @@
 // Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
+import { Hono } from 'hono';
 
 // ============================================
 // ROUTING OPTIONS:
@@ -40,7 +41,12 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
-  app.route('/reports', reportRoutes);
-  app.route('/fcm', fcmRoutes);
-  app.route('/tokens', tokenRoutes);
+
+  const emergencyRoutes = new Hono();
+
+  emergencyRoutes.route('/reports', reportRoutes);
+  emergencyRoutes.route('/fcm', fcmRoutes);
+  emergencyRoutes.route('/tokens', tokenRoutes);
+
+  app.route('/emergency', emergencyRoutes);
 };

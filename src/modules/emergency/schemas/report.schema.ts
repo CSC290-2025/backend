@@ -1,3 +1,4 @@
+import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
 
 const CreateReportSchema = z.object({
@@ -29,7 +30,7 @@ const ReportResponseSchema = z.object({
   level: z
     .enum(['near_miss', 'minor', 'moderate', 'major', 'lethal'])
     .nullable(),
-  status: z.enum(['pending', 'resolved', 'verified']).nullable(),
+  status: z.enum(['pending', 'resolved', 'verified']).refine(isReportStatus),
   title: z.string().min(1).optional(),
   report_category: z
     .enum(['traffic', 'accident', 'disaster'])
