@@ -6,6 +6,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime';
 import path from 'node:path';
+import { NotFoundError } from '@/errors';
 
 type GroupId =
   | 0
@@ -80,7 +81,7 @@ async function uploadFile(input: UploadInput, groupId: GroupId) {
 
   const files = (response as UploadResponse).files;
   if (!files || files.length === 0) {
-    throw new Error('Upload failed: no files returned in response.');
+    throw new NotFoundError('Upload failed: no files returned in response.');
   }
 
   return {
