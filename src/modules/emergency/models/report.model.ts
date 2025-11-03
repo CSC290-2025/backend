@@ -6,17 +6,13 @@ import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts
 const createReport = async (data: CreateReport): Promise<ReportResponse> => {
   try {
     const report = await prisma.emergency_reports.create({ data });
-
     return {
       id: report.id,
       image_url: report.image_url,
       description: report.description,
       ambulance_service: report.ambulance_service,
       level: report.level,
-      status: (report.status ?? 'pending') as
-        | 'pending'
-        | 'resolved'
-        | 'verified',
+      status: (report.status ?? 'pending') as ReportStatus,
       report_category: report.report_category ?? undefined,
       created_at: report.created_at,
       updated_at: report.updated_at,
