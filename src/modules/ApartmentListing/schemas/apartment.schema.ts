@@ -47,6 +47,13 @@ const createApartmentSchema = z.object({
   water_price: z.number().min(0),
   internet: z.enum(['free', 'not_free', 'none']),
   userId: z.int(),
+  address: z.object({
+    address_line: z.string().min(0).max(255).nullable(),
+    province: z.string().min(0).max(255).nullable(),
+    district: z.string().min(0).max(255).nullable(),
+    subdistrict: z.string().min(0).max(255).nullable(),
+    postal_code: z.string().min(0).max(20).nullable(),
+  }),
 });
 
 const updateApartmentSchema = z.object({
@@ -58,6 +65,15 @@ const updateApartmentSchema = z.object({
   electric_price: z.number().min(0),
   water_price: z.number().min(0),
   internet: z.enum(['free', 'not_free', 'none']),
+  address: z
+    .object({
+      address_line: z.string().min(0).max(255).nullable(),
+      province: z.string().min(0).max(255).nullable(),
+      district: z.string().min(0).max(255).nullable(),
+      subdistrict: z.string().min(0).max(255).nullable(),
+      postal_code: z.string().min(0).max(20).nullable(),
+    })
+    .optional(),
 });
 const ApartmentIdParam = z.object({
   id: z.string(),

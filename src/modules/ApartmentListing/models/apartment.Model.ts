@@ -6,7 +6,7 @@ import type {
   ApartmentFilter,
 } from '../types/apartment.types';
 import { ApartmentSchemas } from '../schemas';
-import { cloudinaryModel } from '.';
+// import { cloudinaryModel } from '.';
 
 export async function getAllApartments() {
   try {
@@ -66,11 +66,16 @@ export async function getApartmentByIdSimplified(id: number) {
 
 export async function createApartment(data: createApartmentData) {
   try {
-    const { userId, ...apartmentData } = data;
+    const { userId, address, ...apartmentData } = data;
+
     const response = await prisma.$transaction(async (tx) => {
+      const createdAddress = await tx.addresses.create({
+        data: address,
+      });
       const apartment = await tx.apartment.create({
         data: {
           ...apartmentData,
+          address_id: createdAddress.id,
           apartment_owner: {
             create: {
               user_id: userId,
@@ -79,13 +84,11 @@ export async function createApartment(data: createApartmentData) {
         },
         include: {
           apartment_owner: true,
-          apartment_picture: true,
+          addresses: true,
         },
       });
-
       return apartment;
     });
-
     return response;
   } catch (error) {
     console.error('Prisma Create Error:', error);
@@ -95,39 +98,99 @@ export async function createApartment(data: createApartmentData) {
 
 export async function updateApartment(data: updateApartmentData, id: number) {
   try {
-    // Remove apartment_picture from data as it's handled separately
-    const { ...updateData } = data;
-    const response = await prisma.apartment.update({
-      where: { id },
-      data: updateData,
+    const { address, ...apartmentData } = data;
+
+    const response = await prisma.$transaction(async (tx) => {
+      const updateData: any = { ...apartmentData };
+
+      // If address data is provided, update the address
+      if (address) {
+        // First get the apartment to find the address_id
+        const apartment = await tx.apartment.findUnique({
+          where: { id },
+          select: { address_id: true },
+        });
+
+        if (!apartment) {
+          throw new Error('Apartment not found');
+        }
+
+        if (apartment.address_id) {
+          // Update existing address
+          await tx.addresses.update({
+            where: { id: apartment.address_id },
+            data: address,
+          });
+        } else {
+          // Create new address if apartment doesn't have one
+          const newAddress = await tx.addresses.create({
+            data: address,
+          });
+          updateData.address_id = newAddress.id;
+        }
+      }
+
+      // Update the apartment
+      const updatedApartment = await tx.apartment.update({
+        where: { id },
+        data: updateData,
+        include: {
+          addresses: true,
+          apartment_owner: true,
+        },
+      });
+
+      return updatedApartment;
     });
+
     return response;
   } catch (error) {
+    console.error('Update apartment error details:', error);
     throw handlePrismaError(error);
   }
 }
 
 export async function deleteApartment(id: number) {
   try {
-    // First delete associated records
-    await prisma.$transaction([
-      // Delete apartment_owner records
-      prisma.apartment_owner.deleteMany({
-        where: { apartment_id: id },
-      }),
-      // Delete rooms
-      prisma.room.deleteMany({
-        where: { apartment_id: id },
-      }),
-      // Delete apartment_picture records
-      prisma.apartment_picture.deleteMany({
-        where: { apartment_id: id },
-      }),
-      // Finally delete the apartment
-      prisma.apartment.delete({
+    await prisma.$transaction(async (tx) => {
+      // First, get the apartment to find its address_id
+      const apartment = await tx.apartment.findUnique({
         where: { id },
-      }),
-    ]);
+        select: { address_id: true },
+      });
+
+      // Delete apartment_owner records
+      await tx.apartment_owner.deleteMany({
+        where: { apartment_id: id },
+      });
+
+      // Delete rooms
+      await tx.room.deleteMany({
+        where: { apartment_id: id },
+      });
+
+      // Delete apartment_picture records (commented out for now)
+      // await tx.apartment_picture.deleteMany({
+      //   where: { apartment_id: id },
+      // });
+
+      // Delete the apartment
+      await tx.apartment.delete({
+        where: { id },
+      });
+      // Delete the address if it exists and is not used by other apartments
+      if (apartment?.address_id) {
+        const otherApartmentsUsingAddress = await tx.apartment.count({
+          where: { address_id: apartment.address_id },
+        });
+        // Only delete if no other apartments are using this address
+        if (otherApartmentsUsingAddress === 0) {
+          await tx.addresses.delete({
+            where: { id: apartment.address_id },
+          });
+        }
+      }
+    });
   } catch (error) {
     console.error('Prisma Delete Error:', error);
     throw handlePrismaError(error);
