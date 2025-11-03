@@ -1,64 +1,17 @@
-// source/routes/traffic.openapi.routes.ts
-// This file handles ALL traffic-related OpenAPI routes
+//handles ALL traffic-related OpenAPI routes
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import {
   TrafficLightSchemas,
   LightRequestSchemas,
   VehicleSchemas,
-  IntersectionSchemas,
 } from '../schemas';
 import {
   TrafficLightController,
   LightRequestController,
   VehicleController,
-  IntersectionController,
 } from '../controllers';
 
-export const SetupMainTrafficRoutes = (app: OpenAPIHono) => {
-  // ============================================
-  // INTERSECTION ROUTES
-  // ============================================
-
-  app.openapi(
-    IntersectionSchemas.getIntersectionRoute,
-    IntersectionController.getIntersection
-  );
-
-  app.openapi(
-    IntersectionSchemas.createIntersectionRoute,
-    IntersectionController.createIntersection
-  );
-
-  app.openapi(
-    IntersectionSchemas.updateIntersectionRoute,
-    IntersectionController.updateIntersection
-  );
-
-  app.openapi(
-    IntersectionSchemas.deleteIntersectionRoute,
-    IntersectionController.deleteIntersection
-  );
-
-  app.openapi(
-    IntersectionSchemas.listIntersectionsRoute,
-    IntersectionController.listIntersections
-  );
-
-  app.openapi(
-    IntersectionSchemas.listIntersectionsWithLightsRoute,
-    IntersectionController.listIntersectionsWithLights
-  );
-
-  app.openapi(
-    IntersectionSchemas.getNearbyIntersectionsRoute,
-    IntersectionController.getNearbyIntersections
-  );
-
-  app.openapi(
-    IntersectionSchemas.getIntersectionStatsRoute,
-    IntersectionController.getIntersectionStats
-  );
-
+export const setupTrafficRoutes = (app: OpenAPIHono) => {
   // ============================================
   // TRAFFIC LIGHT ROUTES
   // ============================================
@@ -89,10 +42,15 @@ export const SetupMainTrafficRoutes = (app: OpenAPIHono) => {
     TrafficLightController.listTrafficLights
   );
 
-  // Intersection and nearby operations
+  // Intersection and road operations
   app.openapi(
     TrafficLightSchemas.getTrafficLightsByIntersectionRoute,
     TrafficLightController.getTrafficLightsByIntersection
+  );
+
+  app.openapi(
+    TrafficLightSchemas.getTrafficLightsByRoadRoute,
+    TrafficLightController.getTrafficLightsByRoad
   );
 
   // Traffic density and timing operations

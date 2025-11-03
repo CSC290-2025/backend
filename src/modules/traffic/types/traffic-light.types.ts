@@ -1,4 +1,3 @@
-// source/traffic/types/traffic-light.types.ts
 import type { z } from 'zod';
 import type { TrafficLightSchemas } from '../schemas';
 

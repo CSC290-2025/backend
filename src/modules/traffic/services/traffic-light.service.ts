@@ -1,7 +1,7 @@
-// source/traffic/services/traffic-light.service.ts
+// source/services/traffic-light.service.ts
 import { TrafficLightModel } from '../models';
 import * as GoogleMapsService from './google-maps.service';
-import * as TimingService from './timing.service.ts';
+import * as TimingService from './timing.service';
 import type {
   TrafficLight,
   CreateTrafficLightData,
@@ -59,10 +59,7 @@ const createTrafficLight = async (
     throw new ValidationError('Invalid IP address format');
   }
 
-  // const intersection = await prisma.intersection.findUnique({ where: { id: data.intersection_id } });
-  // if (!intersection) throw new NotFoundError('Intersection not found');
-
-  return TrafficLightModel.create(data);
+  return await TrafficLightModel.create(data);
 };
 
 /**
@@ -102,6 +99,35 @@ const updateTrafficLight = async (
 };
 
 /**
+ * Delete a traffic light
+ */
+const deleteTrafficLight = async (id: number): Promise<void> => {
+  const existing = await TrafficLightModel.findById(id);
+  if (!existing) {
+    throw new NotFoundError('Traffic light not found');
+  }
+
+  await TrafficLightModel.deleteById(id);
+};
+
+/**
+ * List all traffic lights with filters
+ */
+const listTrafficLights = async (filters?: {
+  intersection_id?: number;
+  road_id?: number;
+  status?: number;
+  auto_mode?: boolean;
+  min_density?: number;
+  max_density?: number;
+}): Promise<{ trafficLights: TrafficLight[]; total: number }> => {
+  const trafficLights = await TrafficLightModel.findAll(filters);
+  const total = await TrafficLightModel.count(filters);
+
+  return { trafficLights, total };
+};
+
+/**
  * Get traffic lights by intersection
  */
 const getTrafficLightsByIntersection = async (
@@ -109,6 +135,20 @@ const getTrafficLightsByIntersection = async (
 ): Promise<{ trafficLights: TrafficLight[]; total: number }> => {
   const trafficLights =
     await TrafficLightModel.findByIntersection(intersection_id);
+
+  return {
+    trafficLights,
+    total: trafficLights.length,
+  };
+};
+
+/**
+ * Get traffic lights by road
+ */
+const getTrafficLightsByRoad = async (
+  road_id: number
+): Promise<{ trafficLights: TrafficLight[]; total: number }> => {
+  const trafficLights = await TrafficLightModel.findByRoad(road_id);
 
   return {
     trafficLights,
@@ -139,8 +179,8 @@ const calculateAndUpdateDensity = async (
 
   // Get traffic data from Google Maps
   const trafficData = await GoogleMapsService.calculateTrafficDensity(
-    trafficLight.latitude,
-    trafficLight.longitude
+    Number(trafficLight.latitude),
+    Number(trafficLight.longitude)
   );
 
   // Calculate recommended timing
@@ -226,7 +266,12 @@ const updateTrafficLightColor = async (
     );
   }
 
-  return await TrafficLightModel.updateColor(id, color);
+  const result = await TrafficLightModel.updateColor(id, color);
+  if (!result) {
+    throw new NotFoundError('Traffic light not found');
+  }
+
+  return result;
 };
 
 /**
@@ -242,12 +287,10 @@ const getIntersectionCoordinatedTiming = async (
     throw new NotFoundError('No traffic lights found at this intersection');
   }
 
-  const lightData = trafficLights.map(
-    (tl: { id: any; density_level: any }) => ({
-      id: tl.id,
-      densityLevel: tl.density_level,
-    })
-  );
+  const lightData = trafficLights.map((tl) => ({
+    id: tl.id,
+    densityLevel: tl.density_level,
+  }));
 
   return TimingService.calculateCoordinatedTiming(lightData);
 };
@@ -256,7 +299,10 @@ export {
   getTrafficLightById,
   createTrafficLight,
   updateTrafficLight,
+  deleteTrafficLight,
+  listTrafficLights,
   getTrafficLightsByIntersection,
+  getTrafficLightsByRoad,
   calculateAndUpdateDensity,
   updateTrafficLightTiming,
   updateTrafficLightColor,
