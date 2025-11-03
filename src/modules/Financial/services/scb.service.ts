@@ -49,17 +49,19 @@ const createQrCode = async (
   if (!qrRequestData.ppType) {
     throw new ValidationError('BILLERID type is required');
   }
-  if (qrRequestData.ppType === 'BILLERID' && !qrRequestData.ppId) {
-    throw new ValidationError('PromptPay ID is required for BILLERID');
-  }
-  if (qrRequestData.ppType === 'BILLERID' && !qrRequestData.ref1) {
-    throw new ValidationError('Reference 1 is required for BILLERID');
+  if (qrRequestData.ppType === 'BILLERID') {
+    if (!qrRequestData.ppId) {
+      throw new ValidationError('PromptPay ID is required for BILLERID');
+    }
+    if (!qrRequestData.ref1) {
+      throw new ValidationError('Reference 1 is required for BILLERID');
+    }
+    if (qrRequestData.ppId.length !== 15) {
+      throw new ValidationError('PromptPay ID must be 15 characters long');
+    }
   }
   if (!qrRequestData.ref2) {
     throw new ValidationError('Reference 2 is required for this merchant');
-  }
-  if (qrRequestData.ppId.length !== 15) {
-    throw new ValidationError('PromptPay ID must be 15 characters long');
   }
 
   return await ScbModel.createQr(qrRequestData);
