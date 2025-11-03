@@ -16,7 +16,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { setupApartmentRoutes } from '@/modules/ApartmentListing';
 import { setupRatingRoutes } from '@/modules/ApartmentListing';
 import { setupRoomRoutes } from '@/modules/ApartmentListing';
-
+import { setupAddressRoutes } from '@/modules/ApartmentListing';
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
 // import { apartmentRoutes } from '@/modules/ApartmentListing/routes/apartment.route';
@@ -28,9 +28,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // ============================================
   // OpenAPI Routes (documented in Swagger)
   // ============================================
+  setupAddressRoutes(app);
   setupApartmentRoutes(app);
-  setupRatingRoutes(app);
   setupRoomRoutes(app);
+  setupRatingRoutes(app);
 
   //
   // ============================================
