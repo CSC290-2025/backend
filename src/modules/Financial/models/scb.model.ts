@@ -49,7 +49,7 @@ const buildScbHeaders = async (includeAuth = false): Promise<HeadersInit> => {
 // will auto refresh
 const getOAuthToken = async (): Promise<ScbToken> => {
   try {
-    // Return cached token if still balid
+    // Return cached token if still valid
     if (cachedToken && cachedToken.expiresAt > Date.now()) {
       return cachedToken;
     }
