@@ -110,6 +110,3 @@ CLAUDE.md
 # VSCode AI integrations cache
 .vscode/.ai/
 .vscode-ai/
-
-# Upload File
-uploads/
