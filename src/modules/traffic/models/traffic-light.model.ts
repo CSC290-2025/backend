@@ -216,31 +216,56 @@ const findByRoad = async (road_id: number): Promise<TrafficLight[]> => {
 // ---------------------- CREATE ----------------------
 const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
   try {
-    const locationValue = data.location
-      ? `ST_SetSRID(ST_MakePoint(${data.location.coordinates[0]}, ${data.location.coordinates[1]}), 4326)`
-      : 'NULL';
+    const params: any[] = [];
+    const columns: string[] = [];
+    const values: string[] = [];
 
-    const result = await prisma.$queryRawUnsafe<any[]>(`
-      INSERT INTO traffic_lights (
-        intersection_id,
-        road_id,
-        ip_address,
-        location,
-        status,
-        current_color,
-        density_level,
-        auto_mode
-      )
-      VALUES (
-        ${data.intersection_id},
-        ${data.road_id},
-        ${data.ip_address ? `'${data.ip_address}'` : 'NULL'},
-        ${locationValue},
-        ${data.status ?? 0},
-        1,
-        1,
-        ${data.auto_mode ?? true}
-      )
+    if (data.intersection_id != null) {
+      params.push(data.intersection_id);
+      columns.push('intersection_id');
+      values.push(`$${params.length}`);
+    }
+
+    if (data.road_id != null) {
+      params.push(data.road_id);
+      columns.push('road_id');
+      values.push(`$${params.length}`);
+    }
+
+    if (data.ip_address) {
+      params.push(data.ip_address);
+      columns.push('ip_address');
+      values.push(`$${params.length}::inet`);
+    }
+
+    if (data.location) {
+      params.push(data.location.coordinates[0]); // lon
+      const lonIndex = params.length;
+      params.push(data.location.coordinates[1]); // lat
+      const latIndex = params.length;
+      columns.push('location');
+      values.push(`ST_SetSRID(ST_MakePoint($${lonIndex}, $${latIndex}), 4326)`);
+    }
+
+    params.push(data.status ?? 0);
+    columns.push('status');
+    values.push(`$${params.length}`);
+
+    params.push(1);
+    columns.push('current_color');
+    values.push(`$${params.length}`);
+
+    params.push(1);
+    columns.push('density_level');
+    values.push(`$${params.length}`);
+
+    params.push(data.auto_mode ?? true);
+    columns.push('auto_mode');
+    values.push(`$${params.length}`);
+
+    const sql = `
+      INSERT INTO traffic_lights (${columns.join(', ')})
+      VALUES (${values.join(', ')})
       RETURNING
         id,
         intersection_id,
@@ -252,13 +277,13 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
         current_color,
         density_level,
         auto_mode,
-        last_updated;
-    `);
+        last_updated
+    `;
+
+    const result = await prisma.$queryRawUnsafe<any[]>(sql, ...params);
 
     const tl = result[0];
-    if (!tl) {
-      throw new Error('Failed to create traffic light');
-    }
+    if (!tl) throw new Error('Failed to create traffic light');
 
     return {
       id: tl.id,
@@ -274,7 +299,6 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
     };
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -444,7 +468,6 @@ const deleteById = async (id: number): Promise<void> => {
     await prisma.$executeRaw`DELETE FROM traffic_lights WHERE id = ${id};`;
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -476,7 +499,6 @@ const count = async (filters?: {
     return Number(result[0]?.count || 0);
   } catch (error) {
     handlePrismaError(error);
-    return 0;
   }
 };
 

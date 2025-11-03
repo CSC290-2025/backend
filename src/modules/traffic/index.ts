@@ -18,4 +18,5 @@ export {
 } from './services';
 
 // Export route setup function
-export { setupTrafficRoutes } from './routes/traffic.openapi.routes';
+export { setupTrafficRoutes } from './routes/light-request.openapi.routes';
+export { SetupMainTrafficRoutes } from './routes/traffic.openapi.routes';

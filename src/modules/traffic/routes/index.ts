@@ -1,2 +1,2 @@
 export { setupTrafficRoutes } from './light-request.openapi.routes';
-//export {setupTrafficRoutes} from './traffic.openapi.routes'
+export { SetupMainTrafficRoutes } from './traffic.openapi.routes';
