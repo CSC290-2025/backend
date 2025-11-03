@@ -30,7 +30,7 @@ const createQrRoute = createPostRoute({
   summary: 'Create new QR Code',
   requestSchema: ScbQrRequestSchema,
   responseSchema: ScbQrResponseSchema,
-  tags: ['Wallets'],
+  tags: ['SCB'],
 });
 
 export const ScbSchemas = {

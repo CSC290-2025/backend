@@ -54,7 +54,7 @@ try {
   console.error('Decryption failed:', error);
 }
 
-// exncrypt test
+// encrypt test
 try {
   console.log('\n -- Encrypt  Test -- ');
   const originalData = {
