@@ -116,6 +116,7 @@ const updateRoomRoute = createPutRoute({
   requestSchema: updateRoomSchema,
   responseSchema: RoomSchema,
   params: RoomParam,
+  tags: ['Room'],
 });
 const deleteRoomRoute = createDeleteRoute({
   path: '/apartments/{id}/rooms/{roomId}',
