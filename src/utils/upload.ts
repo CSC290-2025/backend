@@ -5,8 +5,6 @@ import {
 } from '@ttwrpz/zipline-client';
 import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime';
-import path from 'node:path';
-import { NotFoundError } from '@/errors';
 
 type GroupId =
   | 0
@@ -38,7 +36,7 @@ const groupFolderId: Record<GroupId, string> = {
   2: 'cmhhphbb2002401o16aaif2wg',
   3: 'cmhhphe8e002501o19fb9aq4f',
   4: 'cmhhphgtw002601o1l92123nh',
-  5: 'cmhhphjqf002701o1qdafqn8f',
+  5: 'cmhhphe8e002501o19fb9aq4f',
   6: 'cmhhphmeu002801o1jaf8ma9i',
   7: 'cmhhphpit002901o18kkusxj8',
   8: 'cmhhphs2z002a01o1vbqd78bq',
@@ -60,7 +58,7 @@ async function uploadFile(input: UploadInput, groupId: GroupId) {
 
   if ('filePath' in input) {
     const buffer = fs.readFileSync(input.filePath);
-    filename = input.filePath.split(path.sep).pop() || 'file.bin';
+    filename = input.filePath.split('/').pop() || 'file.bin';
     const mimeType = mime.getType(filename) || 'application/octet-stream';
     blob = new Blob([buffer], { type: mimeType });
   } else if ('fileBlob' in input) {
@@ -79,14 +77,9 @@ async function uploadFile(input: UploadInput, groupId: GroupId) {
     folderId,
   });
 
-  const files = (response as UploadResponse).files;
-  if (!files || files.length === 0) {
-    throw new NotFoundError('Upload failed: no files returned in response.');
-  }
-
   return {
-    id: files[0].id,
-    url: files[0].url,
+    id: (response as UploadResponse).files[0].id,
+    url: (response as UploadResponse).files[0].url,
   };
 }
 
