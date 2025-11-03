@@ -19,7 +19,7 @@ const encrypt = async (data: object): Promise<string> => {
       'G11_PUBLIC_KEY environment variable is not defined'
     );
   }
-  if (!data) {
+  if (Object.keys(data).length === 0) {
     throw new ValidationError('Data to encrypt cannot be null or undefined');
   }
   return await ScbModel.encryptData(jsonString, PUBLIC_KEY);
