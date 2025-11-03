@@ -44,19 +44,27 @@ const getTrafficLightById = async (
 const createTrafficLight = async (
   data: CreateTrafficLightData
 ): Promise<TrafficLight> => {
+  // Validate location exists
+  if (!data.location) {
+    throw new ValidationError('Location is required');
+  }
+
   // Validate location
-  if (data.latitude < -90 || data.latitude > 90) {
+  const [longitude, latitude] = data.location.coordinates;
+  if (latitude < -90 || latitude > 90) {
     throw new ValidationError('Latitude must be between -90 and 90');
   }
 
-  if (data.longitude < -180 || data.longitude > 180) {
+  if (longitude < -180 || longitude > 180) {
     throw new ValidationError('Longitude must be between -180 and 180');
   }
 
   // Validate IP address format (INET type)
-  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  if (!ipRegex.test(data.ip_address)) {
-    throw new ValidationError('Invalid IP address format');
+  if (data.ip_address) {
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(data.ip_address)) {
+      throw new ValidationError('Invalid IP address format');
+    }
   }
 
   return await TrafficLightModel.create(data);
@@ -75,15 +83,20 @@ const updateTrafficLight = async (
   }
 
   // Validate location if provided
-  if (data.latitude !== undefined) {
-    if (data.latitude < -90 || data.latitude > 90) {
-      throw new ValidationError('Latitude must be between -90 and 90');
-    }
-  }
+  if (data.location !== undefined) {
+    if (data.location === null) {
+      // Allow setting location to null if that's intended
+      // Otherwise, you could throw an error here
+    } else {
+      const [longitude, latitude] = data.location.coordinates;
 
-  if (data.longitude !== undefined) {
-    if (data.longitude < -180 || data.longitude > 180) {
-      throw new ValidationError('Longitude must be between -180 and 180');
+      if (latitude < -90 || latitude > 90) {
+        throw new ValidationError('Latitude must be between -90 and 90');
+      }
+
+      if (longitude < -180 || longitude > 180) {
+        throw new ValidationError('Longitude must be between -180 and 180');
+      }
     }
   }
 
@@ -172,15 +185,23 @@ const calculateAndUpdateDensity = async (
     throw new NotFoundError('Traffic light not found');
   }
 
+  // Check if location exists
+  if (!trafficLight.location) {
+    throw new ValidationError('Traffic light location is not set');
+  }
+
   // Check if auto mode is enabled
   if (!trafficLight.auto_mode) {
     throw new ValidationError('Traffic light is not in auto mode');
   }
 
+  // Extract coordinates from location
+  const [longitude, latitude] = trafficLight.location.coordinates;
+
   // Get traffic data from Google Maps
   const trafficData = await GoogleMapsService.calculateTrafficDensity(
-    Number(trafficLight.latitude),
-    Number(trafficLight.longitude)
+    latitude,
+    longitude
   );
 
   // Calculate recommended timing

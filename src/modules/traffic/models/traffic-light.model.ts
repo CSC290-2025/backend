@@ -6,6 +6,18 @@ import type {
   UpdateTrafficLightData,
 } from '../types';
 
+// Helper function to convert lat/lng to location object
+const createLocation = (
+  latitude: number | null,
+  longitude: number | null
+): { type: 'Point'; coordinates: [number, number] } | null => {
+  if (latitude === null || longitude === null) return null;
+  return {
+    type: 'Point',
+    coordinates: [longitude, latitude],
+  };
+};
+
 // ---------------------- FIND BY ID ----------------------
 const findById = async (id: number): Promise<TrafficLight | null> => {
   try {
@@ -32,8 +44,7 @@ const findById = async (id: number): Promise<TrafficLight | null> => {
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -42,6 +53,7 @@ const findById = async (id: number): Promise<TrafficLight | null> => {
     };
   } catch (error) {
     handlePrismaError(error);
+    throw error;
   }
 };
 
@@ -112,8 +124,7 @@ const findAll = async (filters?: {
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -122,6 +133,7 @@ const findAll = async (filters?: {
     }));
   } catch (error) {
     handlePrismaError(error);
+    return [];
   }
 };
 
@@ -151,8 +163,7 @@ const findByIntersection = async (
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -161,6 +172,7 @@ const findByIntersection = async (
     }));
   } catch (error) {
     handlePrismaError(error);
+    return [];
   }
 };
 
@@ -188,8 +200,7 @@ const findByRoad = async (road_id: number): Promise<TrafficLight[]> => {
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -198,13 +209,19 @@ const findByRoad = async (road_id: number): Promise<TrafficLight[]> => {
     }));
   } catch (error) {
     handlePrismaError(error);
+    return [];
   }
 };
 
 // ---------------------- CREATE ----------------------
 const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
   try {
-    const result = await prisma.$queryRaw<any[]>`INSERT INTO traffic_lights (
+    const locationValue = data.location
+      ? `ST_SetSRID(ST_MakePoint(${data.location.coordinates[0]}, ${data.location.coordinates[1]}), 4326)`
+      : 'NULL';
+
+    const result = await prisma.$queryRawUnsafe<any[]>(`
+      INSERT INTO traffic_lights (
         intersection_id,
         road_id,
         ip_address,
@@ -217,11 +234,11 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
       VALUES (
         ${data.intersection_id},
         ${data.road_id},
-        ${data.ip_address},
-        ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326),
+        ${data.ip_address ? `'${data.ip_address}'` : 'NULL'},
+        ${locationValue},
         ${data.status ?? 0},
-        1,  -- default RED
-        1,  -- default LOW
+        1,
+        1,
         ${data.auto_mode ?? true}
       )
       RETURNING
@@ -235,16 +252,20 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
         current_color,
         density_level,
         auto_mode,
-        last_updated;`;
+        last_updated;
+    `);
 
     const tl = result[0];
+    if (!tl) {
+      throw new Error('Failed to create traffic light');
+    }
+
     return {
       id: tl.id,
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -253,6 +274,7 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
     };
   } catch (error) {
     handlePrismaError(error);
+    throw error;
   }
 };
 
@@ -262,9 +284,7 @@ const update = async (
   data: UpdateTrafficLightData
 ): Promise<TrafficLight> => {
   try {
-    // Build dynamic SQL parts
     const updates: string[] = [];
-    const params: any[] = [];
 
     if (data.status !== undefined) updates.push(`status = ${data.status}`);
     if (data.current_color !== undefined)
@@ -272,11 +292,15 @@ const update = async (
     if (data.auto_mode !== undefined)
       updates.push(`auto_mode = ${data.auto_mode}`);
     if (data.ip_address !== undefined)
-      updates.push(`ip_address = '${data.ip_address}'`);
-    if (data.latitude !== undefined && data.longitude !== undefined)
       updates.push(
-        `location = ST_SetSRID(ST_MakePoint(${data.longitude}, ${data.latitude}), 4326)`
+        `ip_address = ${data.ip_address ? `'${data.ip_address}'` : 'NULL'}`
       );
+    if (data.location !== undefined) {
+      const locationValue = data.location
+        ? `ST_SetSRID(ST_MakePoint(${data.location.coordinates[0]}, ${data.location.coordinates[1]}), 4326)`
+        : 'NULL';
+      updates.push(`location = ${locationValue}`);
+    }
     if (data.density_level !== undefined)
       updates.push(`density_level = ${data.density_level}`);
 
@@ -301,13 +325,16 @@ const update = async (
     `);
 
     const tl = result[0];
+    if (!tl) {
+      throw new Error('Traffic light not found');
+    }
+
     return {
       id: tl.id,
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -316,6 +343,7 @@ const update = async (
     };
   } catch (error) {
     handlePrismaError(error);
+    throw error;
   }
 };
 
@@ -345,13 +373,16 @@ const updateDensity = async (
         last_updated;`;
 
     const tl = result[0];
+    if (!tl) {
+      throw new Error('Traffic light not found');
+    }
+
     return {
       id: tl.id,
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -360,6 +391,7 @@ const updateDensity = async (
     };
   } catch (error) {
     handlePrismaError(error);
+    throw error;
   }
 };
 
@@ -393,8 +425,7 @@ const updateColor = async (
       intersection_id: tl.intersection_id,
       road_id: tl.road_id,
       ip_address: tl.ip_address,
-      latitude: Number(tl.latitude),
-      longitude: Number(tl.longitude),
+      location: createLocation(tl.latitude, tl.longitude),
       status: tl.status,
       current_color: tl.current_color,
       density_level: tl.density_level,
@@ -403,6 +434,7 @@ const updateColor = async (
     };
   } catch (error) {
     handlePrismaError(error);
+    throw error;
   }
 };
 
@@ -412,6 +444,7 @@ const deleteById = async (id: number): Promise<void> => {
     await prisma.$executeRaw`DELETE FROM traffic_lights WHERE id = ${id};`;
   } catch (error) {
     handlePrismaError(error);
+    throw error;
   }
 };
 
@@ -443,6 +476,7 @@ const count = async (filters?: {
     return Number(result[0]?.count || 0);
   } catch (error) {
     handlePrismaError(error);
+    return 0;
   }
 };
 
