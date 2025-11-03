@@ -123,7 +123,7 @@ const createQr = async (
   data: ScbQrRequestSchema
 ): Promise<ScbQrResponseSchema> => {
   try {
-    const response = await fetch(`${SCB_BASE_URL}/v2/payment/qrcode/create`, {
+    const response = await fetch(`${SCB_BASE_URL}/v1/payment/qrcode/create`, {
       method: 'POST',
       headers: await buildScbHeaders(true),
       body: JSON.stringify(data),
