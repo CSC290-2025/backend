@@ -17,7 +17,12 @@ const getUserCard = async (c: Context) => {
 const createCard = async (c: Context) => {
   const body = await c.req.json();
   const card = await InsuranceCardService.createCard(body);
-  return successResponse(c, { card }, 201, 'Insurance card created successfully');
+  return successResponse(
+    c,
+    { card },
+    201,
+    'Insurance card created successfully'
+  );
 };
 
 const topUpCard = async (c: Context) => {

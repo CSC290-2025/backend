@@ -40,7 +40,9 @@ const createCard = async (
   }
 };
 
-const findCardByUserId = async (userId: number): Promise<InsuranceCard | null> => {
+const findCardByUserId = async (
+  userId: number
+): Promise<InsuranceCard | null> => {
   try {
     const card = await prisma.insurance_cards.findFirst({
       where: { user_id: userId },

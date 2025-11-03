@@ -94,7 +94,11 @@ const updateWalletBalance = async (
 // Transaction operations
 const createTransaction = async (data: {
   wallet_id: number;
-  transaction_type: 'top_up' | 'transfer_in' | 'transfer_out' | 'transfer_to_service';
+  transaction_type:
+    | 'top_up'
+    | 'transfer_in'
+    | 'transfer_out'
+    | 'transfer_to_service';
   amount: number;
   target_wallet_id?: number;
   target_service?: string;

@@ -66,13 +66,15 @@ const createGetRoute = <
   });
 
 const createPostRoute = <
-  TRequest extends z.ZodTypeAny,
-  TResponse extends z.ZodTypeAny,
+  TParams extends z.ZodObject<any> | undefined = undefined,
+  TRequest extends z.ZodTypeAny = z.ZodTypeAny,
+  TResponse extends z.ZodTypeAny = z.ZodTypeAny,
 >(config: {
   path: string;
   summary: string;
   requestSchema: TRequest;
   responseSchema: TResponse;
+  params?: TParams;
   tags?: string[];
 }) =>
   createRoute({
@@ -81,6 +83,7 @@ const createPostRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     request: {
+      ...(config.params && { params: config.params }),
       body: {
         content: {
           'application/json': { schema: config.requestSchema },

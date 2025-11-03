@@ -5,12 +5,14 @@
 This is a **Hono-based Node.js API** with **Prisma ORM** following a modular, layered architecture. The codebase uses **TypeScript** with path aliases (`@/*` → `src/*`) and is structured around domain modules under `src/modules/`.
 
 ### Core Stack
+
 - **Framework**: Hono with OpenAPI support (`@hono/zod-openapi`)
 - **Database**: PostgreSQL via Prisma (with Accelerate extension)
 - **Validation**: Zod schemas for type-safe request/response
 - **Documentation**: Auto-generated Swagger UI at `/swagger`
 
 ### Critical Prisma Configuration
+
 - Prisma client is **custom-generated** to `src/generated/prisma` (not default `node_modules`)
 - Always import from `@/generated/prisma`, never `@prisma/client`
 - Schema includes PostgreSQL extensions: `postgis`, `uuid_ossp`
@@ -30,6 +32,7 @@ modules/[TeamName]/
 ```
 
 ### Import Flow Rules
+
 - **Types**: Import from `@/types` (defines interfaces)
 - **Models**: Import from `@/models` (uses types)
 - **Services**: Import from `@/services` and `@/models` (uses both)
@@ -39,18 +42,21 @@ modules/[TeamName]/
 **Never skip layers** - controllers must never call models directly.
 
 ### Index File Convention
+
 Each layer has an `index.ts` using namespace exports:
+
 ```typescript
 // models/index.ts
 export * as ProductModel from './product.model';
 
-// services/index.ts  
+// services/index.ts
 export * as ProductService from './product.service';
 ```
 
 ## Error Handling System
 
 ### Custom Error Pattern
+
 Throw custom errors **directly** - the global error handler (in `app.onError()`) automatically catches and formats them:
 
 ```typescript
@@ -62,6 +68,7 @@ if (!product) throw new NotFoundError('Product not found');
 ```
 
 ### Available Error Types
+
 - `ValidationError` (400) - Bad input
 - `NotFoundError` (404) - Resource missing
 - `UnauthorizedError` (401) - Auth required
@@ -70,7 +77,9 @@ if (!product) throw new NotFoundError('Product not found');
 - `DatabaseError` (500) - DB operation failures
 
 ### Prisma Error Handling
+
 In models, wrap Prisma calls with `handlePrismaError()`:
+
 ```typescript
 import { handlePrismaError } from '@/errors';
 
@@ -84,6 +93,7 @@ try {
 ## Response Formatting
 
 **Always** use `successResponse()` from `@/utils/response`:
+
 ```typescript
 import { successResponse } from '@/utils/response';
 
@@ -97,7 +107,9 @@ return successResponse(c, { id }, 201, 'Product created successfully');
 ## Routing: Two Options
 
 ### Option 1: OpenAPI Routes (Documented in Swagger)
+
 Use for public APIs that need documentation:
+
 1. Define schemas in `schemas/[feature].schemas.ts` using OpenAPI helpers
 2. Create setup function in `routes/[feature].openapi.routes.ts`
 3. Register in `src/routes/index.ts` under "OpenAPI Routes" section
@@ -116,7 +128,9 @@ export const getProductRoute = createGetRoute({
 ```
 
 ### Option 2: Normal Hono Routes (Not Documented)
+
 Use for internal/admin endpoints:
+
 ```typescript
 // routes/product.routes.ts
 const productRoutes = new Hono();
@@ -129,6 +143,7 @@ app.route('/products', productRoutes);
 ## Development Workflow
 
 ### Essential Commands
+
 ```bash
 pnpm dev              # Start dev server with hot reload (tsx watch)
 pnpm migrate          # Run Prisma migrations
@@ -137,11 +152,13 @@ pnpm lint:fix         # Auto-fix ESLint issues
 ```
 
 ### Database Workflow
+
 1. Modify `prisma/schema.prisma`
 2. Run `pnpm migrate` (generates migration + updates client)
 3. Generated client appears in `src/generated/prisma`
 
 ### Testing Workflow
+
 - Server runs on `http://localhost:3000` (configured in `src/config/env.ts`)
 - Swagger docs at `http://localhost:3000/swagger`
 - Health check at `http://localhost:3000/`
@@ -149,26 +166,32 @@ pnpm lint:fix         # Auto-fix ESLint issues
 ## Key Conventions
 
 ### Environment Variables
+
 - Managed via `dotenv` in `src/config/env.ts`
 - Database URL must be in `.env` as `DATABASE_URL`
 
 ### Module Naming
+
 - Team modules use PascalCase folder names (e.g., `Financial/`, not `financial/`)
 - Example module at `modules/_example/` - excluded from TypeScript compilation
 
 ### Type Safety
+
 - Controller params: `c.req.param('id')` for path params
 - Body parsing: `await c.req.json()` (no middleware needed)
 - Query params: `c.req.query()` returns object
 
 ### OpenAPI Helpers
+
 Four pre-built route creators in `src/utils/openapi-helpers.ts`:
+
 - `createGetRoute` - GET endpoints
-- `createPostRoute` - POST endpoints  
+- `createPostRoute` - POST endpoints
 - `createPutRoute` - PUT endpoints
 - `createDeleteRoute` - DELETE endpoints
 
 Each auto-generates success/error response schemas wrapped in:
+
 ```json
 {
   "success": true,

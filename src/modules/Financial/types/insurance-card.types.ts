@@ -9,8 +9,4 @@ type TopUpInsuranceCardData = z.infer<
   typeof InsuranceCardSchemas.TopUpInsuranceCardSchema
 >;
 
-export type {
-  InsuranceCard,
-  CreateInsuranceCardData,
-  TopUpInsuranceCardData,
-};
+export type { InsuranceCard, CreateInsuranceCardData, TopUpInsuranceCardData };
