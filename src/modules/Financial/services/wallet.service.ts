@@ -9,6 +9,14 @@ const getWalletById = async (id: number): Promise<Wallet> => {
 };
 
 const createWallet = async (data: CreateWalletData): Promise<Wallet> => {
+  // Check if user already has a wallet
+  const existingWallets = await WalletModel.findWalletsByUserId(data.user_id);
+  if (existingWallets.length > 0) {
+    throw new ValidationError(
+      'User already has a wallet. Only one wallet per user is allowed.'
+    );
+  }
+
   return await WalletModel.createWallet(data.user_id, data);
 };
 
