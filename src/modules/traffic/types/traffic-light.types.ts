@@ -1,3 +1,4 @@
+// source/types/traffic-light.types.ts
 import type { z } from 'zod';
 import type { TrafficLightSchemas } from '../schemas';
 
@@ -17,6 +18,12 @@ type TrafficLightColor = z.infer<
   typeof TrafficLightSchemas.TrafficLightColorEnum
 >;
 type DensityLevel = z.infer<typeof TrafficLightSchemas.DensityLevelEnum>;
+
+// Location type for PostGIS geometry
+type Location = {
+  type: 'Point';
+  coordinates: [number, number]; // [longitude, latitude]
+};
 
 // Additional types for Google Maps integration
 interface GoogleMapsTrafficData {
@@ -58,15 +65,6 @@ type CreateLightRequestData = {
   traffic_light_id: number;
 };
 
-/* Vehicle types
-type Vehicle = {
-  id: number;
-  user_id: number;
-  latitude: number;
-  longitude: number;
-  vehicle_plate: string;
-};*/
-
 // Emergency types
 type TrafficEmergency = {
   id: number;
@@ -93,13 +91,13 @@ export type {
   TrafficLightTiming,
   TrafficLightColor,
   DensityLevel,
+  Location,
   GoogleMapsTrafficData,
   TrafficLightCycleConfig,
   Intersection,
   Road,
   TrafficLightRequest,
   CreateLightRequestData,
-  //Vehicle,
   TrafficEmergency,
   CreateEmergencyData,
 };
