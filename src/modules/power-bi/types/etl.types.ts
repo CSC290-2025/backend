@@ -17,11 +17,10 @@ import type {
   ambulances,
   emergency_calls,
   payments,
-  team_integrations,
   waste_types,
   waste_event_statistics,
   power_bi_reports,
-  Prisma,
+  team_integrations,
 } from '@/generated/prisma';
 
 // Extraction Types
@@ -37,10 +36,6 @@ type ExtractedUserData = {
 };
 
 type ExtractedHealthcareData = {
-<<<<<<< HEAD
-=======
-  specialties: specialty[];
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   patients: patients[];
   facilities: facilities[];
   beds: beds[];
@@ -49,10 +44,7 @@ type ExtractedHealthcareData = {
   ambulances: ambulances[];
   emergencyCalls: emergency_calls[];
   payments: payments[];
-<<<<<<< HEAD
   teamIntegrations: team_integrations[];
-=======
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
 };
 
 type ExtractedWeatherData = {

@@ -8,48 +8,22 @@ const getUserData = async (c: Context) => {
   return successResponse(c, data);
 };
 
-<<<<<<< HEAD
 const getHealthcareData = async (c: Context) => {
   const data = await ETLService.getHealthcareData();
   return successResponse(c, data);
-=======
-const getUserData = async (c: Context) => {
-  const data = await ETLService.getUserData();
-  return successResponse(c, { data });
-};
-
-const getHealthcareData = async (c: Context) => {
-  const data = await ETLService.getHealthcareData();
-  return successResponse(c, { data });
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
 };
 
 const getWeatherData = async (c: Context) => {
   const data = await ETLService.getWeatherData();
-<<<<<<< HEAD
   return successResponse(c, data);
-=======
-  return successResponse(c, { data });
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
 };
 
 const getWasteData = async (c: Context) => {
   const data = await ETLService.getWasteData();
-<<<<<<< HEAD
   return successResponse(c, data);
 };
 
 // Transformation
-=======
-  return successResponse(c, { data });
-};
-
-const getTeamIntegrations = async (c: Context) => {
-  const data = await ETLService.getTeamIntegrations();
-  return successResponse(c, { data });
-};
-
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
 const transformWeatherData = async (c: Context) => {
   const data = await ETLService.transformWeatherData(
     await ETLService.getWeatherData()
@@ -57,10 +31,7 @@ const transformWeatherData = async (c: Context) => {
   return successResponse(c, data);
 };
 
-<<<<<<< HEAD
 // Loading
-=======
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
 const loadWeatherDataToG7FBDB = async (c: Context) => {
   const serviceAccountPath = process.env.G07_SERVICE_ACCOUNT_PATH;
   const databaseUrl = process.env.G07_DATABASE_URL;
@@ -87,19 +58,58 @@ const loadWeatherDataToG7FBDB = async (c: Context) => {
   return successResponse(c, { result });
 };
 
+// Healthcare Transformation
+const transformHealthcareData = async (c: Context) => {
+  const healthcareData = await ETLService.getHealthcareData();
+  const addresses = await ETLService.getAddressesForHealthcare();
+  const data = await ETLService.transformHealthcareData(
+    healthcareData,
+    addresses
+  );
+  return successResponse(c, data);
+};
+
+// Healthcare Loading
+const loadHealthcareDataToG7FBDB = async (c: Context) => {
+  const serviceAccountPath = process.env.G07_SERVICE_ACCOUNT_PATH;
+  const databaseUrl = process.env.G07_DATABASE_URL;
+
+  if (!serviceAccountPath) {
+    return c.json(
+      { error: 'G07_SERVICE_ACCOUNT_PATH environment variable is required' },
+      400
+    );
+  }
+
+  if (!databaseUrl) {
+    return c.json(
+      { error: 'G07_DATABASE_URL environment variable is required' },
+      400
+    );
+  }
+
+  const healthcareData = await ETLService.getHealthcareData();
+  const addresses = await ETLService.getAddressesForHealthcare();
+  const transformedData = await ETLService.transformHealthcareData(
+    healthcareData,
+    addresses
+  );
+
+  const result = await ETLService.loadHealthcareDataToG7FBDB(
+    transformedData,
+    serviceAccountPath,
+    databaseUrl
+  );
+  return successResponse(c, { result });
+};
+
 export {
-<<<<<<< HEAD
-=======
-  getExtractedData,
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   getUserData,
   getHealthcareData,
   getWeatherData,
   getWasteData,
-<<<<<<< HEAD
-=======
-  getTeamIntegrations,
->>>>>>> ddf9188 (feat: implement modular ETL data extraction and fix Firebase field mapping)
   transformWeatherData,
   loadWeatherDataToG7FBDB,
+  transformHealthcareData,
+  loadHealthcareDataToG7FBDB,
 };
