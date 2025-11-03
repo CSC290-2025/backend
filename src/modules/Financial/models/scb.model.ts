@@ -9,7 +9,7 @@ import { handlePrismaError } from '@/errors';
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
 
 // In-memory token storage
-let cachedToken: ScbToken | null;
+let cachedToken: ScbToken | null = null;
 // We wont need to store this since scb uses it for their own tracking
 const generateRequestUId = () => {
   return randomUUID();
@@ -49,7 +49,7 @@ const buildScbHeaders = async (includeAuth = false): Promise<HeadersInit> => {
 // will auto refresh
 const getOAuthToken = async (): Promise<ScbToken> => {
   try {
-    // Return cached token if still balid
+    // Return cached token if still valid
     if (cachedToken && cachedToken.expiresAt > Date.now()) {
       return cachedToken;
     }

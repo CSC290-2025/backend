@@ -14,7 +14,7 @@ try {
   console.log('Cached Expires at:', new Date(cachedToken.expiresAt));
 
   if (token.accessToken === cachedToken.accessToken) {
-    console.log('Cache successful!! Yippe (👉ﾟヮﾟ)👉');
+    console.log('Cache successful!! Yippee (👉ﾟヮﾟ)👉');
   } else {
     console.log('Cache failed 😭🥀');
   }
