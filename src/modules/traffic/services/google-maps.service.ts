@@ -1,4 +1,4 @@
-// source/traffic/services/google-maps.service.ts
+// source/services/google-maps.service.ts
 import type { GoogleMapsTrafficData, DensityLevel } from '../types';
 
 /**

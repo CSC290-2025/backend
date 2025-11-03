@@ -1,9 +1,21 @@
-// source/traffic/routes/traffic-light.openapi.routes.ts
+//handles ALL traffic-related OpenAPI routes
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { TrafficLightSchemas } from '../schemas';
-import { TrafficLightController, LightRequestController } from '../controllers';
+import {
+  TrafficLightSchemas,
+  LightRequestSchemas,
+  VehicleSchemas,
+} from '../schemas';
+import {
+  TrafficLightController,
+  LightRequestController,
+  VehicleController,
+} from '../controllers';
 
-const setupTrafficLightRoutes = (app: OpenAPIHono) => {
+export const setupTrafficRoutes = (app: OpenAPIHono) => {
+  // ============================================
+  // TRAFFIC LIGHT ROUTES
+  // ============================================
+
   // Main CRUD operations
   app.openapi(
     TrafficLightSchemas.getTrafficLightRoute,
@@ -52,16 +64,28 @@ const setupTrafficLightRoutes = (app: OpenAPIHono) => {
     TrafficLightController.updateTiming
   );
 
-  // Light request operations
+  // ============================================
+  // LIGHT REQUEST ROUTES
+  // ============================================
+
   app.openapi(
-    TrafficLightSchemas.createLightRequestRoute,
+    LightRequestSchemas.createRequestRoute,
     LightRequestController.createLightRequest
   );
 
   app.openapi(
-    TrafficLightSchemas.getLightRequestsRoute,
-    LightRequestController.getLightRequest
+    LightRequestSchemas.getRequestsRoute,
+    LightRequestController.getLightRequests
   );
-};
 
-export { setupTrafficLightRoutes };
+  // ============================================
+  // VEHICLE ROUTES
+  // ============================================
+
+  app.openapi(
+    VehicleSchemas.updateLocationRoute,
+    VehicleController.updateVehicleLocation
+  );
+
+  app.openapi(VehicleSchemas.getVehicleRoute, VehicleController.getVehicle);
+};
