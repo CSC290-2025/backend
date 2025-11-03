@@ -113,3 +113,16 @@ export const deleteRating = async (id: number) => {
     throw handlePrismaError(error);
   }
 };
+
+//bugged, need schema.prisma fixed for rating table. apartment has to NOT be an array
+// export const countRating = async (apartmentId: number) =>{
+//   try {
+//     return await prisma.rating.count({
+//       where: {
+//         apartment: apartmentId,
+//       },
+//     });
+//   } catch (error) {
+//     throw handlePrismaError(error);
+//   }
+// }
