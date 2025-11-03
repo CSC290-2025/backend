@@ -128,6 +128,9 @@ const createQr = async (
       headers: await buildScbHeaders(true),
       body: JSON.stringify(data),
     });
+    if (!response.ok) {
+      throw new Error('SCB QR creation failed');
+    }
 
     const result = await response.json();
     return result;
