@@ -10,18 +10,16 @@ const getRoomByID = async (id: number): Promise<Room> => {
 const getAllRooms = async (id: number): Promise<Room[]> => {
   const apartmentId = await apartmentModel.getApartmentById(id);
   if (!apartmentId) throw new NotFoundError('Apartment not found');
+
   const rooms = await roomModel.getAllRooms(apartmentId.id);
   if (!rooms) throw new NotFoundError('No rooms found');
   return rooms;
 };
 
-const getRoomByStatus = async (
-  apartmentId: number,
-  status: string
-): Promise<Room[]> => {
-  const apartment = await apartmentModel.getApartmentById(apartmentId);
+const getRoomByStatus = async (id: number, status: string): Promise<Room[]> => {
+  const apartment = await apartmentModel.getApartmentById(id);
   if (!apartment) throw new NotFoundError('Apartment not found');
-  const rooms = await roomModel.getRoomByStatus(apartmentId, status);
+  const rooms = await roomModel.getRoomByStatus(apartment.id, status);
   if (!rooms) throw new NotFoundError('No rooms found');
   return rooms;
 };

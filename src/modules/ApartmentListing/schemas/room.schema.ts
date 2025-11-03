@@ -27,10 +27,9 @@ const createRoomSchema = z
   .object({
     name: z.string().min(2).max(255),
     type: z.string().min(2).max(255),
-    size: z.number().min(0).default(0),
+    size: z.string().min(0).default('0'),
     price_start: z.number().min(0).default(0),
     price_end: z.number().min(0).default(0),
-    apartment_id: z.int().nullable(),
   })
   .superRefine((data, ctx) => {
     // For creation both price_start and price_end are required, so we can
@@ -48,14 +47,13 @@ const updateRoomSchema = z
   .object({
     name: z.string().min(2).max(255).optional(),
     type: z.string().min(2).max(255).optional(),
-    size: z.number().min(0).optional().default(0),
+    size: z.string().min(0).optional(),
     price_start: z.number().min(0).optional().default(0),
     price_end: z.number().min(0).optional().default(0),
     room_status: z
       .enum(['occupied', 'pending', 'available'])
       .default('available')
       .optional(),
-    apartment_id: z.int().optional(),
   })
   .superRefine((data, ctx) => {
     // For creation both price_start and price_end are required, so we can
@@ -69,12 +67,14 @@ const updateRoomSchema = z
     }
   });
 const RoomIdParam = z.object({
-  id: z.string(),
+  // id: z.string(),
+  roomId: z.coerce.number().int().positive(),
 });
 const RoomParam = z.object({
-  id: z.int(),
-  roomId: z.int(),
+  id: z.coerce.number().int().positive(),
+  roomId: z.coerce.number().int().positive(),
 });
+
 //openAPI
 const getAllRoomsRoute = createGetRoute({
   path: '/apartments/{id}/rooms',
@@ -84,14 +84,16 @@ const getAllRoomsRoute = createGetRoute({
   tags: ['Room'],
 });
 const getRoomsByStatusRoute = createGetRoute({
-  path: '/apartments/{id}/rooms/status',
+  path: '/apartments/{id}/rooms/{status}',
   summary: 'Get all rooms for an apartment by status',
-  params: ApartmentSchemas.ApartmentIdParam,
+  params: ApartmentSchemas.ApartmentIdParam.extend({
+    status: z.enum(['occupied', 'pending', 'available']),
+  }),
   responseSchema: RoomListSchema,
   tags: ['Room'],
 });
 const getRoomByIDRoute = createGetRoute({
-  path: '/apartments/{id}/rooms/:roomId',
+  path: '/apartments/{id}/rooms/{roomId}',
   summary: 'Get a room by ID',
   params: z.object({
     id: z.string(),
@@ -109,14 +111,14 @@ const createRoomRoute = createPostRoute({
   tags: ['Room'],
 });
 const updateRoomRoute = createPutRoute({
-  path: '/apartments/{id}/rooms/:roomId',
+  path: '/apartments/{id}/rooms/{roomId}',
   summary: 'Update an existing room',
   requestSchema: updateRoomSchema,
   responseSchema: RoomSchema,
   params: RoomParam,
 });
 const deleteRoomRoute = createDeleteRoute({
-  path: '/apartments/{id}/rooms/:roomId',
+  path: '/apartments/{id}/rooms/{roomId}',
   summary: 'Delete a room',
   params: RoomParam,
   tags: ['Room'],

@@ -6,6 +6,7 @@ import type {
   ApartmentFilter,
 } from '../types/apartment.types';
 import { ApartmentSchemas } from '../schemas';
+import { cloudinaryModel } from '.';
 
 export async function getAllApartments() {
   try {
@@ -50,10 +51,22 @@ export async function getApartmentById(id: number) {
   }
 }
 
+export async function getApartmentByIdSimplified(id: number) {
+  try {
+    // Try fetching without includes first to isolate the issue
+    const response = await prisma.apartment.findUnique({
+      where: { id },
+    });
+    return response;
+  } catch (error) {
+    console.error('Prisma Find Error:', error);
+    throw handlePrismaError(error);
+  }
+}
+
 export async function createApartment(data: createApartmentData) {
   try {
     const { userId, ...apartmentData } = data;
-
     const response = await prisma.$transaction(async (tx) => {
       const apartment = await tx.apartment.create({
         data: {
@@ -66,10 +79,13 @@ export async function createApartment(data: createApartmentData) {
         },
         include: {
           apartment_owner: true,
+          apartment_picture: true,
         },
       });
+
       return apartment;
     });
+
     return response;
   } catch (error) {
     console.error('Prisma Create Error:', error);
@@ -79,6 +95,7 @@ export async function createApartment(data: createApartmentData) {
 
 export async function updateApartment(data: updateApartmentData, id: number) {
   try {
+    // Remove apartment_picture from data as it's handled separately
     const { ...updateData } = data;
     const response = await prisma.apartment.update({
       where: { id },
@@ -86,8 +103,6 @@ export async function updateApartment(data: updateApartmentData, id: number) {
     });
     return response;
   } catch (error) {
-    // 👇 Add this line for immediate debugging
-    console.error('Original Error in updateApartment:', error);
     throw handlePrismaError(error);
   }
 }

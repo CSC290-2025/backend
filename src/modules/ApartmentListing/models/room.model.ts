@@ -31,13 +31,14 @@ export async function getRoomByID(id: number) {
 }
 export async function getRoomByStatus(apartmentId: number, status: RoomStatus) {
   try {
+    const desiredStatusValue =
+      RoomSchemas.RoomStatus[status as keyof typeof RoomSchemas.RoomStatus];
+    const finalStatus = desiredStatusValue || RoomSchemas.RoomStatus.available;
+
     const rooms = await prisma.room.findMany({
       where: {
         apartment: { id: apartmentId },
-        room_status:
-          RoomSchemas.RoomStatus[
-            status as keyof typeof RoomSchemas.RoomStatus
-          ] || RoomSchemas.RoomStatus.available,
+        room_status: finalStatus,
       },
     });
     return rooms;
