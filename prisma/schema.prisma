@@ -11,6 +11,7 @@ datasource db {
 }
 
 model addresses {
+  id               Int                      @id @default(autoincrement())
   address_line     String?
   province         String?                  @db.VarChar(255)
   district         String?                  @db.VarChar(255)
