@@ -1,1 +1,1 @@
-export { etlRoutes } from './routes';
+export { etlRoutes, reportsRoutes } from './routes';

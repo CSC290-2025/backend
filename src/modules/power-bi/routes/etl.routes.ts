@@ -13,20 +13,4 @@ etlRoutes.get('/extract/healthcare', ETLController.getHealthcareData);
 etlRoutes.get('/extract/weather', ETLController.getWeatherData);
 etlRoutes.get('/extract/waste', ETLController.getWasteData);
 
-// Transformation
-etlRoutes.get('/transform/weather', ETLController.transformWeatherData);
-etlRoutes.get('/transform/healthcare', ETLController.transformHealthcareData);
-
-// Loading
-etlRoutes.get('/load/weather', ETLController.loadWeatherDataToG7FBDB);
-etlRoutes.get('/load/healthcare', ETLController.loadHealthcareDataToG7FBDB);
-
-// Reports (Power BI)
-etlRoutes.get('/reports', ETLController.getReports);
-etlRoutes.post('/reports', ETLController.createReport);
-
-// Transformed data access (from Firebase)
-etlRoutes.get('/data/weather', ETLController.getWeatherTransformedData);
-etlRoutes.get('/data/healthcare', ETLController.getHealthcareTransformedData);
-
 export { etlRoutes };

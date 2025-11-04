@@ -148,7 +148,6 @@ type ReportMetadata = {
   lastUpdate: Date;
   powerBiReportId: number;
 };
-
 export type {
   ExtractedUserData,
   ExtractedHealthcareData,
