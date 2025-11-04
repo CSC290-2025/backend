@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { UserService } from '@/services';
+import { UserService } from '../services/user.sevices';
 import { successResponse } from '@/utils/response';
 
 const getUser = async (c: Context) => {
