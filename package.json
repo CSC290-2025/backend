@@ -15,7 +15,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@google/genai": "^1.28.0",
     "@google/generative-ai": "^0.24.1",
     "@hono/node-server": "^1.19.3",
     "@hono/swagger-ui": "^0.5.2",
