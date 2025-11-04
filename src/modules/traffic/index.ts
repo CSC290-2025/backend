@@ -20,3 +20,5 @@ export {
 // Export route setup function
 export { setupTrafficRoutes } from './routes/light-request.openapi.routes';
 export { SetupMainTrafficRoutes } from './routes/traffic.openapi.routes';
+export { setupTrafficEmergencyRoutes } from './routes/traffic_emergencies.routes';
+export { setupRoadRoutes } from './routes/roads.routes';

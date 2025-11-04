@@ -39,14 +39,6 @@ interface TrafficLightCycleConfig {
   totalCycle: number;
 }
 
-type Road = {
-  id: number;
-  name: string;
-  start_intersection_id: number;
-  end_intersection_id: number;
-  length_meters: number;
-};
-
 // Light Request types
 type TrafficLightRequest = {
   id: number;
@@ -56,24 +48,6 @@ type TrafficLightRequest = {
 
 type CreateLightRequestData = {
   traffic_light_id: number;
-};
-
-// Emergency types
-type TrafficEmergency = {
-  id: number;
-  user_id: number;
-  accident_location: string | null;
-  destination_hospital: string;
-  status: string;
-  ambulance_vehicle_id: number;
-  created_at: string;
-};
-
-type CreateEmergencyData = {
-  user_id: number;
-  accident_location?: string;
-  destination_hospital: string;
-  ambulance_vehicle_id: number;
 };
 
 export type {
@@ -87,9 +61,6 @@ export type {
   Location,
   GoogleMapsTrafficData,
   TrafficLightCycleConfig,
-  Road,
   TrafficLightRequest,
   CreateLightRequestData,
-  TrafficEmergency,
-  CreateEmergencyData,
 };

@@ -2,7 +2,12 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { setupTrafficRoutes } from 'modules/traffic';
 import { SetupMainTrafficRoutes } from 'modules/traffic';
+import { setupRoadRoutes } from 'modules/traffic';
+
+import { setupTrafficEmergencyRoutes } from 'modules/traffic';
+
 //import { setupTrafficRoutes } from '@/modules/traffic/routes';
+
 // ============================================
 // ROUTING OPTIONS:
 // Choose ONE approach per module that you're comfortable with:
@@ -28,6 +33,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   setupTrafficRoutes(app);
   SetupMainTrafficRoutes(app);
+  setupTrafficEmergencyRoutes(app);
+  setupRoadRoutes(app);
   //
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
