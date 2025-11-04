@@ -1,4 +1,4 @@
-import prisma from '@/config/client';
+import prisma from '../config/client';
 import { handlePrismaError } from '@/errors';
 import type {
   Product,

@@ -1,16 +1,18 @@
-import { serve } from '@hono/node-server';
-// import { Hono } from 'hono';
-import config from '@/config/env';
-import { errorHandler } from '@/middlewares/error';
+// src/index.ts
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
-import { setupRoutes } from '@/routes';
+import { serve } from '@hono/node-server'; // แก้ไขการนำเข้า serve
+import config from '@/config/env';
+import { errorHandler } from '@/middlewares/error';
+import { setupRoutes } from '@/routes'; // ฟังก์ชันเพื่อกำหนด routes อื่นๆ
+import routeStopsRoutes from './modules/_example/routes/routeFinder.route'; // Import routes สำหรับ route stops
 
-// const app = new Hono();
 const app = new OpenAPIHono();
 
+// กำหนด Error handler
 app.onError(errorHandler);
 
+// กำหนด OpenAPI Documentation
 app.doc('/doc', {
   openapi: '3.0.0',
   info: {
@@ -23,12 +25,13 @@ app.doc('/doc', {
       url: `http://localhost:${config.port}`,
       description: 'Local development server',
     },
-    // can add live api server after
   ],
 });
 
+// กำหนด Swagger UI เพื่อแสดงเอกสาร API
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
+// Health check route
 app.get('/', (c) => {
   return c.json({
     name: 'Smart City Hub API',
@@ -39,8 +42,13 @@ app.get('/', (c) => {
   });
 });
 
+// เชื่อมโยง routes ที่เกี่ยวข้องกับ route stops
+app.route('/api', routeStopsRoutes);
+
+// เรียกใช้ฟังก์ชัน setupRoutes สำหรับการกำหนด routes อื่นๆ
 setupRoutes(app);
 
+// ตั้งค่าเซิร์ฟเวอร์
 const server = serve(
   {
     fetch: app.fetch,
@@ -53,6 +61,7 @@ const server = serve(
   }
 );
 
+// การจัดการ Signal เมื่อโปรเซสได้รับคำสั่งหยุด
 process.on('SIGINT', () => {
   server.close();
   process.exit(0);
