@@ -129,10 +129,44 @@ const extractWasteData = async (): Promise<ExtractedWasteData> => {
   }
 };
 
+// Generic reports metadata across categories (admin-owned)
+const extractReportsMetadata = async () => {
+  try {
+    // Shape is flexible; frontend maps embed_url or embedUrl if present
+    // and filters by category string
+    return await prisma.reports_metadata.findMany();
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const createReportMetadata = async (record: {
+  title: string;
+  description?: string | null;
+  category: string;
+  embed_url?: string | null;
+  embedUrl?: string | null;
+}) => {
+  try {
+    // Normalizes both embed_url and embedUrl
+    const payload: any = {
+      title: record.title,
+      description: record.description ?? null,
+      category: record.category,
+      embed_url: (record as any).embed_url ?? (record as any).embedUrl ?? null,
+    };
+    return await prisma.reports_metadata.create({ data: payload });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   extractUserData,
   extractHealthcareData,
   extractWeatherData,
   extractWasteData,
   extractAddressesForHealthcare,
+  extractReportsMetadata,
+  createReportMetadata,
 };

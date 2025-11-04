@@ -103,6 +103,54 @@ const loadHealthcareDataToG7FBDB = async (c: Context) => {
   return successResponse(c, { result });
 };
 
+// Reports listing (metadata-driven across categories)
+const getReports = async (c: Context) => {
+  const reports = await ETLService.getReportsMetadata();
+  return successResponse(c, { reports });
+};
+
+// Create report metadata (admin)
+const createReport = async (c: Context) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { title, description, category, embed_url, embedUrl } = body || {};
+  if (!title || !category || (!embed_url && !embedUrl)) {
+    return c.json(
+      { error: 'title, category, and embed_url are required' },
+      400
+    );
+  }
+  const created = await ETLService.createReportMetadata({
+    title,
+    description,
+    category,
+    embed_url,
+    embedUrl,
+  });
+  return successResponse(c, { report: created });
+};
+
+// Transformed data (from Firebase) - Weather
+const getWeatherTransformedData = async (c: Context) => {
+  const serviceAccountPath = process.env.G07_SERVICE_ACCOUNT_PATH;
+  const databaseUrl = process.env.G07_DATABASE_URL;
+  const data = await ETLService.getTransformedWeatherFromFirebase(
+    databaseUrl,
+    serviceAccountPath
+  );
+  return successResponse(c, data);
+};
+
+// Transformed data (from Firebase) - Healthcare
+const getHealthcareTransformedData = async (c: Context) => {
+  const serviceAccountPath = process.env.G07_SERVICE_ACCOUNT_PATH;
+  const databaseUrl = process.env.G07_DATABASE_URL;
+  const data = await ETLService.getTransformedHealthcareFromFirebase(
+    databaseUrl,
+    serviceAccountPath
+  );
+  return successResponse(c, data);
+};
+
 export {
   getUserData,
   getHealthcareData,
@@ -112,4 +160,8 @@ export {
   loadWeatherDataToG7FBDB,
   transformHealthcareData,
   loadHealthcareDataToG7FBDB,
+  getReports,
+  getWeatherTransformedData,
+  getHealthcareTransformedData,
+  createReport,
 };
