@@ -1,7 +1,7 @@
+import type { Context } from 'hono';
 import { ScbService } from '../services';
 import { successResponse } from '@/utils/response';
 
-import type { Context } from 'hono';
 const createQrCode = async (c: Context) => {
   const body = await c.req.json();
   const qrResponse = await ScbService.createQrCode(body);
@@ -23,7 +23,6 @@ const handleWebhook = async (c: Context) => {
 
   // Process the webhook
   await ScbService.processWebhook(payload);
-
   return successResponse(
     c,
     { received: true },
@@ -32,4 +31,16 @@ const handleWebhook = async (c: Context) => {
   );
 };
 
-export { createQrCode, handleWebhook };
+const confirmQrPayment = async (c: Context) => {
+  const transRef = c.req.param('transRef');
+  const sendingBank = c.req.query('sendingBank');
+  const confirmation = await ScbService.confirmQrPayment(transRef, sendingBank);
+  return successResponse(
+    c,
+    { confirmation },
+    200,
+    'Payment confirmed successfully'
+  );
+};
+
+export { createQrCode, handleWebhook, confirmQrPayment };
