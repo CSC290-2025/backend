@@ -101,12 +101,52 @@ const extractRouteDetails = (route: any) => {
   };
 };
 
+const TRANSIT_TYPES =
+  'bus_station|subway_station|train_station|transit_station';
+
+const findNearestTransitStop = async (
+  lat: number,
+  lng: number
+): Promise<string> => {
+  const nearbySearchUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=500&type=${TRANSIT_TYPES}&key=${GOOGLE_API_KEY}`;
+
+  try {
+    const response = await axios.get(nearbySearchUrl);
+    const data = response.data;
+
+    if (data.status === 'OK' && data.results.length > 0) {
+      const nearestStop = data.results[0];
+      return nearestStop.name;
+    }
+    return `${lat},${lng}`;
+  } catch (error) {
+    return `${lat},${lng}`;
+  }
+};
+
 export const getRoutes = async (
-  origin: string,
+  origin: string | undefined,
+  lat: string | undefined,
+  lng: string | undefined,
   destination: string,
-  waypoints: string
+  waypoints: string = ''
 ) => {
-  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&waypoints=${waypoints}&mode=transit&alternatives=true&key=${GOOGLE_API_KEY}`;
+  let finalOrigin = '';
+
+  if (origin && origin.length > 0) {
+    finalOrigin = origin;
+  } else if (lat && lng) {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    finalOrigin = await findNearestTransitStop(latNum, lngNum);
+  }
+
+  if (!finalOrigin) {
+    throw new Error(
+      'Could not determine a starting point (origin or GPS location).'
+    );
+  }
+  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${finalOrigin}&destination=${destination}&waypoints=${waypoints}&mode=transit&alternatives=true&key=${GOOGLE_API_KEY}`;
 
   try {
     const response = await axios.get(googleMapsUrl);
