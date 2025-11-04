@@ -7,10 +7,10 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
-const PrismaDecimal = z.instanceof(Decimal);
+const PrismaDecimal = z.number();
 
 const decimalInput = z
-  .union([z.instanceof(Decimal), z.number(), z.string()])
+  .union([z.number(), z.string()])
   .transform((val) => {
     if (val instanceof Decimal) return val;
     return new Decimal(val);
