@@ -2,6 +2,7 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { setupAddressRoutes } from './addressG5.routes';
 import { setupUserSpecialistRoutes } from './specialistG6.routes';
+import { setupUserSpecialtyRoutes } from '@/modules/citizens/routes';
 // ============================================
 // ROUTING OPTIONS:
 // Choose ONE approach per module that you're comfortable with:
@@ -31,4 +32,5 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // app.route('/products', productRoutes);
   setupAddressRoutes(app);
   setupUserSpecialistRoutes(app);
+  setupUserSpecialtyRoutes(app);
 };
