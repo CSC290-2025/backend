@@ -30,6 +30,9 @@ app.notFound((c) => {
   );
 });
 
+app.get('/swagger', swaggerUI({ url: '/doc' }));
+
+app.get('/swagger', swaggerUI({ url: '/doc' }));
 app.get('/', (c) => {
   return c.json({
     name: 'Smart City Hub API',
