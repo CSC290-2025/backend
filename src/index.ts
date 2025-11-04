@@ -49,6 +49,9 @@ app.get('/doc', (c) => {
     port = addr.port;
   }
 
+  // Use public APP_URL when available so Swagger uses correct scheme (http/https)
+  const docServerUrl = process.env.APP_URL ?? `http://localhost:${port}`;
+
   const doc = app.getOpenAPIDocument({
     openapi: '3.0.0',
     info: {
@@ -58,7 +61,7 @@ app.get('/doc', (c) => {
     },
     servers: [
       {
-        url: `http://localhost:${port}`,
+        url: docServerUrl,
         description: 'Local development server',
       },
     ],
@@ -98,16 +101,17 @@ async function startServer(startPort: number, maxRetries = 10) {
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      serverInstance = serve({ fetch: app.fetch, port }, async (info) => {
+      serverInstance = serve({ fetch: app.fetch, port }, (info) => {
+        const publicUrl =
+          process.env.APP_URL ?? `http://localhost:${info.port}`;
         console.log(`Server is running on http://localhost:${info.port}`);
-        console.log(
-          `API Documentation on http://localhost:${info.port}/swagger`
-        );
-        console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
+        console.log(`Public URL (if set): ${process.env.APP_URL ?? 'none'}`);
+        console.log(`API Documentation on ${publicUrl}/swagger`);
+        console.log(`OpenAPI Spec on ${publicUrl}/doc`);
 
         // Start ngrok in development mode (only meant to run in a branch for Github codespace)
         if (!config.isProduction && process.env.G11_NGROK_AUTH_TOKEN) {
-          await startNgrok(info.port, process.env.G11_NGROK_AUTH_TOKEN);
+          startNgrok(info.port, process.env.G11_NGROK_AUTH_TOKEN);
         }
       });
 

@@ -53,7 +53,7 @@ const webhookRoute = createPostRoute({
     success: z.boolean(),
     message: z.string(),
   }),
-  tags: ['SCB'],
+  tags: ['Auto-call. No need for manual testing'],
 });
 
 export const ScbSchemas = {
