@@ -25,6 +25,18 @@ const ScbQrResponseSchema = z.object({
     qrImage: z.string(),
   }),
 });
+// Webhook payload from SCB when payment is confirmed
+const ScbWebhookPayloadSchema = z
+  .object({
+    transactionId: z.string().optional(),
+    amount: z.string().optional(),
+    ref1: z.string().optional(),
+    ref2: z.string().optional(),
+    ref3: z.string().optional(),
+    status: z.string().optional(),
+  })
+  .passthrough(); // Allow additional fields from SCB
+
 const createQrRoute = createPostRoute({
   path: '/scb/qr/create',
   summary: 'Create new QR Code',
@@ -33,9 +45,22 @@ const createQrRoute = createPostRoute({
   tags: ['SCB'],
 });
 
+const webhookRoute = createPostRoute({
+  path: '/scb/webhook-listener',
+  summary: 'SCB Payment Webhook Listener',
+  requestSchema: ScbWebhookPayloadSchema,
+  responseSchema: z.object({
+    success: z.boolean(),
+    message: z.string(),
+  }),
+  tags: ['SCB'],
+});
+
 export const ScbSchemas = {
   ScbTokenSchema,
   ScbQrRequestSchema,
   ScbQrResponseSchema,
+  ScbWebhookPayloadSchema,
   createQrRoute,
+  webhookRoute,
 };

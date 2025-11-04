@@ -4,5 +4,11 @@ import type { ScbSchemas } from '../schemas';
 type ScbToken = z.infer<typeof ScbSchemas.ScbTokenSchema>;
 type ScbQrRequestSchema = z.infer<typeof ScbSchemas.ScbQrRequestSchema>;
 type ScbQrResponseSchema = z.infer<typeof ScbSchemas.ScbQrResponseSchema>;
+type ScbWebhookPayload = z.infer<typeof ScbSchemas.ScbWebhookPayloadSchema>;
 
-export type { ScbToken, ScbQrRequestSchema, ScbQrResponseSchema };
+export type {
+  ScbToken,
+  ScbQrRequestSchema,
+  ScbQrResponseSchema,
+  ScbWebhookPayload,
+};

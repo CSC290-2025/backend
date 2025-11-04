@@ -5,6 +5,7 @@ import type {
   ScbToken,
   ScbQrRequestSchema,
   ScbQrResponseSchema,
+  ScbWebhookPayload,
 } from '../types';
 
 // the same as the one from model no business logic added
@@ -91,15 +92,40 @@ const createQrCode = async (
   };
 
   // Log for reference
-  // console.log('\nQR Code Created');
-  // console.log({
-  //   ref1,
-  //   ref2,
-  //   ref3,
-  //   amount: qrRequestData.amount,
-  // });
+  console.log('\nQR Code Created');
+  console.log({
+    ref1,
+    ref2,
+    ref3,
+    amount: qrRequestData.amount,
+  });
 
   return await ScbModel.createQr(qrRequest);
 };
 
-export { getOAuthToken, encrypt, decrypt, createQrCode };
+// Process webhook from SCB
+const processWebhook = async (payload: ScbWebhookPayload): Promise<void> => {
+  // SCB sends data with these actual field names
+  const data = payload as Record<string, unknown>;
+
+  const transactionId = data.transactionId as string;
+  const amount = data.amount as string;
+  const ref1 = data.billPaymentRef1 as string;
+  const ref2 = data.billPaymentRef2 as string;
+  const ref3 = data.billPaymentRef3 as string;
+  const sendingBankCode = data.sendingBankCode as string;
+
+  console.log('Processing payment confirmation:');
+  console.log('Transaction ID:', transactionId);
+  console.log('Amount:', amount);
+  console.log('Ref1:', ref1);
+  console.log('Ref2:', ref2);
+  console.log('Ref3:', ref3);
+  console.log('Sending Bank Code:', sendingBankCode);
+
+  // TODO: Use transactionId and sendingBankCode to call other API
+  // Example:
+  // await someOtherApi.confirm({ transactionId, sendingBankCode });
+};
+
+export { getOAuthToken, encrypt, decrypt, createQrCode, processWebhook };

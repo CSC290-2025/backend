@@ -6,6 +6,7 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
+import { startNgrok } from '@/modules/Financial/utils/ngrok';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
@@ -97,12 +98,17 @@ async function startServer(startPort: number, maxRetries = 10) {
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      serverInstance = serve({ fetch: app.fetch, port }, (info) => {
+      serverInstance = serve({ fetch: app.fetch, port }, async (info) => {
         console.log(`Server is running on http://localhost:${info.port}`);
         console.log(
           `API Documentation on http://localhost:${info.port}/swagger`
         );
         console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
+
+        // Start ngrok in development mode (only meant to run in a branch for Github codespace)
+        if (!config.isProduction && process.env.G11_NGROK_AUTH_TOKEN) {
+          await startNgrok(info.port, process.env.G11_NGROK_AUTH_TOKEN);
+        }
       });
 
       return;
