@@ -1,45 +1,13 @@
 import { randomUUID } from 'crypto';
 import { ScbModel } from '../models';
+import { WalletService } from '../services';
 import { ValidationError } from '@/errors';
 import type {
-  ScbToken,
   ScbQrRequestSchema,
   ScbQrResponseSchema,
   ScbWebhookPayload,
+  ScbApiQrRequest,
 } from '../types';
-
-// the same as the one from model no business logic added
-const getOAuthToken = async (): Promise<ScbToken> => {
-  return await ScbModel.getOAuthToken();
-};
-
-const encrypt = async (data: object): Promise<string> => {
-  const jsonString = JSON.stringify(data);
-  const PUBLIC_KEY = process.env.G11_PUBLIC_KEY;
-  if (!PUBLIC_KEY) {
-    throw new ValidationError(
-      'G11_PUBLIC_KEY environment variable is not defined'
-    );
-  }
-  if (Object.keys(data).length === 0) {
-    throw new ValidationError('Data to encrypt cannot be null or undefined');
-  }
-  return await ScbModel.encryptData(jsonString, PUBLIC_KEY);
-};
-
-const decrypt = async (encryptedData: string): Promise<object> => {
-  const PUBLIC_KEY = process.env.G11_PUBLIC_KEY;
-  if (!PUBLIC_KEY) {
-    throw new ValidationError(
-      'G11_PUBLIC_KEY environment variable is not defined'
-    );
-  }
-  if (!encryptedData) {
-    throw new ValidationError('Encrypted data cannot be null or undefined');
-  }
-  const decryptedString = await ScbModel.decryptData(encryptedData, PUBLIC_KEY);
-  return JSON.parse(decryptedString);
-};
 
 // validate env, generate refs
 const createQrCode = async (
@@ -47,6 +15,11 @@ const createQrCode = async (
 ): Promise<ScbQrResponseSchema> => {
   const billerId = process.env.G11_BILLER_ID;
   const ref3Prefix = process.env.G11_REF3_PREFIX;
+  const payerId = qrRequestData.payerId;
+
+  if (!payerId) {
+    throw new ValidationError('Payer ID is required in the request body');
+  }
 
   if (!billerId || billerId.length !== 15) {
     throw new ValidationError('G11_BILLER_ID must be 15 characters in .env');
@@ -76,12 +49,12 @@ const createQrCode = async (
       .toUpperCase()
       .slice(0, 20 - p.length);
 
-  const ref1 = ref('REF1');
-  const ref2 = ref('REF2');
-  const ref3 = ref(ref3Prefix);
+  const ref1 = ref('R1'); // R1 will be the transaction reference for us
+  const ref2 = payerId.toString(); // ref2 is the payerId itself for wallet lookup
+  const ref3 = ref(ref3Prefix); // scb use this for their own tracking
 
   // Prepare request
-  const qrRequest = {
+  const qrRequest: ScbApiQrRequest = {
     qrType: 'PP',
     ppType: 'BILLERID',
     ppId: billerId,
@@ -101,6 +74,21 @@ const createQrCode = async (
   });
 
   return await ScbModel.createQr(qrRequest);
+};
+
+// Confirm QR payment with SCB
+const confirmQrPayment = async (
+  transRef: string | undefined,
+  sendingBank: string | undefined
+): Promise<object> => {
+  // Validate required parameters
+  if (!transRef || !sendingBank) {
+    throw new ValidationError(
+      'transRef and sendingBank are required parameters'
+    );
+  }
+
+  return await ScbModel.confirmQrPayment(transRef, sendingBank);
 };
 
 // Process webhook from SCB
@@ -123,9 +111,36 @@ const processWebhook = async (payload: ScbWebhookPayload): Promise<void> => {
   console.log('Ref3:', ref3);
   console.log('Sending Bank Code:', sendingBankCode);
 
-  // TODO: Use transactionId and sendingBankCode to call other API
-  // Example:
-  // await someOtherApi.confirm({ transactionId, sendingBankCode });
+  if (transactionId && sendingBankCode) {
+    try {
+      const confirmation = await confirmQrPayment(
+        transactionId,
+        sendingBankCode
+      );
+      console.log('Payment confirmed:', confirmation);
+
+      // Only top up if status code is 1000 (Success)
+      const statusCode = (confirmation as { status?: { code?: number } })
+        ?.status?.code;
+      if (statusCode === 1000) {
+        const userId = parseInt(ref2);
+
+        if (!isNaN(userId)) {
+          // Get user's wallet
+          const wallets = await WalletService.getUserWallets(userId);
+          const walletId = wallets[0].id;
+          await WalletService.topUpBalance(walletId, parseFloat(amount));
+          console.log(`Topped up wallet ${walletId} with ${amount}`);
+        }
+      } else {
+        console.log(
+          `Payment not successful. Status code: ${statusCode}. Skipping wallet top-up.`
+        );
+      }
+    } catch (_error) {
+      throw new Error('Failed to process webhook payment confirmation');
+    }
+  }
 };
 
-export { getOAuthToken, encrypt, decrypt, createQrCode, processWebhook };
+export { createQrCode, confirmQrPayment, processWebhook };
