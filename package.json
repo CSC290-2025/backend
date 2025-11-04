@@ -6,7 +6,7 @@
     "build": "tsup",
     "start": "node dist/index.js",
     "migrate": "prisma migrate dev",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "tsx prisma/users.seed.ts",
     "type-check": "tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
