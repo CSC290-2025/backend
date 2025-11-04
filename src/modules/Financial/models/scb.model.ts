@@ -1,9 +1,5 @@
 import { randomUUID, publicEncrypt, publicDecrypt, constants } from 'crypto';
-import type {
-  ScbToken,
-  ScbQrRequestSchema,
-  ScbQrResponseSchema,
-} from '../types';
+import type { ScbToken, ScbApiQrRequest, ScbQrResponseSchema } from '../types';
 import { handlePrismaError } from '@/errors';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
@@ -120,7 +116,7 @@ const decryptData = (cipherText: string, publicKey: string): string => {
 };
 
 const createQr = async (
-  data: ScbQrRequestSchema
+  data: ScbApiQrRequest
 ): Promise<ScbQrResponseSchema> => {
   try {
     const response = await fetch(`${SCB_BASE_URL}/v1/payment/qrcode/create`, {
@@ -139,4 +135,28 @@ const createQr = async (
   }
 };
 
-export { getOAuthToken, encryptData, decryptData, createQr };
+const confirmQrPayment = async (
+  transRef: string,
+  sendingBank: string
+): Promise<object> => {
+  try {
+    const response = await fetch(
+      `${SCB_BASE_URL}/v1/payment/billpayment/transactions/${transRef}?sendingBank=${sendingBank}`,
+      {
+        method: 'GET',
+        headers: await buildScbHeaders(true),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('SCB payment confirmation failed');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { getOAuthToken, encryptData, decryptData, createQr, confirmQrPayment };
