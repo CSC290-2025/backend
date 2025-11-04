@@ -1,5 +1,6 @@
 // Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
+import { setupCleanAirRoutes } from '../modules/clean-air/routes';
 
 // ============================================
 // ROUTING OPTIONS:
@@ -23,7 +24,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupAuthRoutes(app);
   // setupPaymentRoutes(app);
   // setupProductRoutes(app);
-  //
+  setupCleanAirRoutes(app);
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
   // ============================================

@@ -22,7 +22,7 @@ const TARGET_DISTRICTS: TargetDistrict[] = [
 ];
 
 function getConfiguredUrl(): string {
-  const url = process.env.AIR4THAI_API_URL;
+  const url = process.env.G05_AIR4THAI_API_URL;
   if (!url) {
     throw new CleanAirConfigurationError('AIR4THAI_API_URL is not configured');
   }

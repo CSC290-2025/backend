@@ -1,1 +1,1 @@
-export * from './clean-air.routes';
+export { setupCleanAirRoutes } from './clean-air.openapi.routes';

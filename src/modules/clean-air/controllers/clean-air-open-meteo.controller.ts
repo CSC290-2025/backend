@@ -2,11 +2,9 @@ import type { Context } from 'hono';
 import { ValidationError } from '@/errors';
 import { successResponse } from '@/utils/response';
 import { CleanAirService } from '../services';
-import type { GetDistrictsQuery } from '../types';
 
 const getDistricts = async (c: Context) => {
-  let query: GetDistrictsQuery | undefined;
-  const districts = await CleanAirService.getDistricts(query);
+  const districts = await CleanAirService.getDistricts();
   return successResponse(c, { districts });
 };
 

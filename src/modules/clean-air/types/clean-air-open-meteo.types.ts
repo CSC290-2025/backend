@@ -69,16 +69,12 @@ export type AirQualityCategory =
   | 'VERY_UNHEALTHY'
   | 'HAZARDOUS';
 
-export interface GetDistrictsQuery {
-  limit?: number;
-}
-
 export interface SearchDistrictQuery {
   q: string;
 }
 
 export interface CleanAirService {
-  getDistricts(query?: GetDistrictsQuery): Promise<DistrictAirQuality[]>;
+  getDistricts(): Promise<DistrictAirQuality[]>;
   getDistrictDetail(district: string): Promise<DistrictDetail>;
   getDistrictHistory(district: string): Promise<DistrictHistory>;
   getDistrictSummary(district: string): Promise<DistrictSummary>;

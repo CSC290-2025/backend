@@ -9,7 +9,6 @@ import type {
   DistrictDetailData,
   DistrictHistory,
   DistrictSummary,
-  GetDistrictsQuery,
   SearchDistrictQuery,
 } from '../types';
 
@@ -266,10 +265,8 @@ function aggregateHourlyHistory(
   return history.slice(0, limitDays);
 }
 
-async function getDistricts(
-  query: GetDistrictsQuery = {}
-): Promise<DistrictAirQuality[]> {
-  const baseUrl = process.env.OPEN_METEO_BASE_URL;
+async function getDistricts(): Promise<DistrictAirQuality[]> {
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
   if (!baseUrl) {
     throw new CleanAirConfigurationError(
       'OPEN_METEO_BASE_URL is not configured'
@@ -298,10 +295,6 @@ async function getDistricts(
     });
   }
 
-  if (query.limit && query.limit > 0) {
-    return results.slice(0, query.limit);
-  }
-
   return results;
 }
 
@@ -322,7 +315,7 @@ async function getDistrictDetail(district: string): Promise<DistrictDetail> {
     throw new ValidationError('District parameter is required');
   }
 
-  const baseUrl = process.env.OPEN_METEO_BASE_URL;
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
   if (!baseUrl) {
     throw new CleanAirConfigurationError(
       'OPEN_METEO_BASE_URL is not configured'
@@ -369,7 +362,7 @@ async function getDistrictHistory(district: string): Promise<DistrictHistory> {
     throw new ValidationError('District parameter is required');
   }
 
-  const baseUrl = process.env.OPEN_METEO_BASE_URL;
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
   if (!baseUrl) {
     throw new CleanAirConfigurationError(
       'OPEN_METEO_BASE_URL is not configured'
@@ -403,7 +396,7 @@ async function getDistrictSummary(district: string): Promise<DistrictSummary> {
     throw new ValidationError('District parameter is required');
   }
 
-  const baseUrl = process.env.OPEN_METEO_BASE_URL;
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
   if (!baseUrl) {
     throw new CleanAirConfigurationError(
       'OPEN_METEO_BASE_URL is not configured'
@@ -438,11 +431,10 @@ async function getDistrictSummary(district: string): Promise<DistrictSummary> {
 
   const sumNumbers = (values: number[]) =>
     values.reduce((acc, value) => acc + value, 0);
-
   const average = {
-    aqi: Math.round((sumNumbers(aqiValues) / aqiValues.length) * 10) / 10,
-    pm25: Math.round((sumNumbers(pm25Values) / pm25Values.length) * 10) / 10,
-    pm10: Math.round((sumNumbers(pm10Values) / pm10Values.length) * 10) / 10,
+    aqi: Math.round(sumNumbers(aqiValues) / aqiValues.length),
+    pm25: Number((sumNumbers(pm25Values) / pm25Values.length).toFixed(1)),
+    pm10: Number((sumNumbers(pm10Values) / pm10Values.length).toFixed(1)),
   };
 
   const maximum = {
@@ -512,10 +504,17 @@ async function getHealthTips(district: string): Promise<string[]> {
     throw new ValidationError('District parameter is required');
   }
 
-  const apiKey = process.env.DEEPINFRA_API_KEY;
+  const apiKey = process.env.G05_GEMINI_API_KEY;
   if (!apiKey) {
-    throw new CleanAirConfigurationError('DEEPINFRA_API_KEY is not configured');
+    throw new CleanAirConfigurationError('GEMINI_API_KEY is not configured');
   }
+
+  const modelName = process.env.G05_GEMINI_MODEL;
+  if (!modelName) {
+    throw new CleanAirConfigurationError('GEMINI_MODEL is not configured');
+  }
+
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
   try {
     const detail = await getDistrictDetail(district);
@@ -535,38 +534,52 @@ async function getHealthTips(district: string): Promise<string[]> {
       `Measured at: ${current.measured_at}`,
       `Provide exactly three short English bullet tips (max 20 words each) that help people stay healthy with the current air quality.`,
       `Keep the tone practical and friendly.`,
+      `Return only the three bullet tips with no introductory or closing sentences.`,
     ].join('\n');
 
-    const response = await axios.post(
-      'https://api.deepinfra.com/v1/openai/chat/completions',
-      {
-        model: 'mistralai/Mistral-Small-3.2-24B-Instruct-2506',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You give concise, actionable health advice in English about air quality. Output should be clean text only.',
-          },
-          { role: 'user', content: prompt },
-        ],
-        max_tokens: 250,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 20000,
-      }
-    );
+    const requestBody = { contents: [{ parts: [{ text: prompt }] }] };
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
 
-    const content = response?.data?.choices?.[0]?.message?.content || '';
-    const lines = content
-      .split('\n')
-      .map((line: string) => line.replace(/^[-•*\d.\s]+/, '').trim())
-      .filter((line: string) => line.length > 0)
-      .slice(0, 3);
+    const raw = await response.text();
+
+    if (!response.ok) {
+      throw new CleanAirConfigurationError(
+        `Gemini request failed (${response.status}): ${raw}`
+      );
+    }
+
+    let lines: string[] = [];
+
+    try {
+      const parsed = JSON.parse(raw) as {
+        candidates?: Array<{
+          content?: { parts?: Array<{ text?: string }> };
+        }>;
+      };
+
+      const combinedText =
+        parsed.candidates
+          ?.flatMap((candidate) => candidate.content?.parts ?? [])
+          .map((part) => part.text?.trim())
+          .filter((text): text is string => Boolean(text))
+          .join('\n') ?? '';
+
+      lines = combinedText
+        .split(/\r?\n|•|\*|-/)
+        .map((line) => line.replace(/^[\s\d.:-]+/, '').trim())
+        .filter(Boolean);
+    } catch {
+      lines = raw
+        .split('\n')
+        .map((line) => line.replace(/^[\s\d.:-]+/, '').trim())
+        .filter(Boolean);
+    }
+
+    lines = lines.slice(0, 3);
 
     if (lines.length === 0) {
       return [
@@ -582,7 +595,7 @@ async function getHealthTips(district: string): Promise<string[]> {
       );
     }
 
-    return lines.slice(0, 3);
+    return lines;
   } catch (error) {
     console.log('getHealthTips error', error);
     return [

@@ -5,7 +5,6 @@ import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
-import { cleanAirRoutes } from './modules/clean-air';
 // const app = new Hono();
 const app = new OpenAPIHono();
 
@@ -27,7 +26,6 @@ app.doc('/doc', {
   ],
 });
 
-app.route('/clean-air', cleanAirRoutes);
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 app.get('/', (c) => {
