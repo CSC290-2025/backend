@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { ValidationError } from '@/errors';
 import { CleanAirConfigurationError, CleanAirProviderError } from '../error';
 
@@ -25,6 +24,68 @@ const DETAIL_CURRENT_PARAMS =
 const HISTORY_HOURLY_PARAMS =
   'pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone';
 const HISTORY_PAST_DAYS = 7;
+
+type QueryValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Array<string | number | boolean | null | undefined>;
+
+function buildQuery(params: Record<string, QueryValue>): string {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((entry) => {
+        if (entry !== undefined && entry !== null) {
+          searchParams.append(key, String(entry));
+        }
+      });
+      return;
+    }
+    searchParams.append(key, String(value));
+  });
+
+  const query = searchParams.toString();
+  return query ? `?${query}` : '';
+}
+
+async function fetchJson<T>(
+  url: string,
+  params: Record<string, QueryValue>,
+  timeoutMs = 15000
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(`${url}${buildQuery(params)}`, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(
+        `Request failed with status ${response.status}: ${text.slice(0, 200)}`
+      );
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 function getAirCategory(aqi: number) {
   if (aqi <= 50) return 'GOOD';
@@ -105,27 +166,24 @@ async function fetchCurrentAirQuality(
 ): Promise<any> {
   try {
     const url = `${baseUrl}/air-quality`;
-    const response = await axios.get(url, {
-      params: {
-        latitude: lat,
-        longitude: lng,
-        current: currentParams,
-        timezone: 'Asia/Bangkok',
-        domains: 'cams_global',
-        timeformat: 'unixtime',
-      },
-      timeout: 15000,
+    const data = await fetchJson<Record<string, any>>(url, {
+      latitude: lat,
+      longitude: lng,
+      current: currentParams,
+      timezone: 'Asia/Bangkok',
+      domains: 'cams_global',
+      timeformat: 'unixtime',
     });
 
-    if (!response || !response.data || !response.data.current) {
-      console.log('fetchCurrentAirQuality no data', response?.data);
+    if (!data || !data.current) {
+      console.log('fetchCurrentAirQuality no data', data);
       throw new CleanAirProviderError(
         'Invalid response from air quality provider',
         'open-meteo'
       );
     }
 
-    return response.data.current;
+    return data.current;
   } catch (error) {
     console.log('fetchCurrentAirQuality error', error);
     throw new CleanAirProviderError(
@@ -143,29 +201,26 @@ async function fetchHourlyAirQuality(
 ): Promise<any> {
   try {
     const url = `${baseUrl}/air-quality`;
-    const response = await axios.get(url, {
-      params: {
-        latitude: lat,
-        longitude: lng,
-        hourly: hourlyParams,
-        past_days: HISTORY_PAST_DAYS,
-        forecast_days: 1,
-        timezone: 'Asia/Bangkok',
-        domains: 'cams_global',
-        timeformat: 'unixtime',
-      },
-      timeout: 15000,
+    const data = await fetchJson<Record<string, any>>(url, {
+      latitude: lat,
+      longitude: lng,
+      hourly: hourlyParams,
+      past_days: HISTORY_PAST_DAYS,
+      forecast_days: 1,
+      timezone: 'Asia/Bangkok',
+      domains: 'cams_global',
+      timeformat: 'unixtime',
     });
 
-    if (!response || !response.data || !response.data.hourly) {
-      console.log('fetchHourlyAirQuality no data', response?.data);
+    if (!data || !data.hourly) {
+      console.log('fetchHourlyAirQuality no data', data);
       throw new CleanAirProviderError(
         'Invalid response from air quality provider',
         'open-meteo'
       );
     }
 
-    return response.data.hourly;
+    return data.hourly;
   } catch (error) {
     console.log('fetchHourlyAirQuality error', error);
     throw new CleanAirProviderError(

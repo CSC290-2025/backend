@@ -1,4 +1,3 @@
-import axios from 'axios';
 import https from 'https';
 import { CleanAirConfigurationError, CleanAirProviderError } from '../error';
 import type {
@@ -125,14 +124,59 @@ function emptyDistrictRecord(district: string): Air4ThaiDistrictAirQuality {
 async function fetchStations(): Promise<Air4ThaiStation[]> {
   const url = getConfiguredUrl();
   try {
-    const response = await axios.get(url, {
-      timeout: 15000,
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+    const rawText = await new Promise<string>((resolve, reject) => {
+      const request = https.request(
+        url,
+        { method: 'GET', rejectUnauthorized: false },
+        (response) => {
+          if (response.statusCode && response.statusCode >= 400) {
+            reject(
+              new Error(
+                `Request failed with status ${response.statusCode}: ${
+                  response.statusMessage ?? ''
+                }`
+              )
+            );
+            response.resume();
+            return;
+          }
+
+          response.setEncoding('utf8');
+          const chunks: string[] = [];
+
+          response.on('data', (chunk) => {
+            chunks.push(chunk);
+          });
+
+          response.on('end', () => {
+            resolve(chunks.join(''));
+          });
+        }
+      );
+
+      const timeout = setTimeout(() => {
+        request.destroy(new Error('Request timed out'));
+      }, 15000);
+
+      request.on('error', (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+
+      request.on('close', () => {
+        clearTimeout(timeout);
+      });
+
+      request.end();
     });
 
-    let payload: unknown = response?.data;
-    if (typeof payload === 'string') {
-      payload = JSON.parse(payload);
+    let payload: unknown = rawText;
+    if (rawText.trim().length > 0) {
+      try {
+        payload = JSON.parse(rawText);
+      } catch (error) {
+        console.log('fetchStations parse error', error);
+      }
     }
 
     const data = payload as Air4ThaiApiResponse;
