@@ -71,7 +71,6 @@ model apartment {
   name               String?             @db.VarChar(255)
   phone              String?             @db.VarChar(10)
   description        String?
-  rating_id          Int?
   electric_price     Float?
   water_price        Float?
   internet           apartment_internet?
@@ -79,7 +78,6 @@ model apartment {
   apartment_location apartment_location?
   address_id         Int?
   addresses          addresses?          @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rating             rating?             @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   apartment_owner    apartment_owner[]
   apartment_picture  apartment_picture[]
   room               room[]
@@ -627,13 +625,13 @@ model questions {
 }
 
 model rating {
-  id         Int         @id @default(autoincrement())
-  user_id    Int
-  rating     Float?
-  comment    String?
-  created_at DateTime?   @db.Timestamptz(6)
-  apartment  apartment[]
-  users      users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  rating       Float?
+  comment      String?
+  created_at   DateTime? @db.Timestamptz(6)
+  apartment_id Int?
+  users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model receiver_requests {
