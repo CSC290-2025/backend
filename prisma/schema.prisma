@@ -38,11 +38,6 @@ model air_quality {
   location_id Int?
   aqi         Decimal?              @db.Decimal(6, 2)
   pm25        Decimal?              @db.Decimal(8, 3)
-  pm10        Decimal?              @db.Decimal(8, 3)
-  co          Decimal?              @db.Decimal(8, 3)
-  no2         Decimal?              @db.Decimal(8, 3)
-  so2         Decimal?              @db.Decimal(8, 3)
-  o3          Decimal?              @db.Decimal(8, 3)
   category    air_quality_category?
   measured_at DateTime              @default(now()) @db.Timestamptz(6)
   addresses   addresses?            @relation(fields: [location_id], references: [id], onUpdate: NoAction)
@@ -302,20 +297,21 @@ model emergency_contacts {
 }
 
 model emergency_reports {
-  id                 Int                      @id @default(autoincrement())
-  user_id            Int?
-  image_url          String?                  @db.VarChar(1024)
-  description        String?
-  location           Unsupported("geometry")?
-  ambulance_service  Boolean?                 @default(false)
-  level              report_level?
-  status             report_status?           @default(pending)
-  report_category_id Int?
-  created_at         DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime                 @default(now()) @db.Timestamptz(6)
-  alerts             alerts[]
-  report_categories  report_categories?       @relation(fields: [report_category_id], references: [id], onUpdate: NoAction)
-  users              users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  id                     Int                      @id @default(autoincrement())
+  user_id                Int?
+  image_url              String?                  @db.VarChar(1024)
+  description            String?
+  location               Unsupported("geometry")?
+  ambulance_service      Boolean?                 @default(false)
+  level                  report_level?
+  status                 report_status?           @default(pending)
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  title                  String
+  contact_center_service Boolean?                 @default(false)
+  report_category        report_type?
+  alerts                 alerts[]
+  users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([location], map: "idx_emergency_reports_location", type: Gist)
 }
@@ -343,10 +339,13 @@ model events {
   address_id             Int?
   created_at             DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  organization_id        Int?
   event_bookmarks        event_bookmarks[]
+  event_tag              event_tag?
   addresses              addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   departments            departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
   users                  users?                   @relation(fields: [host_user_id], references: [id], onUpdate: NoAction)
+  event_organization     event_organization?      @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "organization_id")
   waste_event_statistics waste_event_statistics[]
 
   @@index([start_at], map: "idx_events_start_at")
@@ -434,6 +433,7 @@ model fcm_token {
   user_id    Int?
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  tokens     String
   users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
@@ -657,11 +657,10 @@ model refresh_tokens {
 }
 
 model report_categories {
-  id                Int                 @id @default(autoincrement())
-  name              String              @unique @db.VarChar(255)
-  created_at        DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
-  emergency_reports emergency_reports[]
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
 model reports_metadata {
@@ -752,8 +751,9 @@ model spatial_ref_sys {
 }
 
 model specialty {
-  id             Int    @id @default(autoincrement())
-  specialty_name String @unique @db.VarChar(50)
+  id              Int               @id @default(autoincrement())
+  specialty_name  String            @unique @db.VarChar(50)
+  users_specialty users_specialty[]
 }
 
 model stops {
@@ -796,6 +796,7 @@ model traffic_lights {
   density_level   Int?                     @db.SmallInt
   auto_mode       Boolean?                 @default(true)
   last_updated    DateTime                 @default(now()) @db.Timestamptz(6)
+  road_id         Int?
   light_requests  light_requests[]
   intersections   intersections?           @relation(fields: [intersection_id], references: [id], onUpdate: NoAction)
 
@@ -869,6 +870,8 @@ model users {
   emergency_contacts            emergency_contacts[]
   emergency_reports             emergency_reports[]
   event_bookmarks               event_bookmarks[]
+  event_organization            event_organization?
+  event_tag_name                event_tag_name?
   events                        events[]
   fcm_token                     fcm_token[]
   freecycle_posts               freecycle_posts[]
@@ -889,6 +892,7 @@ model users {
   user_profiles                 user_profiles?
   roles                         roles?                          @relation(fields: [role_id], references: [id], onUpdate: NoAction)
   users_departments             users_departments[]
+  users_specialty               users_specialty[]
   vehicles                      vehicles[]
   volunteer_event_participation volunteer_event_participation[]
   volunteer_events              volunteer_events[]
@@ -1011,6 +1015,39 @@ model weather_data {
   addresses            addresses? @relation(fields: [location_id], references: [id], onUpdate: NoAction)
 }
 
+model users_specialty {
+  user_id      Int
+  specialty_id Int
+  specialty    specialty @relation(fields: [specialty_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@id([user_id, specialty_id])
+}
+
+model event_organization {
+  id           Int      @id
+  name         String?  @db.VarChar(255)
+  email        String?  @db.VarChar(255)
+  phone_number String?  @db.VarChar(255)
+  users        users    @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  events       events[]
+}
+
+model event_tag {
+  event_id       Int             @id(map: "pk_event_tag")
+  event_tag_id   Int?
+  name           String?         @db.VarChar(255)
+  events         events          @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_tag_name event_tag_name? @relation(fields: [event_tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model event_tag_name {
+  id        Int         @id
+  name      String?     @db.VarChar(255)
+  event_tag event_tag[]
+  users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
 enum air_quality_category {
   good
   moderate
@@ -1131,12 +1168,8 @@ enum wallet_type {
   organization
 }
 
-// Example model for reference (src/modules/_example)
-model Product {
-  id        String   @id @default(cuid())
-  name      String
-  price     Float
-  category  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum report_type {
+  traffic
+  accident
+  disaster
 }
