@@ -51,13 +51,84 @@ export async function getApartmentById(id: number) {
   }
 }
 
-export async function getApartmentByIdSimplified(id: number) {
+export async function getApartmentWithRating(id: number) {
   try {
-    // Try fetching without includes first to isolate the issue
-    const response = await prisma.apartment.findUnique({
+    const apartment = await prisma.apartment.findUnique({
       where: { id },
+      include: {
+        apartment_owner: {
+          include: {
+            users: true,
+          },
+        },
+        addresses: true,
+        room: true,
+      },
     });
-    return response;
+
+    if (!apartment) return null;
+    // Calculate average rating - with better error handling
+    try {
+      const ratingData = await prisma.rating.aggregate({
+        where: {
+          apartment: { some: { id } },
+          rating: { not: null },
+        },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+      return {
+        ...apartment,
+        averageRating: ratingData._avg.rating ?? 0,
+        totalRatings: ratingData._count.rating,
+      };
+    } catch (ratingError) {
+      console.error('Rating aggregation error:', ratingError);
+      // Return apartment without rating if rating query fails
+      return {
+        ...apartment,
+        averageRating: 0,
+        totalRatings: 0,
+      };
+    }
+  } catch (error) {
+    console.error('Prisma Find Error:', error);
+    throw handlePrismaError(error);
+  }
+}
+
+export async function getAllApartmentsWithRating() {
+  try {
+    const apartments = await prisma.apartment.findMany({
+      include: {
+        apartment_owner: {
+          include: {
+            users: true,
+          },
+        },
+        addresses: true,
+        room: true,
+      },
+    });
+    // Get ratings for all apartments in parallel
+    const apartmentsWithRatings = await Promise.all(
+      apartments.map(async (apartment) => {
+        const ratingData = await prisma.rating.aggregate({
+          where: {
+            apartment: { some: { id: apartment.id } },
+            rating: { not: null },
+          },
+          _avg: { rating: true },
+          _count: { rating: true },
+        });
+        return {
+          ...apartment,
+          averageRating: ratingData._avg.rating ?? 0,
+          totalRatings: ratingData._count.rating,
+        };
+      })
+    );
+    return apartmentsWithRatings;
   } catch (error) {
     console.error('Prisma Find Error:', error);
     throw handlePrismaError(error);
