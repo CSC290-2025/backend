@@ -16,11 +16,13 @@ export const findReportByStatus = async (c: Context) => {
   const page = Number(_page);
   const limit = Number(_limit);
 
-  const report = await ReportService.findReportByStatus(
+  const { report, totalPage } = await ReportService.findReportByStatus(
     statusParam as ReportStatus,
     page,
     limit
   );
+  c.header('Access-Control-Expose-Headers', 'x-total-count');
+  c.header('x-total-count', totalPage.toString());
   return successResponse(
     c,
     { report },

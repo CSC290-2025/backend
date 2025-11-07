@@ -40,4 +40,9 @@ const ReportResponseSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
-export { CreateReportSchema, ReportResponseSchema };
+const PaginatedReportSchema = z.object({
+  report: z.array(ReportResponseSchema),
+  totalPage: z.number(),
+});
+
+export { CreateReportSchema, ReportResponseSchema, PaginatedReportSchema };

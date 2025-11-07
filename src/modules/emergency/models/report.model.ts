@@ -1,6 +1,10 @@
 import prisma from '@/config/client.ts';
 import { handlePrismaError, ValidationError } from '@/errors';
-import type { CreateReport, ReportResponse } from '@/modules/emergency/types';
+import type {
+  CreateReport,
+  PaginatedReport,
+  ReportResponse,
+} from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 
 const createReport = async (data: CreateReport): Promise<ReportResponse> => {
@@ -28,20 +32,27 @@ const findReportByStatus = async (
   status: ReportStatus,
   page: number,
   perPage: number
-): Promise<ReportResponse[]> => {
+): Promise<PaginatedReport> => {
   try {
     if (status === null || !status) {
       throw new ValidationError('Status is required');
     }
+
+    if (!page || !perPage || isNaN(page) || isNaN(perPage)) {
+      throw new ValidationError('Page and perPage must be valid numbers');
+    }
     const report = await prisma.emergency_reports.findMany({
       skip: (page - 1) * perPage,
-      take: perPage,
       where: {
         status: status,
       },
+      take: perPage,
+      orderBy: { created_at: 'desc' },
     });
-
-    return report.map((r) => ({
+    const totalPage = await prisma.emergency_reports.count({
+      where: { status },
+    });
+    const reportRes = report.map((r) => ({
       id: r.id,
       image_url: r.image_url,
       description: r.description,
@@ -53,7 +64,13 @@ const findReportByStatus = async (
       updated_at: r.updated_at,
       title: r.title,
       user_id: r.user_id,
+      total: totalPage,
     }));
+
+    return {
+      report: reportRes,
+      totalPage: totalPage,
+    };
   } catch (error) {
     console.log(error);
     handlePrismaError(error);
