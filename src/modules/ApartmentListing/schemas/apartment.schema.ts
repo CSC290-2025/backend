@@ -35,23 +35,7 @@ const ApartmentSchema = z.object({
   address_id: z.int().nullable(),
 });
 
-const ApartmentWithRatingSchema = z.object({
-  id: z.int(),
-  name: z.string().min(2).max(255).nullable(),
-  phone: z.string().min(10).max(10).nullable(),
-  description: z.string().min(0).nullable(),
-  electric_price: z.number().min(0).nullable(),
-  water_price: z.number().min(0).nullable(),
-  apartment_type: z.enum(['dormitory', 'apartment']).nullable(),
-  apartment_location: z.enum(['asoke', 'prachauthit', 'phathumwan']).nullable(),
-  internet: z.enum(['free', 'not_free', 'none']).nullable(),
-  address_id: z.int().nullable(),
-  averageRating: z.number().min(0).max(5),
-  totalRatings: z.number().int().min(0),
-});
-
 const ApartmentListSchema = z.array(ApartmentSchema);
-const ApartmenWithRatingListSchema = z.array(ApartmentSchema);
 
 const createApartmentSchema = z.object({
   name: z.string().min(2).max(255),
@@ -136,16 +120,16 @@ const DeleteApartmentRoute = createDeleteRoute({
 
 const getApartmentbyIDRoute = createGetRoute({
   path: '/apartments/{id}',
-  summary: 'Get an apartment by ID with rating',
+  summary: 'Get an apartment by ID',
   params: ApartmentIdParam,
-  responseSchema: ApartmentWithRatingSchema,
+  responseSchema: ApartmentSchema,
   tags: ['Apartment'],
 });
 
 const getAllApartmentsRoute = createGetRoute({
   path: '/apartments',
   summary: 'Get all apartments',
-  responseSchema: ApartmenWithRatingListSchema,
+  responseSchema: z.array(ApartmentSchema),
   tags: ['Apartment'],
 });
 

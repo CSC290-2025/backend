@@ -6,14 +6,14 @@ import type {
   updateApartmentData,
 } from '../types';
 
-const getApartmentByID = async (id: number) => {
-  const apartment = await apartmentModel.getApartmentWithRating(id);
+const getApartmentByID = async (id: number): Promise<Apartment> => {
+  const apartment = await apartmentModel.getApartmentById(id);
   if (!apartment) throw new NotFoundError('Apartment not found');
   return apartment;
 };
 
-const getAllApartments = async () => {
-  const apartments = await apartmentModel.getAllApartmentsWithRating();
+const getAllApartments = async (): Promise<Apartment[]> => {
+  const apartments = await apartmentModel.getAllApartments();
   if (!apartments) throw new NotFoundError('No apartments found');
   return apartments;
 };

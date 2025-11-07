@@ -27,14 +27,12 @@ const getAverageRatingByApartment = async (
   if (apartment === null) throw new NotFoundError('Apartment not found');
   return apartment;
 };
-//fix this
 const getAllComments = async (): Promise<Rating[]> => {
   const comments = await ratingModel.getAllComments();
   if (!comments) throw new NotFoundError('No comments found');
   return comments.map((comment) => ({
     id: comment.id,
-    //error, need to fix db schema to return apartment id properly
-    apartmentId: comment.apartment[0]?.id ?? 0,
+    apartmentId: comment.apartment?.id ?? 0,
     userId: comment.user_id,
     rating: comment.rating,
     comment: comment.comment,
@@ -63,8 +61,7 @@ const updateRating = async (data: updateRatingData): Promise<Rating> => {
 
   return {
     id: existingRating.id,
-    //error, need to fix db schema to return apartment id properly
-    apartmentId: existingRating.apartment[0]?.id ?? 0,
+    apartmentId: existingRating.apartment?.id ?? 0,
     userId: existingRating.user_id,
     rating: existingRating.rating,
     comment: existingRating.comment,

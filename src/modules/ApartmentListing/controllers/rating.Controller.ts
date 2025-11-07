@@ -45,7 +45,7 @@ export async function updateRatingController(c: Context) {
   );
 }
 export async function deleteRatingController(c: Context) {
-  const data = await c.req.json();
-  await ratingService.deleteRating(data);
+  const id = Number(c.req.param('id'));
+  await ratingService.deleteRating(id);
   return successResponse(c, { message: 'Rating deleted successfully' }, 200);
 }

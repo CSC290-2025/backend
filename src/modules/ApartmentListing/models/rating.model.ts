@@ -6,7 +6,7 @@ export const getCommentsByApartment = async (apartmentId: number) => {
   try {
     const comments = await prisma.rating.findMany({
       where: {
-        apartment: { some: { id: apartmentId } },
+        apartment_id: apartmentId,
         comment: { not: null },
       },
       include: {
@@ -25,7 +25,7 @@ export const getAverageRatingByApartment = async (apartmentId: number) => {
   try {
     const agg = await prisma.rating.aggregate({
       where: {
-        apartment: { some: { id: apartmentId } },
+        apartment_id: apartmentId,
         rating: { not: null },
       },
       _avg: { rating: true },
@@ -54,7 +54,7 @@ export const createRating = async (data: createRatingData) => {
   try {
     const existing = await prisma.rating.findFirst({
       where: {
-        apartment: { some: { id: data.apartmentId } },
+        apartment_id: data.apartmentId,
         user_id: data.userId,
       },
     });
@@ -67,7 +67,7 @@ export const createRating = async (data: createRatingData) => {
     return await prisma.rating.create({
       data: {
         user_id: data.userId,
-        apartment: { connect: { id: data.apartmentId } },
+        apartment_id: data.apartmentId,
         rating: data.rating,
         comment: data.comment ?? '',
       },
@@ -113,16 +113,3 @@ export const deleteRating = async (id: number) => {
     throw handlePrismaError(error);
   }
 };
-
-//bugged, need schema.prisma fixed for rating table. apartment has to NOT be an array
-// export const countRating = async (apartmentId: number) =>{
-//   try {
-//     return await prisma.rating.count({
-//       where: {
-//         apartment: apartmentId,
-//       },
-//     });
-//   } catch (error) {
-//     throw handlePrismaError(error);
-//   }
-// }
