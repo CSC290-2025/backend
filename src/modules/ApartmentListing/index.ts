@@ -7,4 +7,4 @@ export { setupApartmentRoutes } from './routes/apartment.route';
 export { setupRatingRoutes } from './routes/rating.route';
 export { setupRoomRoutes } from './routes/room.route';
 export { setupAddressRoutes } from './routes/address.route';
-// export {setupBookingRoutes} from './routes/booking.route';
+export { setupBookingRoutes } from './routes/booking.route';
