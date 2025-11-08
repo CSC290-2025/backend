@@ -80,6 +80,7 @@ model apartment {
   addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   apartment_owner    apartment_owner[]
   apartment_picture  apartment_picture[]
+  rating             rating[]
   room               room[]
 }
 
@@ -627,13 +628,14 @@ model questions {
 }
 
 model rating {
-  id           Int       @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   user_id      Int
   rating       Float?
   comment      String?
-  created_at   DateTime? @db.Timestamptz(6)
+  created_at   DateTime?  @db.Timestamptz(6)
   apartment_id Int?
-  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  apartment    apartment? @relation(fields: [apartment_id], references: [id], onUpdate: NoAction)
+  users        users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model receiver_requests {
