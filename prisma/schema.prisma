@@ -71,15 +71,13 @@ model apartment {
   name               String?             @db.VarChar(255)
   phone              String?             @db.VarChar(10)
   description        String?
-  rating_id          Int?
   electric_price     Float?
   water_price        Float?
   internet           apartment_internet?
   apartment_type     apartment_type?
   apartment_location apartment_location?
   address_id         Int?
-  addresses          addresses?          @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rating             rating?             @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   apartment_owner    apartment_owner[]
   apartment_picture  apartment_picture[]
   room               room[]
@@ -92,7 +90,9 @@ model apartment_booking {
   booking_status booking_status? @default(pending)
   created_at     DateTime?       @db.Timestamptz(6)
   updated_at     DateTime?       @db.Timestamptz(6)
-  users          users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  room_id        Int?
+  users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
 
 model apartment_owner {
@@ -100,7 +100,7 @@ model apartment_owner {
   user_id      Int
   apartment_id Int
   apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model apartment_picture {
@@ -627,13 +627,13 @@ model questions {
 }
 
 model rating {
-  id         Int         @id @default(autoincrement())
-  user_id    Int
-  rating     Float?
-  comment    String?
-  created_at DateTime?   @db.Timestamptz(6)
-  apartment  apartment[]
-  users      users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  rating       Float?
+  comment      String?
+  created_at   DateTime? @db.Timestamptz(6)
+  apartment_id Int?
+  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model receiver_requests {
@@ -692,15 +692,16 @@ model roles {
 }
 
 model room {
-  id           Int          @id @default(autoincrement())
-  name         String?      @db.VarChar(255)
-  type         String?      @db.VarChar(255)
-  size         String?      @db.VarChar(50)
-  room_status  room_status?
-  price_start  Float?
-  price_end    Float?
-  apartment_id Int?
-  apartment    apartment?   @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  type              String?             @db.VarChar(255)
+  size              String?             @db.VarChar(50)
+  room_status       room_status?
+  price_start       Float?
+  price_end         Float?
+  apartment_id      Int?
+  apartment_booking apartment_booking[]
+  apartment         apartment?          @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model route_stops {
