@@ -34,6 +34,9 @@ const deleteRatingSchema = z.object({
   id: z.int(),
 });
 
+const ratingParam = z.object({
+  id: z.coerce.number().int().positive(),
+});
 //openAPI
 const createRatingRoute = createPostRoute({
   path: '/ratings',
@@ -48,13 +51,13 @@ const updateRatingRoute = createPutRoute({
   summary: 'Update an existing rating',
   requestSchema: updateRatingSchema,
   responseSchema: RatingSchema,
-  params: updateRatingSchema,
+  params: ratingParam,
   tags: ['Rating'],
 });
 const deleteRatingRoute = createDeleteRoute({
   path: '/ratings/{id}',
   summary: 'Delete an existing rating',
-  params: deleteRatingSchema,
+  params: ratingParam,
   tags: ['Rating'],
 });
 

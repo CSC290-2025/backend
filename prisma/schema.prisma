@@ -694,16 +694,16 @@ model roles {
 }
 
 model room {
-  id                Int                 @id @default(autoincrement())
-  name              String?             @db.VarChar(255)
-  type              String?             @db.VarChar(255)
-  size              String?             @db.VarChar(50)
-  room_status       room_status?
-  price_start       Float?
-  price_end         Float?
-  apartment_id      Int?
-  apartment_booking apartment_booking[]
-  apartment         apartment?          @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           Int                 @id @default(autoincrement())
+  name         String?             @db.VarChar(255)
+  type         String?             @db.VarChar(255)
+  size         String?             @db.VarChar(50)
+  room_status  room_status?
+  price_start  Float?
+  price_end    Float?
+  apartment_id Int?
+  booking      apartment_booking[]
+  apartment    apartment?          @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model route_stops {

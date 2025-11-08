@@ -12,6 +12,7 @@ export async function getApartmentByID(c: Context) {
   const apartment = await apartmentService.getApartmentByID(id);
   return successResponse(c, { apartment });
 }
+
 export async function createApartment(c: Context) {
   const data = await c.req.json();
   const apartment = await apartmentService.createApartment(data);
@@ -22,7 +23,6 @@ export async function createApartment(c: Context) {
     'Apartment created successfully'
   );
 }
-
 export async function updateApartment(c: Context) {
   const id = Number(c.req.param('id'));
   const data = await c.req.json();
