@@ -19,6 +19,37 @@ const createWallet = async (data: CreateWalletData): Promise<Wallet> => {
 
   return await WalletModel.createWallet(data.user_id, data);
 };
+const transferFunds = async (
+  fromUserId: number,
+  toUserId: number,
+  amount: number
+): Promise<{ status: string }> => {
+  if (amount <= 0) {
+    throw new ValidationError('Transfer amount must be positive');
+  }
+
+  const fromWallet = await WalletModel.findWalletByUserId(fromUserId);
+  const toWallet = await WalletModel.findWalletByUserId(toUserId);
+
+  if (!fromWallet) {
+    throw new NotFoundError('Sender wallet not found');
+  }
+  if (!toWallet) {
+    throw new NotFoundError('Recipient wallet not found');
+  }
+
+  if (fromWallet.balance < amount) {
+    throw new ValidationError('Insufficient funds');
+  }
+
+  await WalletModel.updateWalletBalance(
+    fromWallet.id,
+    fromWallet.balance - amount
+  );
+  await WalletModel.updateWalletBalance(toWallet.id, toWallet.balance + amount);
+
+  return { status: 'success' };
+};
 
 const updateWallet = async (
   id: number,
@@ -58,4 +89,5 @@ export {
   updateWallet,
   getUserWallets,
   topUpBalance,
+  transferFunds,
 };
