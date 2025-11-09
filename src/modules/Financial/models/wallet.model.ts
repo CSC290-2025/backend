@@ -33,23 +33,12 @@ const createWallet = async (
   }
 };
 
-const findWalletsByUserId = async (userId: number): Promise<Wallet[]> => {
+const findWalletByUserId = async (userId: number): Promise<Wallet> => {
   try {
-    const wallets = await prisma.wallets.findMany({
+    const wallet = await prisma.wallets.findFirstOrThrow({
       where: { owner_id: userId },
     });
-    return wallets.map(transformWallet);
-  } catch (error) {
-    handlePrismaError(error);
-  }
-};
-
-const findWalletByUserId = async (userId: number): Promise<Wallet | null> => {
-  try {
-    const wallet = await prisma.wallets.findFirst({
-      where: { owner_id: userId },
-    });
-    return wallet ? transformWallet(wallet) : null;
+    return transformWallet(wallet);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -104,7 +93,6 @@ const updateWalletBalance = async (
 
 export {
   createWallet,
-  findWalletsByUserId,
   findWalletByUserId,
   findWalletById,
   updateWallet,

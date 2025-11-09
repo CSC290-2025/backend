@@ -10,8 +10,8 @@ const getWalletById = async (id: number): Promise<Wallet> => {
 
 const createWallet = async (data: CreateWalletData): Promise<Wallet> => {
   // Check if user already has a wallet
-  const existingWallets = await WalletModel.findWalletsByUserId(data.user_id);
-  if (existingWallets.length > 0) {
+  const existingWallet = await WalletModel.findWalletByUserId(data.user_id);
+  if (existingWallet) {
     throw new ValidationError(
       'User already has a wallet. Only one wallet per user is allowed.'
     );
@@ -61,8 +61,8 @@ const updateWallet = async (
   return await WalletModel.updateWallet(id, data);
 };
 
-const getUserWallets = async (userId: number): Promise<Wallet[]> => {
-  return await WalletModel.findWalletsByUserId(userId);
+const getUserWallets = async (userId: number): Promise<Wallet> => {
+  return await WalletModel.findWalletByUserId(userId);
 };
 
 const topUpBalance = async (
