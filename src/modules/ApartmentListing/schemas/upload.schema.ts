@@ -4,7 +4,6 @@ import {
   createPostRoute,
 } from '@/utils/openapi-helpers';
 import { z } from 'zod';
-import { fi } from 'zod/v4/locales';
 
 // Data schema for upload response
 const uploadDataSchema = z.object({

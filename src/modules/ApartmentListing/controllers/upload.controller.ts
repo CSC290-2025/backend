@@ -1,5 +1,4 @@
 import { successResponse } from '@/utils/response';
-import { deleteUploadFile } from '@/utils/upload';
 import { ValidationError, InternalServerError } from '@/errors';
 import type { Context } from 'hono';
 import { uploadModel } from '../models/index';
