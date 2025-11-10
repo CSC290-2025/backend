@@ -89,9 +89,13 @@ model apartment_booking {
   user_id        Int
   check_in       DateTime?       @db.Timestamptz(6)
   booking_status booking_status? @default(pending)
-  created_at     DateTime?       @db.Timestamptz(6)
-  updated_at     DateTime?       @db.Timestamptz(6)
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
   room_id        Int?
+  guest_name     String?         @db.VarChar(255)
+  guest_phone    String?         @db.VarChar(10)
+  guest_email    String?         @db.VarChar(255)
+  room_type      String?         @db.VarChar(255)
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
@@ -694,16 +698,16 @@ model roles {
 }
 
 model room {
-  id           Int                 @id @default(autoincrement())
-  name         String?             @db.VarChar(255)
-  type         String?             @db.VarChar(255)
-  size         String?             @db.VarChar(50)
-  room_status  room_status?
-  price_start  Float?
-  price_end    Float?
-  apartment_id Int?
-  booking      apartment_booking[]
-  apartment    apartment?          @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  type              String?             @db.VarChar(255)
+  size              String?             @db.VarChar(50)
+  room_status       room_status?
+  price_start       Float?
+  price_end         Float?
+  apartment_id      Int?
+  apartment_booking apartment_booking[]
+  apartment         apartment?          @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model route_stops {
