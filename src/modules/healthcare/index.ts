@@ -5,9 +5,15 @@ export type * from './types';
 
 // Export model functions under a namespace for clarity
 export * as PatientModel from './models';
+export * as BedModel from './models/bed.model';
 
 // Export schemas for OpenAPI usage and validation
-export { PatientSchemas } from './schemas';
+export { PatientSchemas, BedSchemas } from './schemas';
 
 // Export routes (both normal Hono and OpenAPI variants)
-export { patientRoutes, setupPatientRoutes } from './routes';
+export {
+  patientRoutes,
+  setupPatientRoutes,
+  bedRoutes,
+  setupBedRoutes,
+} from './routes';
