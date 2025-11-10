@@ -110,6 +110,7 @@ const createRoomRoute = createPostRoute({
   params: ApartmentSchemas.ApartmentIdParam,
   tags: ['Room'],
 });
+
 const updateRoomRoute = createPutRoute({
   path: '/apartments/{id}/rooms/{roomId}',
   summary: 'Update an existing room',
