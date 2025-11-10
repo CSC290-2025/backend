@@ -33,7 +33,7 @@
 
 import type { Context, Handler } from 'hono';
 import { addressService } from '../services/addressG5.service';
-import type { Address } from '../types/addressG5.types';
+import type { AddressG5 } from '../types/addressG5.types';
 
 export const addressController = {
   getUsersByDistrict: (async (c: Context) => {
@@ -48,7 +48,7 @@ export const addressController = {
 
     const users = await addressService.getUsersByDistrict(district);
 
-    const addresses: Address[] = users
+    const addresses: AddressG5[] = users
       .map((u) => u.address)
       .filter((a) => a !== null);
 

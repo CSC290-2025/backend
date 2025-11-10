@@ -9,7 +9,6 @@ export const addressService = {
 
     const users = await addressModel.getUsersByDistrict(district);
 
-    // Return empty array if no users found
     return users || [];
   },
 };

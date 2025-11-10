@@ -10,6 +10,8 @@ import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 
 const app = new OpenAPIHono();
+app.route('/citizens', addressRoutes);
+app.route('/citizens', specialistRoutes);
 app.onError(errorHandler);
 
 app.use(

@@ -1,4 +1,4 @@
-export interface Address {
+export interface AddressG5 {
   id: number;
   address_line: string | null;
   province: string | null;
@@ -11,5 +11,5 @@ export interface UserWithAddress {
   id: number;
   username: string;
   email: string;
-  address: Address | null;
+  address: AddressG5 | null;
 }
