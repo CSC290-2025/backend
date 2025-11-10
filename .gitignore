@@ -111,5 +111,6 @@ CLAUDE.md
 .vscode/.ai/
 .vscode-ai/
 
-# Upload File
-uploads/
+# Service Account
+serviceAccount.json
+service-account.json
