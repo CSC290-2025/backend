@@ -7,9 +7,15 @@ export type * from './types';
 export * as PatientModel from './models';
 export * as BedModel from './models/bed.model';
 export * as FacilityModel from './models/facility.model';
+export * as AppointmentModel from './models/appointment.model';
 
 // Export schemas for OpenAPI usage and validation
-export { PatientSchemas, BedSchemas, FacilitySchemas } from './schemas';
+export {
+  PatientSchemas,
+  BedSchemas,
+  FacilitySchemas,
+  AppointmentSchemas,
+} from './schemas';
 
 // Export routes (both normal Hono and OpenAPI variants)
 export {
@@ -19,4 +25,6 @@ export {
   setupBedRoutes,
   facilityRoutes,
   setupFacilityRoutes,
+  appointmentRoutes,
+  setupAppointmentRoutes,
 } from './routes';

@@ -16,6 +16,7 @@ import {
   setupPatientRoutes,
   setupBedRoutes,
   setupFacilityRoutes,
+  setupAppointmentRoutes,
 } from '@/modules/healthcare/routes';
 
 // Normal Hono Routes (not in Swagger docs)
@@ -31,6 +32,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupPatientRoutes(app);
   setupBedRoutes(app);
   setupFacilityRoutes(app);
+  setupAppointmentRoutes(app);
   //
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
