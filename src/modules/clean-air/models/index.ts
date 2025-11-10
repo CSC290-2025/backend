@@ -1,1 +1,1 @@
-export { CleanAirModel } from './clean-air-open-meteo.model';
+export * as CleanAirModel from './clean-air.model';

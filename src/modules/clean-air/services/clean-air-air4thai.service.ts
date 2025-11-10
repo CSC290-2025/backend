@@ -13,12 +13,25 @@ interface TargetDistrict {
   keywords: string[];
 }
 
-const TARGET_DISTRICTS: TargetDistrict[] = [
+const AIR4THAI_TARGET_DISTRICTS: TargetDistrict[] = [
   { name: 'Thung Khru', keywords: ['thung khru', 'thung kru'] },
   { name: 'Rat Burana', keywords: ['rat burana'] },
   { name: 'Thon Buri', keywords: ['thon buri', 'thonburi'] },
   { name: 'Chom Thong', keywords: ['chom thong', 'chomthong', 'jomtong'] },
 ];
+
+export const AIR4THAI_DISTRICT_NAMES = AIR4THAI_TARGET_DISTRICTS.map(
+  (district) => district.name
+);
+
+export function resolveCategory(aqi: number): AirQualityCategory {
+  if (aqi <= 50) return 'GOOD';
+  if (aqi <= 100) return 'MODERATE';
+  if (aqi <= 150) return 'UNHEALTHY_FOR_SENSITIVE';
+  if (aqi <= 200) return 'UNHEALTHY';
+  if (aqi <= 300) return 'VERY_UNHEALTHY';
+  return 'HAZARDOUS';
+}
 
 function getConfiguredUrl(): string {
   const url = process.env.G05_AIR4THAI_API_URL;
@@ -44,20 +57,13 @@ function toIsoTimestamp(date?: string, time?: string): string {
     return new Date().toISOString();
   }
   const safeTime = time && time.includes(':') ? time : '00:00';
-  const candidate = `${date}T${safeTime.length === 5 ? `${safeTime}:00` : safeTime}+07:00`;
+  const candidate = `${date}T${
+    safeTime.length === 5 ? `${safeTime}:00` : safeTime
+  }+07:00`;
   const parsed = Date.parse(candidate);
   return Number.isNaN(parsed)
     ? new Date().toISOString()
     : new Date(parsed).toISOString();
-}
-
-function resolveCategory(aqi: number): AirQualityCategory {
-  if (aqi <= 50) return 'GOOD';
-  if (aqi <= 100) return 'MODERATE';
-  if (aqi <= 150) return 'UNHEALTHY_FOR_SENSITIVE';
-  if (aqi <= 200) return 'UNHEALTHY';
-  if (aqi <= 300) return 'VERY_UNHEALTHY';
-  return 'HAZARDOUS';
 }
 
 function stationText(station: Air4ThaiStation): string {
@@ -74,10 +80,7 @@ function stationText(station: Air4ThaiStation): string {
     .toLowerCase();
 }
 
-function isMatchingDistrict(
-  station: Air4ThaiStation,
-  target: TargetDistrict
-): boolean {
+function isMatchingDistrict(station: Air4ThaiStation, target: TargetDistrict) {
   const text = stationText(station);
   return target.keywords.some((keyword) => text.includes(keyword));
 }
@@ -200,7 +203,7 @@ async function getBangkokDistrictAQI(): Promise<Air4ThaiDistrictAirQuality[]> {
   const stations = await fetchStations();
   const results: Air4ThaiDistrictAirQuality[] = [];
 
-  TARGET_DISTRICTS.forEach((target) => {
+  AIR4THAI_TARGET_DISTRICTS.forEach((target) => {
     const matches = stations
       .filter((station) => isMatchingDistrict(station, target))
       .sort((a, b) => stationTimestamp(b) - stationTimestamp(a));
