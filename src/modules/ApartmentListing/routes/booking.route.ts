@@ -8,16 +8,24 @@ const setupBookingRoutes = (app: OpenAPIHono) => {
     bookingControllers.createBooking
   );
   app.openapi(
-    bookingSchemas.getAllBookingsRoute,
-    bookingControllers.getAllBookings
+    bookingSchemas.getAllBookingsForUserRoute,
+    bookingControllers.getAllBookingsForUser
   );
   app.openapi(
     bookingSchemas.getBookingByIdRoute,
     bookingControllers.getBookingById
   );
   app.openapi(
+    bookingSchemas.getBookingsByApartmentIdRoute,
+    bookingControllers.getBookingsByApartmentId
+  );
+  app.openapi(
     bookingSchemas.updateBookingRoute,
     bookingControllers.updateBooking
+  );
+  app.openapi(
+    bookingSchemas.updateBookingStatusRoute,
+    bookingControllers.updateBookingStatus
   );
   app.openapi(
     bookingSchemas.deleteBookingRoute,

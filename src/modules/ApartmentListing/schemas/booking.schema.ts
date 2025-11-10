@@ -9,13 +9,16 @@ import { z } from 'zod';
 const bookingSchema = z.object({
   id: z.int(),
   user_id: z.int(),
-  room_id: z.int(),
+  room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
   guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
-  check_in: z.date().nullable(),
-  booking_status: z.enum(['pending', 'confirmed', 'cancelled']).nullable(),
+  check_in: z.string().datetime().nullable(),
+  booking_status: z
+    .enum(['pending', 'confirmed', 'cancelled'])
+    .default('pending')
+    .nullable(),
   created_at: z.date().nullable(),
   updated_at: z.date().nullable(),
 });
@@ -24,29 +27,23 @@ const bookingListSchema = z.array(bookingSchema);
 
 const createbookingSchema = z.object({
   user_id: z.int(),
-  room_id: z.int(),
+  room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
   guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
-  check_in: z.date().nullable(),
-  booking_status: z
-    .enum(['pending', 'confirmed', 'cancelled'])
-    .default('pending')
-    .optional(),
+  check_in: z.string().datetime().nullable(),
 });
 
 const updatebookingSchema = z.object({
   user_id: z.int(),
-  room_id: z.int(),
+  room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
   guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
-  check_in: z.string().nullable(),
   booking_status: z.enum(['pending', 'confirmed', 'cancelled']).nullable(),
-  created_at: z.string().nullable(),
-  updated_at: z.string().nullable(),
+  check_in: z.string().datetime().nullable(),
 });
 
 const bookingIdParam = z.object({
@@ -78,6 +75,17 @@ const updateBookingRoute = createPutRoute({
   params: UpdatebookingParamsSchema,
   tags: ['booking'],
 });
+const updateBookingStatusRoute = createPutRoute({
+  path: '/bookings/{id}/status',
+  summary: 'Update booking status',
+  requestSchema: z.object({
+    booking_status: z.enum(['pending', 'confirmed', 'cancelled']).nullable(),
+  }),
+  params: bookingIdParam,
+  responseSchema: bookingSchema,
+  tags: ['booking'],
+});
+
 const deleteBookingRoute = createDeleteRoute({
   path: '/bookings/{id}',
   summary: 'Delete an existing booking',
@@ -93,9 +101,12 @@ const getBookingsByApartmentIdRoute = createGetRoute({
   tags: ['booking'],
 });
 
-const getAllBookingsRoute = createGetRoute({
-  path: '/bookings',
-  summary: 'Get all bookings',
+const getAllBookingsForUserRoute = createGetRoute({
+  path: '/bookings/user/{userId}',
+  summary: 'Get all bookings for a specific user',
+  params: z.object({
+    userId: z.coerce.number().int().positive(),
+  }),
   responseSchema: bookingListSchema,
   tags: ['booking'],
 });
@@ -117,7 +128,8 @@ export const bookingSchemas = {
   updateBookingRoute,
   deleteBookingRoute,
   getBookingsByApartmentIdRoute,
-  getAllBookingsRoute,
+  getAllBookingsForUserRoute,
   bookingListSchema,
   getBookingByIdRoute,
+  updateBookingStatusRoute,
 };

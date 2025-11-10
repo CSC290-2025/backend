@@ -4,3 +4,4 @@ export * as ratingModel from './rating.model';
 export * as cloudinaryModel from './cloudinary.model';
 export * as addressModel from './address.model';
 export * as bookingModel from './booking.Model';
+export * as bookingCleanupModel from './bookingCleanup.model';

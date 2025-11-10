@@ -6,6 +6,7 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
+import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
@@ -103,6 +104,10 @@ async function startServer(startPort: number, maxRetries = 10) {
           `API Documentation on http://localhost:${info.port}/swagger`
         );
         console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
+
+        // Start the booking cleanup job
+        startBookingCleanupJob();
+        console.log('Booking cleanup job started - will run every hour');
       });
 
       return;
