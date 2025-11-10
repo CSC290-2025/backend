@@ -48,17 +48,20 @@ const updateRoomSchema = z
     name: z.string().min(2).max(255).optional(),
     type: z.string().min(2).max(255).optional(),
     size: z.string().min(0).optional(),
-    price_start: z.number().min(0).optional().default(0),
-    price_end: z.number().min(0).optional().default(0),
+    price_start: z.number().min(0).optional(),
+    price_end: z.number().min(0).optional(),
     room_status: z
       .enum(['occupied', 'pending', 'available'])
       .default('available')
       .optional(),
   })
   .superRefine((data, ctx) => {
-    // For creation both price_start and price_end are required, so we can
-    // safely validate the relationship here.
-    if (data.price_start >= data.price_end) {
+    // Only validate price relationship if both values are provided
+    if (
+      data.price_start !== undefined &&
+      data.price_end !== undefined &&
+      data.price_start >= data.price_end
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'price_start must be less than price_end',
