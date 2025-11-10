@@ -89,9 +89,13 @@ model apartment_booking {
   user_id        Int
   check_in       DateTime?       @db.Timestamptz(6)
   booking_status booking_status? @default(pending)
-  created_at     DateTime?       @db.Timestamptz(6)
-  updated_at     DateTime?       @db.Timestamptz(6)
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
   room_id        Int?
+  guest_name     String?         @db.VarChar(255)
+  guest_phone    String?         @db.VarChar(10)
+  guest_email    String?         @db.VarChar(255)
+  room_type      String?         @db.VarChar(255)
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
@@ -632,7 +636,7 @@ model rating {
   user_id      Int
   rating       Float?
   comment      String?
-  created_at   DateTime?  @db.Timestamptz(6)
+  created_at   DateTime?  @default(now()) @db.Timestamptz(6)
   apartment_id Int?
   apartment    apartment? @relation(fields: [apartment_id], references: [id], onUpdate: NoAction)
   users        users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
