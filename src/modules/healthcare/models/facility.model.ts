@@ -131,7 +131,6 @@ const create = async (data: CreateFacilityData): Promise<Facility> => {
     });
     return mapFacility(facility);
   } catch (error) {
-    console.log('error', error);
     handlePrismaError(error);
   }
 };
