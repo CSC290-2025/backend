@@ -110,3 +110,7 @@ CLAUDE.md
 # VSCode AI integrations cache
 .vscode/.ai/
 .vscode-ai/
+
+# Service Account
+serviceAccount.json
+service-account.json
