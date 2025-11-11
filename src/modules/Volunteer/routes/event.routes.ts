@@ -8,19 +8,21 @@ import {
   joinEvent,
   leaveEvent,
   getEventParticipants,
+  getMyEvents,
 } from '../controllers/event.controller';
 
 const eventRoutes = new Hono();
 
 eventRoutes.get('/getAll', getAllEvents);
 eventRoutes.post('/create', createEvent);
+eventRoutes.get('/my-events', getMyEvents);
 
 eventRoutes.post('/:id/join', joinEvent);
 eventRoutes.delete('/:id/join', leaveEvent);
 eventRoutes.get('/:id/participants', getEventParticipants);
+eventRoutes.put('/:id/update', updateEvent);
 
 eventRoutes.get('/:id', getEventById);
-eventRoutes.put('/:id/update', updateEvent);
 eventRoutes.delete('/:id', deleteEvent);
 
 export default eventRoutes;

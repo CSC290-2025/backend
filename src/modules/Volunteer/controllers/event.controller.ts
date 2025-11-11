@@ -116,6 +116,23 @@ const getEventParticipants = async (c: Context) => {
   }
 };
 
+const GetMyEventsQuerySchema = z.object({
+  userId: z.coerce
+    .number()
+    .int()
+    .positive('User ID must be a positive integer'),
+});
+
+const getMyEvents = async (c: Context) => {
+  try {
+    const query = GetMyEventsQuerySchema.parse(c.req.query());
+    const events = await EventService.getMyEvents(query.userId);
+    return successResponse(c, { events, count: events.length });
+  } catch (err: any) {
+    throw err;
+  }
+};
+
 export {
   getAllEvents,
   getEventById,
@@ -125,4 +142,5 @@ export {
   joinEvent,
   leaveEvent,
   getEventParticipants,
+  getMyEvents,
 };

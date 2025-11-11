@@ -12,10 +12,16 @@ import {
 } from '../../../errors';
 
 const getAll = async (
-  pagination: PaginationOptions
+  query: PaginationOptions & { search?: string; department_id?: number }
 ): Promise<PaginatedEvents> => {
-  const { page, limit } = pagination;
-  return await EventModel.findMany(page, limit);
+  const { page, limit, search, department_id } = query;
+
+  return await EventModel.findMany(page, limit, {
+    page,
+    limit,
+    search,
+    department_id,
+  });
 };
 
 const getById = async (id: number) => {
@@ -24,6 +30,10 @@ const getById = async (id: number) => {
     throw new NotFoundError('Event not found');
   }
   return event;
+};
+
+const getMyEvents = async (userId: number) => {
+  return await EventModel.findEventsByUserId(userId);
 };
 
 const create = async (data: CreateEventInput) => {
@@ -114,4 +124,5 @@ export {
   joinEvent,
   leaveEvent,
   getParticipants,
+  getMyEvents,
 };

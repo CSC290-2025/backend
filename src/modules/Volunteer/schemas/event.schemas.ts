@@ -67,6 +67,8 @@ const UpdateEventSchema = z.object({
 const PaginationSchema = z.object({
   page: z.coerce.number().int().default(1),
   limit: z.coerce.number().int().default(9),
+  search: z.string().optional(),
+  department_id: z.coerce.number().int().positive().optional(),
 });
 
 const EventIdParam = z.object({

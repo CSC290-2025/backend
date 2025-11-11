@@ -1,15 +1,43 @@
 import prisma from '../../../config/client';
 import { handlePrismaError } from '../../../errors';
-import type { CreateEventInput, UpdateEventInput } from '../types';
-import { NotFoundError } from '../../../errors'; // Import NotFoundError
+import type {
+  CreateEventInput,
+  UpdateEventInput,
+  PaginationOptions,
+} from '../types';
+import type { Prisma } from '../../../generated/prisma';
+import { NotFoundError } from '../../../errors';
 
-const findMany = async (page: number, limit: number) => {
+interface EventFilterOptions extends PaginationOptions {
+  search?: string;
+  department_id?: number;
+}
+
+const findMany = async (
+  page: number,
+  limit: number,
+  filters: EventFilterOptions
+) => {
   try {
     const skip = (page - 1) * limit;
+
+    const where: Prisma.volunteer_eventsWhereInput = {};
+
+    if (filters.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+    if (filters.department_id) {
+      where.department_id = filters.department_id;
+    }
+
     const [events, total] = await Promise.all([
       prisma.volunteer_events.findMany({
         take: limit,
         skip: skip,
+        where: where,
         orderBy: {
           start_at: { sort: 'desc', nulls: 'last' },
         },
@@ -31,10 +59,13 @@ const findMany = async (page: number, limit: number) => {
           address_id: true,
         },
       }),
-      prisma.volunteer_events.count(),
+      prisma.volunteer_events.count({
+        where: where,
+      }),
     ]);
     return { events, total, page, totalPages: Math.ceil(total / limit) };
   } catch (error) {
+    console.error('!!! ORIGINAL PRISMA ERROR in findMany:', error);
     handlePrismaError(error);
   }
 };
@@ -201,6 +232,43 @@ const findParticipation = async (eventId: number, userId: number) => {
   }
 };
 
+const findEventsByUserId = async (userId: number) => {
+  try {
+    const events = await prisma.volunteer_events.findMany({
+      where: {
+        volunteer_event_participation: {
+          some: {
+            user_id: userId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        image_url: true,
+        current_participants: true,
+        total_seats: true,
+        start_at: true,
+        end_at: true,
+        registration_deadline: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        created_by_user_id: true,
+        department_id: true,
+        address_id: true,
+      },
+      orderBy: {
+        start_at: 'asc', // Show upcoming events first
+      },
+    });
+    return events;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   findMany,
   findById,
@@ -211,4 +279,5 @@ export {
   leave,
   findParticipantsByEventId,
   findParticipation,
+  findEventsByUserId,
 };
