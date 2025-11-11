@@ -11,7 +11,7 @@ const RatingSchema = z.object({
   id: z.int(),
   apartmentId: z.int(),
   userId: z.int(),
-  rating: z.int().min(1).max(5).default(0).nullable(),
+  rating: z.int().min(1).max(5).default(1).nullable(),
   comment: z.string().max(500).nullable(),
 });
 
