@@ -21,7 +21,7 @@ const encrypt = async (data: object): Promise<string> => {
     );
   }
   if (Object.keys(data).length === 0) {
-    throw new ValidationError('Data to encrypt cannot be null or undefined');
+    throw new ValidationError('Data to encrypt cannot be empty');
   }
   return await ScbModel.encryptData(jsonString, PUBLIC_KEY);
 };
