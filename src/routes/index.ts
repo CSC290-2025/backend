@@ -14,6 +14,10 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 // import { setupProductRoutes } from '@/modules/_example';
 import { setupEnrollmentRoutes } from '@/modules/Know_AI/routes';
 import { setupCourseRoutes } from '@/modules/Know_AI/routes';
+import { setupOnsiteSessionRoutes } from '@/modules/Know_AI/routes';
+import { setupExerciseRoute } from '@/modules/Know_AI/routes';
+import { setupQuestionRoutes } from '@/modules/Know_AI/routes';
+import { setupLevelRoutes } from '@/modules/Know_AI/routes';
 
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
@@ -27,6 +31,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupProductRoutes(app);
   setupEnrollmentRoutes(app);
   setupCourseRoutes(app);
+  setupOnsiteSessionRoutes(app);
+  setupExerciseRoute(app);
+  setupQuestionRoutes(app);
+  setupLevelRoutes(app);
 
   //
   // ============================================
