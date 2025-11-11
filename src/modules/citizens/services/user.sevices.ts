@@ -1,4 +1,4 @@
-import { UserModel } from '../models/user.model';
+import { UserModel } from '../models/userG2.model';
 import crypto from 'crypto';
 import type {
   User,
