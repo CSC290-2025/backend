@@ -83,7 +83,7 @@ const updateMetroCard = async (
 const updateMetroCardBalance = async (
   id: number,
   balance: number,
-  type: 'increment' | 'decrement',
+  operation: 'increment' | 'decrement',
   trx: Prisma.TransactionClient
 ): Promise<MetroCard> => {
   try {
@@ -91,7 +91,7 @@ const updateMetroCardBalance = async (
       where: { id },
       data: {
         balance: {
-          [type]: balance,
+          [operation]: balance,
         },
         updated_at: new Date(),
       },

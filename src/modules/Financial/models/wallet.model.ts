@@ -2,7 +2,7 @@ import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { wallets } from '@/generated/prisma';
 import type { Wallet, CreateWalletData, UpdateWalletData } from '../types';
-import { Prisma } from '@prisma/client/scripts/default-index';
+import type { Prisma } from '@prisma/client/scripts/default-index';
 
 // Helper to DRY
 const transformWallet = (wallet: wallets): Wallet => ({
@@ -77,13 +77,16 @@ const updateWallet = async (
 const updateWalletBalance = async (
   id: number,
   balance: number,
+  operation: 'increment' | 'decrement' = 'increment',
   trx?: Prisma.TransactionClient
 ): Promise<Wallet> => {
   try {
     const wallet = await (trx ?? prisma).wallets.update({
       where: { id },
       data: {
-        balance,
+        balance: {
+          [operation]: balance,
+        },
         updated_at: new Date(),
       },
     });
