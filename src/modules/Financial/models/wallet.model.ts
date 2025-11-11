@@ -73,25 +73,7 @@ const updateWallet = async (
   }
 };
 
-// const updateWalletBalance = async (
-//   id: number,
-//   balance: number
-// ): Promise<Wallet> => {
-//   try {
-//     const wallet = await prisma.wallets.update({
-//       where: { id },
-//       data: {
-//         balance,
-//         updated_at: new Date(),
-//       },
-//     });
-//     return transformWallet(wallet);
-//   } catch (error) {
-//     handlePrismaError(error);
-//   }
-// };
-
-const incrementWalletBalance = async (
+const incrementWalletBalanceTopup = async (
   id: number,
   amount: number
 ): Promise<Wallet> => {
@@ -110,10 +92,51 @@ const incrementWalletBalance = async (
     handlePrismaError(error);
   }
 };
+
+const atomicTransferFunds = async (
+  fromWalletId: number,
+  toWalletId: number,
+  amount: number
+): Promise<{ fromWallet: Wallet; toWallet: Wallet }> => {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // Deduct from sender if sufficient balance
+      const fromWallet = await tx.wallets.update({
+        where: {
+          id: fromWalletId,
+          balance: { gte: amount },
+        },
+        data: {
+          balance: { decrement: amount },
+          updated_at: new Date(),
+        },
+      });
+
+      const toWallet = await tx.wallets.update({
+        where: { id: toWalletId },
+        data: {
+          balance: { increment: amount },
+          updated_at: new Date(),
+        },
+      });
+
+      return { fromWallet, toWallet };
+    });
+
+    return {
+      fromWallet: transformWallet(result.fromWallet),
+      toWallet: transformWallet(result.toWallet),
+    };
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createWallet,
   findWalletByUserId,
   findWalletById,
   updateWallet,
-  incrementWalletBalance,
+  incrementWalletBalanceTopup,
+  atomicTransferFunds,
 };

@@ -28,6 +28,10 @@ const transferFunds = async (
     throw new ValidationError('Transfer amount must be positive');
   }
 
+  if (fromUserId === toUserId) {
+    throw new ValidationError('Cannot transfer funds to yourself');
+  }
+
   const fromWallet = await WalletModel.findWalletByUserId(fromUserId);
   const toWallet = await WalletModel.findWalletByUserId(toUserId);
 
@@ -38,12 +42,8 @@ const transferFunds = async (
     throw new NotFoundError('Recipient wallet not found');
   }
 
-  if (fromWallet.balance < amount) {
-    throw new ValidationError('Insufficient funds');
-  }
+  await WalletModel.atomicTransferFunds(fromWallet.id, toWallet.id, amount);
 
-  await WalletModel.incrementWalletBalance(fromWallet.id, -amount);
-  await WalletModel.incrementWalletBalance(toWallet.id, amount);
   return { status: 'success' };
 };
 
@@ -74,7 +74,7 @@ const topUpBalance = async (
     throw new NotFoundError('Wallet not found');
   }
 
-  return await WalletModel.incrementWalletBalance(walletId, amount);
+  return await WalletModel.incrementWalletBalanceTopup(walletId, amount);
 };
 
 export {
