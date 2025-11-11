@@ -4,7 +4,11 @@ import type {
   ScbQrRequestSchema,
   ScbQrResponseSchema,
 } from '../types';
-import { handlePrismaError } from '@/errors';
+import {
+  handlePrismaError,
+  ValidationError,
+  InternalServerError,
+} from '@/errors';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
 
@@ -21,7 +25,7 @@ const buildScbHeaders = async (includeAuth = false): Promise<HeadersInit> => {
     const apiKey = process.env.G11_SCB_API_KEY;
 
     if (!apiKey) {
-      throw new Error('G11_SCB_API_KEY not configured');
+      throw new ValidationError('G11_SCB_API_KEY not configured');
     }
 
     const headers: HeadersInit = {
@@ -58,7 +62,7 @@ const getOAuthToken = async (): Promise<ScbToken> => {
     const apiSecret = process.env.G11_SCB_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      throw new Error('SCB API credentials not configured');
+      throw new ValidationError('SCB API credentials not configured');
     }
 
     // call scb oauth token api
@@ -74,7 +78,7 @@ const getOAuthToken = async (): Promise<ScbToken> => {
     });
 
     if (!response.ok) {
-      throw new Error('SCB OAuth failed');
+      throw new InternalServerError('SCB OAuth failed');
     }
 
     const result = await response.json();
@@ -129,7 +133,7 @@ const createQr = async (
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error('SCB QR creation failed');
+      throw new InternalServerError('SCB QR creation failed');
     }
 
     const result = await response.json();
