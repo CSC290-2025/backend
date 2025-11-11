@@ -1,5 +1,5 @@
 import { successResponse } from '@/utils/response';
-import { addressService } from '../service/index.ts';
+import { addressService } from '../service/index';
 import type { Context } from 'hono';
 
 export async function getAddressByID(c: Context) {

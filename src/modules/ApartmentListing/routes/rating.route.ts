@@ -23,10 +23,6 @@ const setupRatingRoutes = (app: OpenAPIHono) => {
     RatingSchemas.getCommentsByApartmentRoute,
     RatingController.getCommentsByApartment
   );
-  app.openapi(
-    RatingSchemas.getAverageRatingByApartmentRoute,
-    RatingController.getAverageRatingByApartment
-  );
   app.openapi(RatingSchemas.getAllRatingsRoute, RatingController.getAllRatings);
 };
 export { setupRatingRoutes };

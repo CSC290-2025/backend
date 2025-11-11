@@ -54,7 +54,7 @@ const createAddressRoute = createPostRoute({
 
 const updateAddressRoute = createPutRoute({
   path: '/address/{id}',
-  summary: 'Create a new address',
+  summary: 'Update an existing address',
   requestSchema: updateAddressSchema,
   responseSchema: addressSchema,
   params: addressParam,

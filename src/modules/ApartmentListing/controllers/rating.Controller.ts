@@ -1,4 +1,4 @@
-import { apartmentService, ratingService } from '../service/index.ts';
+import { apartmentService, ratingService } from '../service';
 import { successResponse } from '@/utils/response';
 import type { Context } from 'hono';
 import { NotFoundError } from '@/errors';

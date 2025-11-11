@@ -1,4 +1,4 @@
-import { roomService } from '../service/index.ts';
+import { roomService } from '../service';
 import { successResponse } from '@/utils/response';
 import type { Context } from 'hono';
 

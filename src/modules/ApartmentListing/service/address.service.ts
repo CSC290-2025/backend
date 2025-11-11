@@ -19,7 +19,7 @@ const updateAddress = async (
   id: number
 ): Promise<Address> => {
   const existingAddress = await addressModel.getAddressByID(id);
-  if (!existingAddress) throw new NotFoundError('Room not found');
+  if (!existingAddress) throw new NotFoundError('Address not found');
   return addressModel.updateAddress(id, data);
 };
 

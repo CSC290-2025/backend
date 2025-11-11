@@ -1,5 +1,5 @@
 import { RoomSchemas } from '../schemas';
-import * as roomController from '../controllers/room.Controller.ts';
+import * as roomController from '../controllers/room.Controller';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 const setupRoomRoutes = (app: OpenAPIHono) => {
