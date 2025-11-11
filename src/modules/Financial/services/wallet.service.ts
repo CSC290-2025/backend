@@ -42,12 +42,8 @@ const transferFunds = async (
     throw new ValidationError('Insufficient funds');
   }
 
-  await WalletModel.updateWalletBalance(
-    fromWallet.id,
-    fromWallet.balance - amount
-  );
-  await WalletModel.updateWalletBalance(toWallet.id, toWallet.balance + amount);
-
+  await WalletModel.incrementWalletBalance(fromWallet.id, -amount);
+  await WalletModel.incrementWalletBalance(toWallet.id, amount);
   return { status: 'success' };
 };
 
@@ -78,9 +74,7 @@ const topUpBalance = async (
     throw new NotFoundError('Wallet not found');
   }
 
-  const newBalance = existingWallet.balance + amount;
-
-  return await WalletModel.updateWalletBalance(walletId, newBalance);
+  return await WalletModel.incrementWalletBalance(walletId, amount);
 };
 
 export {
