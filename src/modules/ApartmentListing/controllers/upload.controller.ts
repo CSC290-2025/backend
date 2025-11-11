@@ -6,13 +6,27 @@ import { uploadModel } from '../models/index';
 async function getPictureByIdController(c: Context) {
   const id = Number(c.req.param('id'));
   const picture = await uploadModel.getPictureById(id);
-  return successResponse(c, picture);
+  if (!picture) {
+    throw new ValidationError('Picture not found.');
+  }
+  return successResponse(c, {
+    id: picture.id.toString(),
+    url: picture.file_path,
+    apartmentId: picture.apartment_id,
+  });
 }
 
 async function getPicturesByApartmentIdController(c: Context) {
   const apartmentId = Number(c.req.param('apartmentId'));
   const pictures = await uploadModel.getPicturesByApartmentId(apartmentId);
-  return successResponse(c, pictures);
+  return successResponse(
+    c,
+    pictures.map((picture) => ({
+      id: picture.id.toString(),
+      url: picture.file_path,
+      apartmentId: picture.apartment_id,
+    }))
+  );
 }
 
 async function uploadFileController(c: Context) {
@@ -35,6 +49,7 @@ async function uploadFileController(c: Context) {
       {
         id: pictureResult.id.toString(),
         url: pictureResult.file_path,
+        apartmentId: Number(apartmentId),
       },
       200,
       'File uploaded successfully!'
