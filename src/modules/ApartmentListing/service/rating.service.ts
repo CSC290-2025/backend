@@ -54,7 +54,7 @@ const createRating = async (data: createRatingData): Promise<Rating> => {
     comment: data.comment ?? ' ',
   };
 };
-//fix this
+
 const updateRating = async (data: updateRatingData): Promise<Rating> => {
   const existingRating = await ratingModel.updateRating(data);
   if (!existingRating) throw new NotFoundError('Rating not found');
