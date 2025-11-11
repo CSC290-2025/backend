@@ -100,12 +100,22 @@ const atomicTransferFunds = async (
 ): Promise<{ fromWallet: Wallet; toWallet: Wallet }> => {
   try {
     const result = await prisma.$transaction(async (tx) => {
+      const senderWallet = await tx.wallets.findUnique({
+        where: { id: fromWalletId },
+        select: { balance: true },
+      });
+
+      if (!senderWallet) {
+        throw new Error('Sender wallet not found');
+      }
+
+      if (Number(senderWallet.balance) < amount) {
+        throw new Error('Insufficient balance for transfer');
+      }
+
       // Deduct from sender if sufficient balance
       const fromWallet = await tx.wallets.update({
-        where: {
-          id: fromWalletId,
-          balance: { gte: amount },
-        },
+        where: { id: fromWalletId },
         data: {
           balance: { decrement: amount },
           updated_at: new Date(),
