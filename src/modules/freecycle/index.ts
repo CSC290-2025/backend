@@ -8,3 +8,8 @@ export { CategoryModel } from './models';
 export { CategoryService } from './services';
 export { CategorySchemas } from './schemas';
 export { setupCategoryRoutes } from './routes';
+
+export { PostCategoryModel } from './models';
+export { PostCategoriesService } from './services';
+export { FreecyclePostsCategoriesSchemas } from './schemas';
+export { setupFreecyclePostCategoriesPostRoutes } from './routes';
