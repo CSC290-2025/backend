@@ -1,7 +1,7 @@
 // Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { setupAddressRoutes } from './addressG5.routes';
-import { setupUserSpecialistRoutes } from './specialistG6.routes';
+import { setupAddressRoutes } from '@/modules/citizens/routes/adressG5.openapi.route';
+import { setupUserSpecialistRoutes } from '@/modules/citizens/routes/specialistG6.openapi.route';
 import {
   setupUserRoutes,
   setupUserSpecialtyRoutes,

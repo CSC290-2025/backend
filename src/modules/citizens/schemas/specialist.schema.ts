@@ -1,13 +1,11 @@
 import { success, z } from 'zod';
 import { createGetRoute } from '@/utils/openapi-helpers';
 
-// Specialist schema
 const SpecialistSchema = z.object({
   id: z.number(),
   specialty_name: z.string(),
 });
 
-// Response schema — matching your Address API style
 const UserSpecialistResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
@@ -17,12 +15,10 @@ const UserSpecialistResponseSchema = z.object({
   }),
 });
 
-// Params (userId in path)
 const UserIdParam = z.object({
   id: z.string().regex(/^\d+$/, 'User ID must be a number'),
 });
 
-// OpenAPI route definition
 // const getUserSpecialistsRoute = createGetRoute({
 //   path: '/users/{id}/specialists',
 //   summary: 'Get specialists by user ID',
