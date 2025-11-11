@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
 import { PostCategoriesService } from '../services';
 import { successResponse } from '@/utils/response';
+import { UnauthorizedError } from '@/errors';
 
 const getCategoriesByPostId = async (c: Context) => {
   const postId = Number(c.req.param('postId'));
@@ -13,7 +14,7 @@ const addCategoryToPost = async (c: Context) => {
   const body = await c.req.json();
   const donaterId = c.get('user')?.id;
   if (!donaterId) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    throw new UnauthorizedError();
   }
   const post = await PostCategoriesService.addCategoryToPost(
     postId,
@@ -28,7 +29,7 @@ const addCategoriesToPost = async (c: Context) => {
   const body = await c.req.json();
   const donaterId = c.get('user')?.id;
   if (!donaterId) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    throw new UnauthorizedError();
   }
   const post = await PostCategoriesService.addCategoriesToPost(
     postId,
@@ -48,7 +49,7 @@ const removeCategoryFromPost = async (c: Context) => {
   const categoryId = Number(c.req.param('categoryId'));
   const donaterId = c.get('user')?.id;
   if (!donaterId) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    throw new UnauthorizedError();
   }
   await PostCategoriesService.removeCategoryFromPost(
     postId,
