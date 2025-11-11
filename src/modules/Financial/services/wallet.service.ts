@@ -42,6 +42,16 @@ const transferFunds = async (
     throw new NotFoundError('Recipient wallet not found');
   }
 
+  if (fromWallet.status !== 'active') {
+    throw new ValidationError(
+      'Sender wallet is not active. Suspended wallets cannot send funds.'
+    );
+  }
+  if (toWallet.status !== 'active') {
+    throw new ValidationError(
+      'Recipient wallet is not active. Suspended wallets cannot receive funds.'
+    );
+  }
   await WalletModel.atomicTransferFunds(fromWallet.id, toWallet.id, amount);
 
   return { status: 'success' };
