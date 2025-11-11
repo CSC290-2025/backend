@@ -52,14 +52,13 @@ const topUpBalance = async (
     throw new NotFoundError('Metro card not found');
   }
 
-  const newBalance = existingMetroCard.balance + amount;
-
   return await prisma.$transaction(async (trx) => {
     await WalletModel.updateWalletBalance(walletId, subtractedAmount, trx);
 
     return await MetroCardModel.updateMetroCardBalance(
       metroCardId,
-      newBalance,
+      amount,
+      'increment',
       trx
     );
   });
