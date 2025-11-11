@@ -39,28 +39,31 @@ const topUpBalance = async (
     throw new ValidationError('Amount must be positive');
   }
 
-  const wallet = await WalletModel.findWalletById(walletId);
-
-  const subtractedAmount = wallet.balance - amount;
-
-  if (subtractedAmount < 0) {
-    throw new ValidationError('Insufficient balance');
-  }
-
   const existingMetroCard = await MetroCardModel.findMetroCardById(metroCardId);
   if (!existingMetroCard) {
     throw new NotFoundError('Metro card not found');
   }
 
   return await prisma.$transaction(async (trx) => {
-    await WalletModel.updateWalletBalance(walletId, subtractedAmount, trx);
+    const updatedWallet = await WalletModel.WalletBalanceTopup(
+      walletId,
+      amount,
+      'decrement',
+      trx
+    );
 
-    return await MetroCardModel.updateMetroCardBalance(
+    if (updatedWallet.balance < 0) {
+      throw new ValidationError('Insufficient balance');
+    }
+
+    const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
       metroCardId,
       amount,
       'increment',
       trx
     );
+
+    return updatedMetroCard;
   });
 };
 

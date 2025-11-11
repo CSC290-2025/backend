@@ -10,7 +10,7 @@ Use this checklist when adding new API endpoints to ensure you follow the correc
 - [ ] **Identify database changes needed** - New tables, columns, relationships?
 - [ ] **Setup test data** - Create test users if needed for testing APIs
 
-### Test User Creation (Optional)
+### Test User Creation (optional)
 
 If your API endpoints require user authentication or user-related operations, you can create test users in your database:
 
