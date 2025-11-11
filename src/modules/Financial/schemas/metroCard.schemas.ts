@@ -29,7 +29,7 @@ const TopUpMetroCardSchema = z.object({
 });
 
 const MetroCardListSchema = z.object({
-  products: z.array(MetroCardSchema),
+  metroCards: z.array(MetroCardSchema),
 });
 
 //Parameter Schema

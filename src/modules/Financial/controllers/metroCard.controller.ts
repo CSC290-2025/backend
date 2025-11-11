@@ -5,7 +5,7 @@ import type { Context } from 'hono';
 const getMetroCard = async (c: Context) => {
   const metroCardId = Number(c.req.param('metroCardId'));
   const metroCards = await MetroCardService.getMetroCardById(metroCardId);
-  return successResponse(c, { metroCards });
+  return successResponse(c, metroCards);
 };
 
 const createMetroCard = async (c: Context) => {
