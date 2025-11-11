@@ -61,7 +61,7 @@ const updateWallet = async (
   return await WalletModel.updateWallet(id, data);
 };
 
-const getUserWallets = async (userId: number): Promise<Wallet> => {
+const getUserWallets = async (userId: number): Promise<Wallet | null> => {
   return await WalletModel.findWalletByUserId(userId);
 };
 

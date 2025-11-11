@@ -23,8 +23,8 @@ const updateWallet = async (c: Context) => {
 
 const getUserWallets = async (c: Context) => {
   const userId = Number(c.req.param('userId'));
-  const wallets = await WalletService.getUserWallets(userId);
-  return successResponse(c, { wallets });
+  const wallet = await WalletService.getUserWallets(userId);
+  return successResponse(c, { wallet });
 };
 
 const topUpBalance = async (c: Context) => {

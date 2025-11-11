@@ -61,9 +61,9 @@ const createWalletRoute = createPostRoute({
 
 const getUserWalletsRoute = createGetRoute({
   path: '/wallets/user/{userId}',
-  summary: 'Get user wallets',
+  summary: 'Get user wallet',
   responseSchema: z.object({
-    wallets: z.array(WalletSchema),
+    wallet: WalletSchema.nullable(),
   }),
   params: UserIdParam,
   tags: ['Wallets'],
