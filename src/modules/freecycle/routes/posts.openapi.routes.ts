@@ -45,6 +45,11 @@ const setupFreecyclePostsRoutes = (app: OpenAPIHono) => {
     FreecyclePostsSchemas.MarkAsNotGivenRoute,
     PostsController.markAsNotGiven
   );
+
+  app.openapi(
+    FreecyclePostsSchemas.getPostsByCategoryRoute,
+    PostsController.getPostsByCategory
+  );
 };
 
 export { setupFreecyclePostsRoutes };

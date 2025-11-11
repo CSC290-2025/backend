@@ -90,6 +90,12 @@ const markAsNotGiven = async (
   return await PostsModel.markAsNotGiven(id, donaterId);
 };
 
+const getPostsByCategory = async (
+  categoryId: number
+): Promise<FreecyclePost[]> => {
+  return await PostsModel.findPostsByCategoryId(categoryId);
+};
+
 export {
   getAllPost,
   getPostById,
@@ -100,4 +106,5 @@ export {
   markAsGiven,
   getNotGivenPost,
   markAsNotGiven,
+  getPostsByCategory,
 };

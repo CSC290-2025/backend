@@ -195,6 +195,28 @@ const markAsNotGiven = async (
   }
 };
 
+const findPostsByCategoryId = async (
+  categoryId: number
+): Promise<FreecyclePost[]> => {
+  try {
+    const posts = await prisma.freecycle_posts.findMany({
+      where: {
+        freecycle_posts_categories: {
+          some: { category_id: categoryId },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    return posts.map((p) => ({
+      ...p,
+      item_weight: p.item_weight ? Number(p.item_weight) : null,
+    }));
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   findAllPosts,
   findPostById,
@@ -205,4 +227,5 @@ export {
   markAsGiven,
   findNotGivenPost,
   markAsNotGiven,
+  findPostsByCategoryId,
 };

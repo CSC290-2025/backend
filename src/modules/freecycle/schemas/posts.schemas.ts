@@ -126,6 +126,18 @@ const getNotGivenPostsRoute = createGetRoute({
   tags: ['Freecycle'],
 });
 
+const CategoryIdParam = z.object({
+  categoryId: z.coerce.number(),
+});
+
+const getPostsByCategoryRoute = createGetRoute({
+  path: '/posts/category/{categoryId}',
+  summary: 'Get post by category Id',
+  responseSchema: z.array(FreecyclePostsSchema),
+  params: CategoryIdParam,
+  tags: ['Freecycle'],
+});
+
 export const FreecyclePostsSchemas = {
   FreecyclePostsSchema,
   CreateFreecyclePostsSchema,
@@ -142,4 +154,6 @@ export const FreecyclePostsSchemas = {
   MarkAsGivenRoute,
   MarkAsNotGivenRoute,
   getNotGivenPostsRoute,
+  CategoryIdParam,
+  getPostsByCategoryRoute,
 };

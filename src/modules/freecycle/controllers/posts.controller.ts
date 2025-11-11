@@ -63,6 +63,12 @@ const getNotGivenPost = async (c: Context) => {
   return successResponse(c, { post });
 };
 
+const getPostsByCategory = async (c: Context) => {
+  const categoryId = Number(c.req.param('categoryId'));
+  const posts = await PostsService.getPostsByCategory(categoryId);
+  return successResponse(c, { posts });
+};
+
 export {
   getAllPost,
   getPostById,
@@ -73,4 +79,5 @@ export {
   markAsGiven,
   getNotGivenPost,
   markAsNotGiven,
+  getPostsByCategory,
 };
