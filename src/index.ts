@@ -11,13 +11,21 @@ const app = new OpenAPIHono();
 app.onError(errorHandler);
 
 app.use(
-  '*',
+  '/*',
   cors({
-    origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    credentials: true,
   })
 );
+
+// app.use(
+//   '*',
+//   cors({
+//     origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
+//     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     allowHeaders: ['Content-Type', 'Authorization'],
+//   })
+// );
 
 app.notFound((c) => {
   return c.json(
