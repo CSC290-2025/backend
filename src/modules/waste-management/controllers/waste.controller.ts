@@ -23,4 +23,13 @@ const getWasteStats = async (c: Context) => {
   return successResponse(c, { stats });
 };
 
-export { getWasteTypes, logWaste, getWasteStats };
+const getDailyStats = async (c: Context) => {
+  const query = c.req.query();
+
+  const date = query.date ? new Date(query.date) : new Date();
+
+  const stats = await WasteService.getDailyStats(date);
+  return successResponse(c, { stats });
+};
+
+export { getWasteTypes, logWaste, getWasteStats, getDailyStats };
