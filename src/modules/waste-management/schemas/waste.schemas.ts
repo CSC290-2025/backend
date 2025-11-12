@@ -46,12 +46,35 @@ const MonthlyStatsResponseSchema = z.object({
   }),
 });
 
+// Schema for daily stats response
+const DailyStatsResponseSchema = z.object({
+  stats: z.object({
+    date: z.string(),
+    total_weight_kg: z.number(),
+    by_type: z.array(
+      z.object({
+        waste_type: z.string().optional(),
+        total_weight: z.number(),
+        log_id: z.number(),
+      })
+    ),
+  }),
+});
+
 // OpenAPI route definitions
 const getWasteTypesRoute = createGetRoute({
   path: '/waste-types',
   summary: 'Get all waste types',
   responseSchema: WasteTypesResponseSchema,
   tags: ['Waste'],
+});
+
+// OpenAPI route definition for daily stats
+const getDailyStatsRoute = createGetRoute({
+  path: '/waste/stats/daily',
+  summary: 'Get daily waste statistics',
+  responseSchema: DailyStatsResponseSchema,
+  tags: ['Waste', 'Analytics'],
 });
 
 const logWasteRoute = createPostRoute({
@@ -75,7 +98,9 @@ export const WasteSchemas = {
   WasteTypesResponseSchema,
   WasteLogResponseSchema,
   MonthlyStatsResponseSchema,
+  DailyStatsResponseSchema, // Add this
   getWasteTypesRoute,
   logWasteRoute,
   getStatsRoute,
+  getDailyStatsRoute, // Add this
 };
