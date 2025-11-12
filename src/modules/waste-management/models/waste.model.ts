@@ -83,4 +83,29 @@ export class WasteModel {
       select: { type_name: true },
     });
   }
+
+  static async getWasteStatsByDay(targetDate: Date) {
+    const dayStart = new Date(targetDate);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(targetDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    return await prisma.waste_event_statistics.findMany({
+      where: {
+        collection_date: {
+          gte: dayStart,
+          lte: dayEnd,
+        },
+        event_id: null,
+      },
+      include: {
+        waste_types: {
+          select: {
+            type_name: true,
+          },
+        },
+      },
+    });
+  }
 }
