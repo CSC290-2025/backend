@@ -32,3 +32,13 @@ export interface StatsQuery {
   month?: number;
   year?: number;
 }
+
+export interface DailyStats {
+  date: string;
+  total_weight_kg: number;
+  by_type: {
+    waste_type: string | undefined;
+    total_weight: number;
+    log_id: number;
+  }[];
+}
