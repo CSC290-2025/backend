@@ -1,4 +1,4 @@
-import { NotFoundError, ValidationError } from '@/errors';
+import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { MetroCardModel, WalletModel } from '../models';
 import type { MetroCard, UpdateMetroCardData } from '../types';
 import prisma from '@/config/client';
@@ -27,6 +27,9 @@ const updateMetroCard = async (
 
   if (!existingMetroCard) throw new NotFoundError('Metro Card not found');
 
+  if (existingMetroCard?.status === 'suspended')
+    throw new ForbiddenError('This card is suspended');
+
   return await MetroCardModel.updateMetroCard(id, data);
 };
 
@@ -40,9 +43,13 @@ const topUpBalance = async (
   }
 
   const existingMetroCard = await MetroCardModel.findMetroCardById(metroCardId);
+
   if (!existingMetroCard) {
     throw new NotFoundError('Metro card not found');
   }
+
+  if (existingMetroCard.status === 'suspended')
+    throw new ForbiddenError('This card is suspended');
 
   return await prisma.$transaction(async (trx) => {
     const updatedWallet = await WalletModel.WalletBalanceTopup(
