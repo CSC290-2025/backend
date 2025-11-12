@@ -73,4 +73,25 @@ export class WasteService {
       by_type: statsWithNames,
     };
   }
+
+  static async getDailyStats(date: Date) {
+    const stats = await WasteModel.getWasteStatsByDay(date);
+
+    const byType = stats.map((stat) => ({
+      waste_type: stat.waste_types?.type_name,
+      total_weight: Number(stat.total_collection_weight) || 0,
+      log_id: stat.id,
+    }));
+
+    const totalWeight = byType.reduce(
+      (sum, stat) => sum + stat.total_weight,
+      0
+    );
+
+    return {
+      date: date.toISOString().split('T')[0],
+      total_weight_kg: totalWeight,
+      by_type: byType,
+    };
+  }
 }
