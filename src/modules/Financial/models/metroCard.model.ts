@@ -4,10 +4,11 @@ import type { MetroCard, UpdateMetroCardData } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
 import type { Prisma } from '@prisma/client/scripts/default-index';
+import { encrypt, maskCardNumber19 } from '../utils/crypto';
 
 //Helper
 export const generateMetroCard = (user_id: number) => {
-  const nanoid = customAlphabet('0123456789', 11);
+  const nanoid = customAlphabet('0123456789', 12);
 
   const prefix = user_id.toString().padStart(4, '0');
 
@@ -20,22 +21,31 @@ const transformMetroCard = (metroCard: metro_cards): MetroCard => ({
   ...metroCard,
   user_id: metroCard.user_id!,
   balance: Number(metroCard.balance || 0),
-  card_number: metroCard.card_number!,
+  card_number: maskCardNumber19(metroCard.card_number!),
   status: metroCard.status as 'active' | 'suspended',
 });
 
 // MetroCard operations
 const createMetroCard = async (user_id: number): Promise<MetroCard> => {
+  const card = generateMetroCard(user_id);
+
+  console.log(card);
+
+  console.log(card.length);
+
+  const encrypted = encrypt(card);
+
   try {
     const metroCard = await prisma.metro_cards.create({
       data: {
         user_id: user_id,
-        card_number: generateMetroCard(user_id),
+        card_number: encrypted,
         balance: 0,
       },
     });
     return transformMetroCard(metroCard);
   } catch (error) {
+    console.error('Metro card creation error:', error);
     handlePrismaError(error);
   }
 };
