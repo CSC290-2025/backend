@@ -670,15 +670,17 @@ model report_categories {
 }
 
 model reports_metadata {
-  report_id                 Int           @id
-  title_string              String?       @db.VarChar(255)
+  report_id                 Int                   @id
+  title_string              String?               @db.VarChar(255)
   description_string        String?
   category_id               Int?
   created_by                Int?
-  last_updated_datetime     DateTime?     @db.Timestamptz(6)
-  power_bi_report_id_string String?       @db.VarChar(255)
-  dim_category              dim_category? @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
-  dim_user                  dim_user?     @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
+  last_updated_datetime     DateTime?             @db.Timestamptz(6)
+  power_bi_report_id_string String?               @db.VarChar(255)
+  visibility                report_visibility?    @default(citizens)
+  power_bi_report_type      power_bi_report_type? @default(summary)
+  dim_category              dim_category?         @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
+  dim_user                  dim_user?             @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
 }
 
 model roads {
@@ -804,6 +806,9 @@ model traffic_lights {
   auto_mode       Boolean?                 @default(true)
   last_updated    DateTime                 @default(now()) @db.Timestamptz(6)
   road_id         Int?
+  green_duration  Int?
+  red_duration    Int?
+  last_color      Int?                     @db.SmallInt
   light_requests  light_requests[]
   intersections   intersections?           @relation(fields: [intersection_id], references: [id], onUpdate: NoAction)
 
@@ -845,16 +850,23 @@ model user_levels {
 }
 
 model user_profiles {
-  user_id             Int        @id
-  first_name          String?    @db.VarChar(255)
-  middle_name         String?    @db.VarChar(255)
-  last_name           String?    @db.VarChar(255)
-  birth_date          DateTime?  @db.Date
+  user_id             Int         @id
+  first_name          String?     @db.VarChar(255)
+  middle_name         String?     @db.VarChar(255)
+  last_name           String?     @db.VarChar(255)
+  birth_date          DateTime?   @db.Date
   gender              gender?
   address_id          Int?
   more_address_detail String?
-  addresses           addresses? @relation(fields: [address_id], references: [id], onUpdate: NoAction)
-  users               users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id_card_number      String?     @db.VarChar(13)
+  blood_type          blood_type?
+  congenital_disease  String?     @db.VarChar(255)
+  allergy             String?     @db.VarChar(255)
+  height              Int?
+  weight              Int?
+  profile_picture     String?     @db.VarChar(255)
+  addresses           addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  users               users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model users {
@@ -1179,4 +1191,21 @@ enum report_type {
   traffic
   accident
   disaster
+}
+
+enum blood_type {
+  A
+  B
+  AB
+  O
+}
+
+enum power_bi_report_type {
+  summary
+  trends
+}
+
+enum report_visibility {
+  citizens
+  admin
 }
