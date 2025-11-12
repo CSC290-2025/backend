@@ -1,9 +1,9 @@
-import { UserModel } from '../models/userG2.model';
+import { UserModel } from '../models';
 import crypto from 'crypto';
+
 import type {
   User,
   UserProfile,
-  CompleteUserData,
   UpdateUserPersonalData,
   UpdateUserProfileData,
   UpdateUserHealthData,
@@ -20,26 +20,15 @@ import {
   UnauthorizedError,
 } from '@/errors';
 
-const getUserById = async (id: number): Promise<User> => {
-  const user = await UserModel.findById(id);
+const getUserById = async (id: number) => {
+  const user = await UserModel.findUserById(id);
   if (!user) {
     throw new NotFoundError('User not found');
   }
   return user;
 };
 
-const getCompleteUserData = async (id: number): Promise<CompleteUserData> => {
-  const userData = await UserModel.findCompleteUserData(id);
-  if (!userData) {
-    throw new NotFoundError('User not found');
-  }
-  return userData;
-};
-
-const updatePersonalInfo = async (
-  id: number,
-  data: UpdateUserPersonalData
-): Promise<User> => {
+const updatePersonalInfo = async (id: number, data: UpdateUserPersonalData) => {
   await getUserById(id);
 
   if (data.username) {
@@ -75,7 +64,7 @@ const updatePersonalInfo = async (
 const updateUserProfile = async (
   id: number,
   data: UpdateUserProfileData
-): Promise<UserProfile> => {
+): Promise<UserProfile | null> => {
   await getUserById(id);
 
   if (data.first_name && data.first_name.trim().length < 2) {
@@ -89,10 +78,7 @@ const updateUserProfile = async (
   return await UserModel.updateUserProfile(id, data);
 };
 
-const updateHealthInfo = async (
-  id: number,
-  data: UpdateUserHealthData
-): Promise<UserProfile> => {
+const updateHealthInfo = async (id: number, data: UpdateUserHealthData) => {
   await getUserById(id);
 
   if (data.birth_date) {
@@ -119,13 +105,17 @@ const updateAddress = async (
     throw new ValidationError('Postal code must be 5 digits');
   }
 
-  return await UserModel.updateAddress(id, data);
+  const j = await UserModel.updateAddress(id, data);
+  if (!j) {
+    throw new NotFoundError();
+  }
+  return j;
 };
 
 const createEmergencyContact = async (
   userId: number,
   data: UpdateEmergencyContactData
-): Promise<EmergencyContact> => {
+): Promise<EmergencyContact | null> => {
   await getUserById(userId);
 
   if (!data.contact_name || data.contact_name.trim().length < 2) {
@@ -142,7 +132,7 @@ const createEmergencyContact = async (
 const updateEmergencyContact = async (
   id: number,
   data: UpdateEmergencyContactData
-): Promise<EmergencyContact> => {
+): Promise<EmergencyContact | null> => {
   if (!data.contact_name || data.contact_name.trim().length < 2) {
     throw new ValidationError('Contact name must be at least 2 characters');
   }
@@ -156,7 +146,7 @@ const updateEmergencyContact = async (
 
 const deleteEmergencyContact = async (
   id: number
-): Promise<EmergencyContact> => {
+): Promise<EmergencyContact | null> => {
   return await UserModel.deleteEmergencyContact(id);
 };
 
@@ -170,7 +160,7 @@ const getEmergencyContacts = async (
 const updateAccountInfo = async (
   id: number,
   data: UpdateUserAccountData
-): Promise<User> => {
+): Promise<User | null> => {
   const user = await getUserById(id);
 
   if (data.username && data.username !== user.username) {
@@ -199,51 +189,65 @@ const updateAccountInfo = async (
   return await UserModel.updateUser(id, data);
 };
 
-const hashPassword = (password: string): string => {
-  return crypto.createHash('sha256').update(password).digest('hex');
-};
+// const hashPassword = (password: string): string => {
+//   return crypto.createHash('sha256').update(password).digest('hex');
+// };
 
-const updatePassword = async (
-  id: number,
-  data: UpdatePasswordData
-): Promise<User> => {
-  const user = await getUserById(id);
+// const updatePassword = async (
+//   id: number,
+//   data: UpdatePasswordData
+// ): Promise<User | null> => {
+//   const user = await getUserById(id);
 
-  // Verify current password
-  if (!data.currentPassword) {
-    throw new ValidationError('Current password is required');
+//   // Verify current password
+//   if (!data.currentPassword) {
+//     throw new ValidationError('Current password is required');
+//   }
+
+//   const currentHashed = hashPassword(data.currentPassword);
+//   const isPasswordValid = currentHashed === user.password_hash;
+
+//   if (!isPasswordValid) {
+//     throw new UnauthorizedError('Current password is incorrect');
+//   }
+
+//   // Validate new password
+//   if (!data.newPassword) {
+//     throw new ValidationError('New password is required');
+//   }
+
+//   if (data.newPassword.length < 8) {
+//     throw new ValidationError('New password must be at least 8 characters');
+//   }
+
+//   // Check if passwords match
+//   if (data.newPassword !== data.confirmNewPassword) {
+//     throw new ValidationError('New passwords do not match');
+//   }
+
+//   // “Hash” new password (SHA-256 for demo; not secure for production)
+//   const hashedPassword = hashPassword(data.newPassword);
+
+//   return await UserModel.updatePassword(id, hashedPassword);
+// };
+
+const getUsersByRole = async (
+  roleName: string
+): Promise<Omit<User, 'password_hash'>[]> => {
+  const users = await UserModel.findUsersByRole(roleName);
+
+  if (!users || users.length === 0) {
+    throw new NotFoundError(`No users found with role: ${roleName}`);
   }
 
-  const currentHashed = hashPassword(data.currentPassword);
-  const isPasswordValid = currentHashed === user.password_hash;
-
-  if (!isPasswordValid) {
-    throw new UnauthorizedError('Current password is incorrect');
-  }
-
-  // Validate new password
-  if (!data.newPassword) {
-    throw new ValidationError('New password is required');
-  }
-
-  if (data.newPassword.length < 8) {
-    throw new ValidationError('New password must be at least 8 characters');
-  }
-
-  // Check if passwords match
-  if (data.newPassword !== data.confirmNewPassword) {
-    throw new ValidationError('New passwords do not match');
-  }
-
-  // “Hash” new password (SHA-256 for demo; not secure for production)
-  const hashedPassword = hashPassword(data.newPassword);
-
-  return await UserModel.updatePassword(id, hashedPassword);
+  return users.map((u: User) => {
+    const { password_hash, ...safe } = u;
+    return safe;
+  });
 };
 
 export {
   getUserById,
-  getCompleteUserData,
   updatePersonalInfo,
   updateUserProfile,
   updateHealthInfo,
@@ -253,5 +257,6 @@ export {
   deleteEmergencyContact,
   getEmergencyContacts,
   updateAccountInfo,
-  updatePassword,
+  // updatePassword,
+  getUsersByRole,
 };

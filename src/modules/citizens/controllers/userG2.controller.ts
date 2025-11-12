@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
-import { UserService } from '../services/user.sevices';
+import { UserService } from '../services/index';
 import { successResponse } from '@/utils/response';
+import { ValidationError } from '@/errors';
 
 const getUser = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
@@ -11,31 +12,15 @@ const getUser = async (c: Context) => {
   return successResponse(c, { user: safeUser });
 };
 
-const getCompleteUserData = async (c: Context) => {
-  const id = parseInt(c.req.param('id'));
-  const userData = await UserService.getCompleteUserData(id);
-
-  const { password_hash, ...safeUser } = userData.user;
-
-  return successResponse(c, {
-    user: safeUser,
-    profile: userData.profile,
-    address: userData.address,
-    emergencyContacts: userData.emergencyContacts,
-  });
-};
-
 const updatePersonalInfo = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
   const body = await c.req.json();
 
   const user = await UserService.updatePersonalInfo(id, body);
 
-  const { password_hash, ...safeUser } = user;
-
   return successResponse(
     c,
-    { user: safeUser },
+    { user: user },
     200,
     'Personal information updated successfully'
   );
@@ -125,27 +110,38 @@ const updateAccountInfo = async (c: Context) => {
 
   const user = await UserService.updateAccountInfo(id, body);
 
-  const { password_hash, ...safeUser } = user;
-
   return successResponse(
     c,
-    { user: safeUser },
+    { user: user },
     200,
     'Account information updated successfully'
   );
 };
-const updatePassword = async (c: Context) => {
-  const id = parseInt(c.req.param('id'));
-  const body = await c.req.json();
 
-  await UserService.updatePassword(id, body);
+// const updatePassword = async (c: Context) => {
+//   const id = parseInt(c.req.param('id'));
+//   const body = await c.req.json();
 
-  return successResponse(c, null, 200, 'Password updated successfully');
+//   await UserService.updatePassword(id, body);
+
+//   return successResponse(c, null, 200, 'Password updated successfully');
+// };
+
+const getUsersByRole = async (c: Context) => {
+  const role = c.req.query('role');
+  if (!role) throw new ValidationError("Query parameter 'role' is required");
+
+  const users = await UserService.getUsersByRole(role);
+  return successResponse(
+    c,
+    { users },
+    200,
+    `Users with role '${role}' retrieved successfully`
+  );
 };
 
 export {
   getUser,
-  getCompleteUserData,
   updatePersonalInfo,
   updateUserProfile,
   updateHealthInfo,
@@ -155,5 +151,6 @@ export {
   updateEmergencyContact,
   deleteEmergencyContact,
   updateAccountInfo,
-  updatePassword,
+  // updatePassword,
+  getUsersByRole,
 };

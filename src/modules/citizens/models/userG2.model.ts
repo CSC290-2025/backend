@@ -264,6 +264,25 @@ const getEmergencyContacts = async (
   }
 };
 
+const findUsersByRole = async (roleName: string): Promise<User[]> => {
+  try {
+    const users = await prisma.users.findMany({
+      where: {
+        roles: {
+          role_name: roleName,
+        },
+      },
+      include: {
+        roles: true,
+      },
+    });
+    return users as unknown as User[];
+  } catch (error) {
+    handlePrismaError(error);
+    return [];
+  }
+};
+
 export {
   findUserById,
   findByUsername,
@@ -277,4 +296,5 @@ export {
   updateEmergencyContact,
   deleteEmergencyContact,
   getEmergencyContacts,
+  findUsersByRole,
 };

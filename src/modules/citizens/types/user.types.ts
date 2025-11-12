@@ -12,13 +12,13 @@ export interface User {
 
 export interface UserProfile {
   user_id: number;
-  first_name?: string;
-  middle_name?: string;
-  last_name?: string;
-  birth_date?: Date;
+  first_name: string | null;
+  middle_name?: string | null;
+  last_name?: string | null;
+  birth_date?: Date | null;
   gender?: 'male' | 'female' | 'none';
-  address_id?: number;
-  more_address_detail?: string;
+  address_id?: number | null;
+  more_address_detail?: string | null;
 }
 
 export interface Address {

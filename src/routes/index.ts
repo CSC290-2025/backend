@@ -6,6 +6,7 @@ import {
   setupUserRoutes,
   setupUserSpecialtyRoutes,
 } from '@/modules/citizens/routes';
+import { setupRoleUserRoutes } from '../modules/citizens/routes/userRoleG11.openapi.routes';
 // ============================================
 // ROUTING OPTIONS:
 // Choose ONE approach per module that you're comfortable with:
@@ -37,4 +38,5 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
   setupUserRoutes(app);
+  setupRoleUserRoutes(app);
 };
