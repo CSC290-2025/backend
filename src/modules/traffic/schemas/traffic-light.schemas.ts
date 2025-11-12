@@ -39,6 +39,9 @@ const TrafficLightSchema = z.object({
   density_level: z.number().int().min(1).max(4), // 1=Low, 2=Moderate, 3=High, 4=Severe
   auto_mode: z.boolean(),
   last_updated: z.coerce.date().nullable(),
+  green_duration: z.number().int().nullable(),
+  red_duration: z.number().int().nullable(),
+  last_color: z.number().int().min(1).max(3).nullable(),
 });
 
 // Create schema - all required fields for new traffic light
@@ -49,6 +52,9 @@ const CreateTrafficLightSchema = z.object({
   location: LocationSchema.nullable(),
   status: z.number().int().default(1),
   auto_mode: z.boolean().default(true),
+  green_duration: z.number().int().optional(),
+  red_duration: z.number().int().optional(),
+  last_color: z.number().int().min(1).max(3).optional(),
 });
 
 // Update schema - all fields optional
@@ -59,6 +65,9 @@ const UpdateTrafficLightSchema = z.object({
   ip_address: z.ipv4().optional(),
   location: LocationSchema.nullable(),
   density_level: z.number().int().min(1).max(4).optional(),
+  green_duration: z.number().int().optional(),
+  red_duration: z.number().int().optional(),
+  last_color: z.number().int().min(1).max(3).optional(),
 });
 
 // Response schemas

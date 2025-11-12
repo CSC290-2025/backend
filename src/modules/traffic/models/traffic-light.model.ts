@@ -6,6 +6,8 @@ import type {
   UpdateTrafficLightData,
 } from '../types';
 
+// ...existing code...
+
 // Helper function to convert lat/lng to location object
 const createLocation = (
   latitude: number | null,
@@ -32,6 +34,9 @@ const findById = async (id: number): Promise<TrafficLight | null> => {
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated
       FROM traffic_lights
       WHERE id = ${id};`;
@@ -49,6 +54,9 @@ const findById = async (id: number): Promise<TrafficLight | null> => {
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     };
   } catch (error) {
@@ -111,6 +119,9 @@ const findAll = async (filters?: {
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated
       FROM traffic_lights
       ${whereClause}
@@ -129,6 +140,9 @@ const findAll = async (filters?: {
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     }));
   } catch (error) {
@@ -153,6 +167,9 @@ const findByIntersection = async (
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated
       FROM traffic_lights
       WHERE intersection_id = ${intersection_id}
@@ -168,6 +185,9 @@ const findByIntersection = async (
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     }));
   } catch (error) {
@@ -190,6 +210,9 @@ const findByRoad = async (road_id: number): Promise<TrafficLight[]> => {
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated
       FROM traffic_lights
       WHERE road_id = ${road_id}
@@ -205,6 +228,9 @@ const findByRoad = async (road_id: number): Promise<TrafficLight[]> => {
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     }));
   } catch (error) {
@@ -220,6 +246,19 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
       ? `ST_SetSRID(ST_MakePoint(${data.location.coordinates[0]}, ${data.location.coordinates[1]}), 4326)`
       : 'NULL';
 
+    const greenVal =
+      data.green_duration !== undefined && data.green_duration !== null
+        ? data.green_duration
+        : 'NULL';
+    const redVal =
+      data.red_duration !== undefined && data.red_duration !== null
+        ? data.red_duration
+        : 'NULL';
+    const lastColorVal =
+      data.last_color !== undefined && data.last_color !== null
+        ? data.last_color
+        : 'NULL';
+
     const result = await prisma.$queryRawUnsafe<any[]>(`
       INSERT INTO traffic_lights (
         intersection_id,
@@ -229,7 +268,10 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
         status,
         current_color,
         density_level,
-        auto_mode
+        auto_mode,
+        green_duration,
+        red_duration,
+        last_color
       )
       VALUES (
         ${data.intersection_id},
@@ -239,7 +281,10 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
         ${data.status ?? 0},
         1,
         1,
-        ${data.auto_mode ?? true}
+        ${data.auto_mode ?? true},
+        ${greenVal},
+        ${redVal},
+        ${lastColorVal}
       )
       RETURNING
         id,
@@ -252,6 +297,9 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated;
     `);
 
@@ -270,6 +318,9 @@ const create = async (data: CreateTrafficLightData): Promise<TrafficLight> => {
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     };
   } catch (error) {
@@ -296,15 +347,21 @@ const update = async (
         `ip_address = ${data.ip_address ? `'${data.ip_address}'` : 'NULL'}`
       );
     if (data.location !== undefined) {
-      const locationValue = data.location
-        ? `ST_SetSRID(ST_MakePoint(${data.location.coordinates[0]}, ${data.location.coordinates[1]}), 4326)`
-        : 'NULL';
-      updates.push(`location = ${locationValue}`);
     }
     if (data.density_level !== undefined)
       updates.push(`density_level = ${data.density_level}`);
 
-    if (updates.length === 0) throw new Error('No update fields provided.');
+    // new updateable fields
+    if (data.green_duration !== undefined)
+      updates.push(`green_duration = ${data.green_duration}`);
+    if (data.red_duration !== undefined)
+      updates.push(`red_duration = ${data.red_duration}`);
+    if (data.last_color !== undefined)
+      updates.push(`last_color = ${data.last_color}`);
+
+    if (updates.length === 0) {
+      throw new Error('No fields to update');
+    }
 
     const result = await prisma.$queryRawUnsafe<any[]>(`
       UPDATE traffic_lights
@@ -321,6 +378,9 @@ const update = async (
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated;
     `);
 
@@ -339,6 +399,9 @@ const update = async (
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     };
   } catch (error) {
@@ -370,6 +433,9 @@ const updateDensity = async (
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated;`;
 
     const tl = result[0];
@@ -387,6 +453,9 @@ const updateDensity = async (
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     };
   } catch (error) {
@@ -402,7 +471,9 @@ const updateColor = async (
 ): Promise<TrafficLight | null> => {
   try {
     const result = await prisma.$queryRaw<any[]>`UPDATE traffic_lights
-      SET current_color = ${color}
+      SET
+        current_color = ${color},
+        last_color = ${color}
       WHERE id = ${id}
       RETURNING
         id,
@@ -415,6 +486,9 @@ const updateColor = async (
         current_color,
         density_level,
         auto_mode,
+        green_duration,
+        red_duration,
+        last_color,
         last_updated;`;
 
     const tl = result[0];
@@ -430,11 +504,14 @@ const updateColor = async (
       current_color: tl.current_color,
       density_level: tl.density_level,
       auto_mode: tl.auto_mode,
+      green_duration: tl.green_duration,
+      red_duration: tl.red_duration,
+      last_color: tl.last_color,
       last_updated: tl.last_updated?.toISOString() || null,
     };
   } catch (error) {
     handlePrismaError(error);
-    throw error;
+    return null;
   }
 };
 
@@ -479,7 +556,6 @@ const count = async (filters?: {
     return 0;
   }
 };
-
 export {
   findById,
   findAll,

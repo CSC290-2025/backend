@@ -4,14 +4,59 @@ import {
   TrafficLightSchemas,
   LightRequestSchemas,
   VehicleSchemas,
+  IntersectionSchemas,
 } from '../schemas';
 import {
   TrafficLightController,
   LightRequestController,
   VehicleController,
+  IntersectionController,
 } from '../controllers';
 
 export const setupTrafficRoutes = (app: OpenAPIHono) => {
+  // ============================================
+  // INTERSECTION ROUTES
+  // ============================================
+  app.openapi(
+    IntersectionSchemas.getIntersectionRoute,
+    IntersectionController.getIntersection
+  );
+
+  app.openapi(
+    IntersectionSchemas.createIntersectionRoute,
+    IntersectionController.createIntersection
+  );
+
+  app.openapi(
+    IntersectionSchemas.updateIntersectionRoute,
+    IntersectionController.updateIntersection
+  );
+
+  app.openapi(
+    IntersectionSchemas.deleteIntersectionRoute,
+    IntersectionController.deleteIntersection
+  );
+
+  app.openapi(
+    IntersectionSchemas.listIntersectionsRoute,
+    IntersectionController.listIntersections
+  );
+
+  app.openapi(
+    IntersectionSchemas.listIntersectionsWithLightsRoute,
+    IntersectionController.listIntersectionsWithLights
+  );
+
+  app.openapi(
+    IntersectionSchemas.getNearbyIntersectionsRoute,
+    IntersectionController.getNearbyIntersections
+  );
+
+  app.openapi(
+    IntersectionSchemas.getIntersectionStatsRoute,
+    IntersectionController.getIntersectionStats
+  );
+
   // ============================================
   // TRAFFIC LIGHT ROUTES
   // ============================================

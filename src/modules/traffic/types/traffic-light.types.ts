@@ -39,13 +39,6 @@ interface TrafficLightCycleConfig {
   totalCycle: number;
 }
 
-// Road and Intersection types
-type Intersection = {
-  id: number;
-  latitude: number;
-  longitude: number;
-};
-
 type Road = {
   id: number;
   name: string;
@@ -94,7 +87,6 @@ export type {
   Location,
   GoogleMapsTrafficData,
   TrafficLightCycleConfig,
-  Intersection,
   Road,
   TrafficLightRequest,
   CreateLightRequestData,
