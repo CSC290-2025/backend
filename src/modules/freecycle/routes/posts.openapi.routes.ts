@@ -9,13 +9,13 @@ const setupFreecyclePostsRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
-    FreecyclePostsSchemas.getFreecyclePostRoute,
-    PostsController.getPostById
+    FreecyclePostsSchemas.getNotGivenPostsRoute,
+    PostsController.getNotGivenPost
   );
 
   app.openapi(
-    FreecyclePostsSchemas.getNotGivenPostsRoute,
-    PostsController.getNotGivenPost
+    FreecyclePostsSchemas.getFreecyclePostRoute,
+    PostsController.getPostById
   );
 
   app.openapi(

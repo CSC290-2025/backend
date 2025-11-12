@@ -59,8 +59,8 @@ const markAsNotGiven = async (c: Context) => {
 };
 
 const getNotGivenPost = async (c: Context) => {
-  const post = await PostsService.getNotGivenPost();
-  return successResponse(c, { post });
+  const posts = await PostsService.getNotGivenPost();
+  return successResponse(c, posts);
 };
 
 const getPostsByCategory = async (c: Context) => {
