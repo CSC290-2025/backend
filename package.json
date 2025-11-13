@@ -2,7 +2,6 @@
   "name": "backend",
   "type": "module",
   "scripts": {
-    "seed": "tsx watch src/modules/power-bi/seed.ts",
     "dev": "tsx watch src/index.ts",
     "build": "tsup",
     "start": "node dist/index.js",
