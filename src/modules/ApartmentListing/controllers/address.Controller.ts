@@ -5,7 +5,7 @@ import type { Context } from 'hono';
 export async function getAddressByID(c: Context) {
   const id = Number(c.req.param('id'));
   const address = await addressService.getAddressByID(id);
-  return successResponse(c, { address });
+  return successResponse(c, address);
 }
 
 export async function createAddress(c: Context) {
