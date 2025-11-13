@@ -21,15 +21,6 @@ const getAllApartments = async (): Promise<Apartment[]> => {
 const createApartment = async (
   data: createApartmentData
 ): Promise<Apartment> => {
-  if (
-    !data.name ||
-    !data.apartment_location ||
-    !data.electric_price ||
-    !data.water_price
-  ) {
-    throw new ValidationError('Missing required fields');
-  }
-
   const apartment = await apartmentModel.createApartment(data);
   if (!apartment) throw new Error('Failed to create apartment');
   return apartment;
@@ -53,9 +44,7 @@ const deleteApartment = async (id: number): Promise<void> => {
 };
 
 const getApartmentRating = async (apartmentId: number) => {
-  const apartment = await getApartmentByID(apartmentId);
-  if (!apartment) throw new NotFoundError('Apartment not found');
-
+  await getApartmentByID(apartmentId);
   const rating = await apartmentModel.getApartmentRating(apartmentId);
   return rating;
 };

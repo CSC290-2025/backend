@@ -7,28 +7,25 @@ import {
 import { z } from 'zod';
 
 const addressSchema = z.object({
-  id: z.int(),
-  address_line: z.string().min(0).max(255).nullable(),
-  province: z.string().min(0).max(255).nullable(),
-  district: z.string().min(0).max(255).nullable(),
-  subdistrict: z.string().min(0).max(255).nullable(),
-  postal_code: z.string().min(0).max(20).nullable(),
+  address_line: z.string().max(255).nullable(),
+  province: z.string().max(255).nullable(),
+  district: z.string().max(255).nullable(),
+  subdistrict: z.string().max(255).nullable(),
+  postal_code: z.string().max(20).nullable(),
 });
-
 const createAddressSchema = z.object({
-  address_line: z.string().min(0).max(255).nullable(),
-  province: z.string().min(0).max(255).nullable(),
-  district: z.string().min(0).max(255).nullable(),
-  subdistrict: z.string().min(0).max(255).nullable(),
-  postal_code: z.string().min(0).max(20).nullable(),
+  address_line: z.string().max(255).nullable(),
+  province: z.string().max(255).nullable(),
+  district: z.string().max(255).nullable(),
+  subdistrict: z.string().max(255).nullable(),
+  postal_code: z.string().max(20).nullable(),
 });
-
 const updateAddressSchema = z.object({
-  address_line: z.string().min(0).max(255).nullable(),
-  province: z.string().min(0).max(255).nullable(),
-  district: z.string().min(0).max(255).nullable(),
-  subdistrict: z.string().min(0).max(255).nullable(),
-  postal_code: z.string().min(0).max(20).nullable(),
+  address_line: z.string().max(255).nullable(),
+  province: z.string().max(255).nullable(),
+  district: z.string().max(255).nullable(),
+  subdistrict: z.string().max(255).nullable(),
+  postal_code: z.string().max(20).nullable(),
 });
 
 const addressParam = z.object({

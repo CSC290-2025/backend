@@ -12,7 +12,7 @@ const RoomSchema = z.object({
   id: z.int(),
   name: z.string().min(2).max(255).nullable(),
   type: z.string().min(2).max(255).nullable(),
-  size: z.string().min(0).nullable(),
+  size: z.string().min(1).nullable(),
   room_status: z
     .enum(['occupied', 'pending', 'available'])
     .default('available')
@@ -27,7 +27,7 @@ const createRoomSchema = z
   .object({
     name: z.string().min(2).max(255),
     type: z.string().min(2).max(255),
-    size: z.string().min(0).default('0'),
+    size: z.string().min(1).default('0'),
     price_start: z.number().min(0).default(0),
     price_end: z.number().min(0).default(0),
   })
@@ -47,7 +47,7 @@ const updateRoomSchema = z
   .object({
     name: z.string().min(2).max(255).optional(),
     type: z.string().min(2).max(255).optional(),
-    size: z.string().min(0).optional(),
+    size: z.string().min(1).optional(),
     price_start: z.number().min(0).optional(),
     price_end: z.number().min(0).optional(),
     room_status: z
@@ -70,7 +70,6 @@ const updateRoomSchema = z
     }
   });
 const RoomIdParam = z.object({
-  // id: z.string(),
   roomId: z.coerce.number().int().positive(),
 });
 const RoomParam = z.object({
@@ -99,8 +98,8 @@ const getRoomByIDRoute = createGetRoute({
   path: '/apartments/{id}/rooms/{roomId}',
   summary: 'Get a room by ID',
   params: z.object({
-    id: z.string(),
-    roomId: z.string(),
+    id: z.coerce.number().int().positive(),
+    roomId: z.coerce.number().int().positive(),
   }),
   responseSchema: RoomSchema,
   tags: ['Room'],

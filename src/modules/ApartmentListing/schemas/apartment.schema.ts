@@ -26,7 +26,7 @@ const ApartmentSchema = z.object({
   id: z.int(),
   name: z.string().min(2).max(255).nullable(),
   phone: z.string().min(10).max(10).nullable(),
-  description: z.string().min(0).nullable(),
+  description: z.string().nullable(),
   electric_price: z.number().min(0).nullable(),
   water_price: z.number().min(0).nullable(),
   apartment_type: z.enum(['dormitory', 'apartment']).nullable(),
@@ -40,7 +40,7 @@ const ApartmentListSchema = z.array(ApartmentSchema);
 const createApartmentSchema = z.object({
   name: z.string().min(2).max(255),
   phone: z.string().min(10).max(10),
-  description: z.string().min(0),
+  description: z.string().nullable(),
   apartment_type: z.enum(['dormitory', 'apartment']),
   apartment_location: z.enum(['asoke', 'prachauthit', 'phathumwan']),
   electric_price: z.number().min(0),
@@ -48,18 +48,18 @@ const createApartmentSchema = z.object({
   internet: z.enum(['free', 'not_free', 'none']),
   userId: z.int(),
   address: z.object({
-    address_line: z.string().min(0).max(255).nullable(),
-    province: z.string().min(0).max(255).nullable(),
-    district: z.string().min(0).max(255).nullable(),
-    subdistrict: z.string().min(0).max(255).nullable(),
-    postal_code: z.string().min(0).max(20).nullable(),
+    address_line1: z.string().min(5).max(255),
+    province: z.string().min(2).max(255),
+    district: z.string().min(2).max(255),
+    subdistrict: z.string().min(2).max(255),
+    postal_code: z.string().min(5).max(10),
   }),
 });
 
 const updateApartmentSchema = z.object({
   name: z.string().min(2).max(255),
   phone: z.string().min(10).max(10),
-  description: z.string().min(0),
+  description: z.string().nullable(),
   apartment_type: z.enum(['dormitory', 'apartment']),
   apartment_location: z.enum(['asoke', 'prachauthit', 'phathumwan']),
   electric_price: z.number().min(0),
@@ -67,16 +67,16 @@ const updateApartmentSchema = z.object({
   internet: z.enum(['free', 'not_free', 'none']),
   address: z
     .object({
-      address_line: z.string().min(0).max(255).nullable(),
-      province: z.string().min(0).max(255).nullable(),
-      district: z.string().min(0).max(255).nullable(),
-      subdistrict: z.string().min(0).max(255).nullable(),
-      postal_code: z.string().min(0).max(20).nullable(),
+      address_line1: z.string().min(5).max(255),
+      province: z.string().min(2).max(255),
+      district: z.string().min(2).max(255),
+      subdistrict: z.string().min(2).max(255),
+      postal_code: z.string().min(5).max(10),
     })
     .optional(),
 });
 const ApartmentIdParam = z.object({
-  id: z.string(),
+  id: z.coerce.number().int().positive(),
 });
 
 const ApartmentFilterSchema = z.object({

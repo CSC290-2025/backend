@@ -16,8 +16,7 @@ export async function getCommentsByApartment(c: Context) {
 export async function getAverageRatingByApartment(c: Context) {
   const apartmentId = Number(c.req.param('id'));
   // Check if apartment exists without fetching rating
-  const apartment = await apartmentService.getApartmentByID(apartmentId);
-  if (!apartment) throw new NotFoundError('Apartment not found');
+  await apartmentService.getApartmentByID(apartmentId);
   // Get the average rating directly
   const averageRating =
     await ratingService.getAverageRatingByApartment(apartmentId);
