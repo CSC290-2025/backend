@@ -37,7 +37,7 @@ export async function filterApartments(c: Context) {
     maxPrice ? Number(maxPrice) : null,
     search || null
   );
-  return successResponse(c, { apartments }, 200);
+  return successResponse(c, apartments, 200);
 }
 export async function countAvailableRooms(c: Context) {
   const id = Number(c.req.param('id'));
