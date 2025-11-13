@@ -105,7 +105,7 @@ const topUpFromWallet = async (
 
     return result;
   } catch (error) {
-    throw new ValidationError('Failed to process transfer');
+    throw new ValidationError(`Failed to process transfer: ${error instanceof Error ? error.message : String(error)}`);
   }
 };
 
