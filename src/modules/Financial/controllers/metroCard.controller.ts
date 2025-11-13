@@ -1,5 +1,7 @@
 import { successResponse } from '@/utils/response';
 import { MetroCardService } from '../services';
+import { WalletModel } from '../models';
+import { NotFoundError } from '@/errors';
 import type { Context } from 'hono';
 
 const getMetroCard = async (c: Context) => {
@@ -41,14 +43,23 @@ const topUpBalance = async (c: Context) => {
   const metroCardId = Number(c.req.param('metroCardId'));
 
   const body = await c.req.json();
-  const metroCard = await MetroCardService.topUpBalance(
+
+  const existingMetroCard =
+    await MetroCardService.getMetroCardById(metroCardId);
+  const wallet = await WalletModel.findWalletByUserId(
+    existingMetroCard.user_id
+  );
+  if (!wallet) throw new NotFoundError('Wallet for metro card owner not found');
+  const walletId = wallet.id;
+
+  const updatedMetroCard = await MetroCardService.topUpBalance(
     metroCardId,
-    body.walletId,
+    walletId,
     body.amount
   );
   return successResponse(
     c,
-    { metroCard },
+    { metroCard: updatedMetroCard },
     200,
     'Balance topped up successfully'
   );
