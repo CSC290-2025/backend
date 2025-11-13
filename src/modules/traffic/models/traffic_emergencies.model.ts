@@ -19,7 +19,13 @@ const findById = async (id: number): Promise<TrafficEmergency | null> => {
         vehicles: true,
       },
     });
-    return emergency;
+    if (!emergency) return null;
+    // Ensure geometry field exists on the returned object to satisfy the domain type
+    const mapped = {
+      ...emergency,
+      accident_location: (emergency as any).accident_location ?? null,
+    } as TrafficEmergency;
+    return mapped;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -29,30 +35,32 @@ const create = async (
   data: CreateTrafficEmergencyData
 ): Promise<TrafficEmergency> => {
   try {
-    // Convert lat/lng to PostGIS POINT format
-    const pointWKT = `POINT(${data.accident_location.longitude} ${data.accident_location.latitude})`;
-
+    // Use parameterized point creation to avoid WKT/quoting issues
     const emergency = (await prisma.$queryRaw`
       INSERT INTO traffic_emergencies (
-        user_id, 
-        accident_location, 
-        destination_hospital, 
+        user_id,
+        accident_location,
+        destination_hospital,
         status,
         ambulance_vehicle_id,
         created_at
       )
       VALUES (
         ${data.user_id},
-        ST_GeomFromText(${pointWKT}, 4326),
+        ST_SetSRID(ST_MakePoint(${data.accident_location.longitude}, ${data.accident_location.latitude}), 4326),
         ${data.destination_hospital},
-        ${data.status || 'pending'},
-        ${data.ambulance_vehicle_id || null},
+        ${data.status ?? 'pending'},
+        ${data.ambulance_vehicle_id ?? null},
         NOW()
       )
       RETURNING *
     `) as TrafficEmergency[];
 
-    return emergency[0];
+    const e = emergency[0];
+    return {
+      ...e,
+      accident_location: (e as any).accident_location ?? null,
+    } as TrafficEmergency;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -79,12 +87,10 @@ const update = async (
 
     // If location is provided, use raw query for geometry update
     if (data.accident_location) {
-      const pointWKT = `POINT(${data.accident_location.longitude} ${data.accident_location.latitude})`;
-
       const emergency = (await prisma.$queryRaw`
-        UPDATE traffic_emergencies 
-        SET 
-          accident_location = ST_GeomFromText(${pointWKT}, 4326),
+        UPDATE traffic_emergencies
+        SET
+          accident_location = ST_SetSRID(ST_MakePoint(${data.accident_location.longitude}, ${data.accident_location.latitude}), 4326),
           destination_hospital = COALESCE(${data.destination_hospital}, destination_hospital),
           status = COALESCE(${data.status}, status),
           ambulance_vehicle_id = COALESCE(${data.ambulance_vehicle_id}, ambulance_vehicle_id)
@@ -92,7 +98,11 @@ const update = async (
         RETURNING *
       `) as TrafficEmergency[];
 
-      return emergency[0];
+      const e = emergency[0];
+      return {
+        ...e,
+        accident_location: (e as any).accident_location ?? null,
+      } as TrafficEmergency;
     }
 
     // Regular update without geometry
@@ -100,8 +110,10 @@ const update = async (
       where: { id },
       data: updateData,
     });
-
-    return emergency;
+    return {
+      ...emergency,
+      accident_location: (emergency as any).accident_location ?? null,
+    } as TrafficEmergency;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -124,7 +136,13 @@ const findByUser = async (userId: number): Promise<TrafficEmergency[]> => {
       },
       orderBy: { created_at: 'desc' },
     });
-    return emergencies;
+    return emergencies.map(
+      (e) =>
+        ({
+          ...e,
+          accident_location: (e as any).accident_location ?? null,
+        }) as TrafficEmergency
+    );
   } catch (error) {
     handlePrismaError(error);
   }
@@ -140,7 +158,13 @@ const findByStatus = async (status: string): Promise<TrafficEmergency[]> => {
       },
       orderBy: { created_at: 'desc' },
     });
-    return emergencies;
+    return emergencies.map(
+      (e) =>
+        ({
+          ...e,
+          accident_location: (e as any).accident_location ?? null,
+        }) as TrafficEmergency
+    );
   } catch (error) {
     handlePrismaError(error);
   }
@@ -190,7 +214,13 @@ const findWithPagination = async (
     ]);
 
     return {
-      emergencies,
+      emergencies: emergencies.map(
+        (e) =>
+          ({
+            ...e,
+            accident_location: (e as any).accident_location ?? null,
+          }) as TrafficEmergency
+      ),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -228,7 +258,8 @@ const getStats = async (): Promise<{
       cancelled: 0,
     };
 
-    for (const item of statusCounts) {
+    type StatusCount = { status: string | null; _count: { status: number } };
+    for (const item of statusCounts as StatusCount[]) {
       if (item.status) {
         stats[item.status] = item._count.status;
       }

@@ -1,10 +1,11 @@
-import { TrafficEmergencyModel } from '../models';
+import { TrafficEmergencyModel, VehicleModel } from '../models';
 import type {
   TrafficEmergency,
   CreateTrafficEmergencyData,
   UpdateTrafficEmergencyData,
   TrafficEmergencyFilterOptions,
-  PaginationOptions,
+  // Use traffic emergencies specific pagination options
+  TrafficEmerPaginationOptions,
   PaginatedTrafficEmergencies,
 } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
@@ -40,6 +41,17 @@ const createTrafficEmergency = async (
     throw new ValidationError('Invalid longitude');
   }
 
+  // If an ambulance vehicle ID is provided, ensure it exists
+  if (
+    data.ambulance_vehicle_id !== undefined &&
+    data.ambulance_vehicle_id !== null
+  ) {
+    const vehicle = await VehicleModel.findVehicleById(
+      data.ambulance_vehicle_id
+    );
+    if (!vehicle) throw new ValidationError('Ambulance vehicle not found');
+  }
+
   return await TrafficEmergencyModel.create(data);
 };
 
@@ -73,7 +85,7 @@ const deleteTrafficEmergency = async (id: number): Promise<void> => {
 
 const listTrafficEmergencies = async (
   filters: TrafficEmergencyFilterOptions,
-  pagination: PaginationOptions
+  pagination: TrafficEmerPaginationOptions
 ): Promise<PaginatedTrafficEmergencies> => {
   return await TrafficEmergencyModel.findWithPagination(filters, pagination);
 };

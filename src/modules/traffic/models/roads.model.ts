@@ -9,6 +9,22 @@ import type {
   PaginatedRoads,
 } from '../types';
 
+// Helper to map Prisma DB rows (which may contain nullable fields)
+// into the domain `Road` shape expected by the rest of the app.
+const mapDbRoadToRoad = (dbRoad: any): Road => {
+  if (!dbRoad) return dbRoad;
+
+  // Coalesce nullable DB values into safe domain values.
+  // - `name` may be nullable in the DB/schema; make it a string here.
+  // - `length_meters` may be nullable; coalesce to 0.
+  // Keep other fields as-is (they may be nullable in the domain schema).
+  return {
+    ...dbRoad,
+    name: dbRoad.name ?? '',
+    length_meters: dbRoad.length_meters ?? 0,
+  } as Road;
+};
+
 const findById = async (id: number): Promise<Road | null> => {
   try {
     const road = await prisma.roads.findUnique({
@@ -18,7 +34,8 @@ const findById = async (id: number): Promise<Road | null> => {
         intersections_roads_end_intersection_idTointersections: true,
       },
     });
-    return road;
+    if (!road) return null;
+    return mapDbRoadToRoad(road);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -34,7 +51,7 @@ const create = async (data: CreateRoadData): Promise<Road> => {
         length_meters: data.length_meters || null,
       },
     });
-    return road;
+    return mapDbRoadToRoad(road);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -57,7 +74,7 @@ const update = async (id: number, data: UpdateRoadData): Promise<Road> => {
         }),
       },
     });
-    return road;
+    return mapDbRoadToRoad(road);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -81,7 +98,7 @@ const findByIntersection = async (intersectionId: number): Promise<Road[]> => {
         ],
       },
     });
-    return roads;
+    return roads.map(mapDbRoadToRoad);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -132,7 +149,7 @@ const findWithPagination = async (
     ]);
 
     return {
-      roads,
+      roads: roads.map(mapDbRoadToRoad),
       total,
       page,
       totalPages: Math.ceil(total / limit),

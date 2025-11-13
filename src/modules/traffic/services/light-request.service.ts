@@ -12,7 +12,7 @@ export const createLightRequest = async (
 
   return {
     request_id: request.id,
-    traffic_light_id: request.traffic_light_id,
+    traffic_light_id: request.traffic_light_id ?? 0,
     requested_by: data.requested_by,
     priority: data.priority,
     reason: data.reason,
@@ -32,7 +32,7 @@ export const getLightRequests = async (
 
   const formattedData: LightRequestResponse[] = data.map((req: any) => ({
     request_id: req.id,
-    traffic_light_id: req.traffic_light_id,
+    traffic_light_id: req.traffic_light_id ?? 0,
     requested_by: 'system',
     priority: 'medium' as const,
     reason: 'automatic',

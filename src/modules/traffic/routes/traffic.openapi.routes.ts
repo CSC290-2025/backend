@@ -12,6 +12,8 @@ import {
   VehicleController,
   IntersectionController,
 } from '../controllers';
+import { setupTrafficEmergencyRoutes } from './traffic_emergencies.routes';
+import { setupRoadRoutes } from './roads.routes';
 
 export const setupTrafficRoutes = (app: OpenAPIHono) => {
   // ============================================
@@ -133,4 +135,14 @@ export const setupTrafficRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(VehicleSchemas.getVehicleRoute, VehicleController.getVehicle);
+
+  // ============================================
+  // TRAFFIC EMERGENCY ROUTES
+  // ============================================
+  setupTrafficEmergencyRoutes(app);
+
+  // ============================================
+  // ROAD ROUTES
+  // ============================================
+  setupRoadRoutes(app);
 };
