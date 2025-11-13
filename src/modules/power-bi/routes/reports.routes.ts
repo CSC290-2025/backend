@@ -1,14 +1,12 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import { ReportsController } from '../controllers';
 
-const reportsRoutes = new Hono();
+const reportRoutes = new Hono();
 
-// Allow frontend dev origin
-reportsRoutes.use('*', cors({ origin: '*' }));
+// Extract data by category
+reportRoutes.get('/', ReportsController.getReports);
+reportRoutes.post('/', ReportsController.createReport);
+reportRoutes.put('/:id', ReportsController.updateReport);
+reportRoutes.delete('/:id', ReportsController.deleteReport);
 
-// Reports (Power BI) - Get reports organized by category, filtered by role
-reportsRoutes.get('/reports', ReportsController.getReports);
-reportsRoutes.post('/reports', ReportsController.createReport);
-
-export { reportsRoutes };
+export { reportRoutes };

@@ -68,9 +68,95 @@ const createReportMetadata = async (record: CreateReportMetadataInput) => {
       description_string: record.description ?? null,
       category_id: categoryId,
       power_bi_report_id_string: embedUrl,
+      visibility: record.visibility || 'citizens',
+      power_bi_report_type: record.type || 'summary',
     };
 
     return await prisma.reports_metadata.create({ data: payload });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const updateReportMetadata = async (
+  reportId: number,
+  record: {
+    title?: string;
+    description?: string | null;
+    category?: string;
+    embedUrl?: string | null;
+    visibility?: 'citizens' | 'admin';
+    type?: 'summary' | 'trends';
+  }
+) => {
+  try {
+    // Find category_id if category name is provided
+    let categoryId: number | undefined = undefined;
+
+    if (record.category) {
+      const category = await prisma.dim_category.findFirst({
+        where: {
+          category_name: {
+            equals: record.category,
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (category) {
+        categoryId = category.category_id;
+      }
+    }
+
+    // Build update payload
+    const updatePayload: {
+      title_string?: string;
+      description_string?: string | null;
+      category_id?: number | null;
+      power_bi_report_id_string?: string | null;
+      visibility?: 'citizens' | 'admin' | 'official';
+      power_bi_report_type?: 'summary' | 'trends';
+      last_updated_datetime?: Date;
+    } = {
+      last_updated_datetime: new Date(),
+    };
+
+    if (record.title !== undefined) {
+      updatePayload.title_string = record.title;
+    }
+    if (record.description !== undefined) {
+      updatePayload.description_string = record.description;
+    }
+    if (categoryId !== undefined) {
+      updatePayload.category_id = categoryId;
+    }
+    if (record.embedUrl !== undefined) {
+      updatePayload.power_bi_report_id_string = record.embedUrl;
+    }
+    if (record.visibility !== undefined) {
+      updatePayload.visibility = record.visibility;
+    }
+    if (record.type !== undefined) {
+      updatePayload.power_bi_report_type = record.type;
+    }
+
+    return await prisma.reports_metadata.update({
+      where: { report_id: reportId },
+      data: updatePayload,
+      include: {
+        dim_category: true,
+      },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const deleteReportMetadata = async (reportId: number) => {
+  try {
+    return await prisma.reports_metadata.delete({
+      where: { report_id: reportId },
+    });
   } catch (error) {
     handlePrismaError(error);
   }
@@ -80,4 +166,6 @@ export {
   getReportsMetadata,
   getReportsMetadataWithCategory,
   createReportMetadata,
+  updateReportMetadata,
+  deleteReportMetadata,
 };

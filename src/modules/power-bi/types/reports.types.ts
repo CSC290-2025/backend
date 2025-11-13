@@ -1,19 +1,28 @@
-import type { reports_metadata } from '@/generated/prisma';
+import { type reports_metadata, report_visibility } from '@/generated/prisma';
 
 // Extended type for report metadata that includes runtime fields
 export type ReportMetadataWithEmbedUrl = reports_metadata & {
   embedUrl?: string | null;
 };
 
-// Type for create report metadata input
 export type CreateReportMetadataInput = {
   title: string;
   description?: string | null;
   category: string;
   embedUrl?: string | null;
+  visibility?: 'citizens' | 'admin';
+  type?: 'summary' | 'trends';
 };
 
-// Type for reports organized by category
+export type UpdateReportMetadataInput = {
+  title?: string;
+  description?: string | null;
+  category?: string;
+  embedUrl?: string | null;
+  visibility?: 'citizens' | 'admin';
+  type?: 'summary' | 'trends';
+};
+
 export type ReportsByCategory = {
   [categoryName: string]: {
     categoryId: number;
@@ -24,5 +33,6 @@ export type ReportsByCategory = {
 };
 
 // shared types
-export const VALID_ROLES = ['citizen', 'official', 'admin'] as const;
+// Runtime list used by services to validate the role query param
+export const VALID_ROLES = ['citizens', 'admin'] as const;
 export type UserRole = (typeof VALID_ROLES)[number];

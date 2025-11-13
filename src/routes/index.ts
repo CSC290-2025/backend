@@ -15,7 +15,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
-import { etlRoutes, reportsRoutes } from '@/modules/power-bi';
+import { reportRoutes } from '@/modules/power-bi';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   // ============================================
@@ -29,6 +29,5 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Normal Hono Routes (not in Swagger docs)
   // ============================================
   // app.route('/products', productRoutes);
-  app.route('/etl', etlRoutes);
-  app.route('/reports', reportsRoutes);
+  app.route('/reports', reportRoutes);
 };

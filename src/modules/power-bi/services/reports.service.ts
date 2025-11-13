@@ -2,8 +2,8 @@ import { ReportsModel } from '../models';
 import type {
   ReportMetadataWithEmbedUrl,
   CreateReportMetadataInput,
+  UpdateReportMetadataInput,
   ReportsByCategory,
-  UserRole,
 } from '../types';
 import { VALID_ROLES } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
@@ -19,7 +19,7 @@ const getReportsMetadata = async (): Promise<ReportMetadataWithEmbedUrl[]> => {
  */
 const getReportsByRole = async (role: string): Promise<ReportsByCategory> => {
   // Validate role parameter
-  const normalizedRole = role.toLowerCase() as UserRole;
+  const normalizedRole = role.toLowerCase();
   if (!VALID_ROLES.includes(normalizedRole)) {
     throw new ValidationError(
       `Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`
@@ -32,9 +32,21 @@ const getReportsByRole = async (role: string): Promise<ReportsByCategory> => {
     return {};
   }
 
-  // Filter reports based on role (for now, all roles see all reports)
-  // This can be extended later to filter based on role-specific permissions
-  const filteredReports = reports;
+  // Filter reports based on visibility and role
+  // - If role is "citizen", only show reports with visibility="citizens"
+  // - If role is "admin", show reports with visibility="citizens" OR visibility="admin"
+  const filteredReports = reports.filter((report) => {
+    const reportVisibility = report.visibility?.toLowerCase();
+
+    if (normalizedRole === 'citizen') {
+      return reportVisibility === 'citizens';
+    } else if (normalizedRole === 'admin') {
+      return reportVisibility === 'citizens' || reportVisibility === 'admin';
+    }
+
+    // For other roles (e.g., 'official'), show all reports for now
+    return true;
+  });
 
   // Group reports by category
   const reportsByCategory: ReportsByCategory = {};
@@ -75,4 +87,48 @@ const createReportMetadata = async (
   return created;
 };
 
-export { getReportsMetadata, getReportsByRole, createReportMetadata };
+const updateReportMetadata = async (
+  reportId: number,
+  record: UpdateReportMetadataInput
+): Promise<ReportMetadataWithEmbedUrl> => {
+  // Check if report exists
+  const existing = await ReportsModel.getReportsMetadata();
+  const reportExists = existing?.some((r) => r.report_id === reportId);
+  if (!reportExists) {
+    throw new NotFoundError(`Report with ID ${reportId} not found`);
+  }
+
+  const updated = await (
+    ReportsModel as {
+      updateReportMetadata: (
+        reportId: number,
+        record: UpdateReportMetadataInput
+      ) => Promise<ReportMetadataWithEmbedUrl | null>;
+    }
+  ).updateReportMetadata(reportId, record);
+  if (!updated) throw new ValidationError('Failed to update report metadata');
+  return updated;
+};
+
+const deleteReportMetadata = async (reportId: number): Promise<void> => {
+  // Check if report exists
+  const existing = await ReportsModel.getReportsMetadata();
+  const reportExists = existing?.some((r) => r.report_id === reportId);
+  if (!reportExists) {
+    throw new NotFoundError(`Report with ID ${reportId} not found`);
+  }
+
+  await (
+    ReportsModel as {
+      deleteReportMetadata: (reportId: number) => Promise<void>;
+    }
+  ).deleteReportMetadata(reportId);
+};
+
+export {
+  getReportsMetadata,
+  getReportsByRole,
+  createReportMetadata,
+  updateReportMetadata,
+  deleteReportMetadata,
+};
