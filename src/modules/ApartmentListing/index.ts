@@ -8,4 +8,4 @@ export { setupRatingRoutes } from './routes/rating.route';
 export { setupRoomRoutes } from './routes/room.route';
 export { setupAddressRoutes } from './routes/address.route';
 export { setupUploadRoutes } from './routes/upload.route';
-// export {setupBookingRoutes} from './routes/booking.route';
+export { setupBookingRoutes } from './routes/booking.route';

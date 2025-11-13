@@ -18,6 +18,7 @@ import { setupRatingRoutes } from '@/modules/ApartmentListing';
 import { setupRoomRoutes } from '@/modules/ApartmentListing';
 import { setupAddressRoutes } from '@/modules/ApartmentListing';
 import { setupUploadRoutes } from '@/modules/ApartmentListing';
+import { setupBookingRoutes } from '@/modules/ApartmentListing';
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
 // import { apartmentRoutes } from '@/modules/ApartmentListing/routes/apartment.route';
@@ -35,6 +36,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
 
+  setupBookingRoutes(app);
   //
   // ============================================
   // Normal Hono Routes (not in Swagger docs)

@@ -64,7 +64,7 @@ export async function createRoom(data: createRoomData, apartmentId: number) {
 }
 export async function updateRoom(id: number, data: updateRoomData) {
   try {
-    const { size, ...rest } = data as any;
+    const { size, ...rest } = data;
     const updateData = {
       ...rest,
       size: size !== undefined && size !== null ? String(size) : undefined,
