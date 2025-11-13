@@ -15,7 +15,8 @@ export function startBookingCleanupJob() {
 
 async function cancelExpiredBookings() {
   const threeDaysAgo = new Date();
-  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+  const BOOKING_EXPIRY_DAYS = 3;
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - BOOKING_EXPIRY_DAYS);
 
   try {
     // Find expired pending bookings with room_id
