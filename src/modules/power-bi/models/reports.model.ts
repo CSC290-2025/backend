@@ -1,6 +1,7 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { CreateReportMetadataInput } from '../types';
+import type { Prisma } from '@/generated/prisma';
 
 // Generic reports metadata across categories (admin-owned)
 const getReportsMetadata = async () => {
@@ -135,16 +136,8 @@ const updateReportMetadata = async (
       }
     }
 
-    // Build update payload
-    const updatePayload: {
-      title_string?: string;
-      description_string?: string | null;
-      category_id?: number | null;
-      power_bi_report_id_string?: string | null;
-      visibility?: 'citizens' | 'admin' | 'official';
-      power_bi_report_type?: 'summary' | 'trends';
-      last_updated_datetime?: Date;
-    } = {
+    // Build update payload using Prisma's unchecked type to allow direct category_id assignment
+    const updatePayload: Prisma.reports_metadataUncheckedUpdateInput = {
       last_updated_datetime: new Date(),
     };
 
