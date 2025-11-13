@@ -1,5 +1,5 @@
 import { successResponse } from '@/utils/response';
-import { bookingService } from '../service/index.ts';
+import { bookingService } from '../service';
 import type { Context } from 'hono';
 
 export async function getAllBookingsForUser(c: Context) {
