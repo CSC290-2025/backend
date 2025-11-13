@@ -11,7 +11,7 @@ const bookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
-  guest_phone: z.string().min(10).max(10).nullable(),
+  guest_phone: z.string().max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
   check_in: z.string().datetime().nullable(),
@@ -29,7 +29,7 @@ const createbookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
-  guest_phone: z.string().min(10).max(10).nullable(),
+  guest_phone: z.string().max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
   check_in: z.string().datetime().nullable(),
@@ -39,7 +39,7 @@ const updatebookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
-  guest_phone: z.string().min(10).max(10).nullable(),
+  guest_phone: z.string().max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
   booking_status: z.enum(['pending', 'confirmed', 'cancelled']).nullable(),
@@ -47,15 +47,15 @@ const updatebookingSchema = z.object({
 });
 
 const bookingIdParam = z.object({
-  id: z.string(),
+  id: z.coerce.number().int().positive(),
 });
 
 const UpdatebookingParamsSchema = z.object({
-  id: z.string(),
+  id: z.coerce.number().int().positive(),
 });
 
 const DeletebookingParamsSchema = z.object({
-  id: z.string(),
+  id: z.coerce.number().int().positive(),
 });
 
 //openAPI
