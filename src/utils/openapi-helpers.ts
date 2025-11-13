@@ -1,4 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi';
+import type { MiddlewareHandler } from 'hono';
 
 const createResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
@@ -49,12 +50,14 @@ const createGetRoute = <
   params?: TParams;
   query?: TQuery;
   tags?: string[];
+  middleware?: MiddlewareHandler[];
 }) =>
   createRoute({
     method: 'get',
     path: config.path,
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
+    ...(config.middleware && { middleware: config.middleware }),
     request: {
       ...(config.params && { params: config.params }),
       ...(config.query && { query: config.query }),
@@ -76,12 +79,14 @@ const createPostRoute = <
   responseSchema: TResponse;
   params?: TParams;
   tags?: string[];
+  middleware?: MiddlewareHandler[];
 }) =>
   createRoute({
     method: 'post',
     path: config.path,
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
+    ...(config.middleware && { middleware: config.middleware }),
     request: {
       ...(config.params && { params: config.params }),
       body: {
@@ -109,12 +114,14 @@ const createPutRoute = <
   responseSchema: TResponse;
   params: TParams;
   tags?: string[];
+  middleware?: MiddlewareHandler[];
 }) =>
   createRoute({
     method: 'put',
     path: config.path,
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
+    ...(config.middleware && { middleware: config.middleware }),
     request: {
       params: config.params,
       body: {
@@ -135,12 +142,14 @@ const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
   summary: string;
   params: TParams;
   tags?: string[];
+  middleware?: MiddlewareHandler[];
 }) =>
   createRoute({
     method: 'delete',
     path: config.path,
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
+    ...(config.middleware && { middleware: config.middleware }),
     request: {
       params: config.params,
     },
