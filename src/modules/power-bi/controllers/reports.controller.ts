@@ -2,6 +2,11 @@ import type { Context } from 'hono';
 import { ReportsService } from '../services';
 import { successResponse } from '@/utils/response';
 
+const getAllReports = async (c: Context) => {
+  const allReports = await ReportsService.getReportsMetadata();
+  return successResponse(c, { reports: allReports });
+};
+
 // Reports listing (metadata-driven across categories, filtered by role)
 const getReports = async (c: Context) => {
   const role = c.req.query('role');
@@ -86,4 +91,4 @@ const deleteReport = async (c: Context) => {
   });
 };
 
-export { getReports, createReport, updateReport, deleteReport };
+export { getAllReports, getReports, createReport, updateReport, deleteReport };

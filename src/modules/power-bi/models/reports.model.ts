@@ -5,7 +5,11 @@ import type { CreateReportMetadataInput } from '../types';
 // Generic reports metadata across categories (admin-owned)
 const getReportsMetadata = async () => {
   try {
-    return await prisma.reports_metadata.findMany();
+    return await prisma.reports_metadata.findMany({
+      orderBy: {
+        report_id: 'asc',
+      },
+    });
   } catch (error) {
     handlePrismaError(error);
   }
@@ -35,11 +39,12 @@ const createReportMetadata = async (record: CreateReportMetadataInput) => {
     let categoryId: number | null = null;
 
     if (record.category) {
+      const categoryName = record.category.trim();
       // Try to find category by name
       const category = await prisma.dim_category.findFirst({
         where: {
           category_name: {
-            equals: record.category,
+            equals: categoryName,
             mode: 'insensitive',
           },
         },
@@ -47,6 +52,25 @@ const createReportMetadata = async (record: CreateReportMetadataInput) => {
 
       if (category) {
         categoryId = category.category_id;
+      } else {
+        // Create a new category entry if it doesn't exist
+        const maxCategory = await prisma.dim_category.findFirst({
+          orderBy: { category_id: 'desc' },
+          select: { category_id: true },
+        });
+
+        const nextCategoryId = (maxCategory?.category_id ?? 0) + 1;
+        const createdCategory = await prisma.dim_category.create({
+          data: {
+            category_id: nextCategoryId,
+            category_name: categoryName,
+            category_description:
+              record.categoryDescription ??
+              `Reports related to ${categoryName}`,
+          },
+        });
+
+        categoryId = createdCategory.category_id;
       }
       // If category doesn't exist, you might want to create it or throw an error
       // For now, we'll leave categoryId as null if not found
@@ -72,7 +96,12 @@ const createReportMetadata = async (record: CreateReportMetadataInput) => {
       power_bi_report_type: record.type || 'summary',
     };
 
-    return await prisma.reports_metadata.create({ data: payload });
+    return await prisma.reports_metadata.create({
+      data: payload,
+      include: {
+        dim_category: true,
+      },
+    });
   } catch (error) {
     handlePrismaError(error);
   }

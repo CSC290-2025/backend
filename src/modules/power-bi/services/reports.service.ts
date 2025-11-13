@@ -20,7 +20,7 @@ const getReportsMetadata = async (): Promise<ReportMetadataWithEmbedUrl[]> => {
 const getReportsByRole = async (role: string): Promise<ReportsByCategory> => {
   // Validate role parameter
   const normalizedRole = role.toLowerCase();
-  if (!VALID_ROLES.includes(normalizedRole)) {
+  if (!VALID_ROLES.includes(normalizedRole as (typeof VALID_ROLES)[number])) {
     throw new ValidationError(
       `Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`
     );
@@ -38,7 +38,7 @@ const getReportsByRole = async (role: string): Promise<ReportsByCategory> => {
   const filteredReports = reports.filter((report) => {
     const reportVisibility = report.visibility?.toLowerCase();
 
-    if (normalizedRole === 'citizen') {
+    if (normalizedRole === 'citizens') {
       return reportVisibility === 'citizens';
     } else if (normalizedRole === 'admin') {
       return reportVisibility === 'citizens' || reportVisibility === 'admin';
@@ -118,11 +118,7 @@ const deleteReportMetadata = async (reportId: number): Promise<void> => {
     throw new NotFoundError(`Report with ID ${reportId} not found`);
   }
 
-  await (
-    ReportsModel as {
-      deleteReportMetadata: (reportId: number) => Promise<void>;
-    }
-  ).deleteReportMetadata(reportId);
+  await ReportsModel.deleteReportMetadata(reportId);
 };
 
 export {
