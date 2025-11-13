@@ -36,6 +36,7 @@ const UserProfileSchema = z.object({
   ethnicity: z.string().nullable(),
   nationality: z.string().nullable(),
   religion: z.string().nullable(),
+  profile_picture: z.string().nullable(),
   addresses: z.array(AddressSchema),
 });
 
