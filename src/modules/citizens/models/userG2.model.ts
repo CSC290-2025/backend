@@ -52,6 +52,58 @@ const findByEmail = async (email: string): Promise<User | null> => {
   }
 };
 
+const findUserByIdForUserSettingPage = async (user_id: number) => {
+  try {
+    const user = await prisma.users.findUnique({
+      where: {
+        id: user_id,
+      },
+      select: {
+        username: true,
+        email: true,
+        phone: true,
+        insurance_cards: {
+          select: {
+            card_number: true,
+          },
+        },
+        user_profiles: {
+          select: {
+            id_card_number: true,
+            first_name: true,
+            middle_name: true,
+            last_name: true,
+            birth_date: true,
+            blood_type: true,
+            congenital_disease: true,
+            allergy: true,
+            height: true,
+            weight: true,
+            gender: true,
+            addresses: {
+              select: {
+                address_line: true,
+                province: true,
+                district: true,
+                subdistrict: true,
+                postal_code: true,
+              },
+            },
+          },
+        },
+        emergency_contacts: {
+          select: {
+            phone: true,
+          },
+        },
+      },
+    });
+    return user;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const updateUser = async (
   id: number,
   data: UpdateUserPersonalData
@@ -297,4 +349,5 @@ export {
   deleteEmergencyContact,
   getEmergencyContacts,
   findUsersByRole,
+  findUserByIdForUserSettingPage,
 };

@@ -28,6 +28,14 @@ const getUserById = async (id: number) => {
   return user;
 };
 
+const getUserProflie = async (user_id: number) => {
+  const user = UserModel.findUserByIdForUserSettingPage(user_id);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+  return user;
+};
+
 const updatePersonalInfo = async (id: number, data: UpdateUserPersonalData) => {
   await getUserById(id);
 
@@ -259,4 +267,5 @@ export {
   updateAccountInfo,
   // updatePassword,
   getUsersByRole,
+  getUserProflie,
 };

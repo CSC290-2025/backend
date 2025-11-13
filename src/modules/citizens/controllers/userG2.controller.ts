@@ -12,6 +12,12 @@ const getUser = async (c: Context) => {
   return successResponse(c, { user: safeUser });
 };
 
+const getUserProflie = async (c: Context) => {
+  const user_id = parseInt(c.req.param('id'));
+  const user = UserService.getUserProflie(user_id);
+  return successResponse(c, { user }, 200, 'User fetch successfully');
+};
+
 const updatePersonalInfo = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
   const body = await c.req.json();
@@ -153,4 +159,5 @@ export {
   updateAccountInfo,
   // updatePassword,
   getUsersByRole,
+  getUserProflie,
 };

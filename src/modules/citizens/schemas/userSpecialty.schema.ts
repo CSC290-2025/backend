@@ -21,6 +21,7 @@ const createUserSpecialty = createPostRoute({
   summary: 'Create new user specialty',
   requestSchema: CreateUserSpecialtySchema,
   responseSchema: UserSpecialtySchema,
+  tags: ['User-specialty'],
 });
 
 export const UserSpecialtySchemas = {

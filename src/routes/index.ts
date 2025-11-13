@@ -3,8 +3,9 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { setupAddressRoutes } from '@/modules/citizens/routes/adressG5.openapi.route';
 import { setupUserSpecialistRoutes } from '@/modules/citizens/routes/specialistG6.openapi.route';
 import {
-  setupUserRoutes,
+  setupUserG8Routes,
   setupUserSpecialtyRoutes,
+  setupUserRoutes,
 } from '@/modules/citizens/routes';
 import { setupRoleUserRoutes } from '../modules/citizens/routes/userRoleG11.openapi.routes';
 // ============================================
@@ -37,6 +38,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
-  setupUserRoutes(app);
+  setupUserG8Routes(app);
   setupRoleUserRoutes(app);
+  setupUserRoutes(app);
 };
