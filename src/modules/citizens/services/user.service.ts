@@ -100,9 +100,14 @@ const updateUserPersonalData = async (
   if (!findUser) {
     throw new NotFoundError('User not found');
   }
-  let findAddress = await AddressModel.findAddressId(addressData);
+  let addressToUse = addressData;
+  if (Array.isArray(addressData)) {
+    addressToUse = addressData[0];
+  }
+
+  let findAddress = await AddressModel.findAddressId(addressToUse);
   if (!findAddress) {
-    findAddress = await AddressModel.createAddress(addressData);
+    findAddress = await AddressModel.createAddress(addressToUse);
   }
   data.address_id = findAddress.id;
   const updateUser = await UserModel.updateUserPersonalData(user_id, data);

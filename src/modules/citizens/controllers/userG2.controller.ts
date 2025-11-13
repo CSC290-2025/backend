@@ -48,10 +48,15 @@ const updatePersonalInfo = async (c: Context) => {
 const updateUserPersonalData = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
   const body = await c.req.json();
+  let addressData = body.address;
+  if (Array.isArray(addressData)) {
+    addressData = addressData[0];
+  }
+
   const updateUser = await UserService.updateUserPersonalData(
     id,
     body.user,
-    body.address
+    addressData
   );
   return successResponse(c, { updateUser }, 200, 'User update successfully');
 };

@@ -64,7 +64,7 @@ const UserPersonalData = z.object({
     nationality: z.string().nullable(),
     religion: z.string().nullable(),
   }),
-  address: z.array(AddressSchema),
+  address: z.union([AddressSchema, z.array(AddressSchema)]),
 });
 
 const UserHealthData = z.object({
