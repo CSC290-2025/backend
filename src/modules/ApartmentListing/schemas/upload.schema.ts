@@ -51,7 +51,7 @@ const uploadFileRoute = createPostRoute({
 });
 
 const deleteFileRoute = createDeleteRoute({
-  path: '/delete/{fileId}',
+  path: '/upload/{fileId}',
   summary: 'Delete a file',
   params: z.object({
     fileId: z.string().openapi({}),

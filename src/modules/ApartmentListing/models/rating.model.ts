@@ -77,10 +77,13 @@ export const createRating = async (data: createRatingData) => {
   }
 };
 
-export const updateRating = async (data: updateRatingData) => {
+export const updateRating = async (
+  ratingId: number,
+  data: updateRatingData
+) => {
   try {
     const rating = await prisma.rating.findUnique({
-      where: { id: data.ratingId },
+      where: { id: ratingId },
       include: { apartment: true },
     });
 
@@ -89,7 +92,7 @@ export const updateRating = async (data: updateRatingData) => {
     }
 
     return await prisma.rating.update({
-      where: { id: data.ratingId },
+      where: { id: ratingId },
       data: {
         rating: data.rating,
         comment: data.comment,

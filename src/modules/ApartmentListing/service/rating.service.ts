@@ -55,8 +55,11 @@ const createRating = async (data: createRatingData): Promise<Rating> => {
   };
 };
 
-const updateRating = async (data: updateRatingData): Promise<Rating> => {
-  const existingRating = await ratingModel.updateRating(data);
+const updateRating = async (
+  id: number,
+  data: updateRatingData
+): Promise<Rating> => {
+  const existingRating = await ratingModel.updateRating(id, data);
   if (!existingRating) throw new NotFoundError('Rating not found');
 
   return {
