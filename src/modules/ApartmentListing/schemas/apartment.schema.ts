@@ -133,6 +133,14 @@ const getAllApartmentsRoute = createGetRoute({
   tags: ['Apartment'],
 });
 
+const apartmentFilterRoute = createGetRoute({
+  path: '/apartments/filter',
+  summary: 'Filter apartments',
+  query: ApartmentFilterSchema,
+  responseSchema: z.array(ApartmentSchema),
+  tags: ['Apartment'],
+});
+
 export const ApartmentSchemas = {
   createApartmentSchema,
   updateApartmentSchema,
@@ -146,4 +154,5 @@ export const ApartmentSchemas = {
   getApartmentbyIDRoute,
   getAllApartmentsRoute,
   ApartmentListSchema,
+  apartmentFilterRoute,
 };
