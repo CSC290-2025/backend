@@ -5,9 +5,18 @@ import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
+import { cors } from 'hono/cors';
 
 // const app = new Hono();
 const app = new OpenAPIHono();
+
+// CORS middleware - allow requests from frontend
+app.use('*', cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
 
 app.onError(errorHandler);
 
