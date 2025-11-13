@@ -35,21 +35,27 @@ async function cancelExpiredBookings() {
     const expiredRoomIds = expiredPendingBookings
       .map((b) => b.room_id)
       .filter((roomId) => roomId !== null);
+
     if (expiredBookingIds.length > 0) {
-      await prisma.apartment_booking.updateMany({
-        where: {
-          id: { in: expiredBookingIds },
-        },
-        data: {
-          booking_status: 'cancelled',
-        },
-      });
-    }
-    // Update room status to available for rooms of just-cancelled bookings
-    for (const roomId of expiredRoomIds) {
-      await prisma.room.update({
-        where: { id: roomId },
-        data: { room_status: 'available' },
+      // Use transaction to ensure atomicity between booking and room updates
+      await prisma.$transaction(async (tx) => {
+        // Cancel expired bookings
+        await tx.apartment_booking.updateMany({
+          where: {
+            id: { in: expiredBookingIds },
+          },
+          data: {
+            booking_status: 'cancelled',
+          },
+        });
+
+        // Update room status to available for rooms of just-cancelled bookings
+        for (const roomId of expiredRoomIds) {
+          await tx.room.update({
+            where: { id: roomId },
+            data: { room_status: 'available' },
+          });
+        }
       });
     }
     console.log(`Cancelled ${expiredBookingIds.length} expired bookings`);
