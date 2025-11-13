@@ -80,6 +80,9 @@ const findUserByIdForUserSettingPage = async (user_id: number) => {
             height: true,
             weight: true,
             gender: true,
+            ethnicity: true,
+            nationality: true,
+            religion: true,
             addresses: {
               select: {
                 address_line: true,

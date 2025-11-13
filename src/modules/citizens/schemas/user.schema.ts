@@ -33,6 +33,9 @@ const UserProfileSchema = z.object({
   height: z.number().nullable(),
   weight: z.number().nullable(),
   gender: z.string().nullable(),
+  ethnicity: z.string().nullable(),
+  nationality: z.string().nullable(),
+  religion: z.string().nullable(),
   addresses: z.array(AddressSchema),
 });
 
