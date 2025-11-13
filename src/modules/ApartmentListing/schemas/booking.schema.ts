@@ -11,10 +11,20 @@ const bookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
-  guest_phone: z.string().max(10).nullable(),
+  guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
-  check_in: z.string().datetime().nullable(),
+  check_in: z
+    .string()
+    .datetime()
+    .refine(
+      (date) => {
+        if (date === null || date === undefined) return true;
+        return new Date(date) >= new Date();
+      },
+      { message: 'Check-in date cannot be in the past' }
+    )
+    .nullable(),
   booking_status: z
     .enum(['pending', 'confirmed', 'cancelled'])
     .default('pending')
@@ -29,21 +39,45 @@ const createbookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
-  guest_phone: z.string().max(10).nullable(),
+  guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
   room_type: z.string().min(2).max(255).nullable(),
-  check_in: z.string().datetime().nullable(),
+  check_in: z
+    .string()
+    .datetime()
+    .refine(
+      (date) => {
+        if (date === null || date === undefined) return true;
+        return new Date(date) >= new Date();
+      },
+      { message: 'Check-in date cannot be in the past' }
+    )
+    .nullable(),
 });
 
 const updatebookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
-  guest_name: z.string().min(2).max(255).nullable(),
-  guest_phone: z.string().max(10).nullable(),
-  guest_email: z.string().email().nullable(),
-  room_type: z.string().min(2).max(255).nullable(),
-  booking_status: z.enum(['pending', 'confirmed', 'cancelled']).nullable(),
-  check_in: z.string().datetime().nullable(),
+  guest_name: z.string().min(2).max(255).nullable().optional(),
+  guest_phone: z.string().max(10).nullable().optional(),
+  guest_email: z.string().email().nullable().optional(),
+  room_type: z.string().min(2).max(255).nullable().optional(),
+  booking_status: z
+    .enum(['pending', 'confirmed', 'cancelled'])
+    .nullable()
+    .optional(),
+  check_in: z
+    .string()
+    .datetime()
+    .refine(
+      (date) => {
+        if (date === null || date === undefined) return true;
+        return new Date(date) >= new Date();
+      },
+      { message: 'Check-in date cannot be in the past' }
+    )
+    .nullable()
+    .optional(),
 });
 
 const bookingIdParam = z.object({

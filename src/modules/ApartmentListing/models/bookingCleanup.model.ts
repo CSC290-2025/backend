@@ -50,12 +50,10 @@ async function cancelExpiredBookings() {
         });
 
         // Update room status to available for rooms of just-cancelled bookings
-        for (const roomId of expiredRoomIds) {
-          await tx.room.update({
-            where: { id: roomId },
-            data: { room_status: 'available' },
-          });
-        }
+        await tx.room.updateMany({
+          where: { id: { in: expiredRoomIds } },
+          data: { room_status: 'available' },
+        });
       });
     }
     console.log(`Cancelled ${expiredBookingIds.length} expired bookings`);

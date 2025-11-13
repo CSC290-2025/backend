@@ -28,8 +28,9 @@ export async function createRatingController(c: Context) {
   return successResponse(c, newRating, 201, 'Rating created successfully');
 }
 export async function updateRatingController(c: Context) {
+  const id = Number(c.req.param('id'));
   const data = await c.req.json();
-  const updatedRating = await ratingService.updateRating(data);
+  const updatedRating = await ratingService.updateRating({ ...data, id });
   return successResponse(c, updatedRating, 200, 'Rating updated successfully');
 }
 export async function deleteRatingController(c: Context) {

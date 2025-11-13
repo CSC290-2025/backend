@@ -45,5 +45,5 @@ export async function updateBookingStatus(c: Context) {
 export async function deleteBooking(c: Context) {
   const id = Number(c.req.param('id'));
   await bookingService.deleteBooking(id);
-  return successResponse(c, 204);
+  return successResponse(c, { message: 'Booking deleted successfully' }, 200);
 }

@@ -1,5 +1,5 @@
 import { successResponse } from '@/utils/response';
-import { ValidationError, InternalServerError } from '@/errors';
+import { ValidationError, InternalServerError, NotFoundError } from '@/errors';
 import type { Context } from 'hono';
 import { uploadModel } from '../models/index';
 
@@ -7,7 +7,7 @@ async function getPictureByIdController(c: Context) {
   const id = Number(c.req.param('id'));
   const picture = await uploadModel.getPictureById(id);
   if (!picture) {
-    throw new ValidationError('Picture not found.');
+    throw new NotFoundError('Picture not found.');
   }
   return successResponse(c, {
     id: picture.id.toString(),
@@ -69,7 +69,7 @@ async function deleteFileController(c: Context) {
 
   try {
     await uploadModel.deletePicture(fileId);
-    return successResponse(c, 204);
+    return successResponse(c, { message: 'File deleted successfully' }, 200);
   } catch (err) {
     console.error(err);
     throw new InternalServerError('Delete failed.');

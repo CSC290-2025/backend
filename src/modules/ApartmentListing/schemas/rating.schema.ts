@@ -25,7 +25,6 @@ const createRatingSchema = z.object({
 });
 
 const updateRatingSchema = z.object({
-  ratingId: z.int().positive(),
   rating: z.int().min(1).max(5).default(1).nullable(),
   comment: z.string().max(500).nullable(),
 });
@@ -73,7 +72,7 @@ const getAverageRatingByApartmentRoute = createGetRoute({
   path: '/apartments/{id}/ratings/average',
   summary: 'Get the average rating for an apartment',
   params: ApartmentSchemas.ApartmentIdParam,
-  responseSchema: z.number().min(0).nullable(),
+  responseSchema: z.number().min(1).max(5).nullable(),
   tags: ['Rating'],
 });
 

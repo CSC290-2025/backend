@@ -31,7 +31,8 @@ const getBookingsByApartmentId = async (
 };
 
 const createBooking = async (data: createBookingData): Promise<Booking> => {
-  if (data.room_id) {
+  // Only check room availability if a specific room is selected
+  if (data.room_id !== null && data.room_id !== undefined) {
     const isRoomAvailable = await bookingModel.checkRoomAvailability(
       data.room_id
     );
@@ -74,9 +75,16 @@ const updateBookingStatus = async (
   if (!existingBooking) throw new NotFoundError('Booking not found');
   const room = await roomModel.getRoomByID(existingBooking.room_id!);
   if (!room) throw new NotFoundError('Associated room not found');
+
+  // Handle room status updates based on booking status
   if (status === 'cancelled') {
     const updateRoomStatus: updateRoomData = {
       room_status: 'available',
+    };
+    await roomModel.updateRoom(existingBooking.room_id!, updateRoomStatus);
+  } else if (status === 'confirmed') {
+    const updateRoomStatus: updateRoomData = {
+      room_status: 'occupied',
     };
     await roomModel.updateRoom(existingBooking.room_id!, updateRoomStatus);
   }
