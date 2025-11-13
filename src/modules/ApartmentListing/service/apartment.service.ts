@@ -1,5 +1,5 @@
 import { apartmentModel } from '../models';
-import { NotFoundError, ValidationError } from '@/errors';
+import { NotFoundError } from '@/errors';
 import type {
   Apartment,
   createApartmentData,

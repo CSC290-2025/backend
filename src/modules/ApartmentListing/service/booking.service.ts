@@ -54,15 +54,11 @@ const updateBooking = async (
   const existingBooking = await bookingModel.getBookingById(id);
   if (!existingBooking) throw new NotFoundError('Booking not found');
 
+  // Prevent room changes: users cannot update to a different room
   if (data.room_id && data.room_id !== existingBooking.room_id) {
-    const isRoomAvailable = await bookingModel.checkRoomAvailability(
-      data.room_id
+    throw new ConflictError(
+      'Room changes are not allowed. Please cancel this booking and create a new one if you need a different room.'
     );
-    if (!isRoomAvailable) {
-      throw new ConflictError(
-        'The room you are trying to change to is already cancelled. Please choose a different room.'
-      );
-    }
   }
 
   const updatedBooking = await bookingModel.updateBooking(id, data);

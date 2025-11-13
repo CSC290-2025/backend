@@ -1,7 +1,6 @@
 import { apartmentService, ratingService } from '../service';
 import { successResponse } from '@/utils/response';
 import type { Context } from 'hono';
-import { NotFoundError } from '@/errors';
 
 export async function getAllRatings(c: Context) {
   const ratings = await ratingService.getAllComments();
