@@ -64,9 +64,7 @@ const createReportMetadata = async (record: CreateReportMetadataInput) => {
           data: {
             category_id: nextCategoryId,
             category_name: categoryName,
-            category_description:
-              record.categoryDescription ??
-              `Reports related to ${categoryName}`,
+            category_description: `Reports related to ${categoryName}`,
           },
         });
 
