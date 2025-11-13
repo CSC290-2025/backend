@@ -17,10 +17,11 @@ import type {
   ambulances,
   emergency_calls,
   payments,
+  team_integrations,
   waste_types,
   waste_event_statistics,
   power_bi_reports,
-  team_integrations,
+  Prisma,
 } from '@/generated/prisma';
 
 // Extraction Types
@@ -148,6 +149,7 @@ type ReportMetadata = {
   lastUpdate: Date;
   powerBiReportId: number;
 };
+
 export type {
   ExtractedUserData,
   ExtractedHealthcareData,
