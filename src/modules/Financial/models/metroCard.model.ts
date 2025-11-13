@@ -4,7 +4,7 @@ import type { MetroCard, UpdateMetroCardData } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
 import type { Prisma } from '@prisma/client/scripts/default-index';
-import { encrypt, maskCardNumber19 } from '../utils/crypto';
+import { decrypt, encrypt, maskCardNumber19 } from '../utils/crypto';
 
 //Helper
 export const generateMetroCard = (user_id: number) => {
@@ -17,21 +17,22 @@ export const generateMetroCard = (user_id: number) => {
   return 'MET-' + base;
 };
 
-const transformMetroCard = (metroCard: metro_cards): MetroCard => ({
+const transformMetroCard = (
+  metroCard: metro_cards,
+  mask: boolean = true
+): MetroCard => ({
   ...metroCard,
   user_id: metroCard.user_id!,
   balance: Number(metroCard.balance || 0),
-  card_number: maskCardNumber19(metroCard.card_number!),
+  card_number: mask
+    ? maskCardNumber19(metroCard.card_number!)
+    : decrypt(metroCard.card_number!),
   status: metroCard.status as 'active' | 'suspended',
 });
 
 // MetroCard operations
 const createMetroCard = async (user_id: number): Promise<MetroCard> => {
   const card = generateMetroCard(user_id);
-
-  console.log(card);
-
-  console.log(card.length);
 
   const encrypted = encrypt(card);
 
@@ -55,7 +56,7 @@ const findMetroCardsByUserId = async (userId: number): Promise<MetroCard[]> => {
     const metroCards = await prisma.metro_cards.findMany({
       where: { user_id: userId },
     });
-    return metroCards.map(transformMetroCard);
+    return metroCards.map((card) => transformMetroCard(card));
   } catch (error) {
     handlePrismaError(error);
   }
@@ -66,7 +67,7 @@ const findMetroCardById = async (id: number): Promise<MetroCard | null> => {
     const metroCard = await prisma.metro_cards.findUnique({
       where: { id },
     });
-    return metroCard ? transformMetroCard(metroCard) : null;
+    return metroCard ? transformMetroCard(metroCard, false) : null;
   } catch (error) {
     handlePrismaError(error);
   }
