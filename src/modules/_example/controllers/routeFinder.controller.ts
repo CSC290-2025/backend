@@ -2,21 +2,30 @@ import type { Context } from 'hono';
 import { getRoutes } from '../models/routeFinder.model';
 
 export const getRoutesController = async (c: Context) => {
-  const lat = c.req.query('lat');
-  const lng = c.req.query('lng');
+  const origLat = c.req.query('origLat') || c.req.query('lat');
+  const origLng = c.req.query('origLng') || c.req.query('lng');
   const origin = c.req.query('origin');
+
   const destination = c.req.query('destination');
+  const destLat = c.req.query('destLat');
+  const destLng = c.req.query('destLng');
+
   const waypoints = c.req.query('waypoints');
 
-  const hasOrigin = origin && origin.length > 0;
-  const hasGPS = lat && lng;
+  const hasOriginString = origin && origin.length > 0;
+  const hasOriginGPS = origLat && origLng;
+  const hasDestinationString = destination && destination.length > 0;
+  const hasDestinationGPS = destLat && destLng;
 
-  if (!destination || (!hasOrigin && !hasGPS)) {
+  if (
+    (!hasOriginString && !hasOriginGPS) ||
+    (!hasDestinationString && !hasDestinationGPS)
+  ) {
     return c.json(
       {
         success: false,
         message:
-          'Missing required parameters: destination, and either (origin) or (lat and lng).',
+          'Missing required parameters: Must provide either (origin or origLat/origLng) AND either (destination or destLat/destLng).',
       },
       400
     );
@@ -25,9 +34,11 @@ export const getRoutesController = async (c: Context) => {
   try {
     const { allRoutesSummarized, fastestRouteSummary } = await getRoutes(
       origin as string,
-      lat as string,
-      lng as string,
+      origLat as string,
+      origLng as string,
       destination as string,
+      destLat as string,
+      destLng as string,
       waypoints as string
     );
 

@@ -91,13 +91,23 @@ const extractRouteDetails = (route: any) => {
     detailedSteps.push(stepDetail);
   });
 
+  // --- Fare Handling Improvement ---
+  let formattedFare = null;
+  if (route.fare) {
+    formattedFare = {
+      value: route.fare.value,
+      currency: route.fare.currency,
+      text: route.fare.text,
+    };
+  }
+
   return {
     start_address: leg.start_address,
     end_address: leg.end_address,
     distance: leg.distance,
     duration: leg.duration,
     detailedSteps: detailedSteps,
-    fare: route.fare,
+    fare: formattedFare,
   };
 };
 
@@ -126,18 +136,20 @@ const findNearestTransitStop = async (
 
 export const getRoutes = async (
   origin: string | undefined,
-  lat: string | undefined,
-  lng: string | undefined,
-  destination: string,
+  origLat: string | undefined,
+  origLng: string | undefined,
+  destination: string | undefined,
+  destLat: string | undefined,
+  destLng: string | undefined,
   waypoints: string = ''
 ) => {
   let finalOrigin = '';
 
   if (origin && origin.length > 0) {
     finalOrigin = origin;
-  } else if (lat && lng) {
-    const latNum = parseFloat(lat);
-    const lngNum = parseFloat(lng);
+  } else if (origLat && origLng) {
+    const latNum = parseFloat(origLat);
+    const lngNum = parseFloat(origLng);
     finalOrigin = await findNearestTransitStop(latNum, lngNum);
   }
 
@@ -146,7 +158,20 @@ export const getRoutes = async (
       'Could not determine a starting point (origin or GPS location).'
     );
   }
-  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${finalOrigin}&destination=${destination}&waypoints=${waypoints}&mode=transit&alternatives=true&key=${GOOGLE_API_KEY}`;
+
+  let finalDestination = '';
+
+  if (destination && destination.length > 0) {
+    finalDestination = destination;
+  } else if (destLat && destLng) {
+    finalDestination = `${destLat},${destLng}`;
+  }
+
+  if (!finalDestination) {
+    throw new Error('Could not determine a destination point.');
+  }
+
+  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${finalOrigin}&destination=${finalDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&key=${GOOGLE_API_KEY}`;
 
   try {
     const response = await axios.get(googleMapsUrl);
