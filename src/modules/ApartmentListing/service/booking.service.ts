@@ -76,11 +76,6 @@ const updateBookingStatus = async (
   if (!room) throw new NotFoundError('Associated room not found');
   if (status === 'cancelled') {
     const updateRoomStatus: updateRoomData = {
-      price_start: room.price_start ?? 0,
-      price_end: room.price_end ?? 0,
-      name: room.name ?? undefined,
-      type: room.type ?? undefined,
-      size: room.size ?? undefined,
       room_status: 'available',
     };
     await roomModel.updateRoom(existingBooking.room_id!, updateRoomStatus);

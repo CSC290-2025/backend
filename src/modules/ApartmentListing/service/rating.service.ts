@@ -51,7 +51,7 @@ const createRating = async (data: createRatingData): Promise<Rating> => {
     apartmentId: data.apartmentId,
     userId: data.userId,
     rating: data.rating ?? 1,
-    comment: data.comment ?? ' ',
+    comment: data.comment ?? '',
   };
 };
 
