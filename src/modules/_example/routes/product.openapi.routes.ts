@@ -3,21 +3,7 @@ import { ProductSchemas } from '../schemas';
 import { ProductController } from '../controllers';
 
 const setupProductRoutes = (app: OpenAPIHono) => {
-  app.openapi(ProductSchemas.listProductsRoute, ProductController.listProducts);
-  app.openapi(ProductSchemas.getProductRoute, ProductController.getProduct);
-  app.openapi(
-    ProductSchemas.createProductRoute,
-    ProductController.createProduct
-  );
-  app.openapi(
-    ProductSchemas.updateProductRoute,
-    ProductController.updateProduct
-  );
-  app.openapi(
-    ProductSchemas.deleteProductRoute,
-    ProductController.deleteProduct
-  );
-
+  // Public routes
   app.openapi(
     ProductSchemas.getProductsByCategoryRoute,
     ProductController.getProductsByCategory
@@ -30,6 +16,24 @@ const setupProductRoutes = (app: OpenAPIHono) => {
     ProductSchemas.getPriceStatsRoute,
     ProductController.getPriceStats
   );
+
+  // Admin routes
+  app.openapi(
+    ProductSchemas.adminCreateProductRoute,
+    ProductController.createProduct
+  );
+  app.openapi(
+    ProductSchemas.adminUpdateProductRoute,
+    ProductController.updateProduct
+  );
+  app.openapi(
+    ProductSchemas.adminDeleteProductRoute,
+    ProductController.deleteProduct
+  );
+
+  // User routes
+  app.openapi(ProductSchemas.listProductsRoute, ProductController.listProducts);
+  app.openapi(ProductSchemas.getProductRoute, ProductController.getProduct);
 };
 
 export { setupProductRoutes };
