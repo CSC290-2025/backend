@@ -94,14 +94,16 @@ const ExternalWeatherDTOSchema = z.object({
 const ExternalWeatherQuerySchema = z.object({
   lat: z.coerce.number(),
   lon: z.coerce.number(),
-  city: z.string().min(1),
-  country: z.string().min(1),
+  // city/country are optional: external clients may only provide coordinates
+  // Provide defaults so Swagger shows sensible defaults when omitted.
+  city: z.string().min(1).optional().nullable().default('Bangkok'),
+  country: z.string().min(1).optional().nullable().default('Thailand'),
 });
 
 const ImportDailyBodySchema = z.object({
   lat: z.coerce.number(),
   lon: z.coerce.number(),
-  location_id: z.coerce.number().int(), // ไปลง weather_data.location_id
+  location_id: z.coerce.number().int(),
 });
 
 const getExternalWeatherRoute = createGetRoute({
@@ -132,7 +134,7 @@ const importDailyRoute = createPostRoute({
   tags: ['Weather', 'External'],
 });
 
-export const ExternalWeatherSchemas = {
+export const WeatherOpenMeteoSchemas = {
   ExternalRawFullSchema,
   ExternalRawDailyOnlySchema,
   ExternalWeatherDTOSchema,

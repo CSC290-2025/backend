@@ -1,2 +1,2 @@
 export { setupWeatherRoutes } from './weather.openapi.routes';
-export { setupExternalWeatherRoutes } from './external.weather.openapi.routes';
+export { setupOpenMeteoRoutes } from './weather-open-meteo.openapi.routes';

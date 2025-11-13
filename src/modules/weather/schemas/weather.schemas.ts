@@ -23,7 +23,7 @@ const WeatherDataSchema = z.object({
 });
 
 const CreateWeatherDataSchema = z.object({
-  location_id: z.number().int(),
+  location_id: z.number().int().nullable().optional(),
   temperature: decimalField,
   feel_temperature: decimalField,
   humidity: decimalField,
@@ -88,8 +88,15 @@ const updateWeatherDataRoute = createPutRoute({
 
 const deleteWeatherDataRoute = createDeleteRoute({
   path: '/weather/{id}',
-  summary: 'Delete weather data',
+  summary: 'Delete weather data by ID',
   params: WeatherIdParam,
+  tags: ['Weather'],
+});
+
+const deleteAllWeatherDataRoute = createDeleteRoute({
+  path: '/weather',
+  summary: 'Delete all weather data from database',
+  params: z.object({}),
   tags: ['Weather'],
 });
 
@@ -105,4 +112,5 @@ export const WeatherSchemas = {
   createWeatherDataRoute,
   updateWeatherDataRoute,
   deleteWeatherDataRoute,
+  deleteAllWeatherDataRoute,
 };

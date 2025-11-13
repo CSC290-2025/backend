@@ -1,2 +1,2 @@
 export { WeatherSchemas } from './weather.schemas';
-export { ExternalWeatherSchemas } from './external.weather.schemas';
+export { WeatherOpenMeteoSchemas } from './weather-open-meteo.schemas';

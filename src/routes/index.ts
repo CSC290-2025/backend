@@ -1,10 +1,10 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import {
   setupWeatherRoutes,
-  setupExternalWeatherRoutes,
+  setupOpenMeteoRoutes,
 } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  setupExternalWeatherRoutes(app);
+  setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
 };

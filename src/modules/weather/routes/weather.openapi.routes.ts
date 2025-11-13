@@ -24,6 +24,11 @@ const setupWeatherRoutes = (app: OpenAPIHono) => {
     WeatherSchemas.deleteWeatherDataRoute,
     WeatherController.deleteWeather
   );
+
+  app.openapi(
+    WeatherSchemas.deleteAllWeatherDataRoute,
+    WeatherController.deleteAllWeather
+  );
 };
 
 export { setupWeatherRoutes };

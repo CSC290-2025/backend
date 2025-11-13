@@ -1,5 +1,7 @@
 const API_BASE = 'https://api.open-meteo.com/v1';
 
+export const OPEN_METEO_TIMEZONE = 'Asia/Bangkok';
+
 const fetchJson = async (url: string, init?: RequestInit, timeoutMs = 8000) => {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -16,7 +18,7 @@ const fetchJson = async (url: string, init?: RequestInit, timeoutMs = 8000) => {
 };
 
 export const OpenMeteoClient = {
-  async getFull(lat: number, lon: number, timezone = 'Asia/Bangkok') {
+  async getFull(lat: number, lon: number, timezone = OPEN_METEO_TIMEZONE) {
     const params = new URLSearchParams({
       latitude: String(lat),
       longitude: String(lon),
@@ -45,7 +47,11 @@ export const OpenMeteoClient = {
     return fetchJson(`${API_BASE}/forecast?${params.toString()}`);
   },
 
-  async getDailyPastOne(lat: number, lon: number, timezone = 'Asia/Bangkok') {
+  async getDailyPastOne(
+    lat: number,
+    lon: number,
+    timezone = OPEN_METEO_TIMEZONE
+  ) {
     const params = new URLSearchParams({
       latitude: String(lat),
       longitude: String(lon),

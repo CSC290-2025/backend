@@ -23,7 +23,7 @@ const findById = async (id: number): Promise<WeatherData | null> => {
     const weather = await prisma.weather_data.findUnique({
       where: { id },
     });
-    return weather;
+    return weather as unknown as WeatherData | null;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -34,7 +34,7 @@ const findAll = async (): Promise<WeatherData[]> => {
     const items = await prisma.weather_data.findMany({
       orderBy: { created_at: 'desc' },
     });
-    return items;
+    return items as unknown as WeatherData[];
   } catch (error) {
     handlePrismaError(error);
   }
@@ -46,7 +46,7 @@ const findByLocationId = async (locationId: number): Promise<WeatherData[]> => {
       where: { location_id: locationId },
       orderBy: { created_at: 'desc' },
     });
-    return items;
+    return items as unknown as WeatherData[];
   } catch (error) {
     handlePrismaError(error);
   }
@@ -58,7 +58,7 @@ const create = async (data: CreateWeatherData): Promise<WeatherData> => {
     const weather = await prisma.weather_data.create({
       data: payload,
     });
-    return weather;
+    return weather as unknown as WeatherData;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -74,7 +74,7 @@ const update = async (
       where: { id },
       data: payload,
     });
-    return weather;
+    return weather as unknown as WeatherData;
   } catch (error) {
     handlePrismaError(error);
   }
