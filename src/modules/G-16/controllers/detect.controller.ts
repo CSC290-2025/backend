@@ -8,7 +8,7 @@ const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const THRESHOLD = 0.8;
 const DANGER_MARKER_TYPE_ID = 999;
 
-// Helper: normalize value to string
+//normalize value to string
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((v) => String(v));
