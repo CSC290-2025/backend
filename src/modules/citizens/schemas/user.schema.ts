@@ -69,7 +69,7 @@ const getUserinfoAndWallet = createGetRoute({
 });
 
 const getUserProflie = createGetRoute({
-  path: 'user/profile/{id}',
+  path: '/user/profile/{id}',
   summary: 'Get user data to show at user setting page',
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,

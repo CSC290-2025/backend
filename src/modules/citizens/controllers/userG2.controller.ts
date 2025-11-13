@@ -14,7 +14,7 @@ const getUser = async (c: Context) => {
 
 const getUserProflie = async (c: Context) => {
   const user_id = parseInt(c.req.param('id'));
-  const user = UserService.getUserProflie(user_id);
+  const user = await UserService.getUserProflie(user_id);
   return successResponse(c, { user }, 200, 'User fetch successfully');
 };
 

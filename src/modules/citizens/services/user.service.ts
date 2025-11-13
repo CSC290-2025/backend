@@ -29,7 +29,7 @@ const getUserById = async (id: number) => {
 };
 
 const getUserProflie = async (user_id: number) => {
-  const user = UserModel.findUserByIdForUserSettingPage(user_id);
+  const user = await UserModel.findUserByIdForUserSettingPage(user_id);
   if (!user) {
     throw new NotFoundError('User not found');
   }
