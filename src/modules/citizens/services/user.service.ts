@@ -1,18 +1,23 @@
 import { UserModel } from '../models';
+import { AddressModel } from '../models';
 import crypto from 'crypto';
 
 import type {
   User,
   UserProfile,
   UpdateUserPersonalData,
-  UpdateUserProfileData,
+  // UpdateUserProfileData,
   UpdateUserHealthData,
   UpdateEmergencyContactData,
   UpdateAddressData,
   UpdateUserAccountData,
   UpdatePasswordData,
   EmergencyContact,
+  UpdateUserPersonal,
+  UpdateUserHealth,
+  UpdateUserAccount,
 } from '../types/user.types';
+import type { RequiredAddress } from '../types/address.type';
 import {
   NotFoundError,
   ValidationError,
@@ -69,21 +74,66 @@ const updatePersonalInfo = async (id: number, data: UpdateUserPersonalData) => {
   return await UserModel.updateUser(id, data);
 };
 
-const updateUserProfile = async (
-  id: number,
-  data: UpdateUserProfileData
-): Promise<UserProfile | null> => {
-  await getUserById(id);
+// const updateUserProfile = async (
+//   id: number,
+//   data: UpdateUserProfileData
+// ): Promise<UserProfile | null> => {
+//   await getUserById(id);
 
-  if (data.first_name && data.first_name.trim().length < 2) {
-    throw new ValidationError('First name must be at least 2 characters');
+//   if (data.first_name && data.first_name.trim().length < 2) {
+//     throw new ValidationError('First name must be at least 2 characters');
+//   }
+
+//   if (data.last_name && data.last_name.trim().length < 2) {
+//     throw new ValidationError('Last name must be at least 2 characters');
+//   }
+
+//   return await UserModel.updateUserProfile(id, data);
+// };
+
+const updateUserPersonalData = async (
+  user_id: number,
+  data: UpdateUserPersonal,
+  addressData: RequiredAddress
+) => {
+  const findUser = await UserModel.findUserById(user_id);
+  if (!findUser) {
+    throw new NotFoundError('User not found');
   }
-
-  if (data.last_name && data.last_name.trim().length < 2) {
-    throw new ValidationError('Last name must be at least 2 characters');
+  let findAddress = await AddressModel.findAddressId(addressData);
+  if (!findAddress) {
+    findAddress = await AddressModel.createAddress(addressData);
   }
+  data.address_id = findAddress.id;
+  const updateUser = await UserModel.updateUserPersonalData(user_id, data);
+  return updateUser;
+};
 
-  return await UserModel.updateUserProfile(id, data);
+const updateUserHealthData = async (
+  user_id: number,
+  data: UpdateUserHealth
+) => {
+  const findUser = await UserModel.findUserById(user_id);
+  if (!findUser) {
+    throw new NotFoundError('User not found');
+  }
+  if (data.birth_date) {
+    data.birth_date = new Date(data.birth_date).toISOString();
+  }
+  const updateUser = await UserModel.updateUserHealthData(user_id, data);
+  return updateUser;
+};
+
+const updateUserAccountData = async (
+  user_id: number,
+  data: UpdateUserAccount
+) => {
+  const findUser = await UserModel.findUserById(user_id);
+  if (!findUser) {
+    throw new NotFoundError('User not found');
+  }
+  const updateUser = await UserModel.updateUserAccountData(user_id, data);
+  return updateUser;
 };
 
 const updateHealthInfo = async (id: number, data: UpdateUserHealthData) => {
@@ -257,7 +307,7 @@ const getUsersByRole = async (
 export {
   getUserById,
   updatePersonalInfo,
-  updateUserProfile,
+  //  updateUserProfile,
   updateHealthInfo,
   updateAddress,
   createEmergencyContact,
@@ -268,4 +318,7 @@ export {
   // updatePassword,
   getUsersByRole,
   getUserProflie,
+  updateUserPersonalData,
+  updateUserHealthData,
+  updateUserAccountData,
 };

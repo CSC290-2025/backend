@@ -7,12 +7,15 @@ import type {
   Address,
   EmergencyContact,
   UpdateUserPersonalData,
-  UpdateUserProfileData,
+  // UpdateUserProfileData,
   UpdateUserHealthData,
   UpdateEmergencyContactData,
   UpdateAddressData,
   UpdateUserAccountData,
   CompleteUserData,
+  UpdateUserPersonal,
+  UpdateUserHealth,
+  UpdateUserAccount,
 } from '../types/user.types';
 
 const findUserById = async (user_id: number) => {
@@ -36,7 +39,6 @@ const findByUsername = async (username: string): Promise<User | null> => {
     return user as unknown as User | null;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -48,7 +50,6 @@ const findByEmail = async (email: string): Promise<User | null> => {
     return user as unknown as User | null;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -125,7 +126,6 @@ const updateUser = async (
     return updated as unknown as User;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -144,33 +144,122 @@ const updatePassword = async (
     return updated as unknown as User;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
-const updateUserProfile = async (
-  userId: number,
-  data: UpdateUserProfileData
-): Promise<UserProfile | null> => {
+// const updateUserProfile = async (
+//   userId: number,
+//   data: UpdateUserProfileData
+// ): Promise<UserProfile | null> => {
+//   try {
+//     const profile = await prisma.user_profiles.upsert({
+//       where: { user_id: userId },
+//       update: {
+//         first_name: data.first_name,
+//         middle_name: data.middle_name,
+//         last_name: data.last_name,
+//       },
+//       create: {
+//         user_id: userId,
+//         first_name: data.first_name,
+//         middle_name: data.middle_name,
+//         last_name: data.last_name,
+//       },
+//     });
+//     return profile as unknown as UserProfile;
+//   } catch (error) {
+//     handlePrismaError(error);
+//   }
+// };
+
+const updateUserPersonalData = async (
+  user_id: number,
+  data: UpdateUserPersonal
+) => {
   try {
-    const profile = await prisma.user_profiles.upsert({
-      where: { user_id: userId },
-      update: {
-        first_name: data.first_name,
-        middle_name: data.middle_name,
-        last_name: data.last_name,
-      },
-      create: {
-        user_id: userId,
-        first_name: data.first_name,
-        middle_name: data.middle_name,
-        last_name: data.last_name,
+    const user = await prisma.users.update({
+      where: { id: user_id },
+      data: {
+        phone: data.phone,
+        user_profiles: {
+          update: {
+            where: { user_id },
+            data: {
+              id_card_number: data.id_card_number,
+              first_name: data.first_name,
+              middle_name: data.middle_name,
+              last_name: data.last_name,
+              ethnicity: data.ethnicity,
+              nationality: data.nationality,
+              religion: data.religion,
+              address_id: data.address_id,
+            },
+          },
+        },
       },
     });
-    return profile as unknown as UserProfile;
+    return user;
   } catch (error) {
     handlePrismaError(error);
-    return null;
+  }
+};
+
+const updateUserHealthData = async (
+  user_id: number,
+  data: UpdateUserHealth
+) => {
+  try {
+    const user = await prisma.user_profiles.upsert({
+      where: { user_id },
+      update: {
+        birth_date: data.birth_date,
+        blood_type: data.blood_type,
+        congenital_disease: data.congenital_disease,
+        allergy: data.allergy,
+        height: data.height,
+        weight: data.weight,
+        gender: data.gender,
+      },
+      create: {
+        user_id,
+        birth_date: data.birth_date,
+        blood_type: data.blood_type,
+        congenital_disease: data.congenital_disease,
+        allergy: data.allergy,
+        height: data.height,
+        weight: data.weight,
+        gender: data.gender,
+      },
+    });
+    return user;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const updateUserAccountData = async (
+  user_id: number,
+  data: UpdateUserAccount
+) => {
+  try {
+    const user = await prisma.users.update({
+      where: { id: user_id },
+      data: {
+        email: data.email,
+        username: data.username,
+        user_profiles: {
+          update: {
+            where: { user_id },
+            data: {
+              profile_picture: data.profile_picture,
+            },
+          },
+        },
+      },
+    });
+    return user;
+  } catch (error) {
+    handlePrismaError(error);
   }
 };
 
@@ -182,7 +271,7 @@ const updateUserHealth = async (
     const profile = await prisma.user_profiles.upsert({
       where: { user_id: userId },
       update: {
-        birth_date: data.birth_date,
+        birth_date: data.birth_date ? new Date(data.birth_date) : null,
         gender: data.gender as any,
       },
       create: {
@@ -194,7 +283,6 @@ const updateUserHealth = async (
     return profile as unknown as UserProfile;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -250,7 +338,6 @@ const updateAddress = async (
     return result as unknown as UserProfile;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -269,7 +356,6 @@ const createEmergencyContact = async (
     return contact as unknown as EmergencyContact;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -288,7 +374,6 @@ const updateEmergencyContact = async (
     return contact as unknown as EmergencyContact;
   } catch (error) {
     handlePrismaError(error);
-    return null;
   }
 };
 
@@ -316,7 +401,6 @@ const getEmergencyContacts = async (
     return contacts as unknown as EmergencyContact[];
   } catch (error) {
     handlePrismaError(error);
-    return [];
   }
 };
 
@@ -335,7 +419,6 @@ const findUsersByRole = async (roleName: string): Promise<User[]> => {
     return users as unknown as User[];
   } catch (error) {
     handlePrismaError(error);
-    return [];
   }
 };
 
@@ -345,7 +428,6 @@ export {
   findByEmail,
   updateUser,
   updatePassword,
-  updateUserProfile,
   updateUserHealth,
   updateAddress,
   createEmergencyContact,
@@ -354,4 +436,7 @@ export {
   getEmergencyContacts,
   findUsersByRole,
   findUserByIdForUserSettingPage,
+  updateUserPersonalData,
+  updateUserHealthData,
+  updateUserAccountData,
 };

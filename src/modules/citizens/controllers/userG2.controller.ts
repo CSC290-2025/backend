@@ -32,17 +32,42 @@ const updatePersonalInfo = async (c: Context) => {
   );
 };
 
-const updateUserProfile = async (c: Context) => {
+// const updateUserProfile = async (c: Context) => {
+//   const id = parseInt(c.req.param('id'));
+//   const body = await c.req.json();
+
+//   const profile = await UserService.updateUserProfile(id, body);
+//   return successResponse(
+//     c,
+//     { profile },
+//     200,
+//     'User profile updated successfully'
+//   );
+// };
+
+const updateUserPersonalData = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
   const body = await c.req.json();
-
-  const profile = await UserService.updateUserProfile(id, body);
-  return successResponse(
-    c,
-    { profile },
-    200,
-    'User profile updated successfully'
+  const updateUser = await UserService.updateUserPersonalData(
+    id,
+    body.user,
+    body.address
   );
+  return successResponse(c, { updateUser }, 200, 'User update successfully');
+};
+
+const updateUserHealthData = async (c: Context) => {
+  const id = parseInt(c.req.param('id'));
+  const body = await c.req.json();
+  const updateUser = await UserService.updateUserHealthData(id, body);
+  return successResponse(c, { updateUser }, 200, 'User update successfully');
+};
+
+const updateUserAccountData = async (c: Context) => {
+  const id = parseInt(c.req.param('id'));
+  const body = await c.req.json();
+  const updateUser = await UserService.updateUserAccountData(id, body);
+  return successResponse(c, { updateUser }, 200, 'User update successfully');
 };
 
 const updateHealthInfo = async (c: Context) => {
@@ -149,7 +174,6 @@ const getUsersByRole = async (c: Context) => {
 export {
   getUser,
   updatePersonalInfo,
-  updateUserProfile,
   updateHealthInfo,
   updateAddress,
   getEmergencyContacts,
@@ -160,4 +184,7 @@ export {
   // updatePassword,
   getUsersByRole,
   getUserProflie,
+  updateUserPersonalData,
+  updateUserHealthData,
+  updateUserAccountData,
 };
