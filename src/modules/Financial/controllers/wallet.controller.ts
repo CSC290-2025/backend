@@ -23,8 +23,8 @@ const updateWallet = async (c: Context) => {
 
 const getUserWallets = async (c: Context) => {
   const userId = Number(c.req.param('userId'));
-  const wallets = await WalletService.getUserWallets(userId);
-  return successResponse(c, { wallets });
+  const wallet = await WalletService.getUserWallets(userId);
+  return successResponse(c, { wallet });
 };
 
 const topUpBalance = async (c: Context) => {
@@ -34,4 +34,21 @@ const topUpBalance = async (c: Context) => {
   return successResponse(c, { wallet }, 200, 'Balance topped up successfully');
 };
 
-export { getWallet, createWallet, updateWallet, getUserWallets, topUpBalance };
+const transferBetweenUsers = async (c: Context) => {
+  const body = await c.req.json();
+  const result = await WalletService.transferFunds(
+    body.from_user_id,
+    body.to_user_id,
+    body.amount
+  );
+  return successResponse(c, result, 200, 'Transfer completed successfully');
+};
+
+export {
+  getWallet,
+  createWallet,
+  updateWallet,
+  getUserWallets,
+  topUpBalance,
+  transferBetweenUsers,
+};

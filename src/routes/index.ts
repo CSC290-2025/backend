@@ -15,6 +15,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import {
   setupWalletRoutes,
   setupInsuranceCardRoutes,
+  setupMetroCardRoutes,
 } from '@/modules/Financial';
 
 // Normal Hono Routes (not in Swagger docs)
@@ -27,6 +28,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupAuthRoutes(app);
   // setupPaymentRoutes(app);
   // setupProductRoutes(app);
+
+  setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupInsuranceCardRoutes(app);
   //

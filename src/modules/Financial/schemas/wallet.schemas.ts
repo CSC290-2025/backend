@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { createRoute } from '@hono/zod-openapi';
 import {
   createGetRoute,
   createPostRoute,
@@ -34,6 +33,12 @@ const TopUpBalanceSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
 });
 
+const TransferFundsSchema = z.object({
+  from_user_id: z.number(),
+  to_user_id: z.number(),
+  amount: z.number().positive('Amount must be positive'),
+});
+
 // Parameter schemas
 const UserIdParam = z.object({
   userId: z.coerce.number(),
@@ -56,9 +61,9 @@ const createWalletRoute = createPostRoute({
 
 const getUserWalletsRoute = createGetRoute({
   path: '/wallets/user/{userId}',
-  summary: 'Get user wallets',
+  summary: 'Get user wallet',
   responseSchema: z.object({
-    wallets: z.array(WalletSchema),
+    wallet: WalletSchema.nullable(),
   }),
   params: UserIdParam,
   tags: ['Wallets'],
@@ -85,52 +90,25 @@ const updateWalletRoute = createPutRoute({
   tags: ['Wallets'],
 });
 
-const topUpBalanceRoute = createRoute({
-  method: 'post',
+const topUpBalanceRoute = createPostRoute({
   path: '/wallets/{walletId}/top-up',
   summary: 'Top up wallet balance',
+  requestSchema: TopUpBalanceSchema,
+  responseSchema: z.object({
+    wallet: WalletSchema,
+  }),
+  params: WalletIdParam,
   tags: ['Wallets'],
-  request: {
-    params: WalletIdParam,
-    body: {
-      content: {
-        'application/json': { schema: TopUpBalanceSchema },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        'application/json': {
-          schema: z.object({
-            success: z.boolean(),
-            data: z.object({
-              wallet: WalletSchema,
-            }),
-            message: z.string().optional(),
-            timestamp: z.string(),
-          }),
-        },
-      },
-      description: 'Success',
-    },
-    404: {
-      content: {
-        'application/json': {
-          schema: z.object({
-            success: z.literal(false),
-            error: z.object({
-              name: z.string(),
-              message: z.string(),
-              statusCode: z.number(),
-            }),
-            timestamp: z.string(),
-          }),
-        },
-      },
-      description: 'Not found',
-    },
-  },
+});
+
+const transferFundsRoute = createPostRoute({
+  path: '/wallets/transfer',
+  summary: 'Transfer funds between users',
+  requestSchema: TransferFundsSchema,
+  responseSchema: z.object({
+    status: z.string(),
+  }),
+  tags: ['Wallets'],
 });
 
 export const WalletSchemas = {
@@ -138,6 +116,7 @@ export const WalletSchemas = {
   CreateWalletSchema,
   UpdateWalletSchema,
   TopUpBalanceSchema,
+  TransferFundsSchema,
   UserIdParam,
   WalletIdParam,
   createWalletRoute,
@@ -145,4 +124,5 @@ export const WalletSchemas = {
   getWalletRoute,
   updateWalletRoute,
   topUpBalanceRoute,
+  transferFundsRoute,
 };
