@@ -2,6 +2,7 @@ import {
   createGetRoute,
   createPostRoute,
   createPutRoute,
+  createDeleteRoute,
 } from '@/utils/openapi-helpers';
 import { z } from 'zod';
 
@@ -84,6 +85,13 @@ const topUpBalanceRoute = createPutRoute({
   tags: ['MetroCards'],
 });
 
+const deleteMetroCardRoute = createDeleteRoute({
+  path: '/metro-cards/{metroCardId}',
+  summary: 'Delete metro card by ID',
+  params: MetroCardIdParam,
+  tags: ['MetroCards'],
+});
+
 export const MetroCardSchemas = {
   MetroCardSchema,
   CreateMetroCardSchema,
@@ -97,4 +105,5 @@ export const MetroCardSchemas = {
   getMetroCardRoute,
   updateMetroCardRoute,
   topUpBalanceRoute,
+  deleteMetroCardRoute,
 };

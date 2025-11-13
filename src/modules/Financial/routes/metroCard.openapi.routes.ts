@@ -24,6 +24,10 @@ const setupMetroCardRoutes = (app: OpenAPIHono) => {
     MetroCardSchemas.topUpBalanceRoute,
     MetroCardController.topUpBalance
   );
+  app.openapi(
+    MetroCardSchemas.deleteMetroCardRoute,
+    MetroCardController.deleteMetroCard
+  );
 };
 
 export { setupMetroCardRoutes };

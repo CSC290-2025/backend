@@ -114,10 +114,21 @@ const updateMetroCardBalance = async (
   }
 };
 
+const deleteMetroCard = async (id: number): Promise<void> => {
+  try {
+    await prisma.metro_cards.delete({
+      where: { id },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createMetroCard,
   findMetroCardsByUserId,
   findMetroCardById,
   updateMetroCard,
   updateMetroCardBalance,
+  deleteMetroCard,
 };

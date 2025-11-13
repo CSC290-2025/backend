@@ -74,10 +74,19 @@ const topUpBalance = async (
   });
 };
 
+const deleteMetroCardById = async (id: number): Promise<void> => {
+  const existingMetroCard = await MetroCardModel.findMetroCardById(id);
+
+  if (!existingMetroCard) throw new NotFoundError('Metro Card not found');
+
+  await MetroCardModel.deleteMetroCard(id);
+};
+
 export {
   getMetroCardById,
   createMetroCard,
   getUserMetroCards,
   updateMetroCard,
   topUpBalance,
+  deleteMetroCardById,
 };

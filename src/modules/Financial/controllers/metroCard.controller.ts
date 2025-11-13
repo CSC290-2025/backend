@@ -54,10 +54,17 @@ const topUpBalance = async (c: Context) => {
   );
 };
 
+const deleteMetroCard = async (c: Context) => {
+  const metroCardId = Number(c.req.param('metroCardId'));
+  await MetroCardService.deleteMetroCardById(metroCardId);
+  return successResponse(c, null, 200, 'Metro card deleted successfully');
+};
+
 export {
   getMetroCard,
   createMetroCard,
   getUserMetroCards,
   updateMetroCard,
   topUpBalance,
+  deleteMetroCard,
 };
