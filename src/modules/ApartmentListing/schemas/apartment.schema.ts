@@ -48,7 +48,7 @@ const createApartmentSchema = z.object({
   internet: z.enum(['free', 'not_free', 'none']),
   userId: z.int(),
   address: z.object({
-    address_line1: z.string().min(5).max(255),
+    address_line: z.string().min(5).max(255),
     province: z.string().min(2).max(255),
     district: z.string().min(2).max(255),
     subdistrict: z.string().min(2).max(255),
@@ -67,7 +67,7 @@ const updateApartmentSchema = z.object({
   internet: z.enum(['free', 'not_free', 'none']),
   address: z
     .object({
-      address_line1: z.string().min(5).max(255),
+      address_line: z.string().min(5).max(255),
       province: z.string().min(2).max(255),
       district: z.string().min(2).max(255),
       subdistrict: z.string().min(2).max(255),
