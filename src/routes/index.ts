@@ -8,6 +8,13 @@ Choose ONE approach per module that you're comfortable with:
 */
 
 // OpenAPI Routes (documented in Swagger)
+// import { setupAuthRoutes } from '@/modules/auth/routes';
+// import { setupPaymentRoutes } from '@/modules/payment/routes';
+// import { setupProductRoutes } from '@/modules/_example';
+import {
+  setupWalletRoutes,
+  setupInsuranceCardRoutes,
+} from '@/modules/Financial';
 
 // Clean Air
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
