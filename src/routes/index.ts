@@ -55,7 +55,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Clean Air
   setupCleanAirRoutes(app);
-  
+
   // Event Hub
   setupEventRoutes(app);
   setupBookmarkRoutes(app);
