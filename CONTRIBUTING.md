@@ -265,7 +265,7 @@ Routes → Controllers → Services → Models → Database
 4. Add business logic in `services/[feature].service.ts`
 5. Create controllers in `controllers/[feature].controller.ts`
 6. Define routes in `routes/[feature].routes.ts`
-7. Export from `index.tsx` files at each level
+7. Export from `index.ts` files at each level
 
 See the `src/modules/_example/` folder for a complete reference implementation.
 

@@ -144,7 +144,7 @@ export class InvalidCredentialsError extends BaseError {
 Update your main index file:
 
 ```typescript
-// src/errors/env.ts
+// src/errors/index.ts
 export { BaseError } from "./base";
 export {
   ValidationError,

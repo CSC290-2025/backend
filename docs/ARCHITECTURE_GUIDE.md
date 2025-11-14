@@ -10,19 +10,19 @@ Substitue [feature] with specific names.
 [team-module]/
 ├── types/
 │   ├── [feature].types.ts
-│   └── env.ts (export * from './[feature].types')
+│   └── index.ts (export * from './[feature].types')
 ├── models/ (interacting with DB)
 │   ├── [feature].model.ts
-│   └── env.ts (export * as [Feature]Model from './[feature].model')
+│   └── index.ts (export * as [Feature]Model from './[feature].model')
 ├── services/ (mostly business logic)
 │   ├── [feature].service.ts
-│   └── env.ts (export * as [Feature]Service from './[feature].service')
+│   └── index.ts (export * as [Feature]Service from './[feature].service')
 ├── controllers/
 │   ├── [feature].controller.ts
-│   └── env.ts (export * as [Feature]Controller from './[feature].controller')
+│   └── index.ts (export * as [Feature]Controller from './[feature].controller')
 └── routes/
     ├── [feature].routes.ts
-    └── env.ts (export { [feature]Routes } from './[feature].routes')
+    └── index.ts (export { [feature]Routes } from './[feature].routes')
 ```
 
 ### 2. IMPORT STRUCTURE
@@ -151,7 +151,7 @@ const setupPostRoutes = (app: OpenAPIHono) => {
 export { setupPostRoutes };
 ```
 
-**Mounting Routes** (src/routes/index.tsx):
+**Mounting Routes** (src/routes/index.ts):
 
 ```typescript
 import type { OpenAPIHono } from "@hono/zod-openapi";
@@ -170,19 +170,19 @@ export const setupRoutes = (app: OpenAPIHono) => {
 #### INDEX FILES PATTERN
 
 ```typescript
-// [team-module]/types/env.ts
+// [team-module]/types/index.ts
 export * from "./[feature].types";
 
-// [team-module]/models/env.ts
+// [team-module]/models/index.ts
 export * as [Feature]Model from "./[feature].model";
 
-// [team-module]/services/env.ts
+// [team-module]/services/index.ts
 export * as [Feature]Service from "./[feature].service";
 
-// [team-module]/controllers/env.ts
+// [team-module]/controllers/index.ts
 export * as [Feature]Controller from "./[feature].controller";
 
-// [team-module]/routes/env.ts
+// [team-module]/routes/index.ts
 export { [Feature]Routes } from "./[feature].routes";
 ```
 

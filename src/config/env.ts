@@ -8,6 +8,7 @@ interface Config {
   cloudinary_name: string;
   cloudinary_api_key: string;
   cloudinary_api_secret: string;
+  isProduction: boolean;
 }
 
 const config: Config = {
@@ -17,6 +18,7 @@ const config: Config = {
   cloudinary_name: process.env.CLOUDINARY_NAME || '',
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY || '',
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET || '',
+  isProduction: process.env.NODE_ENV === 'production',
 };
 
 export default config;

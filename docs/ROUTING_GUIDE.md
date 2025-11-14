@@ -8,7 +8,7 @@ This guide covers both **OpenAPI routes** (documented in Swagger) and **Normal H
 src/
 ├── schemas/                    # Zod schemas + OpenAPI route definitions
 ├── routes/                     # Route setup (both types)
-│   └── index.tsx                # Mounts both types
+│   └── index.ts                # Mounts both types
 ├── modules/
 │   └── _example/               # Example module with normal Hono routes
 │       └── routes/
@@ -114,7 +114,7 @@ export {
 
 ### 2. Export Schema
 
-Add to `src/schemas/index.tsx`:
+Add to `src/schemas/index.ts`:
 
 ```typescript
 export * as PostSchemas from './post.schemas';
@@ -142,7 +142,7 @@ export { setupPostRoutes };
 
 ### 4. Register Routes
 
-Add to `src/routes/index.tsx`:
+Add to `src/routes/index.ts`:
 
 ```typescript
 import { setupPostRoutes } from './post.openapi.routes';
@@ -177,7 +177,7 @@ export { productRoutes };
 
 ### 2. Register Routes
 
-Add to `src/routes/index.tsx`:
+Add to `src/routes/index.ts`:
 
 ```typescript
 import { productRoutes } from '@/modules/_example';

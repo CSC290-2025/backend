@@ -76,4 +76,41 @@ pnpm-lock.yaml
 .eslintcache
 .prettiercache
 
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Cursor AI
+.cursor/
+.cursorignore
+.cursorban
+
+# Codeium AI
+.codeium/
+.codeiumignore
+
+# GitHub Copilot
+.copilotignore
+
+# Tabnine
+.tabnine/
+
+# AWS CodeWhisperer
+**/CodeWhisperer/
+
+# AI tools' temporary & metadata files
+*.ai.log
+*.agent.json
+*.history.json
+*.prompt.log
+*.chatcache
+.ai_temp/
+.ai_cache/
+
+# VSCode AI integrations cache
+.vscode/.ai/
+.vscode-ai/
+
+# Service Account
 serviceAccount.json
+service-account.json

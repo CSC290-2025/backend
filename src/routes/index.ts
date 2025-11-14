@@ -1,19 +1,19 @@
-// Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { Hono } from 'hono';
 
-// ============================================
-// ROUTING OPTIONS:
-// Choose ONE approach per module that you're comfortable with:
-// 1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
-// 2. Normal Hono Routes - Simple, no Swagger docs
-// ============================================
+/* 
+ROUTING OPTIONS:
+Choose ONE approach per module that you're comfortable with:
+  1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
+  2. Normal Hono Routes - Simple, no Swagger docs
+*/
 
 // OpenAPI Routes (documented in Swagger)
-// import { setupAuthRoutes } from '@/modules/auth/routes';
-// import { setupPaymentRoutes } from '@/modules/payment/routes';
-// import { setupProductRoutes } from '@/modules/_example';
-import {
+
+// Clean Air
+import { setupCleanAirRoutes } from '../modules/clean-air/routes';
+  
+// Emergency
+  import {
   setupReportRoutes,
   reportRoutes,
   setupFcmRoutes,
@@ -22,31 +22,91 @@ import {
   tokenRoutes,
 } from '@/modules/emergency';
 
-// Normal Hono Routes (not in Swagger docs)
-// import { productRoutes } from '@/modules/_example';
+// Event Hub
+import { setupEventRoutes } from '@/modules/EventHub';
+import { setupBookmarkRoutes } from '@/modules/EventHub';
+
+// Financial
+import {
+  setupWalletRoutes,
+  setupScbRoutes,
+  setupMetroCardRoutes,
+} from '@/modules/Financial';
+
+// Free Cycle
+import {
+  setupFreecyclePostsRoutes,
+  setupCategoryRoutes,
+  setupFreecyclePostCategoriesPostRoutes,
+} from '@/modules/freecycle';
+
+// Know AI
+import {
+  setupEnrollmentRoutes,
+  setupCourseRoutes,
+  setupOnsiteSessionRoutes,
+  setupExerciseRoute,
+  setupQuestionRoutes,
+  setupLevelRoutes,
+} from '@/modules/Know_AI/routes';
+
+// Power BI
+import { reportRoutes } from '@/modules/power-bi';
+
+// Volunteer
+import { eventRoutes } from '../modules/Volunteer/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  // ============================================
-  // OpenAPI Routes (documented in Swagger)
-  // ============================================
-  // setupAuthRoutes(app);
-  // setupPaymentRoutes(app);
-  // setupProductRoutes(app);
-  //
-  // ============================================
-  // Normal Hono Routes (not in Swagger docs)
-  // ============================================
-  // app.route('/products', productRoutes);
+  /* 
+  ============================================
+  OpenAPI Routes (documented in Swagger)
+  ============================================
+  */
 
+  // Clean Air
+  setupCleanAirRoutes(app);
+
+  //Emergency
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
+  
+  // Event Hub
+  setupEventRoutes(app);
+  setupBookmarkRoutes(app);
 
-  const emergencyRoutes = new Hono();
+  // Financial
+  setupMetroCardRoutes(app);
+  setupWalletRoutes(app);
+  setupScbRoutes(app);
 
-  emergencyRoutes.route('/reports', reportRoutes);
-  emergencyRoutes.route('/fcm', fcmRoutes);
-  emergencyRoutes.route('/tokens', tokenRoutes);
+  // Free Cycle
+  setupFreecyclePostsRoutes(app);
+  setupCategoryRoutes(app);
+  setupFreecyclePostCategoriesPostRoutes(app);
 
-  app.route('/emergency', emergencyRoutes);
+  // Know AI
+  setupEnrollmentRoutes(app);
+  setupCourseRoutes(app);
+  setupOnsiteSessionRoutes(app);
+  setupExerciseRoute(app);
+  setupQuestionRoutes(app);
+  setupLevelRoutes(app);
+
+  /*
+  ============================================
+  Normal Hono Routes (not in Swagger docs)
+  ============================================
+  */
+  //Emergency
+//   app.route('/reports', reportRoutes);
+//   app.route('/fcm', fcmRoutes);
+//   app.route('/tokens', tokenRoutes);
+//   app.route('/emergency', emergencyRoutes);
+
+  // Power BI
+  app.route('/reports', reportRoutes);
+
+  // Volunteer
+  app.route('/api/v1/volunteer/', eventRoutes);
 };
