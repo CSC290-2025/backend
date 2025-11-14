@@ -28,4 +28,8 @@ export {
 } from './schemas';
 
 // Export OpenAPI routes for main app
-export { setupWalletRoutes, setupScbRoutes } from './routes';
+export {
+  setupWalletRoutes,
+  setupScbRoutes,
+  setupMetroCardRoutes,
+} from './routes';

@@ -7,8 +7,11 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 // 2. Normal Hono Routes - Simple, no Swagger docs
 
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
-import { setupWalletRoutes, setupScbRoutes } from '@/modules/Financial';
-import { setupMetroCardRoutes } from '@/modules/Financial/routes';
+import {
+  setupWalletRoutes,
+  setupScbRoutes,
+  setupMetroCardRoutes,
+} from '@/modules/Financial';
 
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
@@ -23,11 +26,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupAuthRoutes(app);
   // setupPaymentRoutes(app);
   // setupProductRoutes(app);
-  
+
   // Clean Air
   setupCleanAirRoutes(app);
-  
-  // Financial 
+
+  // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
@@ -37,7 +40,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
    Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  
+
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
 };
