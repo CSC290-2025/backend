@@ -3,7 +3,6 @@ import { WalletController } from '../controllers';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 const setupWalletRoutes = (app: OpenAPIHono) => {
-  // Wallet routes
   app.openapi(WalletSchemas.createWalletRoute, WalletController.createWallet);
   app.openapi(
     WalletSchemas.getUserWalletsRoute,
@@ -12,6 +11,10 @@ const setupWalletRoutes = (app: OpenAPIHono) => {
   app.openapi(WalletSchemas.getWalletRoute, WalletController.getWallet);
   app.openapi(WalletSchemas.updateWalletRoute, WalletController.updateWallet);
   app.openapi(WalletSchemas.topUpBalanceRoute, WalletController.topUpBalance);
+  app.openapi(
+    WalletSchemas.transferFundsRoute,
+    WalletController.transferBetweenUsers
+  );
 };
 
 export { setupWalletRoutes };
