@@ -19,6 +19,13 @@ import {
   setupMetroCardRoutes,
 } from '@/modules/Financial';
 
+// Free Cycle
+import {
+  setupFreecyclePostsRoutes,
+  setupCategoryRoutes,
+  setupFreecyclePostCategoriesPostRoutes,
+} from '@/modules/freecycle';
+
 // Know AI
 import {
   setupEnrollmentRoutes,
@@ -46,6 +53,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
+  
+  // Free Cycle
+  setupFreecyclePostsRoutes(app);
+  setupCategoryRoutes(app);
+  setupFreecyclePostCategoriesPostRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
