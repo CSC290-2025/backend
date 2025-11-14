@@ -71,17 +71,16 @@ model apartment {
   name               String?             @db.VarChar(255)
   phone              String?             @db.VarChar(10)
   description        String?
-  rating_id          Int?
   electric_price     Float?
   water_price        Float?
   internet           apartment_internet?
   apartment_type     apartment_type?
   apartment_location apartment_location?
   address_id         Int?
-  addresses          addresses?          @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rating             rating?             @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   apartment_owner    apartment_owner[]
   apartment_picture  apartment_picture[]
+  rating             rating[]
   room               room[]
 }
 
@@ -90,9 +89,15 @@ model apartment_booking {
   user_id        Int
   check_in       DateTime?       @db.Timestamptz(6)
   booking_status booking_status? @default(pending)
-  created_at     DateTime?       @db.Timestamptz(6)
-  updated_at     DateTime?       @db.Timestamptz(6)
-  users          users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  room_id        Int?
+  guest_name     String?         @db.VarChar(255)
+  guest_phone    String?         @db.VarChar(10)
+  guest_email    String?         @db.VarChar(255)
+  room_type      String?         @db.VarChar(255)
+  users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
 
 model apartment_owner {
@@ -100,7 +105,7 @@ model apartment_owner {
   user_id      Int
   apartment_id Int
   apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model apartment_picture {
@@ -213,6 +218,7 @@ model digital_cards {
   id                          Int                           @id @default(autoincrement())
   user_id                     Int?
   status                      String                        @default("active") @db.VarChar(20)
+  balance                     Decimal?                      @db.Decimal(14, 2)
   users                       users?                        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   transportation_transactions transportation_transactions[]
 }
@@ -305,13 +311,12 @@ model emergency_reports {
   ambulance_service      Boolean?                 @default(false)
   level                  report_level?
   status                 report_status?           @default(pending)
-  report_category_id     Int?
   created_at             DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
   title                  String
   contact_center_service Boolean?                 @default(false)
+  report_category        report_type?
   alerts                 alerts[]
-  report_categories      report_categories?       @relation(fields: [report_category_id], references: [id], onUpdate: NoAction)
   users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@index([location], map: "idx_emergency_reports_location", type: Gist)
@@ -340,10 +345,13 @@ model events {
   address_id             Int?
   created_at             DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  organization_id        Int?
   event_bookmarks        event_bookmarks[]
+  event_tag              event_tag?
   addresses              addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   departments            departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
   users                  users?                   @relation(fields: [host_user_id], references: [id], onUpdate: NoAction)
+  event_organization     event_organization?      @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "organization_id")
   waste_event_statistics waste_event_statistics[]
 
   @@index([start_at], map: "idx_events_start_at")
@@ -528,7 +536,7 @@ model metro_cards {
   id          Int            @id @default(autoincrement())
   user_id     Int?
   balance     Decimal?       @default(0) @db.Decimal(14, 2)
-  card_number String?        @unique @db.VarChar(50)
+  card_number String?        @unique @db.VarChar(255)
   status      wallet_status? @default(active)
   created_at  DateTime       @default(now()) @db.Timestamptz(6)
   updated_at  DateTime       @default(now()) @db.Timestamptz(6)
@@ -625,13 +633,14 @@ model questions {
 }
 
 model rating {
-  id         Int         @id @default(autoincrement())
-  user_id    Int
-  rating     Float?
-  comment    String?
-  created_at DateTime?   @db.Timestamptz(6)
-  apartment  apartment[]
-  users      users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           Int        @id @default(autoincrement())
+  user_id      Int
+  rating       Float?
+  comment      String?
+  created_at   DateTime?  @default(now()) @db.Timestamptz(6)
+  apartment_id Int?
+  apartment    apartment? @relation(fields: [apartment_id], references: [id], onUpdate: NoAction)
+  users        users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model receiver_requests {
@@ -655,23 +664,24 @@ model refresh_tokens {
 }
 
 model report_categories {
-  id                Int                 @id @default(autoincrement())
-  name              String              @unique @db.VarChar(255)
-  created_at        DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
-  emergency_reports emergency_reports[]
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
 model reports_metadata {
-  report_id                 Int           @id
-  title_string              String?       @db.VarChar(255)
+  report_id                 Int                   @id
+  title_string              String?               @db.VarChar(255)
   description_string        String?
   category_id               Int?
   created_by                Int?
-  last_updated_datetime     DateTime?     @db.Timestamptz(6)
-  power_bi_report_id_string String?       @db.VarChar(255)
-  dim_category              dim_category? @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
-  dim_user                  dim_user?     @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
+  last_updated_datetime     DateTime?             @db.Timestamptz(6)
+  power_bi_report_id_string String?               @db.VarChar(255)
+  visibility                report_visibility?    @default(citizens)
+  power_bi_report_type      power_bi_report_type? @default(summary)
+  dim_category              dim_category?         @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
+  dim_user                  dim_user?             @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
 }
 
 model roads {
@@ -691,15 +701,16 @@ model roles {
 }
 
 model room {
-  id           Int          @id @default(autoincrement())
-  name         String?      @db.VarChar(255)
-  type         String?      @db.VarChar(255)
-  size         String?      @db.VarChar(50)
-  room_status  room_status?
-  price_start  Float?
-  price_end    Float?
-  apartment_id Int?
-  apartment    apartment?   @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  type              String?             @db.VarChar(255)
+  size              String?             @db.VarChar(50)
+  room_status       room_status?
+  price_start       Float?
+  price_end         Float?
+  apartment_id      Int?
+  apartment_booking apartment_booking[]
+  apartment         apartment?          @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model route_stops {
@@ -795,6 +806,10 @@ model traffic_lights {
   density_level   Int?                     @db.SmallInt
   auto_mode       Boolean?                 @default(true)
   last_updated    DateTime                 @default(now()) @db.Timestamptz(6)
+  road_id         Int?
+  green_duration  Int?
+  red_duration    Int?
+  last_color      Int?                     @db.SmallInt
   light_requests  light_requests[]
   intersections   intersections?           @relation(fields: [intersection_id], references: [id], onUpdate: NoAction)
 
@@ -802,14 +817,16 @@ model traffic_lights {
 }
 
 model transportation_transactions {
-  id            Int            @id @default(autoincrement())
-  card_id       Int?
-  route_id      Int?
-  amount        Decimal?       @db.Decimal(12, 2)
-  status        String?        @db.VarChar(50)
-  created_at    DateTime       @default(now()) @db.Timestamptz(6)
-  digital_cards digital_cards? @relation(fields: [card_id], references: [id], onUpdate: NoAction)
-  routes        routes?        @relation(fields: [route_id], references: [id], onUpdate: NoAction)
+  id               Int                      @id @default(autoincrement())
+  card_id          Int?
+  route_id         Int?
+  amount           Decimal?                 @db.Decimal(12, 2)
+  status           String?                  @db.VarChar(50)
+  created_at       DateTime                 @default(now()) @db.Timestamptz(6)
+  tap_in_location  Unsupported("geometry")?
+  tap_out_location Unsupported("geometry")?
+  digital_cards    digital_cards?           @relation(fields: [card_id], references: [id], onUpdate: NoAction)
+  routes           routes?                  @relation(fields: [route_id], references: [id], onUpdate: NoAction)
 }
 
 model transportation_vehicle_types {
@@ -836,16 +853,26 @@ model user_levels {
 }
 
 model user_profiles {
-  user_id             Int        @id
-  first_name          String?    @db.VarChar(255)
-  middle_name         String?    @db.VarChar(255)
-  last_name           String?    @db.VarChar(255)
-  birth_date          DateTime?  @db.Date
+  user_id             Int         @id
+  first_name          String?     @db.VarChar(255)
+  middle_name         String?     @db.VarChar(255)
+  last_name           String?     @db.VarChar(255)
+  birth_date          DateTime?   @db.Date
   gender              gender?
   address_id          Int?
   more_address_detail String?
-  addresses           addresses? @relation(fields: [address_id], references: [id], onUpdate: NoAction)
-  users               users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id_card_number      String?     @db.VarChar(13)
+  blood_type          blood_type?
+  congenital_disease  String?     @db.VarChar(255)
+  allergy             String?     @db.VarChar(255)
+  height              Int?
+  weight              Int?
+  profile_picture     String?     @db.VarChar(255)
+  ethnicity           String?     @db.VarChar(255)
+  nationality         String?     @db.VarChar(255)
+  religion            String?     @db.VarChar(255)
+  addresses           addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  users               users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model users {
@@ -868,6 +895,8 @@ model users {
   emergency_contacts            emergency_contacts[]
   emergency_reports             emergency_reports[]
   event_bookmarks               event_bookmarks[]
+  event_organization            event_organization?
+  event_tag_name                event_tag_name?
   events                        events[]
   fcm_token                     fcm_token[]
   freecycle_posts               freecycle_posts[]
@@ -1020,6 +1049,30 @@ model users_specialty {
   @@id([user_id, specialty_id])
 }
 
+model event_organization {
+  id           Int      @id
+  name         String?  @db.VarChar(255)
+  email        String?  @db.VarChar(255)
+  phone_number String?  @db.VarChar(255)
+  users        users    @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  events       events[]
+}
+
+model event_tag {
+  event_id       Int             @id(map: "pk_event_tag")
+  event_tag_id   Int?
+  name           String?         @db.VarChar(255)
+  events         events          @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_tag_name event_tag_name? @relation(fields: [event_tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model event_tag_name {
+  id        Int         @id
+  name      String?     @db.VarChar(255)
+  event_tag event_tag[]
+  users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
 enum air_quality_category {
   good
   moderate
@@ -1138,4 +1191,27 @@ enum wallet_status {
 enum wallet_type {
   individual
   organization
+}
+
+enum report_type {
+  traffic
+  accident
+  disaster
+}
+
+enum blood_type {
+  A
+  B
+  AB
+  O
+}
+
+enum power_bi_report_type {
+  summary
+  trends
+}
+
+enum report_visibility {
+  citizens
+  admin
 }
