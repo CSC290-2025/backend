@@ -8,6 +8,7 @@ import { addressRoutes } from '@/modules/citizens/routes/addressG5.route';
 import { specialistRoutes } from '@/modules/citizens/routes/specialistG6.route';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
+import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
 
 const app = new OpenAPIHono();
 app.route('/citizens', addressRoutes);
@@ -73,6 +74,7 @@ app.get('/doc', (c) => {
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 setupRoutes(app);
+startAir4ThaiAggregationJob();
 
 let serverInstance: ReturnType<typeof serve> | null = null;
 
