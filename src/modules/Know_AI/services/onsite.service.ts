@@ -3,7 +3,7 @@ import { OnsiteSessionModel } from '@/modules/Know_AI/models';
 import type { onsite, createOnsite } from '@/modules/Know_AI/types';
 
 const getAllOnsiteSession = async (): Promise<onsite[]> => {
-  return await OnsiteSessionModel.getAllOnsiteSession();
+  return await OnsiteSessionModel.getAllOnsiteSessions();
 };
 
 const getOnsiteSessionById = async (id: number): Promise<onsite> => {
