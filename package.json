@@ -47,7 +47,7 @@
     "vitest": "^3.2.4"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/users.seed.ts"
   },
   "engines": {
     "node": ">=20.19.0",
