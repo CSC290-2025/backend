@@ -1,1 +1,1 @@
-export { default as wasteRoutes } from './waste.routes';
+export { setupWasteRoutes } from './waste.openapi.routes';
