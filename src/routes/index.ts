@@ -56,7 +56,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
-  
+
   // Free Cycle
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
@@ -75,7 +75,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  
+
   // Power BI
   app.route('/reports', reportRoutes);
 
