@@ -12,6 +12,10 @@ Choose ONE approach per module that you're comfortable with:
 // Clean Air
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
 
+// Event Hub
+import { setupEventRoutes } from '@/modules/EventHub';
+import { setupBookmarkRoutes } from '@/modules/EventHub';
+
 // Financial
 import {
   setupWalletRoutes,
@@ -51,6 +55,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Clean Air
   setupCleanAirRoutes(app);
+
+  // Event Hub
+  setupEventRoutes(app);
+  setupBookmarkRoutes(app);
 
   // Financial
   setupMetroCardRoutes(app);
