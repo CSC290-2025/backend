@@ -11,16 +11,15 @@ Choose ONE approach per module that you're comfortable with:
 
 // Clean Air
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
-  
+
 // Emergency
-  import {
+import {
   setupReportRoutes,
-  reportRoutes,
   setupFcmRoutes,
-  fcmRoutes,
   setupTokenRoutes,
-  tokenRoutes,
 } from '@/modules/emergency';
+
+// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
 import { setupEventRoutes } from '@/modules/EventHub';
@@ -70,7 +69,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
-  
+
   // Event Hub
   setupEventRoutes(app);
   setupBookmarkRoutes(app);
@@ -99,10 +98,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   ============================================
   */
   //Emergency
-//   app.route('/reports', reportRoutes);
-//   app.route('/fcm', fcmRoutes);
-//   app.route('/tokens', tokenRoutes);
-//   app.route('/emergency', emergencyRoutes);
+  //   app.route('/reports', reportRoutes);
+  //   app.route('/fcm', fcmRoutes);
+  //   app.route('/tokens', tokenRoutes);
+  //   app.route('/emergency', emergencyRoutes);
 
   // Power BI
   app.route('/reports', reportRoutes);
