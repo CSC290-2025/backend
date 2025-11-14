@@ -13,37 +13,45 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 // import { setupPaymentRoutes } from '@/modules/payment/routes';
 // import { setupProductRoutes } from '@/modules/_example';
 // import { productRoutes } from '@/modules/_example';
-import { setupApartmentRoutes } from '@/modules/ApartmentListing';
-import { setupRatingRoutes } from '@/modules/ApartmentListing';
-import { setupRoomRoutes } from '@/modules/ApartmentListing';
-import { setupAddressRoutes } from '@/modules/ApartmentListing';
-import { setupUploadRoutes } from '@/modules/ApartmentListing';
-import { setupBookingRoutes } from '@/modules/ApartmentListing';
+import {
+  setupApartmentRoutes,
+  setupRatingRoutes,
+  setupRoomRoutes,
+  setupAddressRoutes,
+  setupUploadRoutes,
+  setupBookingRoutes,
+} from '@/modules/ApartmentListing';
+
+import { setupCleanAirRoutes } from '../modules/clean-air/routes';
+
 // Normal Hono Routes (not in Swagger docs)
 // import { productRoutes } from '@/modules/_example';
-// import { apartmentRoutes } from '@/modules/ApartmentListing/routes/apartment.route';
-// import { bookingRoute } from '@/modules/ApartmentListing/routes/booking.route';
-// import { ratingRoutes } from '@/modules/ApartmentListing/routes/rating.route';
-// import { roomRoutes } from '@/modules/ApartmentListing/routes/room.route';
+import { eventRoutes } from '../modules/Volunteer/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  // ============================================
-  // OpenAPI Routes (documented in Swagger)
-  // ============================================
+  /* 
+  ============================================
+  OpenAPI Routes (documented in Swagger)
+  ============================================
+  */
+
+  // Apartment
   setupAddressRoutes(app);
   setupApartmentRoutes(app);
   setupRoomRoutes(app);
   setupRatingRoutes(app);
   setupUploadRoutes(app);
-
   setupBookingRoutes(app);
-  //
-  // ============================================
-  // Normal Hono Routes (not in Swagger docs)
-  // ============================================
-  // app.route('/products', productRoutes);
-  // app.route('/apartments', apartmentRoutes);
-  // app.route('/bookings', bookingRoute);
-  // app.route('/ratings', ratingRoutes);
-  // app.route('/rooms', roomRoutes);
+
+  // Clean Air
+  setupCleanAirRoutes(app);
+
+  /* 
+  ============================================
+   Normal Hono Routes (not in Swagger docs)
+  ============================================
+  */
+
+  // Volunteer
+  app.route('/api/v1/volunteer/', eventRoutes);
 };
