@@ -122,10 +122,12 @@ const updateReportMetadata = async (
     let categoryId: number | undefined = undefined;
 
     if (record.category) {
+      const categoryName = record.category.trim();
+      // Try to find category by name
       const category = await prisma.dim_category.findFirst({
         where: {
           category_name: {
-            equals: record.category,
+            equals: categoryName,
             mode: 'insensitive',
           },
         },
@@ -133,6 +135,23 @@ const updateReportMetadata = async (
 
       if (category) {
         categoryId = category.category_id;
+      } else {
+        // Create a new category entry if it doesn't exist
+        const maxCategory = await prisma.dim_category.findFirst({
+          orderBy: { category_id: 'desc' },
+          select: { category_id: true },
+        });
+
+        const nextCategoryId = (maxCategory?.category_id ?? 0) + 1;
+        const createdCategory = await prisma.dim_category.create({
+          data: {
+            category_id: nextCategoryId,
+            category_name: categoryName,
+            category_description: `Reports related to ${categoryName}`,
+          },
+        });
+
+        categoryId = createdCategory.category_id;
       }
     }
 
