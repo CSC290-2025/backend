@@ -61,12 +61,7 @@ const topUpBalance = async (
   }
 
   return await prisma.$transaction(async (trx) => {
-    await WalletModel.WalletBalanceTopup(
-      walletId,
-      amount,
-      'decrement',
-      trx
-    );
+    await WalletModel.WalletBalanceTopup(walletId, amount, 'decrement', trx);
     const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
       metroCardId,
       amount,
