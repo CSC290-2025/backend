@@ -41,7 +41,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Clean Air
   setupCleanAirRoutes(app);
-  
+
   // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
