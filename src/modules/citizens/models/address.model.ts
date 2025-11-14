@@ -11,7 +11,7 @@ const findAddressId = async (data: RequiredAddress) => {
         address_line: data.address_line,
         province: data.province,
         district: data.district,
-        subdistrict: data.subDistrict,
+        subdistrict: data.subdistrict,
         postal_code: data.postal_code,
       },
       select: {
@@ -33,7 +33,7 @@ const createAddress = async (data: RequiredAddress) => {
         address_line: data.address_line,
         province: data.province,
         district: data.district,
-        subdistrict: data.subDistrict,
+        subdistrict: data.subdistrict,
         postal_code: data.postal_code,
       },
     });
