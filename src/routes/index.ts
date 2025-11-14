@@ -36,6 +36,9 @@ import {
   setupLevelRoutes,
 } from '@/modules/Know_AI/routes';
 
+// Power BI
+import { reportRoutes } from '@/modules/power-bi';
+
 // Volunteer
 import { eventRoutes } from '../modules/Volunteer/routes';
 
@@ -53,7 +56,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
-  
+
   // Free Cycle
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
@@ -72,6 +75,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
+
+  // Power BI
+  app.route('/reports', reportRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
