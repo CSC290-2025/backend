@@ -1,18 +1,23 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 /* 
-============================================
 ROUTING OPTIONS:
 Choose ONE approach per module that you're comfortable with:
   1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
   2. Normal Hono Routes - Simple, no Swagger docs
-============================================
 */
 
 // OpenAPI Routes (documented in Swagger)
 
 // Clean Air
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
+
+// Financial
+import {
+  setupWalletRoutes,
+  setupScbRoutes,
+  setupMetroCardRoutes,
+} from '@/modules/Financial';
 
 // Know AI
 import {
@@ -36,6 +41,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Clean Air
   setupCleanAirRoutes(app);
+
+  // Financial
+  setupMetroCardRoutes(app);
+  setupWalletRoutes(app);
+  setupScbRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
