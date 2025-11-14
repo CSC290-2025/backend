@@ -1,3 +1,4 @@
+// Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 /* 
@@ -53,7 +54,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRoomRoutes(app);
   setupRatingRoutes(app);
   setupUploadRoutes(app);
-
   setupBookingRoutes(app);
   //
   // ============================================
