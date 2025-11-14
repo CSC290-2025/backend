@@ -1,3 +1,4 @@
+import { NotFoundError, ValidationError } from '@/errors';
 import { WasteModel } from '../models';
 import type { WasteLogRequest, WasteStats } from '../types';
 import type { Prisma } from '@/generated/prisma';
@@ -10,9 +11,10 @@ export class WasteService {
 
   static async logWaste(data: WasteLogRequest) {
     if (!data.waste_type_name || !data.weight) {
-      throw new Error('waste_type_name and weight are required');
+      throw new NotFoundError('waste_type_name and weight are required');
     }
-    if (data.weight <= 0) throw new Error('Weight must be greater than 0');
+    if (data.weight <= 0)
+      throw new ValidationError('Weight must be greater than 0');
 
     const wasteLog = await WasteModel.createOrUpdateDailyWasteLog(
       data.waste_type_name,
