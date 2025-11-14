@@ -7,16 +7,16 @@ import {
 } from '@/utils/openapi-helpers';
 
 const levelSchema = z.object({
-  user_id: z.number(),
-  current_level: z.number(),
+  user_id: z.coerce.number(),
+  current_level: z.coerce.number(),
 });
 
 const levelParam = z.object({
-  user_id: z.number(),
+  user_id: z.coerce.number(),
 });
 
 const getUserLevel = createGetRoute({
-  path: '/level/{id}',
+  path: '/level/{user_id}',
   summary: 'Get level',
   responseSchema: levelSchema,
   params: levelParam,

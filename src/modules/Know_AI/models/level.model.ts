@@ -4,6 +4,7 @@ import type { level, levelId } from '@/modules/Know_AI/types';
 
 const getLevel = async (user_id: number): Promise<level> => {
   try {
+    console.log(user_id);
     const level = await prisma.user_levels.findUnique({
       where: {
         user_id,

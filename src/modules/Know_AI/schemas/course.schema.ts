@@ -30,7 +30,6 @@ const onsiteSession = z.object({
 });
 
 const createCourseVideo = z.object({
-  course_id: z.number(),
   video_name: z.string().max(255),
   video_description: z.string().nullable(),
   duration_minutes: z.number(),
@@ -39,7 +38,6 @@ const createCourseVideo = z.object({
 });
 
 const createOnsiteSession = z.object({
-  course_id: z.number(),
   address_id: z.number().nullable(),
   duration_hours: z.number().nullable(),
   event_at: z.coerce.date(),

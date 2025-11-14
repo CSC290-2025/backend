@@ -7,7 +7,7 @@ import {
 } from '@/utils/openapi-helpers';
 
 const exerciseSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
   user_id: z.number().nullable(),
   question_id: z.number().nullable(),
   user_answer: z.string().nullable(),
@@ -16,7 +16,7 @@ const exerciseSchema = z.object({
 });
 
 const exerciseId = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
 });
 
 const getExercise = createGetRoute({

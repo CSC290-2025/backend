@@ -4,6 +4,7 @@ import type { question, questionId } from '@/modules/Know_AI/types';
 
 const getQuestion = async (id: number): Promise<question> => {
   try {
+    console.log(id);
     const question = await prisma.questions.findUnique({
       where: {
         id,
@@ -16,6 +17,7 @@ const getQuestion = async (id: number): Promise<question> => {
 
     return question;
   } catch (error) {
+    console.log(error);
     handlePrismaError(error);
   }
 };

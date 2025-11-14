@@ -26,7 +26,7 @@ const getCourseByType = async (c: Context) => {
 };
 
 const updateCourse = async (c: Context) => {
-  const id = Number(c.req.param('id'));
+  const id = parseInt(c.req.param('id'));
   const body = await c.req.json();
   const updatedCourse = await CourseService.updateCourse(id, body);
   return successResponse(
