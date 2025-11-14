@@ -1,5 +1,5 @@
-// Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
+import { setupCleanAirRoutes } from '../modules/clean-air/routes';
 
 // ============================================
 // ROUTING OPTIONS:
@@ -19,8 +19,7 @@ import { setupExerciseRoute } from '@/modules/Know_AI/routes';
 import { setupQuestionRoutes } from '@/modules/Know_AI/routes';
 import { setupLevelRoutes } from '@/modules/Know_AI/routes';
 
-// Normal Hono Routes (not in Swagger docs)
-// import { productRoutes } from '@/modules/_example';
+import { eventRoutes } from '../modules/Volunteer/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   // ============================================
@@ -37,8 +36,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupLevelRoutes(app);
 
   //
+  setupCleanAirRoutes(app);
+
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
   // ============================================
-  // app.route('/products', productRoutes);
+  app.route('/api/v1/volunteer/', eventRoutes);
 };
