@@ -1,78 +1,90 @@
-// src/controllers/detect.controller.ts
-import type { Context } from 'hono';
-import { detectDangerFromImage } from '../services/gemini.service';
-import { addMarker } from '../services/marker.service';
-import { ValidationError } from '@/errors';
+// // src/controllers/detect.controller.ts
+// import type { Context } from 'hono';
+// import { detectDangerFromImage } from '../services/gemini.service';
+// import { addtheMarker } from '../services/marker.service';
+// import { ValidationError } from '@/errors';
 
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
-const THRESHOLD = 0.8;
-const DANGER_MARKER_TYPE_ID = 999;
+// const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
+// const THRESHOLD = 0.8;
+// const DANGER_MARKER_TYPE_ID = 999;
 
-export async function detectHarm(c: Context) {
-  const body = await c.req.parseBody();
-  const file = body['image'];
+// //normalize value to string
+// function toStringArray(value: unknown): string[] {
+//   if (Array.isArray(value)) {
+//     return value.map((v) => String(v));
+//   }
+//   if (value != null) {
+//     return [String(value)];
+//   }
+//   return [];
+// }
 
-  if (!(file instanceof File)) {
-    throw new ValidationError('Please upload file image');
-  }
+// export async function detectHarm(c: Context) {
+//   const body = await c.req.parseBody();
+//   const file = body['image'];
 
-  if (!ALLOWED.includes(file.type as any)) {
-    throw new ValidationError('Unsupport file type');
-  }
+//   // 1) Validate file
+//   if (!(file instanceof File)) {
+//     throw new ValidationError('Please upload file image');
+//   }
 
-  const lat = Number(body['lat']);
-  const lng = Number(body['lng']);
-  const hasLoc =
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    lat >= -90 &&
-    lat <= 90 &&
-    lng >= -180 &&
-    lng <= 180;
+//   if (!ALLOWED.includes(file.type as (typeof ALLOWED)[number])) {
+//     throw new ValidationError('Unsupport file type');
+//   }
 
-  // call AI to detect : is_danger, confidence, danger_types, reasons
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ai = await detectDangerFromImage(buffer, file.type);
+//   // 2) Validate location
+//   const lat = Number(body['lat']);
+//   const lng = Number(body['lng']);
+//   const checkCordinate =
+//     Number.isFinite(lat) &&
+//     Number.isFinite(lng) &&
+//     lat >= -90 &&
+//     lat <= 90 &&
+//     lng >= -180 &&
+//     lng <= 180;
 
-  const is_danger = Boolean(ai.is_danger);
-  const confidence = Math.min(1, Math.max(0, Number(ai.confidence) || 0));
-  const danger_types = Array.isArray(ai.danger_types)
-    ? ai.danger_types
-    : ai.danger_types
-      ? [String(ai.danger_types)]
-      : [];
-  const reasons = Array.isArray(ai.reasons)
-    ? ai.reasons
-    : ai.reasons
-      ? [String(ai.reasons)]
-      : [];
+//   // 3) Call AI to detect danger from image
+//   const buffer = Buffer.from(await file.arrayBuffer());
+//   const ai = await detectDangerFromImage(buffer, file.type);
 
-  // if it danger and have cordinates create the marker
-  let marker: any = null;
-  if (is_danger && confidence >= THRESHOLD && hasLoc) {
-    const title = danger_types[0] ?? 'danger';
-    const description = `AI detected: ${title} (${Math.round(confidence * 100)}%)`;
+//   const is_danger = Boolean(ai.is_danger);
 
-    marker = await addMarker({
-      lat,
-      lng,
-      marker_type_id: DANGER_MARKER_TYPE_ID,
-      title,
-      description,
-      confidence,
-      categories: danger_types,
-    });
-  }
+//   const rawConfidence = Number(ai.confidence) || 0;
+//   const confidence = Math.min(1, Math.max(0, rawConfidence));
 
-  // send result to frontend
-  return c.json({
-    ok: true,
-    is_danger,
-    confidence, // 0..1
-    danger_types, // string[]
-    reasons, // string[]
-    threshold: THRESHOLD,
-    over_threshold: is_danger && confidence >= THRESHOLD,
-    marker, // { id, lat, lng, ... }
-  });
-}
+//   const danger_types = toStringArray(ai.danger_types);
+//   const reasons = toStringArray(ai.reasons);
+
+//   // 4) Create marker if dangerous
+//   let marker: any = null;
+//   const over_threshold = is_danger && confidence >= THRESHOLD;
+
+//   if (over_threshold && checkCordinate) {
+//     const title = danger_types[0] ?? 'danger';
+//     const description = `AI detected: ${title} (${Math.round(
+//       confidence * 100
+//     )}%)`;
+
+//     marker = await addtheMarker({
+//       lat,
+//       lng,
+//       marker_type_id: DANGER_MARKER_TYPE_ID,
+//       title,
+//       description,
+//       confidence,
+//       categories: danger_types,
+//     });
+//   }
+
+//   // 5) Send result to frontend
+//   return c.json({
+//     ok: true,
+//     is_danger,
+//     confidence, // 0..1
+//     danger_types, // string[]
+//     reasons, // string[]
+//     threshold: THRESHOLD,
+//     over_threshold,
+//     marker, // { id, lat, lng, ... } or null
+//   });
+// }

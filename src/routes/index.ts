@@ -1,6 +1,6 @@
 // Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { detectRoutes } from '../modules/G-16/routes/detect.routes.js';
+// import { detectRoutes } from '../modules/G-16/routes/detect.routes.js';
 import markerRoutes from '../modules/G-16/routes/marker.routes.js';
 
 // ============================================
@@ -29,6 +29,22 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Normal Hono Routes (not in Swagger docs)
   // ============================================
   // app.route('/products', productRoutes);
-  app.route('/api', detectRoutes);
-  app.route('/api', markerRoutes);
+
+  // app.route('/api', detectRoutes);
+  app.route('/api/markers', markerRoutes);
+  app.get('/', (c) => {
+    return c.json({ 
+      message: 'G-16 API Server',
+      version: '1.0.0',
+      routes: [
+        'GET /health',
+        'GET /api/markers',
+        'GET /api/markers/:id',
+        'POST /api/markers',
+        'PUT /api/markers/:id',
+        'DELETE /api/markers/:id',
+      ]
+    });
+  });
 };
+
