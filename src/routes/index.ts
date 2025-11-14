@@ -14,7 +14,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // OpenAPI Routes (documented in Swagger)
   // ============================================
   setupCleanAirRoutes(app);
-  
+
   // ============================================
   // Normal Hono Routes (not in Swagger docs)
   // ============================================
