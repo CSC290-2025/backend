@@ -21,7 +21,7 @@ import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
-  setupInsuranceCardRoutes
+  setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
