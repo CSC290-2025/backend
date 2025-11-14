@@ -45,9 +45,10 @@ import { reportRoutes } from '@/modules/power-bi';
 
 // Volunteer
 import { eventRoutes } from '../modules/Volunteer/routes';
-import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
 // Waste
+import { setupWasteRoutes } from '@/modules/waste-management/routes';
+
 export const setupRoutes = (app: OpenAPIHono) => {
   /* 
   ============================================
