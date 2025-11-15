@@ -52,9 +52,10 @@ const findPostByDonater = async (
   }
 };
 
+//not authorize
 const createPost = async (
   data: CreateFreecyclePostData,
-  donaterId: number
+  donaterId: number | null
 ): Promise<FreecyclePost> => {
   try {
     const post = await prisma.freecycle_posts.create({

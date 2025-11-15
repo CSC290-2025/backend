@@ -24,7 +24,8 @@ const getPostByDonater: Handler = async (c: Context) => {
 
 const createPost = async (c: Context) => {
   const body = await c.req.json();
-  const donaterId = c.get('user')?.id;
+  const userIdFromToken = c.get('user')?.id;
+  const donaterId = userIdFromToken || body.donater_id || null;
   const post = await PostsService.createPost(body, donaterId);
   return successResponse(c, { post }, 201, 'Post created successfully');
 };

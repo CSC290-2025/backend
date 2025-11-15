@@ -20,12 +20,14 @@ const FreecyclePostsSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
+//not authorize
 const CreateFreecyclePostsSchema = z.object({
   item_name: z.string().max(255),
   item_weight: z.number().nullable(),
   photo_url: z.string().nullable(),
   description: z.string().nullable(),
   donate_to_department_id: z.number().nullable(),
+  donater_id: z.number().nullable().optional(),
 });
 
 const UpdateFreecyclePostsSchema = z.object({
@@ -78,7 +80,7 @@ const createFreecyclePostsRoute = createPostRoute({
   requestSchema: CreateFreecyclePostsSchema,
   responseSchema: FreecyclePostsSchema,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const UpdateFreecyclePostsRoute = createPutRoute({
