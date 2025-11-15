@@ -12,11 +12,16 @@ Choose ONE approach per module that you're comfortable with:
 // Clean Air
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
 
+// Event Hub
+import { setupEventRoutes } from '@/modules/EventHub';
+import { setupBookmarkRoutes } from '@/modules/EventHub';
+
 // Financial
 import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -36,8 +41,14 @@ import {
   setupLevelRoutes,
 } from '@/modules/Know_AI/routes';
 
+// Power BI
+import { reportRoutes } from '@/modules/power-bi';
+
 // Volunteer
 import { eventRoutes } from '../modules/Volunteer/routes';
+
+// Waste
+import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /* 
@@ -49,11 +60,16 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
+  // Event Hub
+  setupEventRoutes(app);
+  setupBookmarkRoutes(app);
+
   // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
-  
+  setupInsuranceCardRoutes(app);
+
   // Free Cycle
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
@@ -67,11 +83,17 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Waste
+  setupWasteRoutes(app);
+
   /*
   ============================================
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
+
+  // Power BI
+  app.route('/reports', reportRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

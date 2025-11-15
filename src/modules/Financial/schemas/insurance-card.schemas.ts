@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { createRoute } from '@hono/zod-openapi';
 import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
 
 // Base schema
@@ -62,69 +61,16 @@ const getInsuranceCardRoute = createGetRoute({
   tags: ['Insurance Cards'],
 });
 
-const topUpInsuranceCardRoute = createRoute({
-  method: 'post',
+const topUpInsuranceCardRoute = createPostRoute({
   path: '/insurance-cards/{cardId}/top-up',
   summary: 'Top up insurance card from wallet',
+  requestSchema: TopUpInsuranceCardSchema,
+  responseSchema: z.object({
+    card: InsuranceCardSchema,
+    transaction_id: z.number(),
+  }),
+  params: CardIdParam,
   tags: ['Insurance Cards'],
-  request: {
-    params: CardIdParam,
-    body: {
-      content: {
-        'application/json': { schema: TopUpInsuranceCardSchema },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        'application/json': {
-          schema: z.object({
-            success: z.boolean(),
-            data: z.object({
-              card: InsuranceCardSchema,
-              transaction_id: z.number(),
-            }),
-            message: z.string().optional(),
-            timestamp: z.string(),
-          }),
-        },
-      },
-      description: 'Success',
-    },
-    400: {
-      content: {
-        'application/json': {
-          schema: z.object({
-            success: z.literal(false),
-            error: z.object({
-              name: z.string(),
-              message: z.string(),
-              statusCode: z.number(),
-            }),
-            timestamp: z.string(),
-          }),
-        },
-      },
-      description: 'Bad request',
-    },
-    404: {
-      content: {
-        'application/json': {
-          schema: z.object({
-            success: z.literal(false),
-            error: z.object({
-              name: z.string(),
-              message: z.string(),
-              statusCode: z.number(),
-            }),
-            timestamp: z.string(),
-          }),
-        },
-      },
-      description: 'Not found',
-    },
-  },
 });
 
 export const InsuranceCardSchemas = {
