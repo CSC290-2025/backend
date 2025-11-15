@@ -218,6 +218,7 @@ model digital_cards {
   id                          Int                           @id @default(autoincrement())
   user_id                     Int?
   status                      String                        @default("active") @db.VarChar(20)
+  balance                     Decimal?                      @db.Decimal(14, 2)
   users                       users?                        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   transportation_transactions transportation_transactions[]
 }
@@ -535,7 +536,7 @@ model metro_cards {
   id          Int            @id @default(autoincrement())
   user_id     Int?
   balance     Decimal?       @default(0) @db.Decimal(14, 2)
-  card_number String?        @unique @db.VarChar(50)
+  card_number String?        @unique @db.VarChar(255)
   status      wallet_status? @default(active)
   created_at  DateTime       @default(now()) @db.Timestamptz(6)
   updated_at  DateTime       @default(now()) @db.Timestamptz(6)
@@ -670,15 +671,17 @@ model report_categories {
 }
 
 model reports_metadata {
-  report_id                 Int           @id
-  title_string              String?       @db.VarChar(255)
+  report_id                 Int                   @id
+  title_string              String?               @db.VarChar(255)
   description_string        String?
   category_id               Int?
   created_by                Int?
-  last_updated_datetime     DateTime?     @db.Timestamptz(6)
-  power_bi_report_id_string String?       @db.VarChar(255)
-  dim_category              dim_category? @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
-  dim_user                  dim_user?     @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
+  last_updated_datetime     DateTime?             @db.Timestamptz(6)
+  power_bi_report_id_string String?               @db.VarChar(255)
+  visibility                report_visibility?    @default(citizens)
+  power_bi_report_type      power_bi_report_type? @default(summary)
+  dim_category              dim_category?         @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_category")
+  dim_user                  dim_user?             @relation(fields: [created_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_created_by")
 }
 
 model roads {
@@ -804,6 +807,9 @@ model traffic_lights {
   auto_mode       Boolean?                 @default(true)
   last_updated    DateTime                 @default(now()) @db.Timestamptz(6)
   road_id         Int?
+  green_duration  Int?
+  red_duration    Int?
+  last_color      Int?                     @db.SmallInt
   light_requests  light_requests[]
   intersections   intersections?           @relation(fields: [intersection_id], references: [id], onUpdate: NoAction)
 
@@ -811,14 +817,16 @@ model traffic_lights {
 }
 
 model transportation_transactions {
-  id            Int            @id @default(autoincrement())
-  card_id       Int?
-  route_id      Int?
-  amount        Decimal?       @db.Decimal(12, 2)
-  status        String?        @db.VarChar(50)
-  created_at    DateTime       @default(now()) @db.Timestamptz(6)
-  digital_cards digital_cards? @relation(fields: [card_id], references: [id], onUpdate: NoAction)
-  routes        routes?        @relation(fields: [route_id], references: [id], onUpdate: NoAction)
+  id               Int                      @id @default(autoincrement())
+  card_id          Int?
+  route_id         Int?
+  amount           Decimal?                 @db.Decimal(12, 2)
+  status           String?                  @db.VarChar(50)
+  created_at       DateTime                 @default(now()) @db.Timestamptz(6)
+  tap_in_location  Unsupported("geometry")?
+  tap_out_location Unsupported("geometry")?
+  digital_cards    digital_cards?           @relation(fields: [card_id], references: [id], onUpdate: NoAction)
+  routes           routes?                  @relation(fields: [route_id], references: [id], onUpdate: NoAction)
 }
 
 model transportation_vehicle_types {
@@ -845,16 +853,26 @@ model user_levels {
 }
 
 model user_profiles {
-  user_id             Int        @id
-  first_name          String?    @db.VarChar(255)
-  middle_name         String?    @db.VarChar(255)
-  last_name           String?    @db.VarChar(255)
-  birth_date          DateTime?  @db.Date
+  user_id             Int         @id
+  first_name          String?     @db.VarChar(255)
+  middle_name         String?     @db.VarChar(255)
+  last_name           String?     @db.VarChar(255)
+  birth_date          DateTime?   @db.Date
   gender              gender?
   address_id          Int?
   more_address_detail String?
-  addresses           addresses? @relation(fields: [address_id], references: [id], onUpdate: NoAction)
-  users               users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id_card_number      String?     @db.VarChar(13)
+  blood_type          blood_type?
+  congenital_disease  String?     @db.VarChar(255)
+  allergy             String?     @db.VarChar(255)
+  height              Int?
+  weight              Int?
+  profile_picture     String?     @db.VarChar(255)
+  ethnicity           String?     @db.VarChar(255)
+  nationality         String?     @db.VarChar(255)
+  religion            String?     @db.VarChar(255)
+  addresses           addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  users               users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model users {
@@ -1179,4 +1197,21 @@ enum report_type {
   traffic
   accident
   disaster
+}
+
+enum blood_type {
+  A
+  B
+  AB
+  O
+}
+
+enum power_bi_report_type {
+  summary
+  trends
+}
+
+enum report_visibility {
+  citizens
+  admin
 }
