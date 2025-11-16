@@ -8,12 +8,24 @@ Choose ONE approach per module that you're comfortable with:
 */
 
 // Apartment
-import { setupApartmentRoutes } from '@/modules/ApartmentListing';
-import { setupRatingRoutes } from '@/modules/ApartmentListing';
-import { setupRoomRoutes } from '@/modules/ApartmentListing';
-import { setupAddressRoutes } from '@/modules/ApartmentListing';
-import { setupUploadRoutes } from '@/modules/ApartmentListing';
-import { setupBookingRoutes } from '@/modules/ApartmentListing';
+import {
+  setupApartmentRoutes,
+  setupRatingRoutes,
+  setupRoomRoutes,
+  setupAddressRoutes,
+  setupUploadRoutes,
+  setupBookingRoutes,
+} from '@/modules/ApartmentListing';
+
+// Citizen
+import {
+  setupCitizenAddressRoutes,
+  setupUserSpecialtyRoutes,
+  setupUserG8Routes,
+  setupRoleUserRoutes,
+  setupUserRoutes,
+  setupUserSpecialistRoutes,
+} from '@/modules/citizens/routes';
 
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
@@ -28,8 +40,7 @@ import {
 // import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
-import { setupEventRoutes } from '@/modules/EventHub';
-import { setupBookmarkRoutes } from '@/modules/EventHub';
+import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
 
 // Financial
 import {
@@ -63,7 +74,7 @@ import { reportRoutes } from '@/modules/power-bi';
 import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
 
 // Volunteer
-import { eventRoutes } from '../modules/Volunteer/routes';
+import { eventRoutes } from '@/modules/Volunteer/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
@@ -85,6 +96,14 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Clean Air
   setupCleanAirRoutes(app);
+
+  // Citizen
+  setupCitizenAddressRoutes(app);
+  setupUserSpecialistRoutes(app);
+  setupUserSpecialtyRoutes(app);
+  setupUserG8Routes(app);
+  setupRoleUserRoutes(app);
+  setupUserRoutes(app);
 
   //Emergency
   setupReportRoutes(app);
