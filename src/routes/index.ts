@@ -64,7 +64,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   OpenAPI Routes (documented in Swagger)
   ============================================
   */
-  
+
   // Apartment
   setupAddressRoutes(app);
   setupApartmentRoutes(app);
