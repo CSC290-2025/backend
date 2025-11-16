@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { createPostRoute } from '@/utils/openapi-helpers';
+import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares/auth';
 
 export const LoginRequestSchema = z.object({
   email: z.email(),
@@ -69,10 +70,10 @@ export const logoutRoute = createPostRoute({
   tags: ['Authentication'],
 });
 
-export const meRoute = createPostRoute({
+export const meRoute = createGetRoute({
   path: '/auth/me',
   summary: 'Get current user',
-  requestSchema: z.object({}),
   responseSchema: MeResponseSchema,
   tags: ['Authentication'],
+  middleware: [authMiddleware],
 });

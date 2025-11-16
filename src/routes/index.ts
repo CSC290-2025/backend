@@ -7,6 +7,9 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
+// Auth
+import { setupAuthRoutes } from '@/modules/Auth/routes';
+
 // Apartment
 import {
   setupApartmentRoutes,
@@ -26,9 +29,6 @@ import {
   setupUserRoutes,
   setupUserSpecialistRoutes,
 } from '@/modules/citizens/routes';
-
-// Auth
-import { setupAuthRoutes } from '@/modules/Auth/routes';
 
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
@@ -95,6 +95,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   ============================================
   */
 
+  // Auth
+  setupAuthRoutes(app);
+
   // Apartment
   setupAddressRoutes(app);
   setupApartmentRoutes(app);
@@ -102,9 +105,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-
-  // Auth
-  setupAuthRoutes(app);
 
   // Clean Air
   setupCleanAirRoutes(app);
