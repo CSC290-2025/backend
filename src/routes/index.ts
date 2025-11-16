@@ -78,7 +78,7 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
-  
+
 // Weather
 import {
   setupWeatherRoutes,
@@ -141,7 +141,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Waste
   setupWasteRoutes(app);
-  
+
   // Weather
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
@@ -151,7 +151,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  
+
   //Emergency
   //   app.route('/reports', reportRoutes);
   //   app.route('/fcm', fcmRoutes);
