@@ -1,4 +1,3 @@
-// Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 /* 
@@ -9,10 +8,8 @@ Choose ONE approach per module that you're comfortable with:
 */
 
 // OpenAPI Routes (documented in Swagger)
-// import { setupAuthRoutes } from '@/modules/auth/routes';
-// import { setupPaymentRoutes } from '@/modules/payment/routes';
-// import { setupProductRoutes } from '@/modules/_example';
-// import { productRoutes } from '@/modules/_example';
+
+// Apartment
 import { setupApartmentRoutes } from '@/modules/ApartmentListing';
 import { setupRatingRoutes } from '@/modules/ApartmentListing';
 import { setupRoomRoutes } from '@/modules/ApartmentListing';
@@ -62,29 +59,19 @@ import { eventRoutes } from '../modules/Volunteer/routes';
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  // ============================================
-  // OpenAPI Routes (documented in Swagger)
-  // ============================================
+  /* 
+  ============================================
+  OpenAPI Routes (documented in Swagger)
+  ============================================
+  */
+  
+  // Apartment
   setupAddressRoutes(app);
   setupApartmentRoutes(app);
   setupRoomRoutes(app);
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-  //
-  // ============================================
-  // Normal Hono Routes (not in Swagger docs)
-  // ============================================
-  // app.route('/products', productRoutes);
-  // app.route('/apartments', apartmentRoutes);
-  // app.route('/bookings', bookingRoute);
-  // app.route('/ratings', ratingRoutes);
-  // app.route('/rooms', roomRoutes);
-  /* 
-  ============================================
-  OpenAPI Routes (documented in Swagger)
-  ============================================
-  */
 
   // Clean Air
   setupCleanAirRoutes(app);
