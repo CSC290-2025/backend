@@ -18,6 +18,15 @@ import { setupBookingRoutes } from '@/modules/ApartmentListing';
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
+// Emergency
+import {
+  setupReportRoutes,
+  setupFcmRoutes,
+  setupTokenRoutes,
+} from '@/modules/emergency';
+
+// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
+
 // Event Hub
 import { setupEventRoutes } from '@/modules/EventHub';
 import { setupBookmarkRoutes } from '@/modules/EventHub';
@@ -77,6 +86,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
+
   // Event Hub
   setupEventRoutes(app);
   setupBookmarkRoutes(app);
@@ -108,6 +122,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
+  //Emergency
+  //   app.route('/reports', reportRoutes);
+  //   app.route('/fcm', fcmRoutes);
+  //   app.route('/tokens', tokenRoutes);
+  //   app.route('/emergency', emergencyRoutes);
 
   // Power BI
   app.route('/reports', reportRoutes);
