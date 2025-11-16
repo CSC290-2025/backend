@@ -4,15 +4,11 @@ import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
-import { addressRoutes } from '@/modules/citizens/routes/addressG5.route';
-import { specialistRoutes } from '@/modules/citizens/routes/specialistG6.route';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
 
 const app = new OpenAPIHono();
-app.route('/citizens', addressRoutes);
-app.route('/citizens', specialistRoutes);
 app.onError(errorHandler);
 
 app.use(

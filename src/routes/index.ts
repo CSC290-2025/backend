@@ -1,5 +1,5 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
-import { setupAddressRoutes } from '@/modules/citizens/routes/adressG5.openapi.route';
+import { setupAddressRoutes } from '@/modules/citizens/routes/addressG5.openapi.route';
 import { setupUserSpecialistRoutes } from '@/modules/citizens/routes/specialistG6.openapi.route';
 import {
   setupUserG8Routes,
