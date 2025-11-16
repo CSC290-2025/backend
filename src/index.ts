@@ -6,25 +6,10 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
+import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
 
 const app = new OpenAPIHono();
-
-// CORS middleware - allow requests from frontend
-app.use(
-  '*',
-  cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:3000',
-    ],
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
-
 app.onError(errorHandler);
 
 app.use(
@@ -121,6 +106,10 @@ async function startServer(startPort: number, maxRetries = 10) {
           `API Documentation on http://localhost:${info.port}/swagger`
         );
         console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
+
+        // Start the booking cleanup job
+        startBookingCleanupJob();
+        console.log('Booking cleanup job started - will run every hour');
       });
 
       return;

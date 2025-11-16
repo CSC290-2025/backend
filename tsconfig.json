@@ -23,7 +23,7 @@
       "@/*": ["*"]
     }
   },
-  "include": ["src/**/*", "prisma/**/*", "src/modules/power-bi/.seed.ts"],
+  "include": ["src/**/*", "src/modules/power-bi/.seed.ts"],
   "exclude": [
     "node_modules",
     "dist",
