@@ -1,10 +1,5 @@
 import { z } from 'zod';
-import {
-  createGetRoute,
-  createPostRoute,
-  createPutRoute,
-  createDeleteRoute,
-} from '@/utils/openapi-helpers';
+import { createGetRoute, createDeleteRoute } from '@/utils/openapi-helpers';
 
 const decimalField = z.coerce.number().nullable().optional();
 
@@ -22,36 +17,12 @@ const WeatherDataSchema = z.object({
   addresses: z.any().nullable().optional(),
 });
 
-const CreateWeatherDataSchema = z.object({
-  location_id: z.number().int().nullable().optional(),
-  temperature: decimalField,
-  feel_temperature: decimalField,
-  humidity: decimalField,
-  wind_speed: decimalField,
-  wind_direction: z.string().max(50).nullable().optional(),
-  rainfall_probability: decimalField,
-});
-
-const UpdateWeatherDataSchema = z.object({
-  location_id: z.number().int().nullable().optional(),
-  temperature: decimalField,
-  feel_temperature: decimalField,
-  humidity: decimalField,
-  wind_speed: decimalField,
-  wind_direction: z.string().max(50).nullable().optional(),
-  rainfall_probability: decimalField,
-});
-
-const WeatherIdParam = z.object({
-  id: z.string(),
+const WeatherDateParam = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
 });
 
 const WeatherDataListSchema = z.object({
   data: z.array(WeatherDataSchema),
-});
-
-const WeatherLocationParam = z.object({
-  location_id: z.string(),
 });
 
 const listWeatherDataRoute = createGetRoute({
@@ -62,34 +33,17 @@ const listWeatherDataRoute = createGetRoute({
 });
 
 const getWeatherDataRoute = createGetRoute({
-  path: '/weather/{id}',
-  summary: 'Get weather data by ID',
-  responseSchema: WeatherDataSchema,
-  params: WeatherIdParam,
-  tags: ['Weather'],
-});
-
-const createWeatherDataRoute = createPostRoute({
-  path: '/weather',
-  summary: 'Create weather data',
-  requestSchema: CreateWeatherDataSchema,
-  responseSchema: WeatherDataSchema,
-  tags: ['Weather'],
-});
-
-const updateWeatherDataRoute = createPutRoute({
-  path: '/weather/{id}',
-  summary: 'Update weather data',
-  params: WeatherIdParam,
-  requestSchema: UpdateWeatherDataSchema,
-  responseSchema: WeatherDataSchema,
+  path: '/weather/{date}',
+  summary: 'Get weather data for a specific date (YYYY-MM-DD)',
+  responseSchema: WeatherDataListSchema,
+  params: WeatherDateParam,
   tags: ['Weather'],
 });
 
 const deleteWeatherDataRoute = createDeleteRoute({
-  path: '/weather/{id}',
-  summary: 'Delete weather data by ID',
-  params: WeatherIdParam,
+  path: '/weather/{date}',
+  summary: 'Delete weather data for a specific date (YYYY-MM-DD)',
+  params: WeatherDateParam,
   tags: ['Weather'],
 });
 
@@ -100,17 +54,29 @@ const deleteAllWeatherDataRoute = createDeleteRoute({
   tags: ['Weather'],
 });
 
+// Date range query schema and route
+const WeatherDateRangeQuery = z.object({
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+});
+
+const listWeatherByRangeRoute = createGetRoute({
+  path: '/weather/range',
+  summary:
+    'List weather data between two dates (inclusive), query params `from` and `to` in YYYY-MM-DD',
+  query: WeatherDateRangeQuery,
+  responseSchema: WeatherDataListSchema,
+  tags: ['Weather'],
+});
+
 export const WeatherSchemas = {
   WeatherDataSchema,
-  CreateWeatherDataSchema,
-  UpdateWeatherDataSchema,
   WeatherDataListSchema,
-  WeatherIdParam,
-  WeatherLocationParam,
+  WeatherDateParam,
+  WeatherDateRangeQuery,
   listWeatherDataRoute,
   getWeatherDataRoute,
-  createWeatherDataRoute,
-  updateWeatherDataRoute,
   deleteWeatherDataRoute,
   deleteAllWeatherDataRoute,
+  listWeatherByRangeRoute,
 };

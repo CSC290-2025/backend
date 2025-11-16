@@ -8,10 +8,18 @@ const listWeather = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-const getWeather = async (c: Context) => {
-  const { id } = WeatherSchemas.WeatherIdParam.parse(c.req.param());
-  const weather = await WeatherService.getWeatherById(id);
-  return successResponse(c, { weather });
+const getWeatherByDate = async (c: Context) => {
+  const { date } = WeatherSchemas.WeatherDateParam.parse(c.req.param());
+  const data = await WeatherService.getWeatherByDate(date);
+  return successResponse(c, { data });
+};
+
+const listWeatherByDateRange = async (c: Context) => {
+  const { from, to } = WeatherSchemas.WeatherDateRangeQuery.parse(
+    c.req.query()
+  );
+  const data = await WeatherService.listWeatherByDateRange(from, to);
+  return successResponse(c, { data });
 };
 
 const getWeatherByLocation = async (c: Context) => {
@@ -20,35 +28,15 @@ const getWeatherByLocation = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-const createWeather = async (c: Context) => {
-  const body = await c.req.json();
-  const parsed = WeatherSchemas.CreateWeatherDataSchema.parse(body);
-  const weather = await WeatherService.createWeather(parsed);
+const deleteWeatherByDate = async (c: Context) => {
+  const { date } = WeatherSchemas.WeatherDateParam.parse(c.req.param());
+  const result = await WeatherService.deleteWeatherByDate(date);
   return successResponse(
     c,
-    { weather },
-    201,
-    'Weather data created successfully'
-  );
-};
-
-const updateWeather = async (c: Context) => {
-  const { id } = WeatherSchemas.WeatherIdParam.parse(c.req.param());
-  const body = await c.req.json();
-  const parsed = WeatherSchemas.UpdateWeatherDataSchema.parse(body);
-  const weather = await WeatherService.updateWeather(id, parsed);
-  return successResponse(
-    c,
-    { weather },
+    result,
     200,
-    'Weather data updated successfully'
+    `Deleted ${result.deleted} weather records for ${date}`
   );
-};
-
-const deleteWeather = async (c: Context) => {
-  const { id } = WeatherSchemas.WeatherIdParam.parse(c.req.param());
-  await WeatherService.deleteWeather(id);
-  return successResponse(c, null, 200, 'Weather data deleted successfully');
 };
 
 const deleteAllWeather = async (c: Context) => {
@@ -63,10 +51,9 @@ const deleteAllWeather = async (c: Context) => {
 
 export {
   listWeather,
-  getWeather,
+  getWeatherByDate,
+  listWeatherByDateRange,
   getWeatherByLocation,
-  createWeather,
-  updateWeather,
-  deleteWeather,
+  deleteWeatherByDate,
   deleteAllWeather,
 };

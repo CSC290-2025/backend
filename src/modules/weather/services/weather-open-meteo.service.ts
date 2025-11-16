@@ -6,6 +6,7 @@ import type {
   ExternalWeatherQuery,
 } from '../types';
 import { ValidationError } from '@/errors';
+import { getDistrictByLocationId } from '../utils/bangkok-districts';
 
 const wmoToCondition = (code: number): string => {
   if (code === 0) return 'Sunny';
@@ -79,19 +80,99 @@ const getWeatherFromOpenMeteo = async (
   query: ExternalWeatherQuery
 ): Promise<ExternalWeatherDTO> => {
   const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
-  if (!Number.isFinite(q.lat) || !Number.isFinite(q.lon)) {
-    throw new ValidationError('Invalid coordinates');
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
   }
   // Open-Meteo expects a timezone; use canonical project timezone
-  const json = await OpenMeteoClient.getFull(q.lat, q.lon, OPEN_METEO_TIMEZONE);
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
   const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
 
-  // Provide sensible defaults when city/country are omitted by the caller.
-  // Defaults match the Swagger defaults: Bangkok, Thailand
-  const city = q.city ?? 'Bangkok';
-  const country = q.country ?? 'Thailand';
+  // Use district info for location name
+  const city = district.name;
+  const country = 'Thailand';
 
   return mapFullToDTO(raw, city, country);
 };
 
-export { getWeatherFromOpenMeteo };
+const getCurrentFromOpenMeteo = async (query: ExternalWeatherQuery) => {
+  const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
+  const city = district.name;
+  const country = 'Thailand';
+  const full = mapFullToDTO(raw, city, country);
+  return WeatherOpenMeteoSchemas.ExternalCurrentResponseSchema.parse({
+    location: full.location,
+    current: full.current,
+  });
+};
+
+const getHourlyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
+  const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
+  const city = district.name;
+  const country = 'Thailand';
+  const full = mapFullToDTO(raw, city, country);
+  return WeatherOpenMeteoSchemas.ExternalHourlyResponseSchema.parse({
+    location: full.location,
+    hourly_forecast: full.hourly_forecast,
+  });
+};
+
+const getDailyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
+  const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
+  const city = district.name;
+  const country = 'Thailand';
+  const full = mapFullToDTO(raw, city, country);
+  return WeatherOpenMeteoSchemas.ExternalDailyResponseSchema.parse({
+    location: full.location,
+    daily_forecast: full.daily_forecast,
+  });
+};
+
+export {
+  getWeatherFromOpenMeteo,
+  getCurrentFromOpenMeteo,
+  getHourlyFromOpenMeteo,
+  getDailyFromOpenMeteo,
+};

@@ -91,32 +91,61 @@ const ExternalWeatherDTOSchema = z.object({
   daily_forecast: z.array(DailyItemSchema),
 });
 
+// Partial response schemas for separated endpoints
+const ExternalCurrentResponseSchema = z.object({
+  location: LocationSchema,
+  current: CurrentSchema,
+});
+
+const ExternalHourlyResponseSchema = z.object({
+  location: LocationSchema,
+  hourly_forecast: z.array(HourlyItemSchema),
+});
+
+const ExternalDailyResponseSchema = z.object({
+  location: LocationSchema,
+  daily_forecast: z.array(DailyItemSchema),
+});
+
 const ExternalWeatherQuerySchema = z.object({
-  lat: z.coerce.number(),
-  lon: z.coerce.number(),
-  // city/country are optional: external clients may only provide coordinates
-  // Provide defaults so Swagger shows sensible defaults when omitted.
-  city: z.string().min(1).optional().nullable().default('Bangkok'),
-  country: z.string().min(1).optional().nullable().default('Thailand'),
+  location_id: z.coerce.number().int().min(1).max(4),
 });
 
 const ImportDailyBodySchema = z.object({
-  lat: z.coerce.number(),
-  lon: z.coerce.number(),
-  location_id: z.coerce.number().int(),
+  location_id: z.coerce.number().int().min(1).max(4),
 });
 
-const getExternalWeatherRoute = createGetRoute({
-  path: '/weather/external',
-  summary: 'Get live weather (Open-Meteo) mapped to internal DTO',
+const getExternalCurrentRoute = createGetRoute({
+  path: '/weather/external/current',
+  summary:
+    'Get current weather (Open-Meteo) by Bangkok district (location_id 1-4)',
   query: ExternalWeatherQuerySchema,
-  responseSchema: ExternalWeatherDTOSchema,
+  responseSchema: ExternalCurrentResponseSchema,
+  tags: ['Weather', 'External'],
+});
+
+const getExternalHourlyRoute = createGetRoute({
+  path: '/weather/external/hourly',
+  summary:
+    'Get hourly forecast (Open-Meteo) by Bangkok district (location_id 1-4)',
+  query: ExternalWeatherQuerySchema,
+  responseSchema: ExternalHourlyResponseSchema,
+  tags: ['Weather', 'External'],
+});
+
+const getExternalDailyRoute = createGetRoute({
+  path: '/weather/external/daily',
+  summary:
+    'Get daily forecast (Open-Meteo) by Bangkok district (location_id 1-4)',
+  query: ExternalWeatherQuerySchema,
+  responseSchema: ExternalDailyResponseSchema,
   tags: ['Weather', 'External'],
 });
 
 const importDailyRoute = createPostRoute({
   path: '/weather/external/daily-import',
-  summary: 'Fetch Open-Meteo daily (past 1) and persist ONLY yesterday to DB',
+  summary:
+    'Fetch Open-Meteo daily (past 1) for Bangkok district and persist yesterday to DB',
   requestSchema: ImportDailyBodySchema,
   responseSchema: z.object({
     created: z.boolean(),
@@ -138,8 +167,13 @@ export const WeatherOpenMeteoSchemas = {
   ExternalRawFullSchema,
   ExternalRawDailyOnlySchema,
   ExternalWeatherDTOSchema,
+  ExternalCurrentResponseSchema,
+  ExternalHourlyResponseSchema,
+  ExternalDailyResponseSchema,
   ExternalWeatherQuerySchema,
   ImportDailyBodySchema,
-  getExternalWeatherRoute,
+  getExternalCurrentRoute,
+  getExternalHourlyRoute,
+  getExternalDailyRoute,
   importDailyRoute,
 };

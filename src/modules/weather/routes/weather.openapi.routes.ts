@@ -8,21 +8,19 @@ const setupWeatherRoutes = (app: OpenAPIHono) => {
     WeatherController.listWeather
   );
 
-  app.openapi(WeatherSchemas.getWeatherDataRoute, WeatherController.getWeather);
-
   app.openapi(
-    WeatherSchemas.createWeatherDataRoute,
-    WeatherController.createWeather
+    WeatherSchemas.getWeatherDataRoute,
+    WeatherController.getWeatherByDate
   );
 
   app.openapi(
-    WeatherSchemas.updateWeatherDataRoute,
-    WeatherController.updateWeather
+    WeatherSchemas.listWeatherByRangeRoute,
+    WeatherController.listWeatherByDateRange
   );
 
   app.openapi(
     WeatherSchemas.deleteWeatherDataRoute,
-    WeatherController.deleteWeather
+    WeatherController.deleteWeatherByDate
   );
 
   app.openapi(

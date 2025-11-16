@@ -3,8 +3,22 @@ import { OpenMeteoService, OpenMeteoScheduler } from '../services';
 import { successResponse } from '@/utils/response';
 import type { ExternalWeatherQuery, ImportDailyBody } from '../types';
 
-const getOpenMeteoWeather = async (c: Context) => {
-  const data = await OpenMeteoService.getWeatherFromOpenMeteo(
+const getOpenMeteoCurrent = async (c: Context) => {
+  const data = await OpenMeteoService.getCurrentFromOpenMeteo(
+    c.req.query() as unknown as ExternalWeatherQuery
+  );
+  return successResponse(c, data);
+};
+
+const getOpenMeteoHourly = async (c: Context) => {
+  const data = await OpenMeteoService.getHourlyFromOpenMeteo(
+    c.req.query() as unknown as ExternalWeatherQuery
+  );
+  return successResponse(c, data);
+};
+
+const getOpenMeteoDaily = async (c: Context) => {
+  const data = await OpenMeteoService.getDailyFromOpenMeteo(
     c.req.query() as unknown as ExternalWeatherQuery
   );
   return successResponse(c, data);
@@ -18,4 +32,9 @@ const importDailyOpenMeteo = async (c: Context) => {
   return successResponse(c, result, 201, `Imported daily for ${result.date}`);
 };
 
-export { getOpenMeteoWeather, importDailyOpenMeteo };
+export {
+  getOpenMeteoCurrent,
+  getOpenMeteoHourly,
+  getOpenMeteoDaily,
+  importDailyOpenMeteo,
+};

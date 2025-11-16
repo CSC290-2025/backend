@@ -1,26 +1,30 @@
 import { WeatherModel } from '../models';
-import type {
-  WeatherData,
-  CreateWeatherData,
-  UpdateWeatherData,
-} from '../types';
+import type { WeatherData } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
 
-const toNumberId = (id: string): number => {
-  const num = Number(id);
-  if (Number.isNaN(num)) {
-    throw new ValidationError('Invalid weather id');
+const validateDateFormat = (date: string): void => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new ValidationError('Invalid date format. Use YYYY-MM-DD');
   }
-  return num;
 };
 
-const getWeatherById = async (id: string): Promise<WeatherData> => {
-  const numId = toNumberId(id);
-  const weather = await WeatherModel.findById(numId);
-  if (!weather) {
-    throw new NotFoundError('Weather data not found');
+const getWeatherByDate = async (date: string): Promise<WeatherData[]> => {
+  validateDateFormat(date);
+  return await WeatherModel.findByDate(date);
+};
+
+const listWeatherByDateRange = async (
+  fromDate: string,
+  toDate: string
+): Promise<WeatherData[]> => {
+  validateDateFormat(fromDate);
+  validateDateFormat(toDate);
+
+  if (fromDate > toDate) {
+    throw new ValidationError('fromDate must be before or equal to toDate');
   }
-  return weather;
+
+  return await WeatherModel.findByDateRange(fromDate, toDate);
 };
 
 const listWeather = async (): Promise<WeatherData[]> => {
@@ -38,36 +42,15 @@ const listWeatherByLocation = async (
   return await WeatherModel.findByLocationId(numLoc);
 };
 
-const createWeather = async (data: CreateWeatherData): Promise<WeatherData> => {
-  if (data.location_id == null) {
-    throw new ValidationError('location_id is required');
+const deleteWeatherByDate = async (
+  date: string
+): Promise<{ deleted: number }> => {
+  validateDateFormat(date);
+  const count = await WeatherModel.deleteByDate(date);
+  if (count === 0) {
+    throw new NotFoundError('No weather data found for the given date');
   }
-  return await WeatherModel.create(data);
-};
-
-const updateWeather = async (
-  id: string,
-  data: UpdateWeatherData
-): Promise<WeatherData> => {
-  const numId = toNumberId(id);
-
-  const existing = await WeatherModel.findById(numId);
-  if (!existing) {
-    throw new NotFoundError('Weather data not found');
-  }
-
-  return await WeatherModel.update(numId, data);
-};
-
-const deleteWeather = async (id: string): Promise<void> => {
-  const numId = toNumberId(id);
-
-  const existing = await WeatherModel.findById(numId);
-  if (!existing) {
-    throw new NotFoundError('Weather data not found');
-  }
-
-  await WeatherModel.deleteById(numId);
+  return { deleted: count };
 };
 
 const deleteAllWeather = async (): Promise<{ deleted: number }> => {
@@ -76,11 +59,10 @@ const deleteAllWeather = async (): Promise<{ deleted: number }> => {
 };
 
 export {
-  getWeatherById,
+  getWeatherByDate,
+  listWeatherByDateRange,
   listWeather,
   listWeatherByLocation,
-  createWeather,
-  updateWeather,
-  deleteWeather,
+  deleteWeatherByDate,
   deleteAllWeather,
 };
