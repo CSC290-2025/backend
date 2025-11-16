@@ -51,7 +51,7 @@ import {
 import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
-import markerRoutes from '../modules/G-16/routes/marker.routes.js';
+import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
 
 // Volunteer
 import { eventRoutes } from '../modules/Volunteer/routes';
