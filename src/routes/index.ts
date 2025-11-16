@@ -7,8 +7,6 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
-// OpenAPI Routes (documented in Swagger)
-
 // Apartment
 import { setupApartmentRoutes } from '@/modules/ApartmentListing';
 import { setupRatingRoutes } from '@/modules/ApartmentListing';
@@ -18,7 +16,7 @@ import { setupUploadRoutes } from '@/modules/ApartmentListing';
 import { setupBookingRoutes } from '@/modules/ApartmentListing';
 
 // Clean Air
-import { setupCleanAirRoutes } from '../modules/clean-air/routes';
+import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
 // Event Hub
 import { setupEventRoutes } from '@/modules/EventHub';
@@ -52,6 +50,9 @@ import {
 // Power BI
 import { reportRoutes } from '@/modules/power-bi';
 
+// Support Map
+import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+
 // Volunteer
 import { eventRoutes } from '../modules/Volunteer/routes';
 
@@ -59,7 +60,7 @@ import { eventRoutes } from '../modules/Volunteer/routes';
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  /* 
+  /*
   ============================================
   OpenAPI Routes (documented in Swagger)
   ============================================
@@ -110,6 +111,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Power BI
   app.route('/reports', reportRoutes);
+
+  // Support Map
+  app.route('/api', detectRoutes);
+  app.route('/api', markerRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
