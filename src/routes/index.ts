@@ -9,6 +9,14 @@ Choose ONE approach per module that you're comfortable with:
 
 // OpenAPI Routes (documented in Swagger)
 
+// Apartment
+import { setupApartmentRoutes } from '@/modules/ApartmentListing';
+import { setupRatingRoutes } from '@/modules/ApartmentListing';
+import { setupRoomRoutes } from '@/modules/ApartmentListing';
+import { setupAddressRoutes } from '@/modules/ApartmentListing';
+import { setupUploadRoutes } from '@/modules/ApartmentListing';
+import { setupBookingRoutes } from '@/modules/ApartmentListing';
+
 // Clean Air
 import { setupCleanAirRoutes } from '../modules/clean-air/routes';
 
@@ -56,6 +64,14 @@ export const setupRoutes = (app: OpenAPIHono) => {
   OpenAPI Routes (documented in Swagger)
   ============================================
   */
+
+  // Apartment
+  setupAddressRoutes(app);
+  setupApartmentRoutes(app);
+  setupRoomRoutes(app);
+  setupRatingRoutes(app);
+  setupUploadRoutes(app);
+  setupBookingRoutes(app);
 
   // Clean Air
   setupCleanAirRoutes(app);
