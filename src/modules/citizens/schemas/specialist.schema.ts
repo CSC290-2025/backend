@@ -1,4 +1,4 @@
-import { success, z } from 'zod';
+import { z } from 'zod';
 import { createGetRoute } from '@/utils/openapi-helpers';
 
 const SpecialistSchema = z.object({
