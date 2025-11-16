@@ -1,8 +1,9 @@
 // export * as AddressG5Route from './addressG5.route';
 // export * as SpecialistG6Route from './specialistG6.route';
 // export { userSpecialtyG1Route } from './userSpecialtyG1.route';
-export { setupAddressRoutes } from './addressG5.openapi.route';
+export { setupCitizenAddressRoutes } from './addressG5.openapi.route';
 export { setupUserSpecialtyRoutes } from './userSpecialtyG1.openapi.route';
 export { setupUserG8Routes } from './userg8.openapi.route';
 export { setupRoleUserRoutes } from './userRoleG11.openapi.routes';
 export { setupUserRoutes } from './user.openapi.route';
+export { setupUserSpecialistRoutes } from './specialistG6.openapi.route';
