@@ -27,6 +27,9 @@ import {
   setupUserSpecialistRoutes,
 } from '@/modules/citizens/routes';
 
+// Auth
+import { setupAuthRoutes } from '@/modules/Auth/routes';
+
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
@@ -99,6 +102,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
+
+  // Auth
+  setupAuthRoutes(app);
 
   // Clean Air
   setupCleanAirRoutes(app);
