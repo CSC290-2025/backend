@@ -35,10 +35,10 @@ float latitude = 13.647372;
 float longitude = 100.495536;
 
 // Firebase Configuration
-#define API_KEY "AIzaSyCsJQMhxz-av8Dyl2l-jduR2zDJK1mv_rs"
-#define DATABASE_URL "https://sit-integrated-proj-2025-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define USER_EMAIL "arduino@smartcity.sit.kmutt.ac.th"
-#define USER_PASSWORD "board123"
+#define API_KEY ""
+#define DATABASE_URL ""
+#define USER_EMAIL ""
+#define USER_PASSWORD ""
 
 // Firebase objects
 WiFiClientSecure ssl_client;
