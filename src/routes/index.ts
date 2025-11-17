@@ -1,4 +1,3 @@
-// Try uncomment setupProductRoutes & see openAPI in action at /swagger route
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 /* 
@@ -8,30 +7,47 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
-// OpenAPI Routes (documented in Swagger)
-// import { setupAuthRoutes } from '@/modules/auth/routes';
-// import { setupPaymentRoutes } from '@/modules/payment/routes';
-// import { setupProductRoutes } from '@/modules/_example';
-// import { productRoutes } from '@/modules/_example';
-import { setupApartmentRoutes } from '@/modules/ApartmentListing';
-import { setupRatingRoutes } from '@/modules/ApartmentListing';
-import { setupRoomRoutes } from '@/modules/ApartmentListing';
-import { setupAddressRoutes } from '@/modules/ApartmentListing';
-import { setupUploadRoutes } from '@/modules/ApartmentListing';
-import { setupBookingRoutes } from '@/modules/ApartmentListing';
+// Apartment
+import {
+  setupApartmentRoutes,
+  setupRatingRoutes,
+  setupRoomRoutes,
+  setupAddressRoutes,
+  setupUploadRoutes,
+  setupBookingRoutes,
+} from '@/modules/ApartmentListing';
+
+// Citizen
+import {
+  setupCitizenAddressRoutes,
+  setupUserSpecialtyRoutes,
+  setupUserG8Routes,
+  setupRoleUserRoutes,
+  setupUserRoutes,
+  setupUserSpecialistRoutes,
+} from '@/modules/citizens/routes';
 
 // Clean Air
-import { setupCleanAirRoutes } from '../modules/clean-air/routes';
+import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
+
+// Emergency
+import {
+  setupReportRoutes,
+  setupFcmRoutes,
+  setupTokenRoutes,
+} from '@/modules/emergency';
+
+// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
-import { setupEventRoutes } from '@/modules/EventHub';
-import { setupBookmarkRoutes } from '@/modules/EventHub';
+import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
 
 // Financial
 import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -54,43 +70,51 @@ import {
 // Power BI
 import { reportRoutes } from '@/modules/power-bi';
 
-// Volunteer
-import { eventRoutes } from '../modules/Volunteer/routes';
+// Support Map
+import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
 
-// Normal Hono Routes (not in Swagger docs)
-// import { productRoutes } from '@/modules/_example';
-// import { apartmentRoutes } from '@/modules/ApartmentListing/routes/apartment.route';
-// import { bookingRoute } from '@/modules/ApartmentListing/routes/booking.route';
-// import { ratingRoutes } from '@/modules/ApartmentListing/routes/rating.route';
-// import { roomRoutes } from '@/modules/ApartmentListing/routes/room.route';
+// Volunteer
+import { eventRoutes } from '@/modules/Volunteer/routes';
+
+// Waste
+import { setupWasteRoutes } from '@/modules/waste-management/routes';
+
+// Weather
+import {
+  setupWeatherRoutes,
+  setupOpenMeteoRoutes,
+} from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  // ============================================
-  // OpenAPI Routes (documented in Swagger)
-  // ============================================
+  /*
+  ============================================
+  OpenAPI Routes (documented in Swagger)
+  ============================================
+  */
+
+  // Apartment
   setupAddressRoutes(app);
   setupApartmentRoutes(app);
   setupRoomRoutes(app);
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-  //
-  // ============================================
-  // Normal Hono Routes (not in Swagger docs)
-  // ============================================
-  // app.route('/products', productRoutes);
-  // app.route('/apartments', apartmentRoutes);
-  // app.route('/bookings', bookingRoute);
-  // app.route('/ratings', ratingRoutes);
-  // app.route('/rooms', roomRoutes);
-  /* 
-  ============================================
-  OpenAPI Routes (documented in Swagger)
-  ============================================
-  */
 
   // Clean Air
   setupCleanAirRoutes(app);
+
+  // Citizen
+  setupCitizenAddressRoutes(app);
+  setupUserSpecialistRoutes(app);
+  setupUserSpecialtyRoutes(app);
+  setupUserG8Routes(app);
+  setupRoleUserRoutes(app);
+  setupUserRoutes(app);
+
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -100,6 +124,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
+  setupInsuranceCardRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
@@ -114,14 +139,31 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Waste
+  setupWasteRoutes(app);
+
+  // Weather
+  setupOpenMeteoRoutes(app);
+  setupWeatherRoutes(app);
+
   /*
   ============================================
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
 
+  //Emergency
+  //   app.route('/reports', reportRoutes);
+  //   app.route('/fcm', fcmRoutes);
+  //   app.route('/tokens', tokenRoutes);
+  //   app.route('/emergency', emergencyRoutes);
+
   // Power BI
   app.route('/reports', reportRoutes);
+
+  // Support Map
+  app.route('/api', detectRoutes);
+  app.route('/api', markerRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

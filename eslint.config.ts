@@ -3,12 +3,7 @@ import globals from 'globals';
 
 export default tseslint.config([
   {
-    ignores: [
-      'dist/',
-      'node_modules/',
-      'src/generated/',
-      'src/modules/_example/',
-    ],
+    ignores: ['dist/', 'node_modules/', 'src/generated/'],
   },
 
   // TypeScript config
