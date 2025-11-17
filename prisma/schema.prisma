@@ -1193,21 +1193,6 @@ enum wallet_type {
   organization
 }
 
-<<<<<<< HEAD
-// // Example model for reference (src/modules/_example)
-// model Product {
-//   id        String   @id @default(cuid())
-//   name      String
-//   price     Float
-//   category  String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// // <<<<<<< HEAD
-// // }
-// // =======
-// // }
-// // >>>>>>> origin/feature/supportMap
-=======
 enum report_type {
   traffic
   accident
@@ -1230,4 +1215,3 @@ enum report_visibility {
   citizens
   admin
 }
->>>>>>> origin
