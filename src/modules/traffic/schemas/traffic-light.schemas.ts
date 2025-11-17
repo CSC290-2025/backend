@@ -213,6 +213,30 @@ const getLightRequestsRoute = createGetRoute({
   tags: ['Light Requests'],
 });
 
+// Status schemas
+const TrafficLightStatusDetailSchema = z.object({
+  id: z.number().int().positive(),
+  status: z.number().int().min(0).max(2).nullable(), // 0=normal, 1=broken/offline, 2=maintenance
+  statusLabel: z.enum(['NORMAL', 'BROKEN', 'MAINTENANCE']),
+  intersection_id: z.number().int().positive().nullable(),
+  road_id: z.number().int().positive().nullable(),
+  current_color: z.number().int().min(1).max(3),
+  location: LocationSchema.nullable(),
+  last_updated: z.string().nullable(),
+});
+
+const BatchStatusResponseSchema = z.object({
+  trafficLights: z.array(TrafficLightStatusDetailSchema),
+  total: z.number().int(),
+});
+
+const getAllStatusRoute = createGetRoute({
+  path: '/traffic-lights/status',
+  summary: 'Get all traffic light statuses',
+  responseSchema: BatchStatusResponseSchema,
+  tags: ['Status'],
+});
+
 export const TrafficLightSchemas = {
   // Base schemas
   TrafficLightColorEnum,
@@ -250,4 +274,9 @@ export const TrafficLightSchemas = {
   updateTimingRoute,
   createLightRequestRoute,
   getLightRequestsRoute,
+  getAllStatusRoute,
+
+  // Status schemas
+  TrafficLightStatusDetailSchema,
+  BatchStatusResponseSchema,
 };

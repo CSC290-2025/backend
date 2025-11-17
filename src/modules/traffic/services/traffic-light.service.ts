@@ -316,6 +316,30 @@ const getIntersectionCoordinatedTiming = async (
   return TimingService.calculateCoordinatedTiming(lightData);
 };
 
+/**
+ * Get all traffic light statuses
+ */
+const getAllStatus = async (): Promise<{
+  trafficLights: Array<{
+    id: number;
+    status: number | null;
+    statusLabel: string;
+    intersection_id: number | null;
+    road_id: number | null;
+    current_color: number;
+    location: { type: 'Point'; coordinates: [number, number] } | null;
+    last_updated: string | null;
+  }>;
+  total: number;
+}> => {
+  const trafficLights = await TrafficLightModel.listAllTrafficStatus();
+
+  return {
+    trafficLights,
+    total: trafficLights.length,
+  };
+};
+
 export {
   getTrafficLightById,
   createTrafficLight,
@@ -328,4 +352,5 @@ export {
   updateTrafficLightTiming,
   updateTrafficLightColor,
   getIntersectionCoordinatedTiming,
+  getAllStatus,
 };

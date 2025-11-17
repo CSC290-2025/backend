@@ -169,3 +169,12 @@ export const getIntersectionTiming = async (c: Context) => {
     'Coordinated timing calculated successfully'
   );
 };
+
+/**
+ * Get all traffic light statuses
+ * GET /traffic-lights/status
+ */
+export const getAllStatus = async (c: Context) => {
+  const result = await TrafficLightService.getAllStatus();
+  return successResponse(c, result);
+};

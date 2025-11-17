@@ -556,6 +556,57 @@ const count = async (filters?: {
     return 0;
   }
 };
+
+// ---------------------- LIST ALL TRAFFIC STATUS ----------------------
+const listAllTrafficStatus = async (): Promise<
+  Array<{
+    id: number;
+    status: number | null;
+    statusLabel: string;
+    intersection_id: number | null;
+    road_id: number | null;
+    current_color: number;
+    location: { type: 'Point'; coordinates: [number, number] } | null;
+    last_updated: string | null;
+  }>
+> => {
+  try {
+    const result = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT
+        id,
+        status,
+        intersection_id,
+        road_id,
+        current_color,
+        ST_Y(location::geometry) AS latitude,
+        ST_X(location::geometry) AS longitude,
+        last_updated
+      FROM traffic_lights
+      ORDER BY id ASC;`
+    );
+
+    return result.map((tl) => {
+      let statusLabel = 'NORMAL';
+      if (tl.status === 1) statusLabel = 'BROKEN';
+      else if (tl.status === 2) statusLabel = 'MAINTENANCE';
+
+      return {
+        id: tl.id,
+        status: tl.status ?? 0,
+        statusLabel,
+        intersection_id: tl.intersection_id,
+        road_id: tl.road_id,
+        current_color: tl.current_color,
+        location: createLocation(tl.latitude, tl.longitude),
+        last_updated: tl.last_updated?.toISOString() || null,
+      };
+    });
+  } catch (error) {
+    handlePrismaError(error);
+    return [];
+  }
+};
+
 export {
   findById,
   findAll,
@@ -567,4 +618,5 @@ export {
   updateColor,
   deleteById,
   count,
+  listAllTrafficStatus,
 };

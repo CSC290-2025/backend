@@ -2,7 +2,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { LightRequestSchemas, VehicleSchemas } from '../schemas';
 import { LightRequestController, VehicleController } from '../controllers';
 
-const setupTrafficRoutes = (app: OpenAPIHono) => {
+const setupLightRequestRoutes = (app: OpenAPIHono) => {
   // Light Request Routes
   app.openapi(
     LightRequestSchemas.createRequestRoute,
@@ -21,4 +21,4 @@ const setupTrafficRoutes = (app: OpenAPIHono) => {
   app.openapi(VehicleSchemas.getVehicleRoute, VehicleController.getVehicle);
 };
 
-export { setupTrafficRoutes };
+export { setupLightRequestRoutes };
