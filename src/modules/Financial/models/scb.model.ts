@@ -1,14 +1,20 @@
 import { randomUUID, publicEncrypt, publicDecrypt, constants } from 'crypto';
 import type {
   ScbToken,
-  ScbQrRequestSchema,
-  ScbQrResponseSchema,
+  ScbQrCreateRequest,
+  ScbQrCreateResponse,
+  ScbOAuthResponse,
+  ScbVerifyScbResponse,
 } from '../types';
 import {
   handlePrismaError,
   ValidationError,
   InternalServerError,
+  NotFoundError,
 } from '@/errors';
+import prisma from '@/config/client';
+import { Decimal } from '@prisma/client/runtime/library';
+import { findWalletById } from './wallet.model';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
 
@@ -81,7 +87,7 @@ const getOAuthToken = async (): Promise<ScbToken> => {
       throw new InternalServerError('SCB OAuth failed');
     }
 
-    const result = await response.json();
+    const result: ScbOAuthResponse = await response.json();
 
     // Cache token
     // calculate expire date from the duration returned from scb api
@@ -124,8 +130,8 @@ const decryptData = (cipherText: string, publicKey: string): string => {
 };
 
 const createQr = async (
-  data: ScbQrRequestSchema
-): Promise<ScbQrResponseSchema> => {
+  data: ScbQrCreateRequest
+): Promise<ScbQrCreateResponse> => {
   try {
     const response = await fetch(`${SCB_BASE_URL}/v1/payment/qrcode/create`, {
       method: 'POST',
@@ -136,11 +142,121 @@ const createQr = async (
       throw new InternalServerError('SCB QR creation failed');
     }
 
-    const result = await response.json();
+    const result: ScbQrCreateResponse = await response.json();
     return result;
   } catch (error) {
     handlePrismaError(error);
   }
 };
 
-export { getOAuthToken, encryptData, decryptData, createQr };
+const verifyPayment = async (
+  transRef: string,
+  sendingBank: string
+): Promise<ScbVerifyScbResponse> => {
+  try {
+    const response = await fetch(
+      `${SCB_BASE_URL}/v1/payment/billpayment/transactions/${transRef}?sendingBank=${sendingBank}`,
+      {
+        headers: await buildScbHeaders(true),
+      }
+    );
+    if (!response.ok) {
+      throw new InternalServerError('SCB verify failed');
+    }
+
+    const result: ScbVerifyScbResponse = await response.json();
+    return result;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const createWalletTransaction = async (data: {
+  wallet_id: number;
+  transaction_type: string;
+  amount: number;
+  target_service: string;
+  description: string;
+}) => {
+  try {
+    return await prisma.wallet_transactions.create({
+      data: {
+        wallet_id: data.wallet_id,
+        transaction_type: data.transaction_type as any,
+        amount: new Decimal(data.amount),
+        target_service: data.target_service,
+        description: data.description,
+      },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const updateTransactionDescription = async (
+  reference1: string,
+  transactionId: string,
+  sendingBank: string
+) => {
+  try {
+    const transaction = await prisma.wallet_transactions.findFirst({
+      where: { description: reference1 },
+    });
+
+    if (!transaction) {
+      throw new ValidationError('Transaction not found');
+    }
+
+    const newDescription = `${transaction.description}|${transactionId}|${sendingBank}`;
+
+    await prisma.wallet_transactions.update({
+      where: { id: transaction.id },
+      data: { description: newDescription },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const findTransactionForVerification = async (ref1: string) => {
+  try {
+    const transaction = await prisma.wallet_transactions.findFirst({
+      where: {
+        description: { startsWith: ref1 + '|' },
+        target_service: 'wallet_top',
+      },
+    });
+
+    if (!transaction || !transaction.description) {
+      throw new NotFoundError('Transaction not found');
+    }
+
+    const parts = transaction.description.split('|');
+    if (parts.length < 3) {
+      throw new ValidationError('Transaction description is incomplete');
+    }
+
+    const transactionId = parts[1];
+    const sendingBank = parts[2];
+
+    const wallet = await findWalletById(transaction.wallet_id!);
+    if (!wallet) {
+      throw new NotFoundError('Wallet not found');
+    }
+
+    return { transactionId, sendingBank, wallet };
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  getOAuthToken,
+  encryptData,
+  decryptData,
+  createQr,
+  verifyPayment,
+  createWalletTransaction,
+  updateTransactionDescription,
+  findTransactionForVerification,
+};
