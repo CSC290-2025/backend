@@ -30,8 +30,10 @@ const paymentConfirm = async (c: Context) => {
     billPaymentRef1: reference1,
   } = body;
 
-  if (!transactionId || !sendingBank) {
-    throw new ValidationError('transactionId and sendingBank are required');
+  if (!transactionId || !sendingBank || !reference1) {
+    throw new ValidationError(
+      'transactionId, sendingBank, and reference1 are required'
+    );
   }
 
   await ScbService.paymentConfirm(transactionId, sendingBank, reference1);

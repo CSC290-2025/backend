@@ -16,7 +16,8 @@ import {
 } from '@/errors';
 import prisma from '@/config/client';
 import { Decimal } from '@prisma/client/runtime/library';
-import { findWalletById } from './wallet.model';
+import { findWalletById, WalletBalanceTopup } from './wallet.model';
+import type { transaction_type } from '@/generated/prisma';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
 
@@ -205,7 +206,7 @@ const verifyPayment = async (
 
 const createWalletTransaction = async (data: {
   wallet_id: number;
-  transaction_type: string;
+  transaction_type: transaction_type;
   amount: number;
   target_service: string;
   description: string;
@@ -214,7 +215,7 @@ const createWalletTransaction = async (data: {
     return await prisma.wallet_transactions.create({
       data: {
         wallet_id: data.wallet_id,
-        transaction_type: data.transaction_type as any,
+        transaction_type: data.transaction_type,
         amount: new Decimal(data.amount),
         target_service: data.target_service,
         description: data.description,
@@ -252,13 +253,12 @@ const updateTransactionDescription = async (
       });
 
       // Top up wallet balance
-      await tx.wallets.update({
-        where: { id: transaction.wallet_id! },
-        data: {
-          balance: { increment: transaction.amount },
-          updated_at: new Date(),
-        },
-      });
+      await WalletBalanceTopup(
+        transaction.wallet_id!,
+        Number(transaction.amount),
+        'increment',
+        tx
+      );
     });
   } catch (error) {
     if (error instanceof BaseError) {

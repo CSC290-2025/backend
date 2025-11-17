@@ -124,7 +124,8 @@ const paymentConfirm = async (
     transactionId,
     sendingBank
   );
-  console.log('Payment confirmed successfully for ref1:', reference1);
+  // un-comment this for real time payment confirmation logs from webhook
+  // console.log('Payment confirmed successfully for ref1:', reference1);
 };
 
 const verifyPayment = async (ref1: string) => {
@@ -134,12 +135,13 @@ const verifyPayment = async (ref1: string) => {
   const data = await ScbModel.verifyPayment(transactionId, sendingBank);
 
   if (data.status.code === 1000) {
-    console.log(
-      'Payment verified successfully for ref1:',
-      ref1,
-      'amount:',
-      data.data.amount
-    );
+    // for testing purposes only
+    // console.log(
+    //   'Payment verified successfully for ref1:',
+    //   ref1,
+    //   'amount:',
+    //   data.data.amount
+    // );
     return {
       statusCode: data.status.code,
       description: data.status.description,
