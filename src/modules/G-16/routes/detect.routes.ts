@@ -1,7 +1,7 @@
-// import { Hono } from 'hono';
-// import { detectHarm } from '../controllers/detect.controller';
+import { Hono } from 'hono';
+import { detectHarm } from '../controllers/detect.controller';
 
-// export const detectRoutes = new Hono();
+export const detectRoutes = new Hono();
 
-// detectRoutes.post('/detect-harm', detectHarm);
-// // detectRoutes.get('/ping', (c) => c.text('detect ok'));
+detectRoutes.post('/detect-harm', detectHarm);
+// detectRoutes.get('/ping', (c) => c.text('detect ok'));

@@ -1,12 +1,12 @@
-// // src/controllers/detect.controller.ts
-// import type { Context } from 'hono';
-// import { detectDangerFromImage } from '../services/gemini.service';
-// import { addtheMarker } from '../services/marker.service';
-// import { ValidationError } from '@/errors';
+// src/controllers/detect.controller.ts
+import type { Context } from 'hono';
+import { detectDangerFromImage } from '../services/gemini.service';
+// import { addMarker } from '../services/marker.service';
+import { ValidationError } from '@/errors';
 
-// const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
-// const THRESHOLD = 0.8;
-// const DANGER_MARKER_TYPE_ID = 999;
+const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
+const THRESHOLD = 0.8;
+const DANGER_MARKER_TYPE_ID = 999;
 
 //normalize value to string
 function toStringArray(value: unknown): string[] {
@@ -52,13 +52,13 @@ export async function detectHarm(c: Context) {
   const rawConfidence = Number(ai.confidence) || 0;
   const confidence = Math.min(1, Math.max(0, rawConfidence));
 
-  const category = toStringArray(ai.category);
+  const categories = toStringArray(ai.category);
 
   const types = toStringArray(ai.types);
   const reasons = toStringArray(ai.reasons);
 
   // 4) Create marker if dangerous or have problem
-  let marker: any = null;
+  const marker: any = null;
   const over_threshold = has_issue && confidence >= THRESHOLD;
 
   if (over_threshold && checkCordinate) {
@@ -67,15 +67,15 @@ export async function detectHarm(c: Context) {
       confidence * 100
     )}%)`;
 
-    marker = await addMarker({
-      lat,
-      lng,
-      marker_type_id: DANGER_MARKER_TYPE_ID,
-      title,
-      description,
-      confidence,
-      category,
-    });
+    // marker = await addMarker({
+    //   lat,
+    //   lng,
+    //   marker_type_id: DANGER_MARKER_TYPE_ID,
+    //   title,
+    //   description,
+    //   confidence,
+    //   categories: types,
+    // });
   }
 
   // 5) Send result to frontend
@@ -85,7 +85,6 @@ export async function detectHarm(c: Context) {
     confidence, // 0..1
     types, // string[]
     reasons, // string[]
-    category,
     threshold: THRESHOLD,
     over_threshold,
     marker, // { id, lat, lng, ... } or null

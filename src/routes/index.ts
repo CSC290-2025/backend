@@ -18,24 +18,24 @@ import {
 } from '@/modules/ApartmentListing';
 
 // Citizen
-import {
-  setupCitizenAddressRoutes,
-  setupUserSpecialtyRoutes,
-  setupUserG8Routes,
-  setupRoleUserRoutes,
-  setupUserRoutes,
-  setupUserSpecialistRoutes,
-} from '@/modules/citizens/routes';
+// import {
+//   setupCitizenAddressRoutes,
+//   setupUserSpecialtyRoutes,
+//   setupUserG8Routes,
+//   setupRoleUserRoutes,
+//   setupUserRoutes,
+//   setupUserSpecialistRoutes,
+// } from '@/modules/citizens/routes';
 
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
 // Emergency
-import {
-  setupReportRoutes,
-  setupFcmRoutes,
-  setupTokenRoutes,
-} from '@/modules/emergency';
+// import {
+//   setupReportRoutes,
+//   setupFcmRoutes,
+//   setupTokenRoutes,
+// } from '@/modules/emergency';
 
 // import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
@@ -80,10 +80,10 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
 // Weather
-import {
-  setupWeatherRoutes,
-  setupOpenMeteoRoutes,
-} from '@/modules/weather/routes';
+// import {
+//   setupWeatherRoutes,
+//   setupOpenMeteoRoutes,
+// } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
@@ -104,17 +104,17 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupCleanAirRoutes(app);
 
   // Citizen
-  setupCitizenAddressRoutes(app);
-  setupUserSpecialistRoutes(app);
-  setupUserSpecialtyRoutes(app);
-  setupUserG8Routes(app);
-  setupRoleUserRoutes(app);
-  setupUserRoutes(app);
+  // setupCitizenAddressRoutes(app);
+  // setupUserSpecialistRoutes(app);
+  // setupUserSpecialtyRoutes(app);
+  // setupUserG8Routes(app);
+  // setupRoleUserRoutes(app);
+  // setupUserRoutes(app);
 
-  //Emergency
-  setupReportRoutes(app);
-  setupFcmRoutes(app);
-  setupTokenRoutes(app);
+  // //Emergency
+  // setupReportRoutes(app);
+  // setupFcmRoutes(app);
+  // setupTokenRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -143,8 +143,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWasteRoutes(app);
 
   // Weather
-  setupOpenMeteoRoutes(app);
-  setupWeatherRoutes(app);
+  // setupOpenMeteoRoutes(app);
+  // setupWeatherRoutes(app);
 
   /*
   ============================================
