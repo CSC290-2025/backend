@@ -87,6 +87,56 @@ const deleteMetroCardById = async (id: number): Promise<void> => {
   await MetroCardModel.deleteMetroCard(id);
 };
 
+const transferToTransportation = async (
+  cardNumber: string,
+  amount: number
+): Promise<MetroCard> => {
+  if (amount <= 0) {
+    throw new ValidationError('Amount must be positive');
+  }
+
+  const normalizedCardNumber = normalizeCardNumber(cardNumber);
+  const hashedCardNumber = hashCardNumber(normalizedCardNumber);
+
+  const existingMetroCard =
+    await MetroCardModel.findMetroCardByHash(hashedCardNumber);
+
+  if (!existingMetroCard) {
+    throw new NotFoundError('Metro card not found');
+  }
+
+  if (existingMetroCard.status === 'suspended') {
+    throw new ForbiddenError('This card is suspended');
+  }
+
+  if (existingMetroCard.balance < amount) {
+    throw new ValidationError('Insufficient metro card balance');
+  }
+
+  const transportationWallet =
+    await WalletModel.findWalletByOrganizationType('Transportation');
+  if (!transportationWallet) {
+    throw new NotFoundError('Transportation wallet not found');
+  }
+
+  return await prisma.$transaction(async (trx) => {
+    const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
+      existingMetroCard.id,
+      amount,
+      'decrement',
+      trx
+    );
+    await WalletModel.WalletBalanceTopup(
+      transportationWallet.id,
+      amount,
+      'increment',
+      trx
+    );
+
+    return updatedMetroCard;
+  });
+};
+
 export {
   getMetroCardById,
   createMetroCard,
@@ -94,4 +144,5 @@ export {
   updateMetroCard,
   topUpBalance,
   deleteMetroCardById,
+  transferToTransportation,
 };

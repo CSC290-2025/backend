@@ -60,6 +60,21 @@ const deleteMetroCard = async (c: Context) => {
   return successResponse(c, null, 200, 'Metro card deleted successfully');
 };
 
+const transferToTransportation = async (c: Context) => {
+  const body = await c.req.json();
+
+  const updatedMetroCard = await MetroCardService.transferToTransportation(
+    body.cardNumber,
+    body.amount
+  );
+  return successResponse(
+    c,
+    { metroCard: updatedMetroCard },
+    200,
+    'Balance transferred to transportation wallet successfully'
+  );
+};
+
 export {
   getMetroCard,
   createMetroCard,
@@ -67,4 +82,5 @@ export {
   updateMetroCard,
   topUpBalance,
   deleteMetroCard,
+  transferToTransportation,
 };

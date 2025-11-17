@@ -56,6 +56,22 @@ const findWalletById = async (id: number): Promise<Wallet> => {
   }
 };
 
+const findWalletByOrganizationType = async (
+  organizationType: string
+): Promise<Wallet | null> => {
+  try {
+    const wallet = await prisma.wallets.findFirst({
+      where: {
+        wallet_type: 'organization',
+        organization_type: organizationType,
+      },
+    });
+    return wallet ? transformWallet(wallet) : null;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const updateWallet = async (
   id: number,
   data: UpdateWalletData
@@ -149,6 +165,7 @@ export {
   createWallet,
   findWalletByUserId,
   findWalletById,
+  findWalletByOrganizationType,
   updateWallet,
   WalletBalanceTopup,
   atomicTransferFunds,
