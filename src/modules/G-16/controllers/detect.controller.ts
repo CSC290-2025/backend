@@ -47,20 +47,22 @@ export async function detectHarm(c: Context) {
   const buffer = Buffer.from(await file.arrayBuffer());
   const ai = await detectDangerFromImage(buffer, file.type);
 
-  const is_danger = Boolean(ai.is_danger);
+  const has_issue = Boolean(ai.has_issue);
 
   const rawConfidence = Number(ai.confidence) || 0;
   const confidence = Math.min(1, Math.max(0, rawConfidence));
 
-  const danger_types = toStringArray(ai.danger_types);
+  const category = toStringArray(ai.category);
+
+  const types = toStringArray(ai.types);
   const reasons = toStringArray(ai.reasons);
 
-  // 4) Create marker if dangerous
+  // 4) Create marker if dangerous or have problem
   let marker: any = null;
-  const over_threshold = is_danger && confidence >= THRESHOLD;
+  const over_threshold = has_issue && confidence >= THRESHOLD;
 
   if (over_threshold && checkCordinate) {
-    const title = danger_types[0] ?? 'danger';
+    const title = types[0] ?? 'danger';
     const description = `AI detected: ${title} (${Math.round(
       confidence * 100
     )}%)`;
@@ -72,17 +74,18 @@ export async function detectHarm(c: Context) {
       title,
       description,
       confidence,
-      categories: danger_types,
+      category,
     });
   }
 
   // 5) Send result to frontend
   return c.json({
     ok: true,
-    is_danger,
+    has_issue,
     confidence, // 0..1
-    danger_types, // string[]
+    types, // string[]
     reasons, // string[]
+    category,
     threshold: THRESHOLD,
     over_threshold,
     marker, // { id, lat, lng, ... } or null
