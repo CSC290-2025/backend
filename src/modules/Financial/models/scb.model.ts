@@ -11,6 +11,8 @@ import {
   ValidationError,
   InternalServerError,
   NotFoundError,
+  BaseError,
+  PaymentNotConfirmedError,
 } from '@/errors';
 import prisma from '@/config/client';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -49,7 +51,12 @@ const buildScbHeaders = async (includeAuth = false): Promise<HeadersInit> => {
 
     return headers;
   } catch (error) {
-    handlePrismaError(error);
+    if (error instanceof BaseError) {
+      throw error;
+    }
+    throw new InternalServerError(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 };
 
@@ -97,7 +104,12 @@ const getOAuthToken = async (): Promise<ScbToken> => {
 
     return token;
   } catch (error) {
-    handlePrismaError(error);
+    if (error instanceof BaseError) {
+      throw error;
+    }
+    throw new InternalServerError(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 };
 
@@ -111,7 +123,12 @@ const encryptData = (data: string, publicKey: string): string => {
     );
     return encrypted.toString('base64');
   } catch (error) {
-    handlePrismaError(error);
+    if (error instanceof BaseError) {
+      throw error;
+    }
+    throw new InternalServerError(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 };
 
@@ -125,7 +142,12 @@ const decryptData = (cipherText: string, publicKey: string): string => {
     );
     return decrypted.toString('utf-8');
   } catch (error) {
-    handlePrismaError(error);
+    if (error instanceof BaseError) {
+      throw error;
+    }
+    throw new InternalServerError(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 };
 
@@ -145,7 +167,12 @@ const createQr = async (
     const result: ScbQrCreateResponse = await response.json();
     return result;
   } catch (error) {
-    handlePrismaError(error);
+    if (error instanceof BaseError) {
+      throw error;
+    }
+    throw new InternalServerError(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 };
 
@@ -167,7 +194,12 @@ const verifyPayment = async (
     const result: ScbVerifyScbResponse = await response.json();
     return result;
   } catch (error) {
-    handlePrismaError(error);
+    if (error instanceof BaseError) {
+      throw error;
+    }
+    throw new InternalServerError(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 };
 
@@ -189,6 +221,9 @@ const createWalletTransaction = async (data: {
       },
     });
   } catch (error) {
+    if (error instanceof BaseError) {
+      throw error;
+    }
     handlePrismaError(error);
   }
 };
@@ -214,6 +249,9 @@ const updateTransactionDescription = async (
       data: { description: newDescription },
     });
   } catch (error) {
+    if (error instanceof BaseError) {
+      throw error;
+    }
     handlePrismaError(error);
   }
 };
@@ -222,18 +260,26 @@ const findTransactionForVerification = async (ref1: string) => {
   try {
     const transaction = await prisma.wallet_transactions.findFirst({
       where: {
-        description: { startsWith: ref1 + '|' },
+        description: { startsWith: ref1 },
         target_service: 'wallet_top',
       },
     });
 
-    if (!transaction || !transaction.description) {
-      throw new NotFoundError('Transaction not found');
+    if (!transaction) {
+      throw new NotFoundError('Transaction not found for verification');
     }
 
-    const parts = transaction.description.split('|');
+    if (!transaction.description!.includes('|')) {
+      throw new PaymentNotConfirmedError(
+        'Transaction not yet confirmed by SCB'
+      );
+    }
+
+    const parts = transaction.description!.split('|');
     if (parts.length < 3) {
-      throw new ValidationError('Transaction description is incomplete');
+      throw new ValidationError(
+        'Transaction description is malformed or not fully updated'
+      );
     }
 
     const transactionId = parts[1];
@@ -241,11 +287,14 @@ const findTransactionForVerification = async (ref1: string) => {
 
     const wallet = await findWalletById(transaction.wallet_id!);
     if (!wallet) {
-      throw new NotFoundError('Wallet not found');
+      throw new NotFoundError('Associated wallet not found');
     }
 
     return { transactionId, sendingBank, wallet };
   } catch (error) {
+    if (error instanceof BaseError) {
+      throw error;
+    }
     handlePrismaError(error);
   }
 };
