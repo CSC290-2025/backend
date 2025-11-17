@@ -59,5 +59,8 @@ jobs:
       - name: Generate Prisma client
         run: pnpm prisma generate
 
+      - name: Create serviceAccount.json
+        run: echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" > serviceAccount.json
+
       - name: Build
         run: pnpm build

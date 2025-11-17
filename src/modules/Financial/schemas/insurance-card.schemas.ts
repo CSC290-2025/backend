@@ -1,0 +1,86 @@
+import { z } from 'zod';
+import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
+
+// Base schema
+const InsuranceCardSchema = z.object({
+  id: z.number(),
+  user_id: z.number(),
+  balance: z.number().default(0),
+  card_number: z.string(),
+  status: z.enum(['active', 'suspended']),
+  created_at: z.date(),
+  updated_at: z.date(),
+});
+
+const CreateInsuranceCardSchema = z.object({
+  user_id: z.number().positive('User ID must be positive'),
+});
+
+const TopUpInsuranceCardSchema = z.object({
+  wallet_id: z.number().positive('Wallet ID must be positive'),
+  amount: z.number().positive('Amount must be positive'),
+});
+
+// Parameter schemas
+const UserIdParam = z.object({
+  userId: z.coerce.number(),
+});
+
+const CardIdParam = z.object({
+  cardId: z.coerce.number(),
+});
+
+// OpenAPI routes
+const createInsuranceCardRoute = createPostRoute({
+  path: '/insurance-cards',
+  summary: 'Create new insurance card',
+  requestSchema: CreateInsuranceCardSchema,
+  responseSchema: z.object({
+    card: InsuranceCardSchema,
+  }),
+  tags: ['Insurance Cards'],
+});
+
+const getUserInsuranceCardRoute = createGetRoute({
+  path: '/insurance-cards/user/{userId}',
+  summary: 'Get user insurance card',
+  responseSchema: z.object({
+    card: InsuranceCardSchema,
+  }),
+  params: UserIdParam,
+  tags: ['Insurance Cards'],
+});
+
+const getInsuranceCardRoute = createGetRoute({
+  path: '/insurance-cards/{cardId}',
+  summary: 'Get insurance card by ID',
+  responseSchema: z.object({
+    card: InsuranceCardSchema,
+  }),
+  params: CardIdParam,
+  tags: ['Insurance Cards'],
+});
+
+const topUpInsuranceCardRoute = createPostRoute({
+  path: '/insurance-cards/{cardId}/top-up',
+  summary: 'Top up insurance card from wallet',
+  requestSchema: TopUpInsuranceCardSchema,
+  responseSchema: z.object({
+    card: InsuranceCardSchema,
+    transaction_id: z.number(),
+  }),
+  params: CardIdParam,
+  tags: ['Insurance Cards'],
+});
+
+export const InsuranceCardSchemas = {
+  InsuranceCardSchema,
+  CreateInsuranceCardSchema,
+  TopUpInsuranceCardSchema,
+  UserIdParam,
+  CardIdParam,
+  createInsuranceCardRoute,
+  getUserInsuranceCardRoute,
+  getInsuranceCardRoute,
+  topUpInsuranceCardRoute,
+};
