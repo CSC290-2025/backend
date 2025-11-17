@@ -298,9 +298,6 @@ const findTransactionForVerification = async (ref1: string) => {
     const sendingBank = parts[2];
 
     const wallet = await findWalletById(transaction.wallet_id!);
-    if (!wallet) {
-      throw new NotFoundError('Associated wallet not found');
-    }
 
     return { transactionId, sendingBank, wallet };
   } catch (error) {
