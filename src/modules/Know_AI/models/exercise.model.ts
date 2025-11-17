@@ -20,4 +20,75 @@ const getExercise = async (id: number): Promise<exercise> => {
   }
 };
 
-export { getExercise };
+const createUserExercise = async (data: {
+  user_id: number;
+  question_id: number;
+  user_answer: string;
+  is_correct: boolean;
+}): Promise<exercise> => {
+  try {
+    const newExercise = await prisma.user_exercises.create({
+      data: {
+        user_id: data.user_id,
+        question_id: data.question_id,
+        user_answer: data.user_answer,
+        is_correct: data.is_correct,
+        created_at: new Date(),
+      },
+    });
+    return newExercise;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const getUserExercisesByLevel = async (userId: number, level: number) => {
+  try {
+    const exercises = await prisma.user_exercises.findMany({
+      where: {
+        user_id: userId,
+        questions: {
+          level: level,
+        },
+      },
+      include: {
+        questions: true,
+      },
+      orderBy: {
+        created_at: 'asc',
+      },
+    });
+    return exercises;
+  } catch (error) {
+    handlePrismaError(error);
+    return [];
+  }
+};
+
+const countCorrectAnswersByLevel = async (
+  userId: number,
+  level: number
+): Promise<number> => {
+  try {
+    const count = await prisma.user_exercises.count({
+      where: {
+        user_id: userId,
+        is_correct: true,
+        questions: {
+          level: level,
+        },
+      },
+    });
+    return count;
+  } catch (error) {
+    handlePrismaError(error);
+    return 0;
+  }
+};
+
+export {
+  getExercise,
+  createUserExercise,
+  getUserExercisesByLevel,
+  countCorrectAnswersByLevel,
+};

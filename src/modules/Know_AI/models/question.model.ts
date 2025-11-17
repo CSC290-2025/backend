@@ -22,4 +22,33 @@ const getQuestion = async (id: number): Promise<question> => {
   }
 };
 
-export { getQuestion };
+const getQuestionsByLevel = async (level: number) => {
+  try {
+    const questions = await prisma.questions.findMany({
+      where: {
+        level,
+      },
+      orderBy: {
+        created_at: 'asc',
+      },
+    });
+    return questions;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const countQuestionsByLevel = async (level: number): Promise<number> => {
+  try {
+    const count = await prisma.questions.count({
+      where: {
+        level,
+      },
+    });
+    return count;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { getQuestion, getQuestionsByLevel, countQuestionsByLevel };
