@@ -25,6 +25,8 @@ const UpdateMetroCardSchema = z.object({
 });
 
 const TopUpMetroCardSchema = z.object({
+  cardNumber: z.string(),
+  walletId: z.number(),
   amount: z.number(),
 });
 
@@ -75,12 +77,11 @@ const updateMetroCardRoute = createPutRoute({
   tags: ['MetroCards'],
 });
 
-const topUpBalanceRoute = createPutRoute({
-  path: '/metro-cards/{metroCardId}/top-up',
+const topUpBalanceRoute = createPostRoute({
+  path: '/metro-cards/top-up',
   summary: 'Top up metro card balance',
   requestSchema: TopUpMetroCardSchema,
   responseSchema: MetroCardSchema,
-  params: MetroCardIdParam,
   tags: ['MetroCards'],
 });
 

@@ -2,6 +2,7 @@ import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { MetroCardModel, WalletModel } from '../models';
 import type { MetroCard, UpdateMetroCardData } from '../types';
 import prisma from '@/config/client';
+import { hashCardNumber, normalizeCardNumber } from '../utils';
 
 const getMetroCardById = async (id: number): Promise<MetroCard> => {
   const wallet = await MetroCardModel.findMetroCardById(id);
@@ -34,7 +35,7 @@ const updateMetroCard = async (
 };
 
 const topUpBalance = async (
-  metroCardId: number,
+  cardNumber: string,
   walletId: number,
   amount: number
 ): Promise<MetroCard> => {
@@ -42,7 +43,12 @@ const topUpBalance = async (
     throw new ValidationError('Amount must be positive');
   }
 
-  const existingMetroCard = await MetroCardModel.findMetroCardById(metroCardId);
+  const normalizedCardNumber = normalizeCardNumber(cardNumber);
+
+  const hashedCardNumber = hashCardNumber(normalizedCardNumber);
+
+  const existingMetroCard =
+    await MetroCardModel.findMetroCardByHash(hashedCardNumber);
 
   if (!existingMetroCard) {
     throw new NotFoundError('Metro card not found');
@@ -63,7 +69,7 @@ const topUpBalance = async (
   return await prisma.$transaction(async (trx) => {
     await WalletModel.WalletBalanceTopup(walletId, amount, 'decrement', trx);
     const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
-      metroCardId,
+      existingMetroCard.id,
       amount,
       'increment',
       trx

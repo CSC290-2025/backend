@@ -13,6 +13,8 @@ interface Config {
   jwtRefreshSecret: string;
   jwtExpiresIn: string;
   jwtRefreshExpiresIn: string;
+  metroCardEncryptionKey: string;
+  metroCardHashKey: string;
 }
 
 const config: Config = {
@@ -27,6 +29,8 @@ const config: Config = {
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'secret-key',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+  metroCardEncryptionKey: process.env.G11_CARD_ENC_KEY || 'secret-key',
+  metroCardHashKey: process.env.G11_CARD_HASH_KEY || 'secret-key',
 };
 
 export default config;
