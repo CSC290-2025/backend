@@ -108,6 +108,8 @@ const createQrCode = async (
     statusCode: qrResponse.status.code,
     description: qrResponse.status.description,
     qrRawData: qrResponse.data.qrRawData,
+    user_id: qrRequestData.user_id,
+    amount: qrRequestData.amount,
     ref1,
   };
 };

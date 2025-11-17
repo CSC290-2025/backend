@@ -234,19 +234,31 @@ const updateTransactionDescription = async (
   sendingBank: string
 ) => {
   try {
-    const transaction = await prisma.wallet_transactions.findFirst({
-      where: { description: reference1 },
-    });
+    await prisma.$transaction(async (tx) => {
+      const transaction = await tx.wallet_transactions.findFirst({
+        where: { description: reference1 },
+      });
 
-    if (!transaction) {
-      throw new ValidationError('Transaction not found');
-    }
+      if (!transaction) {
+        throw new ValidationError('Transaction not found');
+      }
 
-    const newDescription = `${transaction.description}|${transactionId}|${sendingBank}`;
+      const newDescription = `${transaction.description}|${transactionId}|${sendingBank}`;
 
-    await prisma.wallet_transactions.update({
-      where: { id: transaction.id },
-      data: { description: newDescription },
+      // Update transaction description
+      await tx.wallet_transactions.update({
+        where: { id: transaction.id },
+        data: { description: newDescription },
+      });
+
+      // Top up wallet balance
+      await tx.wallets.update({
+        where: { id: transaction.wallet_id! },
+        data: {
+          balance: { increment: transaction.amount },
+          updated_at: new Date(),
+        },
+      });
     });
   } catch (error) {
     if (error instanceof BaseError) {

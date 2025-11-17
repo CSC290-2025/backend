@@ -110,6 +110,8 @@ const ScbQrApiResponseSchema = z.object({
   statusCode: z.number(),
   description: z.string(),
   qrRawData: z.string(),
+  user_id: z.number(),
+  amount: z.string(),
   ref1: z.string(),
 });
 const ScbWebhookRequestSchema = z.object({
