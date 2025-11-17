@@ -8,4 +8,12 @@ const getLevel = async (c: Context) => {
   return successResponse(c, { level });
 };
 
-export { getLevel };
+const completeLevel = async (c: Context) => {
+  const level = Number(c.req.param('level'));
+  const body = await c.req.json();
+  const { user_id } = body;
+  const result = await levelService.completeLevel(user_id, level);
+  return successResponse(c, result);
+};
+
+export { getLevel, completeLevel };

@@ -21,4 +21,23 @@ const getLevel = async (user_id: number): Promise<level> => {
   }
 };
 
-export { getLevel };
+const updateLevel = async (
+  userId: number,
+  newLevel: number
+): Promise<level> => {
+  try {
+    const updated = await prisma.user_levels.update({
+      where: {
+        user_id: userId,
+      },
+      data: {
+        current_level: newLevel,
+      },
+    });
+    return updated;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { getLevel, updateLevel };

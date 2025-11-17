@@ -7,6 +7,7 @@ import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
+import 'dotenv/config';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
