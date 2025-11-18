@@ -18,6 +18,12 @@ const getAllApartments = async (): Promise<Apartment[]> => {
   return apartments;
 };
 
+const getApartmentsByUser = async (userId: number): Promise<Apartment[]> => {
+  const apartments = await apartmentModel.getApartmentsByUser(userId);
+  if (!apartments) throw new NotFoundError('No apartments found for this user');
+  return apartments;
+};
+
 const createApartment = async (
   data: createApartmentData
 ): Promise<Apartment> => {
@@ -71,6 +77,23 @@ const countAvailableRooms = async (apartmentId: number): Promise<number> => {
   return apartmentModel.countAvailableRooms(apartmentId);
 };
 
+const roomPriceRangeService = async (
+  apartmentId: number
+): Promise<{
+  minPrice: number | null;
+  maxPrice: number | null;
+  roomCount: number;
+}> => {
+  const range = await apartmentModel.getRoomPriceRange(apartmentId);
+  if (!range)
+    throw new NotFoundError('No apartments found to determine price range');
+  return {
+    minPrice: range.minPrice,
+    maxPrice: range.maxPrice,
+    roomCount: range.roomCount,
+  };
+};
+
 export {
   getApartmentByID,
   getAllApartments,
@@ -80,4 +103,6 @@ export {
   getApartmentRating,
   countAvailableRooms,
   filterApartments,
+  getApartmentsByUser,
+  roomPriceRangeService,
 };
