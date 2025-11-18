@@ -105,9 +105,8 @@ const transferToTransportation = async (
     throw new NotFoundError('Metro card not found');
   }
 
-  if (existingMetroCard.status === 'suspended') {
+  if (existingMetroCard.status === 'suspended')
     throw new ForbiddenError('This card is suspended');
-  }
 
   if (existingMetroCard.balance < amount) {
     throw new ValidationError('Insufficient metro card balance');
