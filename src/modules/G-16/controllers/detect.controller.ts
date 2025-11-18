@@ -3,6 +3,7 @@ import type { Context } from 'hono';
 import { detectDangerFromImage } from '../services/gemini.service';
 // import { addMarker } from '../services/marker.service';
 import { ValidationError } from '@/errors';
+import { addtheMarker } from '../services/marker.service';
 
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const THRESHOLD = 0.8;
@@ -52,13 +53,13 @@ export async function detectHarm(c: Context) {
   const rawConfidence = Number(ai.confidence) || 0;
   const confidence = Math.min(1, Math.max(0, rawConfidence));
 
-  const categories = toStringArray(ai.category);
+  const category = toStringArray(ai.category);
 
   const types = toStringArray(ai.types);
   const reasons = toStringArray(ai.reasons);
 
   // 4) Create marker if dangerous or have problem
-  const marker: any = null;
+  let marker: any = null;
   const over_threshold = has_issue && confidence >= THRESHOLD;
 
   if (over_threshold && checkCordinate) {
@@ -67,22 +68,47 @@ export async function detectHarm(c: Context) {
       confidence * 100
     )}%)`;
 
-    // marker = await addMarker({
-    //   lat,
-    //   lng,
-    //   marker_type_id: DANGER_MARKER_TYPE_ID,
-    //   title,
-    //   description,
-    //   confidence,
-    //   categories: types,
-    // });
+    console.log('DEBUG detect-harm:', {
+      lat,
+      lng,
+      checkCordinate,
+      has_issue,
+      confidence,
+      over_threshold,
+    });
+
+    try {
+      marker = await addtheMarker({
+        location: {
+          lat: lat,
+          lng: lng,
+        },
+        marker_type_id: null,
+        description: description,
+      });
+
+      console.log('Auto-marker created success');
+    } catch (e) {
+      console.error('Failed to create marker automatically', e);
+    }
   }
+
+  // marker = await addMarker({
+  //   lat,
+  //   lng,
+  //   marker_type_id: DANGER_MARKER_TYPE_ID,
+  //   title,
+  //   description,
+  //   confidence,
+  //   categories: types,
+  // });
 
   // 5) Send result to frontend
   return c.json({
     ok: true,
     has_issue,
     confidence, // 0..1
+    category,
     types, // string[]
     reasons, // string[]
     threshold: THRESHOLD,
