@@ -17,7 +17,7 @@ const AddCategoryToPostSchema = z.object({
 });
 
 const AddCategoriesToPostSchema = z.object({
-  category_ids: z.array(z.number()).min(1, 'At least one category is required'),
+  category_id: z.array(z.number()).min(1, 'At least one category is required'),
 });
 
 const PostIdParam = z.object({

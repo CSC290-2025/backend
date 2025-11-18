@@ -13,9 +13,9 @@ const addCategoryToPost = async (c: Context) => {
   const postId = Number(c.req.param('postId'));
   const body = await c.req.json();
   const donaterId = c.get('user')?.id;
-  if (!donaterId) {
-    throw new UnauthorizedError();
-  }
+  // if (!donaterId) {
+  //   throw new UnauthorizedError();
+  // }
   const post = await PostCategoriesService.addCategoryToPost(
     postId,
     body,
@@ -28,9 +28,9 @@ const addCategoriesToPost = async (c: Context) => {
   const postId = Number(c.req.param('postId'));
   const body = await c.req.json();
   const donaterId = c.get('user')?.id;
-  if (!donaterId) {
-    throw new UnauthorizedError();
-  }
+  // if (!donaterId) {
+  //   throw new UnauthorizedError();
+  // }
   const post = await PostCategoriesService.addCategoriesToPost(
     postId,
     body,

@@ -48,8 +48,8 @@ const addCategoriesToPost = async (
       'Unauthorized: You can only manage your own posts'
     );
 
-  const uniqueCategoryIds = [...new Set(data.category_ids)];
-  if (uniqueCategoryIds.length !== data.category_ids.length) {
+  const uniqueCategoryIds = [...new Set(data.category_id)];
+  if (uniqueCategoryIds.length !== data.category_id.length) {
     throw new ValidationError('Duplicate category IDs found');
   }
 
