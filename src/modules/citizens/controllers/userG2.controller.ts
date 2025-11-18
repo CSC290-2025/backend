@@ -206,7 +206,6 @@ const updateCurrentUserPersonal = async (c: Context) => {
 const updateCurrentUserHealth = async (c: Context) => {
   const user = c.get('user');
   const body = await c.req.json();
-  console.log(user);
   const updatedUser = await UserService.updateUserHealthData(user.userId, body);
   return successResponse(
     c,
