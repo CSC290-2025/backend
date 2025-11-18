@@ -7,7 +7,7 @@ const authMiddleware: MiddlewareHandler = async (c, next) => {
   const accessToken = getCookie(c, 'accessToken');
 
   if (!accessToken) {
-    throw new UnauthorizedError('Missing access token, please login');
+    throw new UnauthorizedError('Please login');
   }
 
   const payload = await verifyAccessToken(accessToken);

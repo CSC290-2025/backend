@@ -13,6 +13,7 @@ interface Config {
   jwtRefreshSecret: string;
   jwtExpiresIn: string;
   jwtRefreshExpiresIn: string;
+  adminRoleId: number;
 }
 
 const config: Config = {
@@ -27,6 +28,8 @@ const config: Config = {
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'secret-key',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+
+  adminRoleId: Number(process.env.ADMIN_ROLE_ID) || 1,
 };
 
 export default config;
