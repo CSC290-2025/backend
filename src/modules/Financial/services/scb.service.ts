@@ -5,6 +5,7 @@ import type {
   ScbToken,
   ScbQrRequestSchema,
   ScbQrResponseSchema,
+  ScbQrCreateResponse,
 } from '../types';
 
 // the same as the one from model no business logic added
@@ -42,7 +43,8 @@ const decrypt = async (encryptedData: string): Promise<object> => {
 
 // validate env, generate refs
 const createQrCode = async (
-  qrRequestData: ScbQrRequestSchema
+  qrRequestData: ScbQrRequestSchema,
+  walletId: number
 ): Promise<ScbQrResponseSchema> => {
   const billerId = process.env.G11_BILLER_ID;
   const ref3Prefix = process.env.G11_REF3_PREFIX;
@@ -90,16 +92,75 @@ const createQrCode = async (
     ref3,
   };
 
-  // Log for reference
-  // console.log('\nQR Code Created');
-  // console.log({
-  //   ref1,
-  //   ref2,
-  //   ref3,
-  //   amount: qrRequestData.amount,
-  // });
+  // Create QR
+  const qrResponse: ScbQrCreateResponse = await ScbModel.createQr(qrRequest);
 
-  return await ScbModel.createQr(qrRequest);
+  // Create wallet transaction
+  await ScbModel.createWalletTransaction({
+    wallet_id: walletId,
+    transaction_type: 'top_up',
+    amount: amount,
+    target_service: 'wallet_top',
+    description: `${ref1}`,
+  });
+
+  return {
+    statusCode: qrResponse.status.code,
+    description: qrResponse.status.description,
+    qrRawData: qrResponse.data.qrRawData,
+    user_id: qrRequestData.user_id,
+    amount: qrRequestData.amount,
+    ref1,
+  };
 };
 
-export { getOAuthToken, encrypt, decrypt, createQrCode };
+const paymentConfirm = async (
+  transactionId: string,
+  sendingBank: string,
+  reference1: string
+) => {
+  await ScbModel.updateTransactionDescription(
+    reference1,
+    transactionId,
+    sendingBank
+  );
+  // un-comment this for real time payment confirmation logs from webhook
+  // console.log('Payment confirmed successfully for ref1:', reference1);
+};
+
+const verifyPayment = async (ref1: string) => {
+  const { transactionId, sendingBank, wallet } =
+    await ScbModel.findTransactionForVerification(ref1);
+
+  const data = await ScbModel.verifyPayment(transactionId, sendingBank);
+
+  if (data.status.code === 1000) {
+    // for testing purposes only
+    // console.log(
+    //   'Payment verified successfully for ref1:',
+    //   ref1,
+    //   'amount:',
+    //   data.data.amount
+    // );
+    return {
+      statusCode: data.status.code,
+      description: data.status.description,
+      amount: data.data.amount,
+      userid: wallet.owner_id,
+      ref1,
+    };
+  } else {
+    throw new ValidationError(
+      `Payment verification failed: ${data.status.code} - ${data.status.description}`
+    );
+  }
+};
+
+export {
+  getOAuthToken,
+  encrypt,
+  decrypt,
+  createQrCode,
+  paymentConfirm,
+  verifyPayment,
+};
