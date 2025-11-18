@@ -26,14 +26,39 @@ const getCourseByType = async (c: Context) => {
 };
 
 const updateCourse = async (c: Context) => {
-  const id = parseInt(c.req.param('id'));
+  const id = Number(c.req.param('id'));
   const body = await c.req.json();
-  const updatedCourse = await CourseService.updateCourse(id, body);
+  const course = await CourseService.updateCourse(id, body);
+  return successResponse(c, { course }, 200, 'Course updated successfully');
+};
+
+const updateCourseVideos = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const body = await c.req.json();
+  const course_videos = await CourseService.updateCourseVideos(
+    id,
+    body.course_videos
+  );
   return successResponse(
     c,
-    { updatedCourse },
+    { course_videos },
     200,
-    'Course updated successfully'
+    'Course videos updated successfully'
+  );
+};
+
+const updateOnsiteSessions = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const body = await c.req.json();
+  const onsite_sessions = await CourseService.updateOnsiteSessions(
+    id,
+    body.onsite_sessions
+  );
+  return successResponse(
+    c,
+    { onsite_sessions },
+    200,
+    'Onsite sessions updated successfully'
   );
 };
 
@@ -54,5 +79,7 @@ export {
   getCourse,
   getCourseByType,
   updateCourse,
+  updateCourseVideos,
+  updateOnsiteSessions,
   deleteCourse,
 };

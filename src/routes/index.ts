@@ -61,7 +61,6 @@ import {
 import {
   setupEnrollmentRoutes,
   setupCourseRoutes,
-  setupOnsiteSessionRoutes,
   setupExerciseRoute,
   setupQuestionRoutes,
   setupLevelRoutes,
@@ -134,7 +133,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Know AI
   setupEnrollmentRoutes(app);
   setupCourseRoutes(app);
-  setupOnsiteSessionRoutes(app);
   setupExerciseRoute(app);
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
