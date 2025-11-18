@@ -26,7 +26,6 @@ const UpdateMetroCardSchema = z.object({
 
 const TopUpMetroCardSchema = z.object({
   amount: z.number(),
-  walletId: z.coerce.number(),
 });
 
 const MetroCardListSchema = z.object({

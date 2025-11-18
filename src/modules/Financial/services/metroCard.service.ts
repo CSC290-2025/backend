@@ -51,18 +51,17 @@ const topUpBalance = async (
   if (existingMetroCard.status === 'suspended')
     throw new ForbiddenError('This card is suspended');
 
+  // Pre-check wallet balance before transaction
+  const wallet = await WalletModel.findWalletById(walletId);
+  if (!wallet) {
+    throw new NotFoundError('Wallet not found');
+  }
+  if (wallet.balance < amount) {
+    throw new ValidationError('Insufficient balance');
+  }
+
   return await prisma.$transaction(async (trx) => {
-    const updatedWallet = await WalletModel.WalletBalanceTopup(
-      walletId,
-      amount,
-      'decrement',
-      trx
-    );
-
-    if (updatedWallet.balance < 0) {
-      throw new ValidationError('Insufficient balance');
-    }
-
+    await WalletModel.WalletBalanceTopup(walletId, amount, 'decrement', trx);
     const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
       metroCardId,
       amount,
