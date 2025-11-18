@@ -4,7 +4,7 @@ import { successResponse } from '@/utils/response';
 import { AuthService } from '../services';
 import type { AuthTypes } from '../types';
 import config from '@/config/env';
-import { UnauthorizedError } from '@/errors';
+import { UnauthorizedError, ConflictError } from '@/errors';
 
 const ACCESS_TOKEN_COOKIE = 'accessToken';
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
@@ -33,6 +33,11 @@ const setAuthCookies = (
 };
 
 const login = async (c: Context) => {
+  const existingUser = c.get('user');
+  if (existingUser) {
+    throw new ConflictError('You are already logged in');
+  }
+
   const body: AuthTypes.LoginRequest = await c.req.json();
   const tokens = await AuthService.login(body);
 
@@ -42,6 +47,11 @@ const login = async (c: Context) => {
 };
 
 const register = async (c: Context) => {
+  const existingUser = c.get('user');
+  if (existingUser) {
+    throw new ConflictError('You are already logged in. Please logout first');
+  }
+
   const body: AuthTypes.RegisterRequest = await c.req.json();
   const tokens = await AuthService.register(body);
 
