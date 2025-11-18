@@ -7,9 +7,13 @@ const optionalAuthMiddleware: MiddlewareHandler = async (c, next) => {
   const accessToken = getCookie(c, 'accessToken');
 
   if (accessToken) {
-    const payload = await verifyAccessToken(accessToken);
-    if (payload) {
-      c.set('user', payload);
+    try {
+      const payload = await verifyAccessToken(accessToken);
+      if (payload) {
+        c.set('user', payload);
+      }
+    } catch (err) {
+      // Invalid token: do nothing, proceed as unauthenticated
     }
   }
 
