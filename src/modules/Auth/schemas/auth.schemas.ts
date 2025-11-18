@@ -38,6 +38,11 @@ export const MeResponseSchema = z.object({
   user: UserResponseSchema,
 });
 
+export const LoginStatusResponseSchema = z.object({
+  authenticated: z.boolean(),
+  userId: z.number(),
+});
+
 export const loginRoute = createPostRoute({
   path: '/auth/login',
   summary: 'User login',
@@ -75,8 +80,8 @@ export const logoutRoute = createPostRoute({
 
 export const meRoute = createGetRoute({
   path: '/auth/me',
-  summary: 'Get current user',
-  responseSchema: MeResponseSchema,
+  summary: 'Check login status',
+  responseSchema: LoginStatusResponseSchema,
   tags: ['Authentication'],
   middleware: [authMiddleware],
 });
