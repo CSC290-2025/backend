@@ -12,12 +12,20 @@ import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-
 const app = new OpenAPIHono();
 app.onError(errorHandler);
 
+// CORS middleware - allow requests from frontend
 app.use(
   '*',
   cors({
-    origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
+    origin: config.isProduction
+      ? 'https://smartcity.sit.kmutt.ac.th'
+      : [
+          'http://localhost:5173',
+          'http://localhost:5174',
+          'http://localhost:3000',
+        ],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 

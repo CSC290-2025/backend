@@ -10,8 +10,8 @@ const getCard = async (c: Context) => {
 
 const getUserCard = async (c: Context) => {
   const userId = Number(c.req.param('userId'));
-  const card = await InsuranceCardService.getCardByUserId(userId);
-  return successResponse(c, { card });
+  const cards = await InsuranceCardService.getCardsByUserId(userId);
+  return successResponse(c, { cards });
 };
 
 const createCard = async (c: Context) => {
