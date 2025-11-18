@@ -6,6 +6,8 @@ import type { AuthTypes } from '../types';
 import config from '@/config/env';
 import { UnauthorizedError, ConflictError } from '@/errors';
 
+// now implemented in auth middleware
+// keeping it just in case of manual retrieval to /refresh endpoint
 const ACCESS_TOKEN_COOKIE = 'accessToken';
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
 const DAYS = Number(config.jwtRefreshExpiresIn);
