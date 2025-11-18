@@ -8,6 +8,22 @@ import type {
 import { ApartmentSchemas } from '../schemas';
 // import { cloudinaryModel } from '.';
 
+// Helper function to transform apartment data from Prisma to expected format
+function transformApartmentData(apartment: any) {
+  if (!apartment) return apartment;
+  return {
+    ...apartment,
+    internet_price: apartment.internet_price
+      ? Number(apartment.internet_price)
+      : null,
+  };
+}
+
+// Helper function to transform array of apartment data
+function transformApartmentArray(apartments: any[]) {
+  return apartments.map(transformApartmentData);
+}
+
 export async function getAllApartments() {
   try {
     const response = await prisma.apartment.findMany({
@@ -22,7 +38,7 @@ export async function getAllApartments() {
         room: true,
       },
     });
-    return response;
+    return transformApartmentArray(response);
   } catch (error) {
     console.error('Prisma Find Error:', error);
     throw handlePrismaError(error);
@@ -44,7 +60,7 @@ export async function getApartmentById(id: number) {
         room: true,
       },
     });
-    return response;
+    return transformApartmentData(response);
   } catch (error) {
     console.error('Prisma Find Error:', error);
     throw handlePrismaError(error);
@@ -57,7 +73,35 @@ export async function getApartmentByIdSimplified(id: number) {
     const response = await prisma.apartment.findUnique({
       where: { id },
     });
-    return response;
+    return transformApartmentData(response);
+  } catch (error) {
+    console.error('Prisma Find Error:', error);
+    throw handlePrismaError(error);
+  }
+}
+
+export async function getApartmentsByUser(userId: number) {
+  try {
+    const response = await prisma.apartment.findMany({
+      where: {
+        apartment_owner: {
+          some: {
+            user_id: userId,
+          },
+        },
+      },
+      include: {
+        apartment_owner: {
+          include: {
+            users: true,
+          },
+        },
+        addresses: true,
+        rating: true,
+        room: true,
+      },
+    });
+    return transformApartmentArray(response);
   } catch (error) {
     console.error('Prisma Find Error:', error);
     throw handlePrismaError(error);
@@ -89,7 +133,7 @@ export async function createApartment(data: createApartmentData) {
       });
       return apartment;
     });
-    return response;
+    return transformApartmentData(response);
   } catch (error) {
     console.error('Prisma Create Error:', error);
     throw handlePrismaError(error);
@@ -143,7 +187,7 @@ export async function updateApartment(data: updateApartmentData, id: number) {
       return updatedApartment;
     });
 
-    return response;
+    return transformApartmentData(response);
   } catch (error) {
     console.error('Update apartment error details:', error);
     throw handlePrismaError(error);
@@ -246,7 +290,7 @@ export async function filterApartments(params: ApartmentFilter) {
         room: true,
       },
     });
-    return response;
+    return transformApartmentArray(response);
   } catch (error) {
     throw handlePrismaError(error);
   }
@@ -274,6 +318,53 @@ export async function countAvailableRooms(id: number) {
     });
     return response;
   } catch (error) {
+    throw handlePrismaError(error);
+  }
+}
+
+export async function getRoomPriceRange(apartmentId: number) {
+  try {
+    const rooms = await prisma.room.findMany({
+      where: {
+        apartment_id: apartmentId,
+      },
+      select: {
+        price_start: true,
+        price_end: true,
+      },
+    });
+
+    if (rooms.length === 0) {
+      return {
+        minPrice: null,
+        maxPrice: null,
+        roomCount: 0,
+      };
+    }
+
+    // Filter out null values and get all prices
+    const prices: number[] = [];
+
+    rooms.forEach((room) => {
+      if (room.price_start !== null) prices.push(room.price_start);
+      if (room.price_end !== null) prices.push(room.price_end);
+    });
+
+    if (prices.length === 0) {
+      return {
+        minPrice: null,
+        maxPrice: null,
+        roomCount: rooms.length,
+      };
+    }
+
+    return {
+      minPrice: Math.min(...prices),
+      maxPrice: Math.max(...prices),
+      roomCount: rooms.length,
+    };
+  } catch (error) {
+    console.error('Error getting room price range:', error);
     throw handlePrismaError(error);
   }
 }
