@@ -1,0 +1,11 @@
+export type * as types from './types';
+export * as controllers from './controllers';
+export * as models from './models';
+export * as routes from './routes';
+export * as service from './service';
+export { setupApartmentRoutes } from './routes/apartment.route';
+export { setupRatingRoutes } from './routes/rating.route';
+export { setupRoomRoutes } from './routes/room.route';
+export { setupAddressRoutes } from './routes/address.route';
+export { setupUploadRoutes } from './routes/upload.route';
+export { setupBookingRoutes } from './routes/booking.route';
