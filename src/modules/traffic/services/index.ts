@@ -6,5 +6,3 @@ export * as TimingService from './timing.service';
 export * as RoadService from './roads.services';
 export * as TrafficEmergencyService from './traffic_emergencies.services';
 export * as IntersectionService from './intersection.service';
-export * as RoadService from './roads.services';
-export * as TrafficEmergencyService from './traffic_emergencies.services';

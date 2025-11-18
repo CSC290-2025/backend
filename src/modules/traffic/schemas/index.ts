@@ -4,5 +4,3 @@ export { VehicleSchemas } from './vehicle.schemas';
 export { TrafficEmergencySchemas } from './traffic_emergencies.schemas';
 export { RoadSchemas } from './roads.schemas';
 export { IntersectionSchemas } from './intersection.schemas';
-export { RoadSchemas } from './roads.schemas';
-export { TrafficEmergencySchemas } from './traffic_emergencies.schemas';
