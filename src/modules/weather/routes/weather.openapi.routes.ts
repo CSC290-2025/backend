@@ -14,6 +14,11 @@ const setupWeatherRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    WeatherSchemas.getWeatherByLocationRoute,
+    WeatherController.getWeatherByLocation
+  );
+
+  app.openapi(
     WeatherSchemas.listWeatherByRangeRoute,
     WeatherController.listWeatherByDateRange
   );

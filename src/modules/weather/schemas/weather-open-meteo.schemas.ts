@@ -115,6 +115,18 @@ const ImportDailyBodySchema = z.object({
   location_id: z.coerce.number().int().min(1).max(4),
 });
 
+const SavedDailyPayloadSchema = z.object({
+  location_id: z.number().int(),
+  temperature: z.number().nullable(),
+  feel_temperature: z.number().nullable(),
+  humidity: z.number().nullable(),
+  wind_speed: z.number().nullable(),
+  wind_direction: z.string().nullable(),
+  rainfall_probability: z.number().nullable(),
+});
+
+const EmptyBodySchema = z.object({}).strict();
+
 const getExternalCurrentRoute = createGetRoute({
   path: '/weather/external/current',
   summary:
@@ -150,15 +162,27 @@ const importDailyRoute = createPostRoute({
   responseSchema: z.object({
     created: z.boolean(),
     date: z.string(),
-    saved: z.object({
-      location_id: z.number().int(),
-      temperature: z.number().nullable(),
-      feel_temperature: z.number().nullable(),
-      humidity: z.number().nullable(),
-      wind_speed: z.number().nullable(),
-      wind_direction: z.string().nullable(),
-      rainfall_probability: z.number().nullable(),
-    }),
+    saved: SavedDailyPayloadSchema,
+  }),
+  tags: ['Weather', 'External'],
+});
+
+const importDailyAllRoute = createPostRoute({
+  path: '/weather/external/daily-import/all',
+  summary:
+    'Fetch Open-Meteo daily (past 1) for all Bangkok districts and persist yesterday to DB',
+  requestSchema: EmptyBodySchema,
+  responseSchema: z.object({
+    processed: z.number().int(),
+    results: z.array(
+      z.object({
+        location_id: z.number().int(),
+        success: z.boolean(),
+        date: z.string().optional(),
+        saved: SavedDailyPayloadSchema.optional(),
+        error: z.string().optional(),
+      })
+    ),
   }),
   tags: ['Weather', 'External'],
 });
@@ -172,8 +196,11 @@ export const WeatherOpenMeteoSchemas = {
   ExternalDailyResponseSchema,
   ExternalWeatherQuerySchema,
   ImportDailyBodySchema,
+  SavedDailyPayloadSchema,
+  EmptyBodySchema,
   getExternalCurrentRoute,
   getExternalHourlyRoute,
   getExternalDailyRoute,
   importDailyRoute,
+  importDailyAllRoute,
 };

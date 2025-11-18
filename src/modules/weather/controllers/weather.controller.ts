@@ -23,8 +23,10 @@ const listWeatherByDateRange = async (c: Context) => {
 };
 
 const getWeatherByLocation = async (c: Context) => {
-  const { locationId } = c.req.param();
-  const data = await WeatherService.listWeatherByLocation(locationId);
+  const { location_id } = WeatherSchemas.WeatherLocationParam.parse(
+    c.req.param()
+  );
+  const data = await WeatherService.listWeatherByLocation(location_id);
   return successResponse(c, { data });
 };
 

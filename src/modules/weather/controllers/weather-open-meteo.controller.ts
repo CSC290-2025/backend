@@ -32,9 +32,20 @@ const importDailyOpenMeteo = async (c: Context) => {
   return successResponse(c, result, 201, `Imported daily for ${result.date}`);
 };
 
+const importDailyOpenMeteoAll = async (c: Context) => {
+  const result = await OpenMeteoScheduler.importAllLocationsYesterday();
+  return successResponse(
+    c,
+    result,
+    201,
+    `Imported daily for ${result.processed} locations`
+  );
+};
+
 export {
   getOpenMeteoCurrent,
   getOpenMeteoHourly,
   getOpenMeteoDaily,
   importDailyOpenMeteo,
+  importDailyOpenMeteoAll,
 };

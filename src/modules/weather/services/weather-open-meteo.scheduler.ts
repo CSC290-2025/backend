@@ -3,7 +3,7 @@ import { WeatherOpenMeteoSchemas } from '../schemas';
 import type { ExternalRawDailyOnly, ImportDailyBody } from '../types';
 import { ValidationError } from '@/errors';
 import { WeatherModel } from '../models';
-import { getDistrictByLocationId } from '../utils';
+import { getDistrictByLocationId, bangkokDistricts } from '../utils';
 import prisma from '@/config/client';
 
 const pickYesterdayPayload = (
@@ -94,4 +94,39 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   };
 };
 
-export { importYesterdayToDatabase };
+const importAllLocationsYesterday = async () => {
+  const results: Array<{
+    location_id: number;
+    success: boolean;
+    date?: string;
+    saved?: ReturnType<typeof pickYesterdayPayload>['payload'];
+    error?: string;
+  }> = [];
+
+  for (const district of bangkokDistricts) {
+    try {
+      const result = await importYesterdayToDatabase({
+        location_id: district.location_id,
+      });
+      results.push({
+        location_id: district.location_id,
+        success: true,
+        date: result.date,
+        saved: result.saved,
+      });
+    } catch (error) {
+      results.push({
+        location_id: district.location_id,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  return {
+    processed: results.length,
+    results,
+  };
+};
+
+export { importYesterdayToDatabase, importAllLocationsYesterday };

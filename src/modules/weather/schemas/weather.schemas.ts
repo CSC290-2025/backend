@@ -32,6 +32,20 @@ const listWeatherDataRoute = createGetRoute({
   tags: ['Weather'],
 });
 
+const WeatherLocationParam = z.object({
+  location_id: z
+    .string()
+    .regex(/^\d+$/, 'location_id must be a positive integer'),
+});
+
+const getWeatherByLocationRoute = createGetRoute({
+  path: '/weather/location/{location_id}',
+  summary: 'List weather data for a specific location id',
+  params: WeatherLocationParam,
+  responseSchema: WeatherDataListSchema,
+  tags: ['Weather'],
+});
+
 const getWeatherDataRoute = createGetRoute({
   path: '/weather/{date}',
   summary: 'Get weather data for a specific date (YYYY-MM-DD)',
@@ -74,8 +88,10 @@ export const WeatherSchemas = {
   WeatherDataListSchema,
   WeatherDateParam,
   WeatherDateRangeQuery,
+  WeatherLocationParam,
   listWeatherDataRoute,
   getWeatherDataRoute,
+  getWeatherByLocationRoute,
   deleteWeatherDataRoute,
   deleteAllWeatherDataRoute,
   listWeatherByRangeRoute,
