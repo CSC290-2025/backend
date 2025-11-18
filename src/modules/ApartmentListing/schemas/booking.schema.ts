@@ -10,6 +10,7 @@ const bookingSchema = z.object({
   id: z.int(),
   user_id: z.int(),
   room_id: z.int().nullable(),
+  apartment_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
   guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
@@ -38,6 +39,7 @@ const bookingListSchema = z.array(bookingSchema);
 const createbookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
+  apartment_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable(),
   guest_phone: z.string().min(10).max(10).nullable(),
   guest_email: z.string().email().nullable(),
@@ -58,6 +60,7 @@ const createbookingSchema = z.object({
 const updatebookingSchema = z.object({
   user_id: z.int(),
   room_id: z.int().nullable(),
+  apartment_id: z.int().nullable(),
   guest_name: z.string().min(2).max(255).nullable().optional(),
   guest_phone: z.string().max(10).nullable().optional(),
   guest_email: z.string().email().nullable().optional(),
