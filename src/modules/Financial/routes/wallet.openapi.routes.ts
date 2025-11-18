@@ -15,6 +15,10 @@ const setupWalletRoutes = (app: OpenAPIHono) => {
     WalletSchemas.transferFundsRoute,
     WalletController.transferBetweenUsers
   );
+  app.openapi(
+    WalletSchemas.getOrganizationBalanceRoute,
+    WalletController.getOrganizationBalance
+  );
 };
 
 export { setupWalletRoutes };

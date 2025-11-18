@@ -1,7 +1,12 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { wallets } from '@/generated/prisma';
-import type { Wallet, CreateWalletData, UpdateWalletData } from '../types';
+import type {
+  Wallet,
+  CreateWalletData,
+  UpdateWalletData,
+  OrganizationType,
+} from '../types';
 import type { Prisma } from '@prisma/client/scripts/default-index';
 
 // Helper to DRY
@@ -57,7 +62,7 @@ const findWalletById = async (id: number): Promise<Wallet> => {
 };
 
 const findWalletByOrganizationType = async (
-  organizationType: string
+  organizationType: OrganizationType
 ): Promise<Wallet | null> => {
   try {
     const wallet = await prisma.wallets.findFirst({

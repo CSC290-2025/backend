@@ -1,6 +1,11 @@
 import { NotFoundError, ValidationError } from '@/errors';
 import { WalletModel } from '../models';
-import type { Wallet, CreateWalletData, UpdateWalletData } from '../types';
+import type {
+  Wallet,
+  CreateWalletData,
+  UpdateWalletData,
+  OrganizationType,
+} from '../types';
 
 const getWalletById = async (id: number): Promise<Wallet> => {
   const wallet = await WalletModel.findWalletById(id);
@@ -87,6 +92,15 @@ const topUpBalance = async (
   return await WalletModel.WalletBalanceTopup(walletId, amount);
 };
 
+const getOrganizationBalance = async (
+  organizationType: OrganizationType
+): Promise<number> => {
+  const wallet =
+    await WalletModel.findWalletByOrganizationType(organizationType);
+
+  return Number(wallet?.balance);
+};
+
 export {
   getWalletById,
   createWallet,
@@ -94,4 +108,5 @@ export {
   getUserWallets,
   topUpBalance,
   transferFunds,
+  getOrganizationBalance,
 };
