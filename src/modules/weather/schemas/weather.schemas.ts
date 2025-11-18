@@ -1,8 +1,8 @@
+// schema สำหรับ validate payload/params ของ weather module และใช้ gen OpenAPI
 import { z } from 'zod';
 import { createGetRoute, createDeleteRoute } from '@/utils/openapi-helpers';
 
-const decimalField = z.coerce.number().nullable().optional();
-
+// รูปแบบข้อมูล weather_data ที่ดึงจากฐาน
 const WeatherDataSchema = z.object({
   id: z.number().int(),
   location_id: z.number().int().nullable(),
@@ -17,14 +17,17 @@ const WeatherDataSchema = z.object({
   addresses: z.any().nullable().optional(),
 });
 
+// ใช้กับ path param /weather/{date}
 const WeatherDateParam = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
 });
 
+// response มาตรฐานของ list endpoints
 const WeatherDataListSchema = z.object({
   data: z.array(WeatherDataSchema),
 });
 
+// route meta สำหรับ GET /weather
 const listWeatherDataRoute = createGetRoute({
   path: '/weather',
   summary: 'List weather data',
@@ -32,12 +35,14 @@ const listWeatherDataRoute = createGetRoute({
   tags: ['Weather'],
 });
 
+// ใช้ validate path param location_id
 const WeatherLocationParam = z.object({
   location_id: z
     .string()
     .regex(/^\d+$/, 'location_id must be a positive integer'),
 });
 
+// route meta สำหรับ GET /weather/location/{location_id}
 const getWeatherByLocationRoute = createGetRoute({
   path: '/weather/location/{location_id}',
   summary: 'List weather data for a specific location id',
@@ -46,6 +51,7 @@ const getWeatherByLocationRoute = createGetRoute({
   tags: ['Weather'],
 });
 
+// route meta สำหรับ GET /weather/{date}
 const getWeatherDataRoute = createGetRoute({
   path: '/weather/{date}',
   summary: 'Get weather data for a specific date (YYYY-MM-DD)',
@@ -54,6 +60,7 @@ const getWeatherDataRoute = createGetRoute({
   tags: ['Weather'],
 });
 
+// route meta สำหรับ DELETE /weather/{date}
 const deleteWeatherDataRoute = createDeleteRoute({
   path: '/weather/{date}',
   summary: 'Delete weather data for a specific date (YYYY-MM-DD)',
@@ -61,6 +68,7 @@ const deleteWeatherDataRoute = createDeleteRoute({
   tags: ['Weather'],
 });
 
+// route meta สำหรับ DELETE /weather
 const deleteAllWeatherDataRoute = createDeleteRoute({
   path: '/weather',
   summary: 'Delete all weather data from database',
@@ -68,12 +76,13 @@ const deleteAllWeatherDataRoute = createDeleteRoute({
   tags: ['Weather'],
 });
 
-// Date range query schema and route
+// schema query สำหรับช่วงวันที่
 const WeatherDateRangeQuery = z.object({
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
 });
 
+// route meta สำหรับ GET /weather/range
 const listWeatherByRangeRoute = createGetRoute({
   path: '/weather/range',
   summary:

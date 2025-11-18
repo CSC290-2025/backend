@@ -1,6 +1,8 @@
+// schema ที่ใช้คุยกับ Open-Meteo และอธิบาย response/route external
 import { z } from 'zod';
 import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
 
+// รูปแบบ response เต็มจาก Open-Meteo /forecast
 const ExternalRawFullSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
@@ -32,6 +34,7 @@ const ExternalRawFullSchema = z.object({
   }),
 });
 
+// รูปแบบ response กรณีดึงย้อนหลัง 1 วัน (ใช้ใน scheduler)
 const ExternalRawDailyOnlySchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
@@ -51,6 +54,7 @@ const ExternalRawDailyOnlySchema = z.object({
   }),
 });
 
+// metadata เมือง/พิกัดที่จะแนบกลับใน response
 const LocationSchema = z.object({
   city: z.string(),
   country: z.string(),
@@ -58,6 +62,7 @@ const LocationSchema = z.object({
   longitude: z.number(),
 });
 
+// ข้อมูล current weather หลัง map แล้ว
 const CurrentSchema = z.object({
   temperature: z.number(),
   feels_like: z.number(),
@@ -69,6 +74,7 @@ const CurrentSchema = z.object({
   last_updated: z.string(),
 });
 
+// 1 แถวของ hourly forecast
 const HourlyItemSchema = z.object({
   time: z.string(),
   temperature: z.number(),
@@ -76,6 +82,7 @@ const HourlyItemSchema = z.object({
   precipitation_chance: z.number().nullable(),
 });
 
+// 1 แถวของ daily forecast
 const DailyItemSchema = z.object({
   date: z.string(),
   high: z.number(),
@@ -84,6 +91,7 @@ const DailyItemSchema = z.object({
   precipitation_chance: z.number().nullable(),
 });
 
+// DTO หลักที่รวม location/current/hourly/daily
 const ExternalWeatherDTOSchema = z.object({
   location: LocationSchema,
   current: CurrentSchema,
@@ -91,30 +99,35 @@ const ExternalWeatherDTOSchema = z.object({
   daily_forecast: z.array(DailyItemSchema),
 });
 
-// Partial response schemas for separated endpoints
+// schema ที่ endpoint current ใช้ตอบกลับ
 const ExternalCurrentResponseSchema = z.object({
   location: LocationSchema,
   current: CurrentSchema,
 });
 
+// schema สำหรับตอบ hourly
 const ExternalHourlyResponseSchema = z.object({
   location: LocationSchema,
   hourly_forecast: z.array(HourlyItemSchema),
 });
 
+// schema สำหรับตอบ daily
 const ExternalDailyResponseSchema = z.object({
   location: LocationSchema,
   daily_forecast: z.array(DailyItemSchema),
 });
 
+// รับ location_id 1-4 จาก query string
 const ExternalWeatherQuerySchema = z.object({
   location_id: z.coerce.number().int().min(1).max(4),
 });
 
+// ใช้กับ body ของ /daily-import (location เดียว)
 const ImportDailyBodySchema = z.object({
   location_id: z.coerce.number().int().min(1).max(4),
 });
 
+// รูปแบบข้อมูลที่ save ลง weather_data
 const SavedDailyPayloadSchema = z.object({
   location_id: z.number().int(),
   temperature: z.number().nullable(),
@@ -125,8 +138,10 @@ const SavedDailyPayloadSchema = z.object({
   rainfall_probability: z.number().nullable(),
 });
 
+// ใช้ยืนยันว่า import all ไม่ควรมี body
 const EmptyBodySchema = z.object({}).strict();
 
+// route meta: GET current
 const getExternalCurrentRoute = createGetRoute({
   path: '/weather/external/current',
   summary:
@@ -136,6 +151,7 @@ const getExternalCurrentRoute = createGetRoute({
   tags: ['Weather', 'External'],
 });
 
+// route meta: GET hourly
 const getExternalHourlyRoute = createGetRoute({
   path: '/weather/external/hourly',
   summary:
@@ -145,6 +161,7 @@ const getExternalHourlyRoute = createGetRoute({
   tags: ['Weather', 'External'],
 });
 
+// route meta: GET daily forecast
 const getExternalDailyRoute = createGetRoute({
   path: '/weather/external/daily',
   summary:
@@ -154,6 +171,7 @@ const getExternalDailyRoute = createGetRoute({
   tags: ['Weather', 'External'],
 });
 
+// route meta: POST import รายวันของ location เดียว
 const importDailyRoute = createPostRoute({
   path: '/weather/external/daily-import',
   summary:
@@ -167,6 +185,7 @@ const importDailyRoute = createPostRoute({
   tags: ['Weather', 'External'],
 });
 
+// route meta: POST import รายวันให้ทุก location
 const importDailyAllRoute = createPostRoute({
   path: '/weather/external/daily-import/all',
   summary:

@@ -13,3 +13,5 @@ export const bangkokDistricts = [
 export const getDistrictByLocationId = (locationId: number) => {
   return bangkokDistricts.find((d) => d.location_id === locationId);
 };
+
+//ตั้ง location_id 1-4

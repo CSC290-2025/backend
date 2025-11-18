@@ -2,18 +2,6 @@ import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { WeatherData } from '../types';
 
-const findById = async (id: number): Promise<WeatherData | null> => {
-  try {
-    const weather = await prisma.weather_data.findUnique({
-      where: { id },
-    });
-    return weather as unknown as WeatherData | null;
-  } catch (error) {
-    console.error('Prisma error in findById:', error);
-    handlePrismaError(error);
-  }
-};
-
 const findAll = async (): Promise<WeatherData[]> => {
   try {
     const items = await prisma.weather_data.findMany({
@@ -113,17 +101,6 @@ const deleteByDate = async (date: string): Promise<number> => {
   }
 };
 
-const deleteById = async (id: number): Promise<void> => {
-  try {
-    await prisma.weather_data.delete({
-      where: { id },
-    });
-  } catch (error) {
-    console.error('Prisma error in deleteById:', error);
-    handlePrismaError(error);
-  }
-};
-
 const deleteAll = async (): Promise<number> => {
   try {
     const result = await prisma.weather_data.deleteMany({});
@@ -135,13 +112,11 @@ const deleteAll = async (): Promise<number> => {
 };
 
 export {
-  findById,
   findAll,
   findByLocationId,
   findByDate,
   findByDateRange,
   create,
-  deleteById,
   deleteByDate,
   deleteAll,
 };
