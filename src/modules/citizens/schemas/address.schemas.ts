@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { createGetRoute } from '@/utils/openapi-helpers';
 
 export const AddressSchema = z.object({
+  user_id: z.number(),
   id: z.number(),
   address_line: z.string().nullable(),
   province: z.string().nullable(),
