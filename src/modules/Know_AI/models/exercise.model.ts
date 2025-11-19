@@ -65,24 +65,57 @@ const createUserExercise = async (data: {
 //   }
 // };
 
+// const getUserExercisesByLevel = async (
+//   userId: number,
+//   level: number
+// ): Promise<any[]> => {
+//   try {
+//     const exercises = await prisma.$queryRaw<any[]>`
+//       SELECT DISTINCT ON (question_id)
+//         userExercise.*
+//       FROM user_exercises userExercise
+//       INNER JOIN questions q ON userExercise.question_id = q.id
+//       WHERE userExercise.user_id = ${userId}
+//         AND q.level = ${level}
+//       ORDER BY userExercise.question_id, userExercise.created_at DESC
+//     `;
+//     return exercises;
+//   } catch (error) {
+//     handlePrismaError(error);
+//     return [];
+//   }
+// };
+
 const getUserExercisesByLevel = async (
   userId: number,
   level: number
 ): Promise<any[]> => {
   try {
-    const exercises = await prisma.$queryRaw<any[]>`
-      SELECT DISTINCT ON (question_id) 
-        userExercise.*
-      FROM user_exercises userExercise
-      INNER JOIN questions q ON userExercise.question_id = q.id
-      WHERE userExercise.user_id = ${userId}
-        AND q.level = ${level}
-      ORDER BY userExercise.question_id, userExercise.created_at DESC
-    `;
-    return exercises;
+    const exercises = await prisma.user_exercises.findMany({
+      where: {
+        user_id: userId,
+        questions: {
+          level: level,
+        },
+      },
+      include: {
+        questions: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    const latestMap = exercises.reduce((map, exercise: any) => {
+      if (!map.has(exercise.question_id)) {
+        map.set(exercise.question_id, exercise);
+      }
+      return map;
+    }, new Map<number, any>());
+
+    return Array.from(latestMap.values());
   } catch (error) {
     handlePrismaError(error);
-    return [];
   }
 };
 
