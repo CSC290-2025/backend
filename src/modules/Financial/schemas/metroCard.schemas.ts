@@ -86,7 +86,10 @@ const topUpBalanceRoute = createPostRoute({
   path: '/metro-cards/top-up',
   summary: 'Top up metro card balance',
   requestSchema: TopUpMetroCardSchema,
-  responseSchema: MetroCardSchema,
+  responseSchema: z.object({
+    metroCard: MetroCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
   tags: ['MetroCards'],
 });
 
@@ -101,7 +104,10 @@ const transferToTransportationRoute = createPostRoute({
   path: '/metro-cards/transfer-to-transportation',
   summary: 'Transfer metro card balance to transportation organization',
   requestSchema: TransferToTransportationSchema,
-  responseSchema: MetroCardSchema,
+  responseSchema: z.object({
+    metroCard: MetroCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
   tags: ['MetroCards'],
 });
 
