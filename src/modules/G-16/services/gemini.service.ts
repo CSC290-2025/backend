@@ -14,7 +14,6 @@ const PROMPT = `You're an AI assistant in smart city hub, your task are:
                 3. Classify the situation into one of the following: harm - weapons, violence, fire, dangerous object, hazardous situations
                                                                      health - have a sick person, injured, collapsed, fainting, wounded
                                                                      trash - overflowing trash bin, garbage on the street
-                                                                     traffic - accident, road blockage, dangerous driving
                                                                      other - any urban issue not fitting above
                 return only the following json format
                 {
@@ -86,17 +85,7 @@ export async function detectDangerFromImage(
     throw new InternalServerError(`Gemini request failed (model=${MODEL})`);
   }
 
-//   // 3) Common Gemini format: text stored inside candidates[0].content.parts[].text
-//   const parts = res?.response?.candidates?.[0]?.content?.parts;
-//   if (Array.isArray(parts)) {
-//     return parts
-//       .map((p: any) => p.text)
-//       .filter(Boolean)
-//       .join(' ');
-//   }
-//   // 4) Text not found in the response
-//   throw new InternalServerError('Gemini did not return text');
-// }
+  const raw = extractText(res);
 
   // change to json
   try {

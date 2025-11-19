@@ -1,9 +1,14 @@
 import * as z from 'zod';
 
+export const LocationSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+});
+
 export const CreateMarkerSchema = z.object({
   description: z.string().optional().nullable(),
   marker_type_id: z.number().int().positive().optional().nullable(),
-  location: z.any().optional().nullable(),
+  location: LocationSchema.optional().nullable(),
 });
 
 export const UpdateMarkerSchema = z.object({
