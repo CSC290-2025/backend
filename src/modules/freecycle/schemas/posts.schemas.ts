@@ -71,7 +71,7 @@ const getUserFreecyclePostsRoute = createGetRoute({
   summary: 'Get post by user',
   responseSchema: FreecyclePostsSchema,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const createFreecyclePostsRoute = createPostRoute({

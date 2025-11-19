@@ -14,10 +14,11 @@ const getPostById = async (c: Context) => {
 };
 
 const getPostByDonater: Handler = async (c: Context) => {
-  const userId = c.get('user')?.id;
-  if (!userId) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
+  console.log('Getting posts by donater');
+  const userId = 1;
+  // if (!userId) {
+  //   return c.json({ error: 'Unauthorized' }, 401);
+  // }
   const posts = await PostsService.getPostByDonater(userId);
   return successResponse(c, { posts });
 };

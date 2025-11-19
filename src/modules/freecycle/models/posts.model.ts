@@ -38,6 +38,7 @@ const findPostById = async (id: number): Promise<FreecyclePost | null> => {
 const findPostByDonater = async (
   donaterId: number
 ): Promise<FreecyclePost[]> => {
+  // console.log('Finding posts by donater:', donaterId);
   try {
     const posts = await prisma.freecycle_posts.findMany({
       where: { donater_id: donaterId },
