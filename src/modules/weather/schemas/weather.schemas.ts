@@ -45,7 +45,7 @@ const WeatherLocationParam = z.object({
 // route meta สำหรับ GET /weather/location/{location_id}
 const getWeatherByLocationRoute = createGetRoute({
   path: '/weather/location/{location_id}',
-  summary: 'List weather data for a specific location id',
+  summary: 'List weather data for a specific location id (16-19)',
   params: WeatherLocationParam,
   responseSchema: WeatherDataListSchema,
   tags: ['Weather'],

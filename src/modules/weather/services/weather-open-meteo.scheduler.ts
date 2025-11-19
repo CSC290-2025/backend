@@ -68,17 +68,27 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   );
   const raw = WeatherOpenMeteoSchemas.ExternalRawDailyOnlySchema.parse(json);
 
-  let locId: number | null = b.location_id ?? null;
-  if (locId != null) {
-    const addr = await prisma.addresses.findUnique({ where: { id: locId } });
-    if (!addr) locId = null;
+  const resolvedAddressId = district.address_id ?? b.location_id ?? null;
+  if (resolvedAddressId == null) {
+    throw new ValidationError(
+      `No address mapping for location_id ${b.location_id}`
+    );
   }
 
-  const { date, payload } = pickYesterdayPayload(raw, locId);
+  const address = await prisma.addresses.findUnique({
+    where: { id: resolvedAddressId },
+  });
+  if (!address) {
+    throw new ValidationError(
+      `Address id ${resolvedAddressId} not found in database`
+    );
+  }
+
+  const { date, payload } = pickYesterdayPayload(raw, address.id);
 
   console.info(
     'Importing yesterday payload to DB for location_id=',
-    locId,
+    address.id,
     'payload=',
     payload
   );
