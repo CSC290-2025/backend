@@ -150,24 +150,75 @@ export const getMarkerById = async (
 };
 
 // GET all marker
+// export const getAllMarkers = async (options?: {
+//   marker_type_id?: number;
+//   skip?: number;
+//   take?: number;
+// }): Promise<MarkerResponse[]> => {
+//   return (await prisma.marker.findMany({
+//     where: options?.marker_type_id
+//       ? { marker_type_id: options.marker_type_id }
+//       : undefined,
+//     include: {
+//       marker_type: true,
+//     },
+//     skip: options?.skip,
+//     take: options?.take,
+//     orderBy: {
+//       created_at: 'desc',
+//     },
+//   })) as MarkerResponse[];
+// };
+
+// get function and return promise that inside are arr of marker response
 export const getAllMarkers = async (options?: {
   marker_type_id?: number;
   skip?: number;
   take?: number;
 }): Promise<MarkerResponse[]> => {
-  return (await prisma.marker.findMany({
-    where: options?.marker_type_id
-      ? { marker_type_id: options.marker_type_id }
-      : undefined,
-    include: {
-      marker_type: true,
-    },
-    skip: options?.skip,
-    take: options?.take,
-    orderBy: {
-      created_at: 'desc',
-    },
-  })) as MarkerResponse[];
+  //option.skip have value? if not == 0
+  const skip = options?.skip ?? 0;
+
+  //option.take have value? if not == 100
+  const take = options?.take ?? 100;
+
+  //if dont hav markerTypeId then == null
+  const markerTypeId = options?.marker_type_id ?? null;
+
+  //use prisma.$queryRaw to write sql
+  const rows = await prisma.$queryRaw<any[]>`
+    SELECT 
+      m.id,
+      m.marker_type_id,
+      m.description,
+      ST_AsGeoJSON(m.location) AS location,  --  geometry -> GeoJSON
+      m.created_at,
+      m.updated_at,
+      json_build_object(
+        'id', mt.id,
+        'marker_type_icon', mt.marker_type_icon,
+        'marker_type_color', mt.marker_type_color,
+        'created_at', mt.created_at,
+        'updated_at', mt.updated_at
+      ) AS marker_type
+    FROM marker m
+    LEFT JOIN marker_type mt ON m.marker_type_id = mt.id
+    WHERE (
+      ${markerTypeId}::int IS NULL 
+      OR m.marker_type_id = ${markerTypeId}::int
+    )
+    ORDER BY m.created_at DESC
+    OFFSET ${skip}
+    LIMIT ${take}
+  `;
+
+  const markers = rows.map((row) => ({
+    ...row,
+    // ST_AsGeoJSON คืนมาเป็น string → parse เป็น object { type, coordinates }
+    location: row.location ? JSON.parse(row.location) : null,
+  }));
+
+  return markers as MarkerResponse[];
 };
 
 //Delete

@@ -68,15 +68,6 @@ export async function detectHarm(c: Context) {
       confidence * 100
     )}%)`;
 
-    console.log('DEBUG detect-harm:', {
-      lat,
-      lng,
-      checkCordinate,
-      has_issue,
-      confidence,
-      over_threshold,
-    });
-
     try {
       marker = await addtheMarker({
         location: {
