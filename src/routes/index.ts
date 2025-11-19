@@ -37,7 +37,7 @@ import {
   setupTokenRoutes,
 } from '@/modules/emergency';
 
-// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
+import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
 import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
@@ -68,7 +68,7 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-import { reportRoutes } from '@/modules/power-bi';
+// import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
 import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
@@ -151,15 +151,14 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-
   //Emergency
-  //   app.route('/reports', reportRoutes);
+  app.route('/reports', reportRoutes);
   //   app.route('/fcm', fcmRoutes);
   //   app.route('/tokens', tokenRoutes);
   //   app.route('/emergency', emergencyRoutes);
 
   // Power BI
-  app.route('/reports', reportRoutes);
+  // app.route('/reports', reportRoutes);
 
   // Support Map
   app.route('/api', detectRoutes);

@@ -1,4 +1,3 @@
-import cloudinary from '@/config/cloudinary.ts';
 import { ReportModel } from '@/modules/emergency/models';
 import type {
   CreateReport,
@@ -7,16 +6,17 @@ import type {
 } from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { ValidationError } from '@/errors';
+import { uploadFile } from '@/utils/upload.ts';
+import { base64ToBlobFromDataUrl } from '@/modules/emergency/utils';
 
 export const createReport = async (
   data: CreateReport
 ): Promise<ReportResponse> => {
-  const imageUrl = data.image_url;
-  if (imageUrl) {
-    const uploadedResponse = await cloudinary.uploader.upload(imageUrl, {
-      upload_preset: 'report',
-    });
-    data.image_url = uploadedResponse.secure_url;
+  const imageData = data.image_url;
+  if (imageData) {
+    const imageBlob = base64ToBlobFromDataUrl(imageData);
+    const uploadedResponse = await uploadFile({ fileBlob: imageBlob }, 13);
+    data.image_url = uploadedResponse.url;
   }
   return await ReportModel.createReport(data);
 };
