@@ -22,6 +22,7 @@ import {
 
 
 // // Citizen
+// Citizen
 // import {
 //   setupCitizenAddressRoutes,
 //   setupUserSpecialtyRoutes,
@@ -45,6 +46,7 @@ import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
 
 // // Emergency
+// Emergency
 // import {
 //   setupReportRoutes,
 //   setupFcmRoutes,
@@ -91,7 +93,11 @@ import {
 import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes, distanceRoutes} from '@/modules/G-16/routes';
+import {
+  detectRoutes,
+  markerRoutes,
+  distanceRoutes,
+} from '@/modules/G-16/routes';
 
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
@@ -100,6 +106,7 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
 // // Weather
+// Weather
 // import {
 //   setupWeatherRoutes,
 //   setupOpenMeteoRoutes,

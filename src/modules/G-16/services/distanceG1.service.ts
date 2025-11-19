@@ -1,9 +1,7 @@
-
 // console.log(process.env.G16_VITE_GOOGLE_MAPS_API_KEY);
 const GOOGLE_MAPS_API_KEY = process.env.G16_VITE_GOOGLE_MAPS_API_KEY;
 // // const DISTANCE_MATRIX_URL =
 // //   'https://maps.googleapis.com/maps/api/distancematrix/json';
-
 
 export interface DistanceElement {
   status: string;
@@ -30,7 +28,6 @@ export async function distanceMatrix(
   origin: string,
   destination: string
 ): Promise<DistanceResponse> {
-
   if (!origin || !destination) {
     throw new Error('Origin and destination are required');
   }
@@ -58,7 +55,6 @@ export async function distanceMatrix(
       );
     }
 
-    
     return {
       status: 'OK',
       originAddresses: data.origin_addresses,
