@@ -37,7 +37,12 @@ import {
   setupTokenRoutes,
 } from '@/modules/emergency';
 
-import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
+import {
+  reportRoutes,
+  fcmRoutes,
+  tokenRoutes,
+  contactRoutes,
+} from '@/modules/emergency';
 
 // Event Hub
 import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
@@ -152,10 +157,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   ============================================
   */
   //Emergency
-  app.route('/reports', reportRoutes);
-  //   app.route('/fcm', fcmRoutes);
-  //   app.route('/tokens', tokenRoutes);
-  //   app.route('/emergency', emergencyRoutes);
+  app.route('/emergency', reportRoutes());
+  app.route('/emergency', contactRoutes());
 
   // Power BI
   // app.route('/reports', reportRoutes);

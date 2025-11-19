@@ -4,14 +4,9 @@ import { successResponse } from '@/utils/response.ts';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 
 export const createReport = async (c: Context) => {
-  try {
-    const body = await c.req.json();
-    const report = await ReportService.createReport(body);
-    return successResponse(c, { report }, 201, 'Create report successfully');
-  } catch (e) {
-    console.log(e);
-    return successResponse(c, { e }, 201, 'Create report successfully');
-  }
+  const body = await c.req.json();
+  const report = await ReportService.createReport(body);
+  return successResponse(c, { report }, 201, 'Create report successfully');
 };
 
 export const findReportByStatus = async (c: Context) => {
