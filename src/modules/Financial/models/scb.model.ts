@@ -17,6 +17,7 @@ import {
 import prisma from '@/config/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { findWalletById, WalletBalanceTopup } from './wallet.model';
+import { ScbEventEmitter } from '../utils';
 import type { transaction_type } from '@/generated/prisma';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
@@ -259,6 +260,21 @@ const updateTransactionDescription = async (
         'increment',
         tx
       );
+      // Emit an event so any SSE listeners can be notified immediately.
+      // Use a unique event key `scb:confirmed:<ref1>` to allow clients to subscribe to only events matching their ref1.
+      // this is use by the frontend topup page to be notified when payment is confirmed
+      try {
+        ScbEventEmitter.emit(`scb:confirmed:${reference1}`, {
+          ref1: reference1,
+          transactionId,
+          sendingBank,
+          walletId: transaction.wallet_id,
+        });
+      } catch (err) {
+        throw new InternalServerError(
+          `Failed to emit SCB payment event ${err}`
+        );
+      }
     });
   } catch (error) {
     if (error instanceof BaseError) {
