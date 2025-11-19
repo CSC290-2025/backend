@@ -60,5 +60,9 @@ export function maskCardNumber19(full: string) {
 }
 
 export function normalizeCardNumber(cardNumber: string): string {
-  return `MET-${cardNumber.replace(/\s/g, '')}`;
+  const cleaned = cardNumber.replace(/\s/g, '');
+  if (cleaned.startsWith('MET-')) {
+    return cleaned;
+  }
+  return `MET-${cleaned}`;
 }

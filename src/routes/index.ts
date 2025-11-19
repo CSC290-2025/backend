@@ -136,7 +136,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // ============================================
   // app.route('/products', productRoutes);
   setupScbRoutes(app);
-  setupInsuranceCardRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
