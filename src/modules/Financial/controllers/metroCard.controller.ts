@@ -39,17 +39,12 @@ const updateMetroCard = async (c: Context) => {
 
 const topUpBalance = async (c: Context) => {
   const body = await c.req.json();
-  const updatedMetroCard = await MetroCardService.topUpBalance(
+  const result = await MetroCardService.topUpBalance(
     body.cardNumber,
     body.walletId,
     body.amount
   );
-  return successResponse(
-    c,
-    { metroCard: updatedMetroCard },
-    200,
-    'Balance topped up successfully'
-  );
+  return successResponse(c, result, 200, 'Balance topped up successfully');
 };
 
 const deleteMetroCard = async (c: Context) => {
@@ -60,13 +55,13 @@ const deleteMetroCard = async (c: Context) => {
 
 const transferToTransportation = async (c: Context) => {
   const body = await c.req.json();
-  const updatedMetroCard = await MetroCardService.transferToTransportation(
+  const result = await MetroCardService.transferToTransportation(
     body.cardNumber,
     body.amount
   );
   return successResponse(
     c,
-    { metroCard: updatedMetroCard },
+    result,
     200,
     'Balance transferred to transportation wallet successfully'
   );
