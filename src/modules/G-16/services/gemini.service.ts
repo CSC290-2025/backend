@@ -86,17 +86,7 @@ export async function detectDangerFromImage(
     throw new InternalServerError(`Gemini request failed (model=${MODEL})`);
   }
 
-//   // 3) Common Gemini format: text stored inside candidates[0].content.parts[].text
-//   const parts = res?.response?.candidates?.[0]?.content?.parts;
-//   if (Array.isArray(parts)) {
-//     return parts
-//       .map((p: any) => p.text)
-//       .filter(Boolean)
-//       .join(' ');
-//   }
-//   // 4) Text not found in the response
-//   throw new InternalServerError('Gemini did not return text');
-// }
+  const raw = extractText(res);
 
   // change to json
   try {

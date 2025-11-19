@@ -1,14 +1,14 @@
-// // src/controllers/detect.controller.ts
-// import type { Context } from 'hono';
-// import { detectDangerFromImage } from '../services/gemini.service';
-// import { addtheMarker } from '../services/marker.service';
-// import { ValidationError } from '@/errors';
+// src/controllers/detect.controller.ts
+import type { Context } from 'hono';
+import { detectDangerFromImage } from '../services/gemini.service';
+import { addtheMarker } from '../services/marker.service';
+import { ValidationError } from '@/errors';
 
-// const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
-// const THRESHOLD = 0.8;
-// const DANGER_MARKER_TYPE_ID = 999;
+const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
+const THRESHOLD = 0.8;
+const DANGER_MARKER_TYPE_ID = 999;
 
-//normalize value to string
+// normalize value to string
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((v) => String(v));
@@ -58,7 +58,7 @@ export async function detectHarm(c: Context) {
   const reasons = toStringArray(ai.reasons);
 
   // 4) Create marker if dangerous or have problem
-  let marker: any = null;
+  const marker: any = null;
   const over_threshold = has_issue && confidence >= THRESHOLD;
 
   if (over_threshold && checkCordinate) {
@@ -67,15 +67,15 @@ export async function detectHarm(c: Context) {
       confidence * 100
     )}%)`;
 
-    marker = await addMarker({
-      lat,
-      lng,
-      marker_type_id: DANGER_MARKER_TYPE_ID,
-      title,
-      description,
-      confidence,
-      category,
-    });
+    // marker = await addMarker({
+    //   lat,
+    //   lng,
+    //   marker_type_id: DANGER_MARKER_TYPE_ID,
+    //   title,
+    //   description,
+    //   confidence,
+    //   category,
+    // });
   }
 
   // 5) Send result to frontend

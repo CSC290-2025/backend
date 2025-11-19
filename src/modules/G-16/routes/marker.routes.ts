@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { getMarkers } from '../controllers/marker.controller';
+import { getAllMarkers } from '../controllers/marker.controller';
 
 const markerRoutes = new Hono();
-markerRoutes.get('/markers', getMarkers); // /api/markers
+markerRoutes.get('/markers', getAllMarkers); // /api/markers
 export { markerRoutes };
