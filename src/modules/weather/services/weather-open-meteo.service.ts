@@ -6,7 +6,9 @@ import type {
   ExternalWeatherQuery,
 } from '../types';
 import { ValidationError } from '@/errors';
+import { getDistrictByLocationId } from '../utils/bangkok-districts';
 
+// แปลง weather code ของ WMO ให้เป็น string ที่อ่านง่าย
 const wmoToCondition = (code: number): string => {
   if (code === 0) return 'Sunny';
   if ([1, 2, 3].includes(code)) return 'Partly Cloudy';
@@ -18,12 +20,14 @@ const wmoToCondition = (code: number): string => {
   return 'Cloudy';
 };
 
+// หาคำย่อทิศลม (N/NE/..)
 const compass8 = (deg?: number | null) => {
   if (deg == null) return 'N';
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   return dirs[Math.round(deg / 45) % 8];
 };
 
+// รับเวลาท้องถิ่นจาก Open-Meteo แล้วแปลงเป็น ISO เวลามาตรฐาน UTC
 const toUtcIso = (localYYYYmmddHHmm: string, offsetSeconds: number): string => {
   const [date, hm] = localYYYYmmddHHmm.split('T');
   const [y, m, d] = date.split('-').map(Number);
@@ -33,6 +37,7 @@ const toUtcIso = (localYYYYmmddHHmm: string, offsetSeconds: number): string => {
   return new Date(utc).toISOString();
 };
 
+// สร้าง DTO รูปแบบที่ backend ใช้จากข้อมูล Open-Meteo ชุดใหญ่
 const mapFullToDTO = (
   raw: ExternalRawFull,
   city: string,
@@ -75,23 +80,80 @@ const mapFullToDTO = (
   });
 };
 
-const getWeatherFromOpenMeteo = async (
-  query: ExternalWeatherQuery
-): Promise<ExternalWeatherDTO> => {
+// ดึงเฉพาะ current weather (ใช้กับ endpoint /weather/external/current)
+const getCurrentFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
-  if (!Number.isFinite(q.lat) || !Number.isFinite(q.lon)) {
-    throw new ValidationError('Invalid coordinates');
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
   }
-  // Open-Meteo expects a timezone; use canonical project timezone
-  const json = await OpenMeteoClient.getFull(q.lat, q.lon, OPEN_METEO_TIMEZONE);
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
   const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
-
-  // Provide sensible defaults when city/country are omitted by the caller.
-  // Defaults match the Swagger defaults: Bangkok, Thailand
-  const city = q.city ?? 'Bangkok';
-  const country = q.country ?? 'Thailand';
-
-  return mapFullToDTO(raw, city, country);
+  const city = district.name;
+  const country = 'Thailand';
+  const full = mapFullToDTO(raw, city, country);
+  return WeatherOpenMeteoSchemas.ExternalCurrentResponseSchema.parse({
+    location: full.location,
+    current: full.current,
+  });
 };
 
-export { getWeatherFromOpenMeteo };
+// ดึงเฉพาะ hourly forecast แล้ว map เป็น schema ของเรา
+const getHourlyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
+  const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
+  const city = district.name;
+  const country = 'Thailand';
+  const full = mapFullToDTO(raw, city, country);
+  return WeatherOpenMeteoSchemas.ExternalHourlyResponseSchema.parse({
+    location: full.location,
+    hourly_forecast: full.hourly_forecast,
+  });
+};
+
+// ดึงเฉพาะ daily forecast แล้ว map เป็น schema ของเรา
+const getDailyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
+  const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+  const json = await OpenMeteoClient.getFull(
+    district.lat,
+    district.lng,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRawFullSchema.parse(json);
+  const city = district.name;
+  const country = 'Thailand';
+  const full = mapFullToDTO(raw, city, country);
+  return WeatherOpenMeteoSchemas.ExternalDailyResponseSchema.parse({
+    location: full.location,
+    daily_forecast: full.daily_forecast,
+  });
+};
+
+export {
+  getCurrentFromOpenMeteo,
+  getHourlyFromOpenMeteo,
+  getDailyFromOpenMeteo,
+};

@@ -1,10 +1,13 @@
+//แปลงข้อมูล (ฟังก์ชั่นที่เก็บอดีตลง database)
 import { OpenMeteoClient, OPEN_METEO_TIMEZONE } from './open-meteo.client';
 import { WeatherOpenMeteoSchemas } from '../schemas';
 import type { ExternalRawDailyOnly, ImportDailyBody } from '../types';
 import { ValidationError } from '@/errors';
 import { WeatherModel } from '../models';
+import { getDistrictByLocationId, bangkokDistricts } from '../utils';
 import prisma from '@/config/client';
 
+// แปลงข้อมูลดิบของ Open-Meteo ให้เหลือค่าของเมื่อวานที่พร้อมบันทึก
 const pickYesterdayPayload = (
   raw: ExternalRawDailyOnly,
   location_id: number | null,
@@ -18,8 +21,8 @@ const pickYesterdayPayload = (
   const dd = String(localY.getUTCDate()).padStart(2, '0');
   const target = `${yyyy}-${mm}-${dd}`;
 
-  const idx = raw.daily.time.findIndex((d) => d === target);
-  const use = idx >= 0 ? idx : 0;
+  const idx = raw.daily.time.indexOf(target);
+  const use = Math.max(idx, 0);
 
   const tmax = raw.daily.temperature_2m_max[use];
   const tmin = raw.daily.temperature_2m_min[use];
@@ -49,20 +52,22 @@ const pickYesterdayPayload = (
   };
 };
 
+// import ข้อมูลเมื่อวานให้ location เดียว (ตรวจ request ก่อน)
 const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   const b = WeatherOpenMeteoSchemas.ImportDailyBodySchema.parse(body);
-  if (!Number.isFinite(b.lat) || !Number.isFinite(b.lon)) {
-    throw new ValidationError('Invalid coordinates');
+  const district = getDistrictByLocationId(b.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${b.location_id}. Valid IDs are 1-4`
+    );
   }
-  // Use canonical Open-Meteo timezone for historical daily fetches
   const json = await OpenMeteoClient.getDailyPastOne(
-    b.lat,
-    b.lon,
+    district.lat,
+    district.lng,
     OPEN_METEO_TIMEZONE
   );
   const raw = WeatherOpenMeteoSchemas.ExternalRawDailyOnlySchema.parse(json);
 
-  // verify that provided location_id references an existing address; if not, treat as null
   let locId: number | null = b.location_id ?? null;
   if (locId != null) {
     const addr = await prisma.addresses.findUnique({ where: { id: locId } });
@@ -71,7 +76,19 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
 
   const { date, payload } = pickYesterdayPayload(raw, locId);
 
-  const created = await WeatherModel.create(payload);
+  console.info(
+    'Importing yesterday payload to DB for location_id=',
+    locId,
+    'payload=',
+    payload
+  );
+  let created;
+  try {
+    created = await WeatherModel.create(payload);
+  } catch (err) {
+    console.error('Failed to create weather_data in scheduler:', err);
+    throw err;
+  }
 
   return {
     created: !!created,
@@ -80,4 +97,40 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   };
 };
 
-export { importYesterdayToDatabase };
+// import ข้อมูลเมื่อวานให้ครบทุกเขตที่ระบบมี
+const importAllLocationsYesterday = async () => {
+  const results: Array<{
+    location_id: number;
+    success: boolean;
+    date?: string;
+    saved?: ReturnType<typeof pickYesterdayPayload>['payload'];
+    error?: string;
+  }> = [];
+
+  for (const district of bangkokDistricts) {
+    try {
+      const result = await importYesterdayToDatabase({
+        location_id: district.location_id,
+      });
+      results.push({
+        location_id: district.location_id,
+        success: true,
+        date: result.date,
+        saved: result.saved,
+      });
+    } catch (error) {
+      results.push({
+        location_id: district.location_id,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  return {
+    processed: results.length,
+    results,
+  };
+};
+
+export { importYesterdayToDatabase, importAllLocationsYesterday };
