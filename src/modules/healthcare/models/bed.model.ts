@@ -122,7 +122,9 @@ const create = async (data: CreateBedData): Promise<Bed> => {
         bed_type: data.bedType ?? null,
         status: data.status ?? null,
         patient_id: data.patientId ?? null,
-        admission_date: data.admissionDate ?? null,
+        admission_date: data.admissionDate
+          ? new Date(data.admissionDate)
+          : null,
       },
       select: bedSelect,
     });
@@ -158,7 +160,9 @@ const update = async (id: number, data: UpdateBedData): Promise<Bed> => {
     }
 
     if (data.admissionDate !== undefined) {
-      updateData.admission_date = data.admissionDate;
+      updateData.admission_date = data.admissionDate
+        ? new Date(data.admissionDate)
+        : null;
     }
 
     const bed = await prisma.beds.update({
