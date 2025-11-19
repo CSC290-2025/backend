@@ -142,10 +142,48 @@ const updateUserAccount = createPutRoute({
   tags: ['User'],
 });
 
+const RoleSchema = z.object({
+  id: z.number(),
+  role_name: z.string(),
+});
+
+const UserRolesResponseSchema = z.object({
+  userId: z.number(),
+  roles: z.array(RoleSchema),
+});
+
+const CreateUserRoleSchema = z.object({
+  user_id: z.number(),
+  role_id: z.number(),
+});
+
+const UserRoleResponseSchema = z.object({
+  user_id: z.number(),
+  role_id: z.number().nullable(),
+});
+
+const getUserRoles = createGetRoute({
+  path: '/user/roles/{id}',
+  summary: 'Get roles by user ID',
+  responseSchema: UserRolesResponseSchema,
+  params: UserIdParam,
+  tags: ['User'],
+});
+
+const createUserRole = createPostRoute({
+  path: '/user/roles',
+  summary: 'Create new user role',
+  requestSchema: CreateUserRoleSchema,
+  responseSchema: UserRoleResponseSchema,
+  tags: ['User'],
+});
+
 export const UserSchemas = {
   getUserinfoAndWallet,
   getUserProflie,
   updateUserPersonal,
   updateUserHealth,
   updateUserAccount,
+  getUserRoles,
+  createUserRole,
 };

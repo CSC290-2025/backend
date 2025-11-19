@@ -189,6 +189,28 @@ const getUsersByRole = async (c: Context) => {
   );
 };
 
+const getUserRoles = async (c: Context) => {
+  const id = parseInt(c.req.param('id'));
+  const userRoles = await UserService.getUserRoles(id);
+
+  const roleCount = userRoles.roles.length;
+
+  return successResponse(
+    c,
+    userRoles,
+    200,
+    `Fetched ${roleCount} ${roleCount === 1 ? 'role' : 'roles'} for user ID ${id}`
+  );
+};
+
+const createUserRole = async (c: Context) => {
+  const body = await c.req.json();
+
+  const userRole = await UserService.createUserRole(body);
+
+  return successResponse(c, userRole, 201, 'User role created successfully');
+};
+
 export {
   getUser,
   updatePersonalInfo,
@@ -205,4 +227,6 @@ export {
   updateUserPersonalData,
   updateUserHealthData,
   updateUserAccountData,
+  getUserRoles,
+  createUserRole,
 };
