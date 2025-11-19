@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { AuthMiddleware } from '@/middlewares';
+import { authMiddleware } from '@/middlewares';
 
 const FreecyclePostsSchema = z.object({
   id: z.number(),
@@ -69,7 +69,7 @@ const getUserFreecyclePostsRoute = createGetRoute({
   summary: 'Get post by user',
   responseSchema: FreecyclePostsSchema,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const createFreecyclePostsRoute = createPostRoute({
@@ -78,7 +78,7 @@ const createFreecyclePostsRoute = createPostRoute({
   requestSchema: CreateFreecyclePostsSchema,
   responseSchema: FreecyclePostsSchema,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const UpdateFreecyclePostsRoute = createPutRoute({
@@ -88,7 +88,7 @@ const UpdateFreecyclePostsRoute = createPutRoute({
   responseSchema: FreecyclePostsSchema,
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const DeleteFreecyclePostsRoute = createDeleteRoute({
@@ -96,7 +96,7 @@ const DeleteFreecyclePostsRoute = createDeleteRoute({
   summary: 'Delete post',
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const MarkAsGivenRoute = createPutRoute({
@@ -106,7 +106,7 @@ const MarkAsGivenRoute = createPutRoute({
   responseSchema: FreecyclePostsSchema,
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const MarkAsNotGivenRoute = createPutRoute({
@@ -116,7 +116,7 @@ const MarkAsNotGivenRoute = createPutRoute({
   responseSchema: FreecyclePostsSchema,
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const getNotGivenPostsRoute = createGetRoute({
