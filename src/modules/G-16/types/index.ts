@@ -1,2 +1,2 @@
-export * from './markerType.types'
-export * from './marker.types'
+export * from './markerType.types';
+export * from './marker.types';

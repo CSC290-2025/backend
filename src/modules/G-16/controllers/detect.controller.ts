@@ -58,15 +58,15 @@ export async function detectHarm(c: Context) {
   const types = toStringArray(ai.types);
   const reasons = toStringArray(ai.reasons);
 
-// 4) Create marker if dangerous or have problem
-let marker: any = null;
-const over_threshold = has_issue && confidence >= THRESHOLD;
+  // 4) Create marker if dangerous or have problem
+  let marker: any = null;
+  const over_threshold = has_issue && confidence >= THRESHOLD;
 
-if (over_threshold && checkCordinate) {
-  const title = types[0] ?? 'danger';
-  const description = `AI detected: ${title} (${Math.round(
-    confidence * 100
-  )}%)`;
+  if (over_threshold && checkCordinate) {
+    const title = types[0] ?? 'danger';
+    const description = `AI detected: ${title} (${Math.round(
+      confidence * 100
+    )}%)`;
 
     try {
       marker = await addtheMarker({
