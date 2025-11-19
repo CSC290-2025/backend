@@ -19,18 +19,18 @@ export const createMarker = async (
   data: CreateMarkerInput
 ): Promise<MarkerResponse> => {
   if (data.location) {
-    // 👇 normalize location ให้เป็น GeoJSON เสมอ
+    //  normalize location to GeoJSON
     const loc: any = data.location;
 
     let geoJson: any;
     if (loc.type && loc.coordinates) {
-      // กรณี frontend ส่ง GeoJSON มาอยู่แล้ว
+      // case that frontend send geojson
       geoJson = loc;
     } else if (typeof loc.lat === 'number' && typeof loc.lng === 'number') {
-      // กรณีเราใช้ { lat, lng } (เช่น detectHarm)
+      // case if we use { lat, lng }
       geoJson = {
         type: 'Point',
-        coordinates: [loc.lng, loc.lat], // ⭐ GeoJSON ใช้ [lng, lat]
+        coordinates: [loc.lng, loc.lat], //  GeoJSON use [lng, lat]
       };
     } else {
       throw new Error('Invalid location format');
@@ -57,7 +57,7 @@ export const createMarker = async (
     })) as MarkerResponse;
   }
 
-  // กรณีไม่มี location
+  // location is null
   return (await prisma.marker.create({
     data: {
       marker_type_id: data.marker_type_id ?? null,
@@ -108,7 +108,7 @@ export const updateMarker = async (
       });
     }
 
-    // ดึงข้อมูลพร้อม relation
+    // pull data with relation
     const result = await prisma.marker.findUnique({
       where: { id: numericId },
       include: { marker_type: true },
