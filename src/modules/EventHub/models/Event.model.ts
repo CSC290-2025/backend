@@ -50,7 +50,6 @@ const list = async (page: number, limit: number) => {
     handlePrismaError(error);
   }
 };
-
 const create = async (data: CreateEventInput) => {
   try {
     const startDateTime = new Date(
@@ -61,38 +60,61 @@ const create = async (data: CreateEventInput) => {
     );
 
     return await prisma.$transaction(async (tx) => {
-      let organizationId = data.organization_id;
-      if (data.organization && !organizationId) {
-        const org = await tx.event_organization.create({
-          data: {
-            id: data.host_user_id,
-            name: data.organization.name,
-            email: data.organization.email,
-            phone_number: data.organization.phone_number,
-          },
-        });
-        organizationId = org.id;
+      const organizationId = data.organization_id ?? data.host_user_id;
+
+      if (!organizationId) {
+        throw new Error('host_user_id or organization_id is required');
       }
 
-      let addressId = data.address_id;
-      if (data.address && !addressId) {
-        const addr = await tx.addresses.create({
+      const existingOrg = await tx.event_organization.findUnique({
+        where: { id: organizationId },
+      });
+
+      if (!existingOrg) {
+        await tx.event_organization.create({
           data: {
-            address_line: data.address.address_line,
-            province: data.address.province,
-            district: data.address.district,
-            subdistrict: data.address.subdistrict,
-            postal_code: data.address.postal_code,
+            id: organizationId,
+            name: data.organization?.name ?? null,
+            email: data.organization?.email ?? null,
+            phone_number: data.organization?.phone_number ?? null,
           },
         });
-        addressId = addr.id;
       }
-      // 3. Create event
+
+      let addressId = data.address_id ?? null;
+
+      if (!addressId && data.address) {
+        const existingAddr = await tx.addresses.findFirst({
+          where: {
+            address_line: data.address.address_line ?? null,
+            province: data.address.province ?? null,
+            district: data.address.district ?? null,
+            subdistrict: data.address.subdistrict ?? null,
+            postal_code: data.address.postal_code ?? null,
+          },
+        });
+
+        if (existingAddr) {
+          addressId = existingAddr.id;
+        } else {
+          const addr = await tx.addresses.create({
+            data: {
+              address_line: data.address.address_line ?? null,
+              province: data.address.province ?? null,
+              district: data.address.district ?? null,
+              subdistrict: data.address.subdistrict ?? null,
+              postal_code: data.address.postal_code ?? null,
+            },
+          });
+          addressId = addr.id;
+        }
+      }
+
       const event = await tx.events.create({
         data: {
           title: data.title,
-          description: data.description,
-          total_seats: data.total_seats || 0,
+          description: data.description ?? null,
+          total_seats: data.total_seats ?? 0,
           start_at: startDateTime,
           end_at: endDateTime,
           host_user_id: data.host_user_id,
@@ -101,7 +123,6 @@ const create = async (data: CreateEventInput) => {
         },
       });
 
-      // 4. Create event tag if provided
       if (data.event_tag_name) {
         const tagName = await tx.event_tag_name.upsert({
           where: { id: data.host_user_id },
@@ -114,7 +135,6 @@ const create = async (data: CreateEventInput) => {
           },
         });
 
-        // Link event to tag
         await tx.event_tag.create({
           data: {
             event_id: event.id,
