@@ -10,6 +10,19 @@ const setupUserRoutes = (app: OpenAPIHono) => {
 
   app.openapi(UserSchemas.getUserRoles, UserG2.getUserRoles);
   app.openapi(UserSchemas.createUserRole, UserG2.createUserRole);
+  app.openapi(UserSchemas.getCurrentUserProfile, UserG2.getCurrentUserProfile);
+  app.openapi(
+    UserSchemas.updateCurrentUserPersonal,
+    UserG2.updateCurrentUserPersonal
+  );
+  app.openapi(
+    UserSchemas.updateCurrentUserHealth,
+    UserG2.updateCurrentUserHealth
+  );
+  app.openapi(
+    UserSchemas.updateCurrentUserAccount,
+    UserG2.updateCurrentUserAccount
+  );
 };
 
 export { setupUserRoutes };
