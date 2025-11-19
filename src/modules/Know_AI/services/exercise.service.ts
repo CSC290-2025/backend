@@ -39,25 +39,67 @@ const submitAnswer = async (
   };
 };
 
+// const getExerciseProgress = async (userId: number, level: number) => {
+//   // Get all questions in this level
+//   const allQuestions = await QuestionModel.getQuestionsByLevel(level);
+//   const totalQuestions = allQuestions.length;
+
+//   // Get user's answers for this level
+//   const userExercises = await ExerciseModel.getUserExercisesByLevel(
+//     userId,
+//     level
+//   );
+//   const answeredCount = userExercises.length;
+
+//   // Count correct answers
+//   const correctCount = await ExerciseModel.countCorrectAnswersByLevel(
+//     userId,
+//     level
+//   );
+
+//   // Calculate percentages
+//   const progressPercentage =
+//     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+//   const scorePercentage =
+//     totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+
+//   return {
+//     level,
+//     total_questions: totalQuestions,
+//     answered_questions: answeredCount,
+//     correct_answers: correctCount,
+//     progress_percentage: Math.round(progressPercentage),
+//     score_percentage: Math.round(scorePercentage),
+//     questions: allQuestions.map((q) => {
+//       const userAnswer = userExercises.find((ue: any) => ue.question_id === q.id);
+//       return {
+//         id: q.id,
+//         question: q.question,
+//         answered: !!userAnswer,
+//         is_correct: userAnswer?.is_correct ?? null,
+//       };
+//     }),
+//   };
+// };
+
+// services/exercise.service.ts
+
 const getExerciseProgress = async (userId: number, level: number) => {
-  // Get all questions in this level
   const allQuestions = await QuestionModel.getQuestionsByLevel(level);
   const totalQuestions = allQuestions.length;
 
-  // Get user's answers for this level
-  const userExercises = await ExerciseModel.getUserExercisesByLevel(
+  const userExercises = (await ExerciseModel.getUserExercisesByLevel(
     userId,
     level
-  );
+  )) as any[];
+
   const answeredCount = userExercises.length;
 
-  // Count correct answers
   const correctCount = await ExerciseModel.countCorrectAnswersByLevel(
     userId,
     level
   );
 
-  // Calculate percentages
   const progressPercentage =
     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
   const scorePercentage =
@@ -70,13 +112,13 @@ const getExerciseProgress = async (userId: number, level: number) => {
     correct_answers: correctCount,
     progress_percentage: Math.round(progressPercentage),
     score_percentage: Math.round(scorePercentage),
-    questions: allQuestions.map((q) => {
+    questions: allQuestions.map((q: any) => {
       const userAnswer = userExercises.find((ue) => ue.question_id === q.id);
       return {
         id: q.id,
         question: q.question,
         answered: !!userAnswer,
-        is_correct: userAnswer?.is_correct || false,
+        is_correct: userAnswer?.is_correct ?? null,
       };
     }),
   };
