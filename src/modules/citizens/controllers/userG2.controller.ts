@@ -209,58 +209,6 @@ const createUserRole = async (c: Context) => {
   const userRole = await UserService.createUserRole(body);
 
   return successResponse(c, userRole, 201, 'User role created successfully');
-const getCurrentUserProfile = async (c: Context) => {
-  const user = c.get('user');
-  const userProfile = await UserService.getUserProflie(user.userId);
-  return successResponse(
-    c,
-    { user: userProfile },
-    200,
-    'User profile fetched successfully'
-  );
-};
-
-const updateCurrentUserPersonal = async (c: Context) => {
-  const user = c.get('user');
-  const body = await c.req.json();
-  const updatedUser = await UserService.updateUserPersonalData(
-    user.userId,
-    body.user,
-    body.address
-  );
-  return successResponse(
-    c,
-    { updateUser: updatedUser },
-    200,
-    'Personal data updated successfully'
-  );
-};
-
-const updateCurrentUserHealth = async (c: Context) => {
-  const user = c.get('user');
-  const body = await c.req.json();
-  const updatedUser = await UserService.updateUserHealthData(user.userId, body);
-  return successResponse(
-    c,
-    { updateUser: updatedUser },
-    200,
-    'Health data updated successfully'
-  );
-};
-
-const updateCurrentUserAccount = async (c: Context) => {
-  const user = c.get('user');
-  const body = await c.req.json();
-  const updatedUser = await UserService.updateUserAccountData(
-    user.userId,
-    body
-  );
-  return successResponse(
-    c,
-    { updateUser: updatedUser },
-    200,
-    'Account data updated successfully'
-  );
 };
 
 const getCurrentUserProfile = async (c: Context) => {

@@ -97,7 +97,7 @@ const getUserinfoAndWallet = createGetRoute({
   responseSchema: UserinfoAndWalletSchema,
   params: UserIdParam,
   tags: ['User'],
-  middleware: [authMiddleware, adminMiddleware],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 const getUserProflie = createGetRoute({
@@ -106,7 +106,7 @@ const getUserProflie = createGetRoute({
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
-  middleware: [authMiddleware, adminMiddleware],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 // const updateUserProfile = createPutRoute({
@@ -125,7 +125,7 @@ const updateUserPersonal = createPutRoute({
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
-  middleware: [authMiddleware, adminMiddleware],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 const updateUserHealth = createPutRoute({
@@ -145,7 +145,7 @@ const updateUserAccount = createPutRoute({
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
-  middleware: [authMiddleware, adminMiddleware],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 const getCurrentUserProfile = createGetRoute({
@@ -162,7 +162,7 @@ const updateCurrentUserPersonal = createPutRoute({
   requestSchema: UserPersonalData,
   responseSchema: UserSettingPageSchema,
   tags: ['User'],
-  middleware: [authMiddleware],
+  // middleware: [authMiddleware],
 });
 
 const updateCurrentUserHealth = createPutRoute({
@@ -180,7 +180,7 @@ const updateCurrentUserAccount = createPutRoute({
   requestSchema: UserAccountData,
   responseSchema: UserSettingPageSchema,
   tags: ['User'],
-  middleware: [authMiddleware],
+  // middleware: [authMiddleware],
 });
 
 const RoleSchema = z.object({
