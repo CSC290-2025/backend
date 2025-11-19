@@ -1,4 +1,4 @@
-import { type reports_metadata, report_visibility } from '@/generated/prisma';
+import { type reports_metadata } from '@/generated/prisma';
 
 // Extended type for report metadata that includes runtime fields
 export type ReportMetadataWithEmbedUrl = reports_metadata & {

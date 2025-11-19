@@ -17,25 +17,25 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
-// Citizen
-import {
-  setupCitizenAddressRoutes,
-  setupUserSpecialtyRoutes,
-  setupUserG8Routes,
-  setupRoleUserRoutes,
-  setupUserRoutes,
-  setupUserSpecialistRoutes,
-} from '@/modules/citizens/routes';
+// // Citizen
+// import {
+//   setupCitizenAddressRoutes,
+//   setupUserSpecialtyRoutes,
+//   setupUserG8Routes,
+//   setupRoleUserRoutes,
+//   setupUserRoutes,
+//   setupUserSpecialistRoutes,
+// } from '@/modules/citizens/routes';
 
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
-// Emergency
-import {
-  setupReportRoutes,
-  setupFcmRoutes,
-  setupTokenRoutes,
-} from '@/modules/emergency';
+// // Emergency
+// import {
+//   setupReportRoutes,
+//   setupFcmRoutes,
+//   setupTokenRoutes,
+// } from '@/modules/emergency';
 
 // import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
@@ -71,7 +71,7 @@ import {
 import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+import { detectRoutes, markerRoutes, distanceRoutes} from '@/modules/G-16/routes';
 
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
@@ -79,11 +79,11 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
-// Weather
-import {
-  setupWeatherRoutes,
-  setupOpenMeteoRoutes,
-} from '@/modules/weather/routes';
+// // Weather
+// import {
+//   setupWeatherRoutes,
+//   setupOpenMeteoRoutes,
+// } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
@@ -103,18 +103,18 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
-  // Citizen
-  setupCitizenAddressRoutes(app);
-  setupUserSpecialistRoutes(app);
-  setupUserSpecialtyRoutes(app);
-  setupUserG8Routes(app);
-  setupRoleUserRoutes(app);
-  setupUserRoutes(app);
+  // // Citizen
+  // setupCitizenAddressRoutes(app);
+  // setupUserSpecialistRoutes(app);
+  // setupUserSpecialtyRoutes(app);
+  // setupUserG8Routes(app);
+  // setupRoleUserRoutes(app);
+  // setupUserRoutes(app);
 
-  //Emergency
-  setupReportRoutes(app);
-  setupFcmRoutes(app);
-  setupTokenRoutes(app);
+  // //Emergency
+  // setupReportRoutes(app);
+  // setupFcmRoutes(app);
+  // setupTokenRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -142,9 +142,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Waste
   setupWasteRoutes(app);
 
-  // Weather
-  setupOpenMeteoRoutes(app);
-  setupWeatherRoutes(app);
+  // // Weather
+  // setupOpenMeteoRoutes(app);
+  // setupWeatherRoutes(app);
 
   /*
   ============================================
@@ -164,6 +164,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
+  app.route('/api', distanceRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
