@@ -1,5 +1,5 @@
 import prisma from '@/config/client';
-import type { metro_cards } from '@/generated/prisma';
+import type { metro_cards, card_transactions } from '@/generated/prisma';
 import type { MetroCard, UpdateMetroCardData } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
@@ -141,6 +141,19 @@ const deleteMetroCard = async (id: number): Promise<void> => {
   }
 };
 
+const findCardTransactionById = async (
+  id: number
+): Promise<card_transactions> => {
+  try {
+    const cardTransaction = await prisma.card_transactions.findUniqueOrThrow({
+      where: { id },
+    });
+    return cardTransaction;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createMetroCard,
   findMetroCardsByUserId,
@@ -149,4 +162,5 @@ export {
   updateMetroCard,
   updateMetroCardBalance,
   deleteMetroCard,
+  findCardTransactionById,
 };
