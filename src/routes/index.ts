@@ -37,7 +37,14 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-import { reportRoutes } from '@/modules/power-bi';
+import { setupReportsRoutes } from '@/modules/power-bi';
+// import { setupAuthRoutes } from '@/modules/auth/routes';
+// import { setupPaymentRoutes } from '@/modules/payment/routes';
+// import { setupProductRoutes } from '@/modules/_example';
+
+// Normal Hono Routes (not in Swagger docs)
+// import { productRoutes } from '@/modules/_example';
+// import { reportRoutes } from '@/modules/power-bi';
 
 // Volunteer
 import { eventRoutes } from '../modules/Volunteer/routes';
@@ -77,8 +84,20 @@ export const setupRoutes = (app: OpenAPIHono) => {
   */
 
   // Power BI
-  app.route('/reports', reportRoutes);
+  setupReportsRoutes(app);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
+  // ============================================
+  // OpenAPI Routes (documented in Swagger)
+  // ============================================
+  // setupAuthRoutes(app);
+  // setupPaymentRoutes(app);
+  // setupProductRoutes(app);
+  //
+  // ============================================
+  // Normal Hono Routes (not in Swagger docs)
+  // ============================================
+  // app.route('/products', productRoutes);
+  // app.route('/reports', reportRoutes);
 };
