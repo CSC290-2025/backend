@@ -7,6 +7,9 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
+// Auth
+import { setupAuthRoutes } from '@/modules/Auth/routes';
+
 // Apartment
 import {
   setupApartmentRoutes,
@@ -17,6 +20,8 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
+
+// // Citizen
 // Citizen
 // import {
 //   setupCitizenAddressRoutes,
@@ -26,16 +31,33 @@ import {
 //   setupUserRoutes,
 //   setupUserSpecialistRoutes,
 // } from '@/modules/citizens/routes';
+// Citizen
+import {
+  setupCitizenAddressRoutes,
+  setupUserSpecialtyRoutes,
+  setupUserG8Routes,
+  setupRoleUserRoutes,
+  setupUserRoutes,
+  setupUserSpecialistRoutes,
+} from '@/modules/citizens/routes';
 
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
+
+// // Emergency
 // Emergency
 // import {
 //   setupReportRoutes,
 //   setupFcmRoutes,
 //   setupTokenRoutes,
 // } from '@/modules/emergency';
+// Emergency
+import {
+  setupReportRoutes,
+  setupFcmRoutes,
+  setupTokenRoutes,
+} from '@/modules/emergency';
 
 // import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
@@ -83,11 +105,17 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
+// // Weather
 // Weather
 // import {
 //   setupWeatherRoutes,
 //   setupOpenMeteoRoutes,
 // } from '@/modules/weather/routes';
+// Weather
+import {
+  setupWeatherRoutes,
+  setupOpenMeteoRoutes,
+} from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
@@ -95,6 +123,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   OpenAPI Routes (documented in Swagger)
   ============================================
   */
+
+  // Auth
+  setupAuthRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
@@ -119,6 +150,17 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupReportRoutes(app);
   // setupFcmRoutes(app);
   // setupTokenRoutes(app);
+  setupCitizenAddressRoutes(app);
+  setupUserSpecialistRoutes(app);
+  setupUserSpecialtyRoutes(app);
+  setupUserG8Routes(app);
+  setupRoleUserRoutes(app);
+  setupUserRoutes(app);
+
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -146,9 +188,13 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Waste
   setupWasteRoutes(app);
 
+
   // Weather
   // setupOpenMeteoRoutes(app);
   // setupWeatherRoutes(app);
+  // Weather
+  setupOpenMeteoRoutes(app);
+  setupWeatherRoutes(app);
 
   /*
   ============================================

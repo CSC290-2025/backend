@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { AuthMiddleware } from '@/middlewares';
+import { authMiddleware } from '@/middlewares';
 
 const FreecyclePostsCategoriesSchema = z.object({
   post_id: z.number(),
@@ -48,7 +48,7 @@ const addCategoryToPostRoute = createPostRoute({
   responseSchema: FreecyclePostsCategoriesSchema,
   params: PostIdParam,
   tags: ['Freecycle-PostCategories'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const addCategoriesToPostRoute = createPostRoute({
@@ -58,7 +58,7 @@ const addCategoriesToPostRoute = createPostRoute({
   responseSchema: z.array(FreecyclePostsCategoriesSchema),
   params: PostIdParam,
   tags: ['Freecycle-PostCategories'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const removeCategoriesFromPostRoute = createDeleteRoute({
@@ -66,7 +66,7 @@ const removeCategoriesFromPostRoute = createDeleteRoute({
   summary: 'remove categories from post',
   params: PostCategoryParams,
   tags: ['Freecycle-PostCategories'],
-  middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 export const FreecyclePostsCategoriesSchemas = {
