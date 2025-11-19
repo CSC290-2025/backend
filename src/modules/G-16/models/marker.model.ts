@@ -1,10 +1,5 @@
 import prisma from '@/config/client.ts';
 import { handlePrismaError, ValidationError } from '@/errors';
-<<<<<<< HEAD
-import type { CreateMarkerTypeInput, UpdateMarkerTypeInput, MarkerTypeResponse } from '../types/markerType.types';
-import type { CreateMarkerInput, MarkerResponse, UpdateMarkerInput } from '../types/marker.types';
-// import { PrismaClient } from '@prisma/client';
-=======
 import type {
   CreateMarkerTypeInput,
   UpdateMarkerTypeInput,
@@ -16,7 +11,6 @@ import type {
   UpdateMarkerInput,
 } from '../types/marker.types';
 import { PrismaClient } from '@prisma/client';
->>>>>>> 180b43e3c6995176aa4eba2874b144743e47ba8e
 import type { BoundingBox } from '../types/marker.types';
 import type { marker } from '@/generated/prisma';
 

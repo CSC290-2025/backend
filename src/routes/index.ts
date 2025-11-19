@@ -17,11 +17,7 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
-<<<<<<< HEAD
-// // Citizen
-=======
 // Citizen
->>>>>>> 180b43e3c6995176aa4eba2874b144743e47ba8e
 // import {
 //   setupCitizenAddressRoutes,
 //   setupUserSpecialtyRoutes,
@@ -34,11 +30,7 @@ import {
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
-<<<<<<< HEAD
-// // Emergency
-=======
 // Emergency
->>>>>>> 180b43e3c6995176aa4eba2874b144743e47ba8e
 // import {
 //   setupReportRoutes,
 //   setupFcmRoutes,
@@ -79,7 +71,11 @@ import {
 import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes, distanceRoutes} from '@/modules/G-16/routes';
+import {
+  detectRoutes,
+  markerRoutes,
+  distanceRoutes,
+} from '@/modules/G-16/routes';
 
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
@@ -87,11 +83,7 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
-<<<<<<< HEAD
-// // Weather
-=======
 // Weather
->>>>>>> 180b43e3c6995176aa4eba2874b144743e47ba8e
 // import {
 //   setupWeatherRoutes,
 //   setupOpenMeteoRoutes,
@@ -115,11 +107,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
-<<<<<<< HEAD
-  // // Citizen
-=======
   // Citizen
->>>>>>> 180b43e3c6995176aa4eba2874b144743e47ba8e
   // setupCitizenAddressRoutes(app);
   // setupUserSpecialistRoutes(app);
   // setupUserSpecialtyRoutes(app);
@@ -158,11 +146,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Waste
   setupWasteRoutes(app);
 
-<<<<<<< HEAD
-  // // Weather
-=======
   // Weather
->>>>>>> 180b43e3c6995176aa4eba2874b144743e47ba8e
   // setupOpenMeteoRoutes(app);
   // setupWeatherRoutes(app);
 
