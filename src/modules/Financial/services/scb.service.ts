@@ -98,7 +98,7 @@ const createQrCode = async (
   // Create wallet transaction
   await ScbModel.createWalletTransaction({
     wallet_id: walletId,
-    transaction_type: 'top_up',
+    transaction_type: 'transfer_in',
     amount: amount,
     target_service: 'wallet_top',
     description: `${ref1}`,

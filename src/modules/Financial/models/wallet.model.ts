@@ -118,20 +118,25 @@ const WalletBalanceTopup = async (
 };
 
 // Transaction operations
-const createTransaction = async (data: {
-  wallet_id: number;
-  transaction_type:
-    | 'top_up'
-    | 'transfer_in'
-    | 'transfer_out'
-    | 'transfer_to_service';
-  amount: number;
-  target_wallet_id?: number;
-  target_service?: string;
-  description?: string;
-}): Promise<number> => {
+const createTransaction = async (
+  data: {
+    wallet_id: number;
+    transaction_type:
+      | 'top_up'
+      | 'transfer_in'
+      | 'transfer_out'
+      | 'transfer_to_service';
+    amount: number;
+    target_wallet_id?: number;
+    target_service?: string;
+    description?: string;
+  },
+  trx?: Prisma.TransactionClient
+): Promise<number> => {
   try {
-    const transaction = await prisma.wallet_transactions.create({
+    // The core logic: Use the passed-in transaction client (trx) if available,
+    // otherwise fall back to the global Prisma client.
+    const transaction = await (trx ?? prisma).wallet_transactions.create({
       data: {
         wallet_id: data.wallet_id,
         transaction_type: data.transaction_type,
@@ -181,6 +186,30 @@ const atomicTransferFunds = async (
         data: {
           balance: { increment: amount },
           updated_at: new Date(),
+        },
+      });
+      // for the vibe where in a wallet you can check all the incoming to your wallet in one column
+      // and also all the outgoing from your wallet in another column separately
+
+      await tx.wallet_transactions.create({
+        data: {
+          wallet_id: fromWalletId,
+          transaction_type: 'transfer_out',
+          amount: -amount,
+          target_wallet_id: toWalletId,
+          target_service: 'peer_transfer',
+          description: `Transfer to wallet ${toWalletId}`,
+        },
+      });
+
+      await tx.wallet_transactions.create({
+        data: {
+          wallet_id: toWalletId,
+          transaction_type: 'transfer_in',
+          amount: amount,
+          target_wallet_id: fromWalletId,
+          target_service: 'peer_transfer',
+          description: `Transfer from wallet ${fromWalletId}`,
         },
       });
 

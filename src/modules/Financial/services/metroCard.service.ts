@@ -68,6 +68,17 @@ const topUpBalance = async (
 
   return await prisma.$transaction(async (trx) => {
     await WalletModel.WalletBalanceTopup(walletId, amount, 'decrement', trx);
+    // Log transfer from user wallet to metro card
+    await WalletModel.createTransaction(
+      {
+        wallet_id: walletId,
+        transaction_type: 'transfer_to_service',
+        amount: -amount,
+        target_service: `metro_card:${existingMetroCard.id}`,
+        description: `Top-up to metro card ${existingMetroCard.card_number}`,
+      },
+      trx
+    );
     const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
       existingMetroCard.id,
       amount,
@@ -129,6 +140,18 @@ const transferToTransportation = async (
       transportationWallet.id,
       amount,
       'increment',
+      trx
+    );
+
+    // Record a transaction for the organization receiving the funds
+    await WalletModel.createTransaction(
+      {
+        wallet_id: transportationWallet.id,
+        transaction_type: 'transfer_in',
+        amount: amount,
+        target_service: 'transportation',
+        description: `Transfer from metro card ${existingMetroCard.card_number}`,
+      },
       trx
     );
 
