@@ -85,7 +85,7 @@ const appointmentTypes = [
   'Vaccination',
 ];
 const paymentMethods = ['Insurance', 'Credit Card', 'Cash'];
-const genders = ['male', 'female', 'none'] as const;
+const genders: Array<'male' | 'female' | 'none'> = ['male', 'female', 'none'];
 
 async function main() {
   console.log('Starting to seed healthcare data...');

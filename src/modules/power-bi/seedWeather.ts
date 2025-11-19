@@ -179,16 +179,10 @@ async function main() {
         }
 
         const aqi = randomFloat(baseAQI - 15, baseAQI + 60);
-        let category:
-          | 'good'
-          | 'moderate'
-          | 'unhealthy'
-          | 'very_unhealthy'
-          | 'hazardous';
+        let category: 'good' | 'moderate' | 'unhealthy' | 'hazardous';
         if (aqi <= 50) category = 'good';
         else if (aqi <= 100) category = 'moderate';
         else if (aqi <= 150) category = 'unhealthy';
-        else if (aqi <= 200) category = 'very_unhealthy';
         else category = 'hazardous';
 
         allAirQualityRecords.push({

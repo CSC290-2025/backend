@@ -5,18 +5,20 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import type { MiddlewareHandler } from 'hono';
+// import type { MiddlewareHandler } from 'hono';
+// import { UnauthorizedError } from "@/errors/types";
 
 // Admin middleware - checks role from query parameter or headers
-const requireAdmin: MiddlewareHandler = async (c, next) => {
-  const role = c.req.query('role') ?? '';
+// will use auth middleware later
+// const requireAdmin: MiddlewareHandler = async (c, next) => {
+//   const role = c.req.query('role') ?? '';
 
-  if (role.toLowerCase() !== 'admin') {
-    return c.json({ error: 'Admin role required for this action' }, 403);
-  }
+//   if (role.toLowerCase() !== 'admin') {
+//     return new UnauthorizedError('Admin role required for this action');
+//   }
 
-  await next();
-};
+//   await next();
+// };
 
 // Zod schemas
 const CategorySchema = z.object({
@@ -119,7 +121,7 @@ const createReportRoute = createPostRoute({
   requestSchema: CreateReportSchema,
   responseSchema: ReportResponseSchema,
   tags: ['PowerBI - Reports'],
-  middleware: [requireAdmin],
+  // middleware: [requireAdmin],
 });
 
 const updateReportRoute = createPutRoute({
@@ -129,7 +131,7 @@ const updateReportRoute = createPutRoute({
   responseSchema: ReportResponseSchema,
   params: ReportIdParam,
   tags: ['PowerBI - Reports'],
-  middleware: [requireAdmin],
+  // middleware: [requireAdmin],
 });
 
 const deleteReportRoute = createDeleteRoute({
@@ -137,7 +139,7 @@ const deleteReportRoute = createDeleteRoute({
   summary: 'Delete report metadata (Admin only)',
   params: ReportIdParam,
   tags: ['PowerBI - Reports'],
-  middleware: [requireAdmin],
+  // middleware: [requireAdmin],
 });
 
 export const ReportsSchemas = {
