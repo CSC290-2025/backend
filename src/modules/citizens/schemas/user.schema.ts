@@ -56,15 +56,18 @@ const UserSettingPageSchema = z.object({
 
 const UserPersonalData = z.object({
   user: z.object({
-    id_card_number: z.string().nullable(),
-    first_name: z.string().nullable(),
-    middle_name: z.string().nullable(),
-    last_name: z.string().nullable(),
-    ethnicity: z.string().nullable(),
-    nationality: z.string().nullable(),
-    religion: z.string().nullable(),
+    phone: z.string(),
+    user_profile: z.object({
+      id_card_number: z.string().nullable(),
+      first_name: z.string().nullable(),
+      middle_name: z.string().nullable(),
+      last_name: z.string().nullable(),
+      ethnicity: z.string().nullable(),
+      nationality: z.string().nullable(),
+      religion: z.string().nullable(),
+    }),
+    address: z.union([AddressSchema, z.array(AddressSchema)]),
   }),
-  address: z.union([AddressSchema, z.array(AddressSchema)]),
 });
 
 const UserHealthData = z.object({
