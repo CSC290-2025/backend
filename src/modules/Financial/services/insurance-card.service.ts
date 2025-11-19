@@ -85,9 +85,20 @@ const topUpFromWallet = async (
         data: {
           wallet_id: wallet.id,
           transaction_type: 'transfer_to_service',
-          amount: -data.amount, // Negative for deduction
+          amount: data.amount,
           target_service: `insurance_card:${card.id}`,
           description: `Top-up to insurance card ${card.card_number}`,
+        },
+      });
+      // Record card transaction
+      await tx.card_transactions.create({
+        data: {
+          card_id: card.id,
+          card_type: 'insurance',
+          transaction_type: 'top_up',
+          reference: String(transaction.id),
+          amount: data.amount,
+          description: `Top-up from wallet ${wallet.id} to insurance card ${card.card_number}`,
         },
       });
 
