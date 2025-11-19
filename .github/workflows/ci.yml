@@ -59,8 +59,11 @@ jobs:
       - name: Generate Prisma client
         run: pnpm prisma generate
 
-      - name: Create serviceAccount.json
-        run: echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" > serviceAccount.json
+      - name: Create serviceAccount.json via Node
+        run: |
+          node -e "require('fs').writeFileSync('serviceAccount.json', process.env.SERVICE_ACCOUNT_JSON)"
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON }}
 
       - name: Build
         run: pnpm build
