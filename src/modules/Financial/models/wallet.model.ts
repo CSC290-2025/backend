@@ -1,6 +1,6 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { wallets } from '@/generated/prisma';
+import type { wallets, wallet_transactions } from '@/generated/prisma';
 import type {
   Wallet,
   CreateWalletData,
@@ -152,11 +152,29 @@ const createTransaction = async (
   }
 };
 
+const findWalletTransactionById = async (
+  id: number
+): Promise<wallet_transactions> => {
+  try {
+    const transaction = await prisma.wallet_transactions.findUniqueOrThrow({
+      where: { id },
+    });
+    return transaction;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const atomicTransferFunds = async (
   fromWalletId: number,
   toWalletId: number,
   amount: number
-): Promise<{ fromWallet: Wallet; toWallet: Wallet }> => {
+): Promise<{
+  fromWallet: Wallet;
+  toWallet: Wallet;
+  fromTransactionId: number;
+  toTransactionId: number;
+}> => {
   try {
     const result = await prisma.$transaction(async (tx) => {
       const senderWallet = await tx.wallets.findUnique({
@@ -191,18 +209,18 @@ const atomicTransferFunds = async (
       // for the vibe where in a wallet you can check all the incoming to your wallet in one column
       // and also all the outgoing from your wallet in another column separately
 
-      await tx.wallet_transactions.create({
+      const fromTransaction = await tx.wallet_transactions.create({
         data: {
           wallet_id: fromWalletId,
           transaction_type: 'transfer_out',
-          amount: -amount,
+          amount: amount,
           target_wallet_id: toWalletId,
           target_service: 'peer_transfer',
           description: `Transfer to wallet ${toWalletId}`,
         },
       });
 
-      await tx.wallet_transactions.create({
+      const toTransaction = await tx.wallet_transactions.create({
         data: {
           wallet_id: toWalletId,
           transaction_type: 'transfer_in',
@@ -213,12 +231,19 @@ const atomicTransferFunds = async (
         },
       });
 
-      return { fromWallet, toWallet };
+      return {
+        fromWallet,
+        toWallet,
+        fromTransactionId: fromTransaction.id,
+        toTransactionId: toTransaction.id,
+      };
     });
 
     return {
       fromWallet: transformWallet(result.fromWallet),
       toWallet: transformWallet(result.toWallet),
+      fromTransactionId: result.fromTransactionId,
+      toTransactionId: result.toTransactionId,
     };
   } catch (error) {
     handlePrismaError(error);
@@ -233,5 +258,6 @@ export {
   updateWallet,
   WalletBalanceTopup,
   createTransaction,
+  findWalletTransactionById,
   atomicTransferFunds,
 };
