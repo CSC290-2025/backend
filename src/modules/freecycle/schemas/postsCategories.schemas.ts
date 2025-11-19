@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { AuthMiddleware } from '@/middlewares';
+// import { AuthMiddleware } from '@/middlewares';
 
 const FreecyclePostsCategoriesSchema = z.object({
   post_id: z.number(),
@@ -17,7 +17,7 @@ const AddCategoryToPostSchema = z.object({
 });
 
 const AddCategoriesToPostSchema = z.object({
-  category_ids: z.array(z.number()).min(1, 'At least one category is required'),
+  category_id: z.array(z.number()).min(1, 'At least one category is required'),
 });
 
 const PostIdParam = z.object({
@@ -48,7 +48,7 @@ const addCategoryToPostRoute = createPostRoute({
   responseSchema: FreecyclePostsCategoriesSchema,
   params: PostIdParam,
   tags: ['Freecycle-PostCategories'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const addCategoriesToPostRoute = createPostRoute({
@@ -58,7 +58,7 @@ const addCategoriesToPostRoute = createPostRoute({
   responseSchema: z.array(FreecyclePostsCategoriesSchema),
   params: PostIdParam,
   tags: ['Freecycle-PostCategories'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const removeCategoriesFromPostRoute = createDeleteRoute({
@@ -66,7 +66,7 @@ const removeCategoriesFromPostRoute = createDeleteRoute({
   summary: 'remove categories from post',
   params: PostCategoryParams,
   tags: ['Freecycle-PostCategories'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 export const FreecyclePostsCategoriesSchemas = {

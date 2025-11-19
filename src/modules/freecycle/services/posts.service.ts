@@ -98,6 +98,10 @@ const getPostsByCategory = async (
   return await PostsModel.findPostsByCategoryId(categoryId);
 };
 
+const getPostsByUserId = async (userId: number): Promise<FreecyclePost[]> => {
+  return await PostsModel.findPostByDonater(userId);
+};
+
 export {
   getAllPost,
   getPostById,
@@ -109,4 +113,5 @@ export {
   getNotGivenPost,
   markAsNotGiven,
   getPostsByCategory,
+  getPostsByUserId,
 };

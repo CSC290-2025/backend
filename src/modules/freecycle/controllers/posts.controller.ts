@@ -71,6 +71,13 @@ const getPostsByCategory = async (c: Context) => {
   return successResponse(c, { posts });
 };
 
+const getPostsByUserId = async (c: Context) => {
+  const userId = Number(c.req.param('userId'));
+
+  const posts = await PostsService.getPostsByUserId(userId);
+  return successResponse(c, { posts });
+};
+
 export {
   getAllPost,
   getPostById,
@@ -82,4 +89,5 @@ export {
   getNotGivenPost,
   markAsNotGiven,
   getPostsByCategory,
+  getPostsByUserId,
 };

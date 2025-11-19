@@ -90,9 +90,9 @@ const updatePost = async (
     if (!existingPost) {
       throw new Error('Post not found');
     }
-    if (existingPost.donater_id !== donaterId) {
-      throw new Error('Unauthorized: You can only update your own posts');
-    }
+    // if (existingPost.donater_id !== donaterId) {
+    //   throw new Error('Unauthorized: You can only update your own posts');
+    // }
     const post = await prisma.freecycle_posts.update({
       where: { id },
       data: {
@@ -117,9 +117,9 @@ const deletePost = async (id: number, donaterId: number): Promise<void> => {
     if (!existingPost) {
       throw new Error('Post not found');
     }
-    if (existingPost.donater_id !== donaterId) {
-      throw new Error('Unauthorized: You can only delete your own posts');
-    }
+    // if (existingPost.donater_id !== donaterId) {
+    //   throw new Error('Unauthorized: You can only delete your own posts');
+    // }
     await prisma.freecycle_posts.delete({
       where: { id },
     });
@@ -139,9 +139,9 @@ const markAsGiven = async (
     if (!existingPost) {
       throw new Error('Post not found');
     }
-    if (existingPost.donater_id !== donaterId) {
-      throw new Error('Unauthorized');
-    }
+    // if (existingPost.donater_id !== donaterId) {
+    //   throw new Error('Unauthorized');
+    // }
     const post = await prisma.freecycle_posts.update({
       where: { id },
       data: { is_given: true },
@@ -181,9 +181,9 @@ const markAsNotGiven = async (
     if (!existingPost) {
       throw new Error('Post not found');
     }
-    if (existingPost.donater_id !== donaterId) {
-      throw new Error('Unauthorized');
-    }
+    // if (existingPost.donater_id !== donaterId) {
+    //   throw new Error('Unauthorized');
+    // }
     const post = await prisma.freecycle_posts.update({
       where: { id },
       data: { is_given: false },
