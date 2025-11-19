@@ -1215,3 +1215,37 @@ enum report_visibility {
   citizens
   admin
 }
+
+enum BinType {
+  RECYCLABLE
+  GENERAL
+  HAZARDOUS
+  ORGANIC
+}
+
+enum BinStatus {
+  NORMAL
+  OVERFLOW
+  NEEDS_COLLECTION
+  MAINTENANCE
+}
+
+model bin_locations {
+  id                      Int        @id @default(autoincrement())
+  bin_name                String     @db.VarChar(255)
+  bin_type                BinType
+  latitude                Decimal    @db.Decimal(10, 8)
+  longitude               Decimal    @db.Decimal(11, 8)
+  address                 String?    @db.Text
+  capacity_kg             Decimal?   @db.Decimal(10, 2)
+  status                  BinStatus  @default(NORMAL)
+  last_collected_at       DateTime   @default(now())
+  total_collected_weight  Decimal    @default(0) @db.Decimal(10, 2)
+  created_at              DateTime   @default(now())
+  updated_at              DateTime   @updatedAt
+
+  @@index([bin_type])
+  @@index([status])
+  @@index([latitude, longitude])
+  @@map("bin_locations")
+}
