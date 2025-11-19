@@ -50,6 +50,7 @@ import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupTransactionRoutes,
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
@@ -129,6 +130,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
+  setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
   //
   // ============================================
