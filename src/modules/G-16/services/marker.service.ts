@@ -65,12 +65,12 @@ export const updateMarker = async (
     return await updateMarkerModel(id, data);
   } catch (error: any) {
     console.error('Error updating marker:', error);
-    
-    // ถ้าเป็น "not found" error ให้ throw ต่อไป
+
+    // if "not found" error then throw
     if (error.message && error.message.includes('not found')) {
       throw error;
     }
-    
+
     throw new Error('Failed to update marker');
   }
 };
@@ -80,12 +80,12 @@ export const deleteMarker = async (id: string): Promise<void> => {
     await deleteMarkerModel(id);
   } catch (error: any) {
     console.error('Error deleting marker:', error);
-    
-    // ถ้าเป็น "not found" error ให้ throw ต่อไป
+
+    // if "not found" error then throw
     if (error.message && error.message.includes('not found')) {
       throw error;
     }
-    
+
     throw new Error('Failed to delete marker');
   }
 };
@@ -100,7 +100,6 @@ export const getMarkersByBounds = async (
     throw new Error('Failed to fetch markers by bounds');
   }
 };
-
 
 // const markers: markerType[] = [];
 
@@ -127,4 +126,3 @@ export const getMarkersByBounds = async (
 // function getMarkersByTypes(marker_type_ids: number[]): { id: number; description: string | null; location: any; marker_type_id: number | null; marker_type: { id: number; marker_type_icon: string | null; marker_type_color: string | null; } | null; created_at: Date; updated_at: Date; }[] | PromiseLike<...> {
 //   throw new Error('Function not implemented.');
 // }
-

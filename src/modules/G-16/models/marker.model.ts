@@ -214,7 +214,7 @@ export const getAllMarkers = async (options?: {
 
   const markers = rows.map((row) => ({
     ...row,
-    // ST_AsGeoJSON คืนมาเป็น string → parse เป็น object { type, coordinates }
+    // ST_AsGeoJSON to string -> parse to object { type, coordinates }
     location: row.location ? JSON.parse(row.location) : null,
   }));
 
