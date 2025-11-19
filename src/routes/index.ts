@@ -71,7 +71,11 @@ import {
 import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+import {
+  detectRoutes,
+  markerRoutes,
+  distanceRoutes,
+} from '@/modules/G-16/routes';
 
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
@@ -111,7 +115,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // setupRoleUserRoutes(app);
   // setupUserRoutes(app);
 
-  //Emergency
+  // //Emergency
   // setupReportRoutes(app);
   // setupFcmRoutes(app);
   // setupTokenRoutes(app);
@@ -166,6 +170,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
+  app.route('/api', distanceRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

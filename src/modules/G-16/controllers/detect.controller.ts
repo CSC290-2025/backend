@@ -83,9 +83,9 @@ export async function detectHarm(c: Context) {
     ok: true,
     has_issue,
     confidence, // 0..1
+    category,
     types, // string[]
     reasons, // string[]
-    category,
     threshold: THRESHOLD,
     over_threshold,
     marker, // { id, lat, lng, ... } or null

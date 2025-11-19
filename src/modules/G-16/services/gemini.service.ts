@@ -14,7 +14,6 @@ const PROMPT = `You're an AI assistant in smart city hub, your task are:
                 3. Classify the situation into one of the following: harm - weapons, violence, fire, dangerous object, hazardous situations
                                                                      health - have a sick person, injured, collapsed, fainting, wounded
                                                                      trash - overflowing trash bin, garbage on the street
-                                                                     traffic - accident, road blockage, dangerous driving
                                                                      other - any urban issue not fitting above
                 return only the following json format
                 {
