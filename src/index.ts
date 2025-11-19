@@ -14,8 +14,14 @@ app.onError(errorHandler);
 
 app.use(
   cors({
-    origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    origin: (origin) => {
+      if (config.isProduction) {
+        return 'https://smartcity.sit.kmutt.ac.th';
+      }
+      return origin || 'http://localhost:5173';
+    },
+    allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
   })
 );
 
