@@ -102,7 +102,7 @@ const getAllReportsRoute = createGetRoute({
   path: '/reports/all',
   summary: 'Get all report metadata',
   responseSchema: ReportsListSchema,
-  tags: ['Reports'],
+  tags: ['PowerBI - Reports'],
 });
 
 const getReportsByRoleRoute = createGetRoute({
@@ -110,7 +110,7 @@ const getReportsByRoleRoute = createGetRoute({
   summary: 'Get reports filtered by role and organized by category',
   responseSchema: ReportsByCategoryResponseSchema,
   query: RoleQuery,
-  tags: ['Reports'],
+  tags: ['PowerBI - Reports'],
 });
 
 const createReportRoute = createPostRoute({
@@ -118,7 +118,7 @@ const createReportRoute = createPostRoute({
   summary: 'Create new report metadata (Admin only)',
   requestSchema: CreateReportSchema,
   responseSchema: ReportResponseSchema,
-  tags: ['Reports'],
+  tags: ['PowerBI - Reports'],
   middleware: [requireAdmin],
 });
 
@@ -128,7 +128,7 @@ const updateReportRoute = createPutRoute({
   requestSchema: UpdateReportSchema,
   responseSchema: ReportResponseSchema,
   params: ReportIdParam,
-  tags: ['Reports'],
+  tags: ['PowerBI - Reports'],
   middleware: [requireAdmin],
 });
 
@@ -136,7 +136,7 @@ const deleteReportRoute = createDeleteRoute({
   path: '/reports/{id}',
   summary: 'Delete report metadata (Admin only)',
   params: ReportIdParam,
-  tags: ['Reports'],
+  tags: ['PowerBI - Reports'],
   middleware: [requireAdmin],
 });
 
