@@ -1,8 +1,9 @@
 // src/controllers/detect.controller.ts
 import type { Context } from 'hono';
 import { detectDangerFromImage } from '../services/gemini.service';
-import { addMarker } from '../services/marker.service';
+// import { addMarker } from '../services/marker.service';
 import { ValidationError } from '@/errors';
+import { addtheMarker } from '../services/marker.service';
 
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const THRESHOLD = 0.8;
@@ -47,41 +48,59 @@ export async function detectHarm(c: Context) {
   const buffer = Buffer.from(await file.arrayBuffer());
   const ai = await detectDangerFromImage(buffer, file.type);
 
-  const is_danger = Boolean(ai.is_danger);
+  const has_issue = Boolean(ai.has_issue);
 
   const rawConfidence = Number(ai.confidence) || 0;
   const confidence = Math.min(1, Math.max(0, rawConfidence));
 
-  const danger_types = toStringArray(ai.danger_types);
+  const category = toStringArray(ai.category);
+
+  const types = toStringArray(ai.types);
   const reasons = toStringArray(ai.reasons);
 
-  // 4) Create marker if dangerous
+  // 4) Create marker if dangerous or have problem
   let marker: any = null;
-  const over_threshold = is_danger && confidence >= THRESHOLD;
+  const over_threshold = has_issue && confidence >= THRESHOLD;
 
   if (over_threshold && checkCordinate) {
-    const title = danger_types[0] ?? 'danger';
+    const title = types[0] ?? 'danger';
     const description = `AI detected: ${title} (${Math.round(
       confidence * 100
     )}%)`;
 
-    marker = await addMarker({
-      lat,
-      lng,
-      marker_type_id: DANGER_MARKER_TYPE_ID,
-      title,
-      description,
-      confidence,
-      categories: danger_types,
-    });
+    try {
+      marker = await addtheMarker({
+        location: {
+          lat: lat,
+          lng: lng,
+        },
+        marker_type_id: null,
+        description: description,
+      });
+
+      console.log('Auto-marker created success');
+    } catch (e) {
+      console.error('Failed to create marker automatically', e);
+    }
   }
+
+  // marker = await addMarker({
+  //   lat,
+  //   lng,
+  //   marker_type_id: DANGER_MARKER_TYPE_ID,
+  //   title,
+  //   description,
+  //   confidence,
+  //   categories: types,
+  // });
 
   // 5) Send result to frontend
   return c.json({
     ok: true,
-    is_danger,
+    has_issue,
     confidence, // 0..1
-    danger_types, // string[]
+    category,
+    types, // string[]
     reasons, // string[]
     threshold: THRESHOLD,
     over_threshold,
