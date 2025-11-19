@@ -1,5 +1,6 @@
 import { WalletSchemas } from '../schemas';
 import { WalletController } from '../controllers';
+import { TransactionController } from '../controllers';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 const setupWalletRoutes = (app: OpenAPIHono) => {
