@@ -13,14 +13,9 @@ const app = new OpenAPIHono();
 app.onError(errorHandler);
 
 app.use(
-  '*',
   cors({
-    origin: config.isProduction
-      ? 'https://smartcity.sit.kmutt.ac.th'
-      : 'http://localhost:5173',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })
 );
 
