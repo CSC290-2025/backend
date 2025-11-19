@@ -281,12 +281,19 @@ const findTransactionForVerification = async (ref1: string) => {
       throw new NotFoundError('Transaction not found for verification');
     }
 
+    // check the item for the '|' delimiter, if not found, means payment not confirmed yet
+    // because we only add it after we receive confirmation from scb
+    // we add it to put more information like transactionId and sendingBank right beside it with | as delimiter
     if (!transaction.description!.includes('|')) {
       throw new PaymentNotConfirmedError(
         'Transaction not yet confirmed by SCB'
       );
     }
 
+    // three part x|x|x
+    // first part = Reference 1 (we use this for our own tracking and act as an key for the transaction in the transaction table)
+    // second part = transactionId (scb give this from webhook when payment is confirmed)
+    // third part = sendingBank (scb give this from webhook when payment is confirmed)
     const parts = transaction.description!.split('|');
     if (parts.length < 3) {
       throw new ValidationError(
