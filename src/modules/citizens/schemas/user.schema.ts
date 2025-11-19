@@ -98,6 +98,14 @@ const getUserinfoAndWallet = createGetRoute({
   tags: ['User'],
 });
 
+const getUserAddress = createGetRoute({
+  path: '/user/address/{id}',
+  summary: 'Get user address data',
+  responseSchema: AddressSchema,
+  params: UserIdParam,
+  tags: ['User'],
+});
+
 const getUserProflie = createGetRoute({
   path: '/user/profile/{id}',
   summary: 'Get user data to show at user setting page',
@@ -148,4 +156,5 @@ export const UserSchemas = {
   updateUserPersonal,
   updateUserHealth,
   updateUserAccount,
+  getUserAddress,
 };
