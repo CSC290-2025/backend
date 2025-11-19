@@ -91,7 +91,6 @@ const extractRouteDetails = (route: any) => {
     detailedSteps.push(stepDetail);
   });
 
-  // --- Fare Handling Improvement ---
   let formattedFare = null;
   if (route.fare) {
     formattedFare = {
@@ -145,14 +144,14 @@ export const getRoutes = async (
 ) => {
   let finalOrigin = '';
 
-  if (origin && origin.length > 0) {
-    finalOrigin = origin;
-  } else if (origLat && origLng) {
-    const latNum = parseFloat(origLat);
-    const lngNum = parseFloat(origLng);
-    finalOrigin = await findNearestTransitStop(latNum, lngNum);
-  }
+  if (origLat && origLng) {
+    finalOrigin = `${origLat},${origLng}`;
+  } 
 
+  else if (origin && origin.length > 0) {
+    finalOrigin = origin;
+  }
+  
   if (!finalOrigin) {
     throw new Error(
       'Could not determine a starting point (origin or GPS location).'
@@ -161,17 +160,26 @@ export const getRoutes = async (
 
   let finalDestination = '';
 
-  if (destination && destination.length > 0) {
+
+  if (destLat && destLng) {
+    finalDestination = `${destLat},${destLng}`; 
+  }
+ 
+  else if (destination && destination.length > 0) {
     finalDestination = destination;
-  } else if (destLat && destLng) {
-    finalDestination = `${destLat},${destLng}`;
   }
 
   if (!finalDestination) {
     throw new Error('Could not determine a destination point.');
   }
+  
 
-  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${finalOrigin}&destination=${finalDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&key=${GOOGLE_API_KEY}`;
+  const encodedOrigin = encodeURIComponent(finalOrigin);
+  const encodedDestination = encodeURIComponent(finalDestination);
+  
+  const currentTimestamp = Math.floor(Date.now() / 1000); 
+
+  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
 
   try {
     const response = await axios.get(googleMapsUrl);
@@ -198,7 +206,8 @@ export const getRoutes = async (
       const errorMessage =
         data.error_message ||
         `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
-      throw new Error(errorMessage);
+      
+      throw new Error(`Google API status: ${data.status}. No valid routes found.`);
     }
   } catch (error) {
     console.error('Error fetching route stops:', error);

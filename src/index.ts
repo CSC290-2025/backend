@@ -1,13 +1,27 @@
-// src/index.ts
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
-import { serve } from '@hono/node-server'; // แก้ไขการนำเข้า serve
+import { serve } from '@hono/node-server';
+import { cors } from 'hono/cors'; 
 import config from '@/config/env';
 import { errorHandler } from '@/middlewares/error';
-import { setupRoutes } from '@/routes'; // ฟังก์ชันเพื่อกำหนด routes อื่นๆ
-import routeStopsRoutes from './modules/_example/routes/routeFinder.route'; // Import routes สำหรับ route stops
+import { setupRoutes } from '@/routes';
+import routeStopsRoutes from './modules/_example/routes/routeFinder.route';
 
 const app = new OpenAPIHono();
+app.use(
+  cors({
+    // อนุญาตให้ Frontend (Vite/React) ที่รันบน Localhost เข้าถึงได้
+    origin: [
+      'http://localhost:5173', 
+      'http://localhost:3000', 
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000',
+    ],
+    allowHeaders: ['Content-Type'],
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    maxAge: 600,
+  })
+);
 
 // กำหนด Error handler
 app.onError(errorHandler);
