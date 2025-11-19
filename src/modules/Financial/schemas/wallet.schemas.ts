@@ -122,6 +122,7 @@ const transferFundsRoute = createPostRoute({
   requestSchema: TransferFundsSchema,
   responseSchema: z.object({
     status: z.string(),
+    transactionId: z.number().optional(),
   }),
   tags: ['Wallets'],
 });
