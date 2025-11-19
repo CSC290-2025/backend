@@ -38,7 +38,10 @@ const topUpBalance = async (
   cardNumber: string,
   walletId: number,
   amount: number
-): Promise<MetroCard> => {
+): Promise<{
+  metroCard: MetroCard;
+  cardTransactionId: number;
+}> => {
   if (amount <= 0) {
     throw new ValidationError('Amount must be positive');
   }
@@ -69,16 +72,27 @@ const topUpBalance = async (
   return await prisma.$transaction(async (trx) => {
     await WalletModel.WalletBalanceTopup(walletId, amount, 'decrement', trx);
     // Log transfer from user wallet to metro card
-    await WalletModel.createTransaction(
+    const walletTransactionId = await WalletModel.createTransaction(
       {
         wallet_id: walletId,
         transaction_type: 'transfer_to_service',
-        amount: -amount,
+        amount: amount,
         target_service: `metro_card:${existingMetroCard.id}`,
         description: `Top-up to metro card ${existingMetroCard.card_number}`,
       },
       trx
     );
+    // Record card transaction for this top-up
+    const cardTransaction = await trx.card_transactions.create({
+      data: {
+        card_id: existingMetroCard.id,
+        card_type: 'metro',
+        transaction_type: 'top_up',
+        reference: String(walletTransactionId),
+        amount: amount,
+        description: `Top-up from wallet ${walletId} to metro card ${existingMetroCard.card_number}`,
+      },
+    });
     const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
       existingMetroCard.id,
       amount,
@@ -86,7 +100,10 @@ const topUpBalance = async (
       trx
     );
 
-    return updatedMetroCard;
+    return {
+      metroCard: updatedMetroCard,
+      cardTransactionId: cardTransaction.id,
+    };
   });
 };
 
@@ -101,7 +118,7 @@ const deleteMetroCardById = async (id: number): Promise<void> => {
 const transferToTransportation = async (
   cardNumber: string,
   amount: number
-): Promise<MetroCard> => {
+): Promise<{ metroCard: MetroCard; cardTransactionId: number }> => {
   if (amount <= 0) {
     throw new ValidationError('Amount must be positive');
   }
@@ -144,7 +161,7 @@ const transferToTransportation = async (
     );
 
     // Record a transaction for the organization receiving the funds
-    await WalletModel.createTransaction(
+    const organizationTransactionId = await WalletModel.createTransaction(
       {
         wallet_id: transportationWallet.id,
         transaction_type: 'transfer_in',
@@ -154,8 +171,22 @@ const transferToTransportation = async (
       },
       trx
     );
+    // Create card transaction record for the metro card that was charged
+    const cardTransaction = await trx.card_transactions.create({
+      data: {
+        card_id: existingMetroCard.id,
+        card_type: 'metro',
+        transaction_type: 'charge',
+        reference: String(organizationTransactionId),
+        amount: amount,
+        description: `Transfer to transportation from metro card ${existingMetroCard.card_number}`,
+      },
+    });
 
-    return updatedMetroCard;
+    return {
+      metroCard: updatedMetroCard,
+      cardTransactionId: cardTransaction.id,
+    };
   });
 };
 
