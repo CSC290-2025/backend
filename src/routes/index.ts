@@ -7,6 +7,9 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
+// Auth
+import { setupAuthRoutes } from '@/modules/Auth/routes';
+
 // Apartment
 import {
   setupApartmentRoutes,
@@ -91,6 +94,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   OpenAPI Routes (documented in Swagger)
   ============================================
   */
+
+  // Auth
+  setupAuthRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
