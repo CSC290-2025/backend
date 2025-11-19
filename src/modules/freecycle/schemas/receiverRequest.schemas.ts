@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { AuthMiddleware } from '@/middlewares';
+// import { AuthMiddleware } from '@/middlewares';
 
 const RequestStatusEnum = z.enum(['pending', 'accepted', 'rejected']);
 
@@ -47,7 +47,7 @@ const getRequestByIdRoute = createGetRoute({
   responseSchema: ReceiverRequestSchema,
   params: RequestIdParam,
   tags: ['Freecycle-ReceiverRequest'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const getUserRequestRoute = createGetRoute({
@@ -55,7 +55,7 @@ const getUserRequestRoute = createGetRoute({
   summary: 'Get my request',
   responseSchema: z.array(ReceiverRequestSchema),
   tags: ['Freecycle-ReceiverRequest'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const getPostRequestRoute = createGetRoute({
@@ -72,7 +72,7 @@ const createRequestRoute = createPostRoute({
   requestSchema: CreateReceiverRequestSchema,
   responseSchema: ReceiverRequestSchema,
   tags: ['Freecycle-ReceiverRequest'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const deleteRequestRoute = createDeleteRoute({
@@ -80,7 +80,7 @@ const deleteRequestRoute = createDeleteRoute({
   summary: 'Cancel receiver request',
   params: RequestIdParam,
   tags: ['Freecycle-ReceiverRequest'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const updateRequestStatusRoute = createPutRoute({
@@ -90,7 +90,19 @@ const updateRequestStatusRoute = createPutRoute({
   responseSchema: ReceiverRequestSchema,
   params: RequestIdParam,
   tags: ['Freecycle-ReceiverRequest'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
+});
+
+const UserIdParam = z.object({
+  userId: z.coerce.number(),
+});
+
+const getPostsByUserIdRoute = createGetRoute({
+  path: '/requests/user/{userId}',
+  summary: 'Get request by user id',
+  responseSchema: z.array(ReceiverRequestSchema),
+  params: UserIdParam,
+  tags: ['Freecycle-ReceiverRequest'],
 });
 
 export const FreecycleReceiverRequestSchemas = {
@@ -107,4 +119,5 @@ export const FreecycleReceiverRequestSchemas = {
   createRequestRoute,
   deleteRequestRoute,
   updateRequestStatusRoute,
+  getPostsByUserIdRoute,
 };

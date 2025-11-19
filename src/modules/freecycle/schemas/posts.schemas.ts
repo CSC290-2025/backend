@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { AuthMiddleware } from '@/middlewares';
+// import { AuthMiddleware } from '@/middlewares';
 
 const FreecyclePostsSchema = z.object({
   id: z.number(),
@@ -71,7 +71,7 @@ const getUserFreecyclePostsRoute = createGetRoute({
   summary: 'Get post by user',
   responseSchema: FreecyclePostsSchema,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const createFreecyclePostsRoute = createPostRoute({
@@ -90,7 +90,7 @@ const UpdateFreecyclePostsRoute = createPutRoute({
   responseSchema: FreecyclePostsSchema,
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const DeleteFreecyclePostsRoute = createDeleteRoute({
@@ -98,7 +98,7 @@ const DeleteFreecyclePostsRoute = createDeleteRoute({
   summary: 'Delete post',
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const MarkAsGivenRoute = createPutRoute({
@@ -108,7 +108,7 @@ const MarkAsGivenRoute = createPutRoute({
   responseSchema: FreecyclePostsSchema,
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const MarkAsNotGivenRoute = createPutRoute({
@@ -118,7 +118,7 @@ const MarkAsNotGivenRoute = createPutRoute({
   responseSchema: FreecyclePostsSchema,
   params: FreecyclePostsIdParam,
   tags: ['Freecycle-Post'],
-  middleware: [AuthMiddleware.isUser],
+  // middleware: [AuthMiddleware.isUser],
 });
 
 const getNotGivenPostsRoute = createGetRoute({
@@ -140,6 +140,18 @@ const getPostsByCategoryRoute = createGetRoute({
   tags: ['Freecycle-Post'],
 });
 
+const UserIdParam = z.object({
+  userId: z.coerce.number(),
+});
+
+const getPostsByUserIdRoute = createGetRoute({
+  path: '/posts/user/{userId}',
+  summary: 'Get posts by user id',
+  responseSchema: z.array(FreecyclePostsSchema),
+  params: UserIdParam,
+  tags: ['Freecycle-Post'],
+});
+
 export const FreecyclePostsSchemas = {
   FreecyclePostsSchema,
   CreateFreecyclePostsSchema,
@@ -158,4 +170,6 @@ export const FreecyclePostsSchemas = {
   getNotGivenPostsRoute,
   CategoryIdParam,
   getPostsByCategoryRoute,
+  UserIdParam,
+  getPostsByUserIdRoute,
 };

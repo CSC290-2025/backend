@@ -55,6 +55,12 @@ const updateRequestStatus: Handler = async (c: Context) => {
   return successResponse(c, { request }, 200, 'Request status updated');
 };
 
+const getRequestsByUserId: Handler = async (c: Context) => {
+  const userId = Number(c.req.param('userId'));
+  const requests = await ReceiverRequestsService.getPostsByUserId(userId);
+  return successResponse(c, { requests });
+};
+
 export {
   getAllRequests,
   getRequestById,
@@ -63,4 +69,5 @@ export {
   createRequest,
   deleteRequest,
   updateRequestStatus,
+  getRequestsByUserId,
 };

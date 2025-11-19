@@ -109,6 +109,41 @@ const updateRequestStatus = async (
   }
 };
 
+const findRequestByUser = async (
+  userId: number
+): Promise<ReceiverRequest[]> => {
+  try {
+    const requests = await prisma.receiver_requests.findMany({
+      where: {
+        receiver_id: userId,
+      },
+      include: {
+        users: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
+        },
+        freecycle_posts: {
+          select: {
+            id: true,
+            item_name: true,
+            description: true,
+            photo_url: true,
+            is_given: true,
+            created_at: true,
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+    return requests;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   findAllRequests,
   findRequestById,
@@ -117,4 +152,5 @@ export {
   createRequest,
   deleteRequest,
   updateRequestStatus,
+  findRequestByUser,
 };

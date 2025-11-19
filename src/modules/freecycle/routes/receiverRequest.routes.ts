@@ -37,6 +37,11 @@ const setupReceiverRequestsRoutes = (app: OpenAPIHono) => {
     FreecycleReceiverRequestSchemas.updateRequestStatusRoute,
     ReceiverRequestsController.updateRequestStatus
   );
+
+  app.openapi(
+    FreecycleReceiverRequestSchemas.getPostsByUserIdRoute,
+    ReceiverRequestsController.getRequestsByUserId
+  );
 };
 
 export { setupReceiverRequestsRoutes };

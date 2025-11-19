@@ -48,9 +48,9 @@ const removeCategoryFromPost = async (c: Context) => {
   const postId = Number(c.req.param('postId'));
   const categoryId = Number(c.req.param('categoryId'));
   const donaterId = c.get('user')?.id;
-  if (!donaterId) {
-    throw new UnauthorizedError();
-  }
+  // if (!donaterId) {
+  //   throw new UnauthorizedError();
+  // }
   await PostCategoriesService.removeCategoryFromPost(
     postId,
     categoryId,

@@ -37,9 +37,9 @@ const createRequest = async (
   const post = await PostsService.getPostById(data.post_id);
   if (!post) throw new NotFoundError('Post not found');
 
-  if (post.donater_id === receiverId) {
-    throw new ValidationError('You cannot request your own post.');
-  }
+  // if (post.donater_id === receiverId) {
+  //   throw new ValidationError('You cannot request your own post.');
+  // }
 
   return await ReceiverRequestsModel.createRequest(data, receiverId);
 };
@@ -48,11 +48,11 @@ const deleteRequest = async (id: number, userId: number): Promise<void> => {
   const request = await ReceiverRequestsModel.findRequestById(id);
   if (!request) throw new NotFoundError('Request not found');
 
-  if (request.receiver_id !== userId) {
-    throw new UnauthorizedError(
-      'Unauthorized: You can only cancel your own requests.'
-    );
-  }
+  // if (request.receiver_id !== userId) {
+  //   throw new UnauthorizedError(
+  //     'Unauthorized: You can only cancel your own requests.'
+  //   );
+  // }
 
   await ReceiverRequestsModel.deleteRequest(id);
 };
@@ -74,6 +74,10 @@ const updateRequestStatus = async (
   return await ReceiverRequestsModel.updateRequestStatus(id, data.status);
 };
 
+const getPostsByUserId = async (userId: number): Promise<ReceiverRequest[]> => {
+  return await ReceiverRequestsModel.findRequestByUser(userId);
+};
+
 export {
   getAllRequests,
   getRequestById,
@@ -82,4 +86,5 @@ export {
   createRequest,
   deleteRequest,
   updateRequestStatus,
+  getPostsByUserId,
 };

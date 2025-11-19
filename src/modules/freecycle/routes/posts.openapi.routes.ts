@@ -24,6 +24,11 @@ const setupFreecyclePostsRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    FreecyclePostsSchemas.getPostsByUserIdRoute,
+    PostsController.getPostsByUserId
+  );
+
+  app.openapi(
     FreecyclePostsSchemas.createFreecyclePostsRoute,
     PostsController.createPost
   );
