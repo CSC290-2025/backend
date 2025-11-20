@@ -72,13 +72,6 @@ import {
 
 // Power BI
 import { setupReportsRoutes } from '@/modules/power-bi';
-// import { setupAuthRoutes } from '@/modules/auth/routes';
-// import { setupPaymentRoutes } from '@/modules/payment/routes';
-// import { setupProductRoutes } from '@/modules/_example';
-
-// Normal Hono Routes (not in Swagger docs)
-// import { productRoutes } from '@/modules/_example';
-// import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
 import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
@@ -152,6 +145,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Power BI
+  setupReportsRoutes(app);
+
   // Waste
   setupWasteRoutes(app);
 
@@ -170,9 +166,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   //   app.route('/fcm', fcmRoutes);
   //   app.route('/tokens', tokenRoutes);
   //   app.route('/emergency', emergencyRoutes);
-
-  // Power BI
-  setupReportsRoutes(app);
 
   // Support Map
   app.route('/api', detectRoutes);
