@@ -1,11 +1,8 @@
 # ROLE MIDDLEWARE USAGE EXAMPLES
 
-* This guide shows how to add role-based access control (RBAC)
-* to OpenAPI routes using the middleware parameter.
+This guide shows how to add role-based access control (RBAC) to OpenAPI routes using the middleware parameter.
 
-// ============================================
-// EXAMPLE 1: In OpenAPI Schema (schemas file)
-// ============================================
+## EXAMPLE 1: In OpenAPI Schema (schemas file)
 
 import { createPostRoute, createGetRoute, createDeleteRoute } from '@/utils/openapi-helpers';
 import { requireRole, adminMiddleware } from '@/middlewares';
