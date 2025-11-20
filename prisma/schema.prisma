@@ -77,13 +77,10 @@ model apartment {
   apartment_type     apartment_type?
   apartment_location apartment_location?
   address_id         Int?
-<<<<<<< HEAD
   addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
-=======
   internet_price     Decimal?            @db.Decimal(10, 2)
   addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   apartment_booking  apartment_booking[]
->>>>>>> origin
   apartment_owner    apartment_owner[]
   apartment_picture  apartment_picture[]
   rating             rating[]
@@ -102,13 +99,10 @@ model apartment_booking {
   guest_phone    String?         @db.VarChar(10)
   guest_email    String?         @db.VarChar(255)
   room_type      String?         @db.VarChar(255)
-<<<<<<< HEAD
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-=======
   apartment_id   Int?
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   apartment      apartment?      @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_apartment_id")
->>>>>>> origin
   room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
 
@@ -1086,8 +1080,6 @@ model event_tag_name {
   users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-<<<<<<< HEAD
-=======
 model bin_locations {
   id                     Int        @id @default(autoincrement())
   bin_name               String     @db.VarChar(255)
@@ -1107,7 +1099,6 @@ model bin_locations {
   @@index([status], map: "idx_status")
 }
 
->>>>>>> origin
 enum air_quality_category {
   good
   moderate
@@ -1228,15 +1219,12 @@ enum wallet_type {
   organization
 }
 
-<<<<<<< HEAD
-=======
 enum report_type {
   traffic
   accident
   disaster
 }
 
->>>>>>> origin
 enum blood_type {
   A
   B
@@ -1249,21 +1237,16 @@ enum power_bi_report_type {
   trends
 }
 
-<<<<<<< HEAD
 enum report_type {
   traffic
   accident
   disaster
 }
 
-=======
->>>>>>> origin
 enum report_visibility {
   citizens
   admin
 }
-<<<<<<< HEAD
-=======
 
 enum binstatus {
   NORMAL
@@ -1278,4 +1261,3 @@ enum bintype {
   HAZARDOUS
   ORGANIC
 }
->>>>>>> origin

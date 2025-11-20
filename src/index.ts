@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 import { serve } from '@hono/node-server';
 import config from '@/config/env';
 import { errorHandler } from '@/middlewares/error';
->>>>>>> origin
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { serve } from '@hono/node-server';
@@ -11,7 +8,6 @@ import { cors } from 'hono/cors';
 import config from '@/config/env';
 import { errorHandler } from '@/middlewares/error';
 import { setupRoutes } from '@/routes';
-<<<<<<< HEAD
 import routeStopsRoutes from './modules/_example/routes/routeFinder.route';
 
 const app = new OpenAPIHono();
@@ -51,7 +47,6 @@ app.doc('/doc', {
 
 // กำหนด Swagger UI เพื่อแสดงเอกสาร API
 app.get('/swagger', swaggerUI({ url: '/doc' }));
-=======
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
@@ -83,7 +78,6 @@ app.notFound((c) => {
     404
   );
 });
->>>>>>> origin
 
 // Health check route
 app.get('/', (c) => {
@@ -96,12 +90,10 @@ app.get('/', (c) => {
   });
 });
 
-<<<<<<< HEAD
 // เชื่อมโยง routes ที่เกี่ยวข้องกับ route stops
 app.route('/api', routeStopsRoutes);
 
 // เรียกใช้ฟังก์ชัน setupRoutes สำหรับการกำหนด routes อื่นๆ
-=======
 app.get('/doc', (c) => {
   let port = config.port;
   const addr = serverInstance?.address();
@@ -130,11 +122,9 @@ app.get('/doc', (c) => {
 
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
->>>>>>> origin
 setupRoutes(app);
 startAir4ThaiAggregationJob();
 
-<<<<<<< HEAD
 // ตั้งค่าเซิร์ฟเวอร์
 const server = serve(
   {
@@ -159,7 +149,6 @@ process.on('SIGTERM', () => {
     if (err) {
       console.error(err);
       process.exit(1);
-=======
 let serverInstance: ReturnType<typeof serve> | null = null;
 
 async function shutdown() {
@@ -169,7 +158,6 @@ async function shutdown() {
       serverInstance.close((err) => {
         if (err) console.error('Error closing server:', err);
       });
->>>>>>> origin
     }
     await prisma.$disconnect();
     console.log('Prisma disconnected');
@@ -177,10 +165,8 @@ async function shutdown() {
     console.error('Error during shutdown:', err);
   } finally {
     process.exit(0);
-<<<<<<< HEAD
   });
 });
-=======
   }
 }
 
@@ -226,4 +212,3 @@ async function startServer(startPort: number, maxRetries = 10) {
 }
 
 startServer(config.port);
->>>>>>> origin
