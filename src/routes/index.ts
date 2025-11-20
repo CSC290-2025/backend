@@ -156,7 +156,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Power BI
   setupReportsRoutes(app);
-  
+
   // Traffic
   setupIntersectionRoutes(app);
   setupTrafficLightRoutes(app);
