@@ -77,7 +77,6 @@ model apartment {
   apartment_type     apartment_type?
   apartment_location apartment_location?
   address_id         Int?
-  addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   internet_price     Decimal?            @db.Decimal(10, 2)
   addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   apartment_booking  apartment_booking[]
@@ -99,7 +98,6 @@ model apartment_booking {
   guest_phone    String?         @db.VarChar(10)
   guest_email    String?         @db.VarChar(255)
   room_type      String?         @db.VarChar(255)
-  users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   apartment_id   Int?
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   apartment      apartment?      @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_apartment_id")
@@ -1119,9 +1117,10 @@ enum apartment_internet {
 }
 
 enum apartment_location {
-  asoke
-  prachauthit
-  phathumwan
+  chomthong
+  thonburi
+  thungkhru
+  ratburana
 }
 
 enum apartment_type {
@@ -1235,12 +1234,6 @@ enum blood_type {
 enum power_bi_report_type {
   summary
   trends
-}
-
-enum report_type {
-  traffic
-  accident
-  disaster
 }
 
 enum report_visibility {
