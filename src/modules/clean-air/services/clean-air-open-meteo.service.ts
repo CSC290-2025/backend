@@ -1,5 +1,6 @@
 import { ValidationError } from '@/errors';
 import { CleanAirConfigurationError, CleanAirProviderError } from '../error';
+import { GoogleGenAI } from '@google/genai';
 
 import type {
   CleanAirService as CleanAirServiceContract,
@@ -569,7 +570,7 @@ async function getHealthTips(district: string): Promise<string[]> {
     throw new CleanAirConfigurationError('GEMINI_MODEL is not configured');
   }
 
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  const ai = new GoogleGenAI({ apiKey: apiKey });
 
   try {
     const detail = await getDistrictDetail(district);
@@ -592,18 +593,30 @@ async function getHealthTips(district: string): Promise<string[]> {
       `Return only the three bullet tips with no introductory or closing sentences.`,
     ].join('\n');
 
-    const requestBody = { contents: [{ parts: [{ text: prompt }] }] };
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: prompt,
     });
 
-    const raw = await response.text();
+    let raw: string;
+    try {
+      if (response && typeof (response as any).text === 'function') {
+        raw = await (response as any).text();
+      } else {
+        raw = String(
+          (response as any)?.text ?? (response as any)?.output ?? ''
+        );
+      }
+    } catch (e) {
+      raw = '';
+    }
 
-    if (!response.ok) {
+    const ok = Boolean((response as any)?.ok ?? true);
+    const status = (response as any)?.status ?? 'unknown';
+
+    if (!ok) {
       throw new CleanAirConfigurationError(
-        `Gemini request failed (${response.status}): ${raw}`
+        `Gemini request failed (${status}): ${raw}`
       );
     }
 
