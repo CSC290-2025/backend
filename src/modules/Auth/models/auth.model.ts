@@ -22,16 +22,21 @@ const findUserById = async (userId: number) => {
 
 const findUserByEmail = async (email: string) => {
   try {
-    return await prisma.users.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email },
       select: {
         id: true,
         username: true,
         email: true,
         password_hash: true,
-        role_id: true,
+        roles: {
+          select: {
+            role_name: true,
+          },
+        },
       },
     });
+    return user;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -146,7 +151,11 @@ const createUser = async (data: {
         username: true,
         email: true,
         phone: true,
-        role_id: true,
+        roles: {
+          select: {
+            role_name: true,
+          },
+        },
         created_at: true,
         last_login: true,
       },
