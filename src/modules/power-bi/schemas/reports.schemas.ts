@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { adminMiddleware, authMiddleware } from '@/middlewares';
 // import type { MiddlewareHandler } from 'hono';
 // import { UnauthorizedError } from "@/errors/types";
 
@@ -121,7 +122,7 @@ const createReportRoute = createPostRoute({
   requestSchema: CreateReportSchema,
   responseSchema: ReportResponseSchema,
   tags: ['PowerBI - Reports'],
-  // middleware: [requireAdmin],
+  middleware: [authMiddleware, adminMiddleware],
 });
 
 const updateReportRoute = createPutRoute({

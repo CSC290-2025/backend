@@ -1,7 +1,10 @@
 import type { Context } from 'hono';
 import { ReportsService } from '../services';
 import { successResponse } from '@/utils/response';
-import { ValidationError } from '@/errors';
+import { UnauthorizedError, ValidationError } from '@/errors';
+import config from '@/config/env';
+
+const ADMIN_ROLE_ID = config.adminRoleId;
 
 const getAllReports = async (c: Context) => {
   const allReports = await ReportsService.getReportsMetadata();
@@ -10,7 +13,15 @@ const getAllReports = async (c: Context) => {
 
 // Reports listing (metadata-driven across categories, filtered by role)
 const getReports = async (c: Context) => {
-  const role = c.req.query('role') ?? 'citizens';
+  const user = c.get('user');
+  const role = user.roleId === ADMIN_ROLE_ID ? 'admin' : 'citizens';
+  const queryRole = c.req.query('role');
+
+  if (queryRole != role) {
+    throw new UnauthorizedError(
+      'You are not authorized to access reports for this role'
+    );
+  }
 
   const reportsByCategory = await ReportsService.getReportsByRole(role);
   return successResponse(c, { reports: reportsByCategory });
