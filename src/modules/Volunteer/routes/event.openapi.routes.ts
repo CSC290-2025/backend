@@ -13,7 +13,7 @@ import {
   EventIdParam,
 } from '../schemas'; // Use relative path to schemas
 import type { PaginatedEvents } from '../types';
-import { OpenAPIHono } from '@hono/zod-openapi';
+import type { OpenAPIHono } from '@hono/zod-openapi';
 import * as EventController from '../controllers';
 
 const PaginatedEventsSchemaForOpenAPI = z
@@ -67,25 +67,10 @@ export const deleteEventRoute = createDeleteRoute({
   tags: ['Volunteer'],
 });
 
-// --- 2. Setup Function ---
-
-export const setupEventRoutes = () => {
-  // Create a new OpenAPIHono instance for this module
-  const volunteerApp = new OpenAPIHono();
-
-  // Register routes (Order matters! Specific paths first)
-  console.log(`--- Registering OpenAPI route: GET / ---`);
-  volunteerApp.openapi(listEventsRoute, EventController.getAllEvents);
-
-  console.log(`--- Registering OpenAPI route: POST /create ---`);
-  volunteerApp.openapi(createEventRoute, EventController.createEvent);
-
-  console.log(`--- Registering OpenAPI route: GET /{id} ---`);
-  volunteerApp.openapi(getEventRoute, EventController.getEventById);
-
-  volunteerApp.openapi(updateEventRoute, EventController.updateEvent);
-
-  volunteerApp.openapi(deleteEventRoute, EventController.deleteEvent);
-
-  return volunteerApp;
+export const setupVolunteerRoutes = (app: OpenAPIHono) => {
+  app.openapi(listEventsRoute, EventController.getAllEvents);
+  app.openapi(createEventRoute, EventController.createEvent);
+  app.openapi(getEventRoute, EventController.getEventById);
+  app.openapi(updateEventRoute, EventController.updateEvent);
+  app.openapi(deleteEventRoute, EventController.deleteEvent);
 };

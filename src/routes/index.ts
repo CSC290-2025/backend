@@ -74,8 +74,7 @@ import { reportRoutes } from '@/modules/power-bi';
 import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
 
 // Volunteer
-// NOTE: Renamed to avoid conflict with EventHub's setupEventRoutes
-import { setupEventRoutes as setupVolunteerRoutes } from '../modules/Volunteer';
+import { setupVolunteerRoutes } from '@/modules/Volunteer';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
@@ -150,6 +149,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
 
+  // Volunteer
+  setupVolunteerRoutes(app);
   /*
   ============================================
   Normal Hono Routes (not in Swagger docs)
@@ -162,8 +163,4 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
-
-  // Volunteer
-  const volunteerApp = setupVolunteerRoutes();
-  app.route('/api/v1/volunteer', volunteerApp);
 };
