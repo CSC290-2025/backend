@@ -1,4 +1,4 @@
-//แปลงข้อมูล (ฟังก์ชั่นที่เก็บอดีตลง database)
+//แปลงข้อมูล (ฟังก์ชั่นที่เก็บอดีตลง database) , // convert data (function to store past data into database)
 import { OpenMeteoClient, OPEN_METEO_TIMEZONE } from './open-meteo.client';
 import { WeatherOpenMeteoSchemas } from '../schemas';
 import type { ExternalRawDailyOnly, ImportDailyBody } from '../types';
@@ -7,7 +7,7 @@ import { WeatherModel } from '../models';
 import { getDistrictByLocationId, bangkokDistricts } from '../utils';
 import prisma from '@/config/client';
 
-// แปลงข้อมูลดิบของ Open-Meteo ให้เหลือค่าของเมื่อวานที่พร้อมบันทึก
+// แปลงข้อมูลดิบของ Open-Meteo ให้เหลือค่าของเมื่อวานที่พร้อมบันทึก , // Convert raw Open-Meteo data to extract yesterday's values that ready for saving
 const pickYesterdayPayload = (
   raw: ExternalRawDailyOnly,
   location_id: number | null,
@@ -52,7 +52,7 @@ const pickYesterdayPayload = (
   };
 };
 
-// import ข้อมูลเมื่อวานให้ location เดียว (ตรวจ request ก่อน)
+// import ข้อมูลเมื่อวานให้ location เดียว (ตรวจ request ก่อน) , // import yesterday's data for a single location (with request validation)
 const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   const b = WeatherOpenMeteoSchemas.ImportDailyBodySchema.parse(body);
   const district = getDistrictByLocationId(b.location_id);
@@ -107,7 +107,7 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   };
 };
 
-// import ข้อมูลเมื่อวานให้ครบทุกเขตที่ระบบมี
+// import ข้อมูลเมื่อวานให้ครบทุกเขตที่ระบบมี , // import yesterday's data for all districts in the system
 const importAllLocationsYesterday = async () => {
   const results: Array<{
     location_id: number;
