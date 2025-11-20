@@ -7,7 +7,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 // ============================================
 // --- IMPORT THE SIMPLE ROUTER ---
 // Import the simple routes instance from your Volunteer module
-import { eventRoutes } from '../modules/Volunteer/routes';
+import { setupEventRoutes } from '../modules/Volunteer';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   // OpenAPI Routes (documented in Swagger)
@@ -16,5 +16,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // import { setupPaymentRoutes } from '@/modules/payment/routes';
   // import { setupProductRoutes } from '@/modules/_example';
   // import { productRoutes } from '@/modules/_example';
-  app.route('/api/v1/volunteer/', eventRoutes);
+  const volunteerApp = setupEventRoutes();
+  app.route('/api/v1/volunteer', volunteerApp);
 };
