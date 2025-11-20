@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
-import { authMiddleware } from '@/middlewares/auth';
+import { authMiddleware, optionalAuthMiddleware } from '@/middlewares';
 
 export const LoginRequestSchema = z.object({
   email: z.email(),
@@ -38,12 +38,18 @@ export const MeResponseSchema = z.object({
   user: UserResponseSchema,
 });
 
+export const LoginStatusResponseSchema = z.object({
+  authenticated: z.boolean(),
+  userId: z.number(),
+});
+
 export const loginRoute = createPostRoute({
   path: '/auth/login',
   summary: 'User login',
   requestSchema: LoginRequestSchema,
   responseSchema: AuthResponseSchema,
   tags: ['Authentication'],
+  middleware: [optionalAuthMiddleware],
 });
 
 export const registerRoute = createPostRoute({
@@ -52,12 +58,13 @@ export const registerRoute = createPostRoute({
   requestSchema: RegisterRequestSchema,
   responseSchema: AuthResponseSchema,
   tags: ['Authentication'],
+  middleware: [optionalAuthMiddleware],
 });
 
 export const refreshTokenRoute = createPostRoute({
   path: '/auth/refresh',
   summary: 'Refresh access token',
-  requestSchema: RefreshTokenRequestSchema,
+  requestSchema: z.object({}),
   responseSchema: AuthResponseSchema,
   tags: ['Authentication'],
 });
@@ -68,12 +75,13 @@ export const logoutRoute = createPostRoute({
   requestSchema: z.object({}),
   responseSchema: z.object({}),
   tags: ['Authentication'],
+  middleware: [authMiddleware],
 });
 
 export const meRoute = createGetRoute({
   path: '/auth/me',
-  summary: 'Get current user',
-  responseSchema: MeResponseSchema,
+  summary: 'Check login status',
+  responseSchema: LoginStatusResponseSchema,
   tags: ['Authentication'],
   middleware: [authMiddleware],
 });
