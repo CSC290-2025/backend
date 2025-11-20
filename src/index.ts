@@ -15,7 +15,6 @@ const app = new OpenAPIHono();
 app.onError(errorHandler);
 
 app.use(
-  '*',
   cors({
     origin: (origin) => {
       if (config.isProduction) {
