@@ -1,14 +1,10 @@
-import { serve } from '@hono/node-server';
 import config from '@/config/env';
 import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { serve } from '@hono/node-server';
-import { cors } from 'hono/cors'; 
-import config from '@/config/env';
-import { errorHandler } from '@/middlewares/error';
 import { setupRoutes } from '@/routes';
-import routeStopsRoutes from './modules/_example/routes/routeFinder.route';
+import routeStopsRoutes from './modules/public-transportation/routes/routeFinder.route';
 
 const app = new OpenAPIHono();
 app.use(
