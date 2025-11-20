@@ -38,8 +38,8 @@ export const listEventsRoute = createGetRoute({
 export const createEventRoute = createPostRoute({
   path: '/create',
   summary: 'Create a new volunteer event',
-  requestSchema: CreateEventSchema,
-  responseSchema: EventSchema,
+  requestSchema: EventSchema.partial(),
+  responseSchema: z.array(EventSchema),
   tags: ['Volunteer'],
 });
 
@@ -52,10 +52,10 @@ export const getEventRoute = createGetRoute({
 });
 
 export const updateEventRoute = createPutRoute({
-  path: '/{id}',
+  path: '/{id}/update',
   summary: 'Update an existing volunteer event',
-  requestSchema: UpdateEventSchema,
-  responseSchema: EventSchema,
+  requestSchema: EventSchema.partial(),
+  responseSchema: z.array(EventSchema),
   params: EventIdParam,
   tags: ['Volunteer'],
 });
