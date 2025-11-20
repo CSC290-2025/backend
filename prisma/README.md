@@ -51,4 +51,4 @@ pnpm seed:all
 ## Notes
 
 - Seeds are idempotent (safe to run multiple times)
-- Roles with existing IDs won't be duplicated
+- Roles with existing names won't be duplicated
