@@ -165,6 +165,18 @@ const findWalletTransactionById = async (
   }
 };
 
+// Return all transactions (basic, no pagination for now). Order by newest first.
+const findAllWalletTransactions = async (): Promise<wallet_transactions[]> => {
+  try {
+    const transactions = await prisma.wallet_transactions.findMany({
+      orderBy: { created_at: 'desc' },
+    });
+    return transactions;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const atomicTransferFunds = async (
   fromWalletId: number,
   toWalletId: number,
@@ -259,5 +271,6 @@ export {
   WalletBalanceTopup,
   createTransaction,
   findWalletTransactionById,
+  findAllWalletTransactions,
   atomicTransferFunds,
 };

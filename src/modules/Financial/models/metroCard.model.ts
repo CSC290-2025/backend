@@ -154,6 +154,17 @@ const findCardTransactionById = async (
   }
 };
 
+const findAllCardTransactions = async (): Promise<card_transactions[]> => {
+  try {
+    const transactions = await prisma.card_transactions.findMany({
+      orderBy: { created_at: 'desc' },
+    });
+    return transactions;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createMetroCard,
   findMetroCardsByUserId,
@@ -163,4 +174,5 @@ export {
   updateMetroCardBalance,
   deleteMetroCard,
   findCardTransactionById,
+  findAllCardTransactions,
 };
