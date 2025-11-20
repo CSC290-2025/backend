@@ -6,7 +6,7 @@ import type {
   ApartmentFilter,
 } from '../types/apartment.types';
 import { ApartmentSchemas } from '../schemas';
-// import { cloudinaryModel } from '.';
+import type { apartment_location } from '@/generated/prisma';
 
 // Helper function to transform apartment data from Prisma to expected format
 function transformApartmentData(apartment: any) {
@@ -107,7 +107,6 @@ export async function getApartmentsByUser(userId: number) {
     throw handlePrismaError(error);
   }
 }
-
 export async function createApartment(data: createApartmentData) {
   try {
     const { userId, address, ...apartmentData } = data;
@@ -116,16 +115,26 @@ export async function createApartment(data: createApartmentData) {
       const createdAddress = await tx.addresses.create({
         data: address,
       });
-      const apartment = await tx.apartment.create({
-        data: {
-          ...apartmentData,
-          address_id: createdAddress.id,
-          apartment_owner: {
-            create: {
-              user_id: userId,
-            },
+
+      // Build create payload and ensure apartment_location matches Prisma enum type
+      const createData: any = {
+        ...apartmentData,
+        address_id: createdAddress.id,
+        apartment_owner: {
+          create: {
+            user_id: userId,
           },
         },
+      };
+
+      if (createData.apartment_location) {
+        // Cast to Prisma enum type
+        createData.apartment_location =
+          createData.apartment_location as apartment_location;
+      }
+
+      const apartment = await tx.apartment.create({
+        data: createData,
         include: {
           apartment_owner: true,
           addresses: true,

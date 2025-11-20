@@ -86,7 +86,7 @@ const roomPriceRangeService = async (
 }> => {
   const range = await apartmentModel.getRoomPriceRange(apartmentId);
   if (!range)
-    throw new NotFoundError('No apartments found to determine price range');
+    throw new NotFoundError('No rooms found to determine price range');
   return {
     minPrice: range.minPrice,
     maxPrice: range.maxPrice,
