@@ -97,7 +97,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   */
 
   // Auth
-  setupAuthRoutes(app);
+  //setupAuthRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);

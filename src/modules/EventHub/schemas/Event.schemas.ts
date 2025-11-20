@@ -1,5 +1,11 @@
 import { z, createRoute } from '@hono/zod-openapi';
-import { authMiddleware, adminMiddleware } from '@/middlewares';
+//import { authMiddleware, adminMiddleware } from '@/middlewares';
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+  createDeleteRoute,
+} from '../../../utils/openapi-helpers';
 
 const EventSchema = z
   .object({
@@ -108,22 +114,31 @@ const EventSchemas = {
     tags: ['Events'],
   }),
 
-  createEventRoute: createRoute({
-    method: 'post',
+  // createEventRoute: createRoute({
+  //   method: 'post',
+  //   path: '/events',
+  //   request: {
+  //     body: { content: { 'application/json': { schema: CreateEventSchema } } },
+  //   },
+  //   responses: {
+  //     201: {
+  //       description: 'Created',
+  //       content: {
+  //         'application/json': { schema: z.object({ event: EventSchema }) },
+  //       },
+  //     },
+  //   },
+  //   tags: ['Events'],
+  //   //middleware: [authMiddleware, adminMiddleware],
+  // }),
+
+  createEventRoute: createPostRoute({
     path: '/events',
-    request: {
-      body: { content: { 'application/json': { schema: CreateEventSchema } } },
-    },
-    responses: {
-      201: {
-        description: 'Created',
-        content: {
-          'application/json': { schema: z.object({ event: EventSchema }) },
-        },
-      },
-    },
+    summary: 'post event',
+    requestSchema: CreateEventSchema.partial(),
+    responseSchema: z.array(CreateEventSchema),
     tags: ['Events'],
-    middleware: [authMiddleware, adminMiddleware],
+    // middleware: [authMiddleware, adminMiddleware],
   }),
 
   updateEventRoute: createRoute({
@@ -142,7 +157,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
-    middleware: [authMiddleware, adminMiddleware],
+    //middleware: [authMiddleware, adminMiddleware],
   }),
 
   deleteEventRoute: createRoute({
@@ -160,7 +175,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
-    middleware: [authMiddleware, adminMiddleware],
+    // middleware: [authMiddleware, adminMiddleware],
   }),
 
   dayEventCountRoute: createRoute({
