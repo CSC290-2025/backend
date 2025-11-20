@@ -159,6 +159,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   //Emergency
   app.route('/emergency', reportRoutes());
   app.route('/emergency', contactRoutes());
+  app.route('/emergency', fcmRoutes());
 
   // Power BI
   // app.route('/reports', reportRoutes);

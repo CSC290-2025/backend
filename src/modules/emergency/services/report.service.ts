@@ -18,6 +18,7 @@ export const createReport = async (
     const uploadedResponse = await uploadFile({ fileBlob: imageBlob }, 13);
     data.image_url = uploadedResponse.url;
   }
+  console.log(data);
   return await ReportModel.createReport(data);
 };
 
