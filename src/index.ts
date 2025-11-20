@@ -14,17 +14,14 @@ app.onError(errorHandler);
 
 // CORS middleware - allow requests from frontend
 app.use(
-  '*',
   cors({
-    origin: config.isProduction
-      ? 'https://smartcity.sit.kmutt.ac.th'
-      : [
-          'http://localhost:5173',
-          'http://localhost:5174',
-          'http://localhost:3000',
-        ],
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    origin: (origin) => {
+      if (config.isProduction) {
+        return 'https://smartcity.sit.kmutt.ac.th';
+      }
+      return origin || 'http://localhost:5173';
+    },
+    allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   })
 );
