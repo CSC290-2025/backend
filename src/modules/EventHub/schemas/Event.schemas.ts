@@ -1,4 +1,5 @@
 import { z, createRoute } from '@hono/zod-openapi';
+import { authMiddleware, adminMiddleware } from '@/middlewares';
 
 const EventSchema = z
   .object({
@@ -139,6 +140,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
+    middleware: [authMiddleware, adminMiddleware],
   }),
 
   updateEventRoute: createRoute({
@@ -157,6 +159,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
+    middleware: [authMiddleware, adminMiddleware],
   }),
 
   deleteEventRoute: createRoute({
@@ -174,6 +177,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
+    middleware: [authMiddleware, adminMiddleware],
   }),
 
   dayEventCountRoute: createRoute({

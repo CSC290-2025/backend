@@ -7,20 +7,50 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
-// OpenAPI Routes (documented in Swagger)
+// Auth
+import { setupAuthRoutes } from '@/modules/Auth/routes';
+
+// Apartment
+import {
+  setupApartmentRoutes,
+  setupRatingRoutes,
+  setupRoomRoutes,
+  setupAddressRoutes,
+  setupUploadRoutes,
+  setupBookingRoutes,
+} from '@/modules/ApartmentListing';
+
+// Citizen
+import {
+  setupCitizenAddressRoutes,
+  setupUserSpecialtyRoutes,
+  setupUserG8Routes,
+  setupRoleUserRoutes,
+  setupUserRoutes,
+  setupUserSpecialistRoutes,
+} from '@/modules/citizens/routes';
 
 // Clean Air
-import { setupCleanAirRoutes } from '../modules/clean-air/routes';
+import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
+
+// Emergency
+import {
+  setupReportRoutes,
+  setupFcmRoutes,
+  setupTokenRoutes,
+} from '@/modules/emergency';
+
+// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
-import { setupEventRoutes } from '@/modules/EventHub';
-import { setupBookmarkRoutes } from '@/modules/EventHub';
+import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
 
 // Financial
 import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -43,18 +73,54 @@ import {
 // Power BI
 import { reportRoutes } from '@/modules/power-bi';
 
+// Support Map
+import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+
 // Volunteer
-import { eventRoutes } from '../modules/Volunteer/routes';
+import { eventRoutes } from '@/modules/Volunteer/routes';
+
+// Waste
+import { setupWasteRoutes } from '@/modules/waste-management/routes';
+
+// Weather
+import {
+  setupWeatherRoutes,
+  setupOpenMeteoRoutes,
+} from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
-  /* 
+  /*
   ============================================
   OpenAPI Routes (documented in Swagger)
   ============================================
   */
 
+  // Auth
+  setupAuthRoutes(app);
+
+  // Apartment
+  setupAddressRoutes(app);
+  setupApartmentRoutes(app);
+  setupRoomRoutes(app);
+  setupRatingRoutes(app);
+  setupUploadRoutes(app);
+  setupBookingRoutes(app);
+
   // Clean Air
   setupCleanAirRoutes(app);
+
+  // Citizen
+  setupCitizenAddressRoutes(app);
+  setupUserSpecialistRoutes(app);
+  setupUserSpecialtyRoutes(app);
+  setupUserG8Routes(app);
+  setupRoleUserRoutes(app);
+  setupUserRoutes(app);
+
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -64,6 +130,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
   setupScbRoutes(app);
+  setupInsuranceCardRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
@@ -78,14 +145,31 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Waste
+  setupWasteRoutes(app);
+
+  // Weather
+  setupOpenMeteoRoutes(app);
+  setupWeatherRoutes(app);
+
   /*
   ============================================
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
 
+  //Emergency
+  //   app.route('/reports', reportRoutes);
+  //   app.route('/fcm', fcmRoutes);
+  //   app.route('/tokens', tokenRoutes);
+  //   app.route('/emergency', emergencyRoutes);
+
   // Power BI
   app.route('/reports', reportRoutes);
+
+  // Support Map
+  app.route('/api', detectRoutes);
+  app.route('/api', markerRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

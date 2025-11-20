@@ -1,7 +1,6 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { EventSchemas } from '../schemas';
 import { EventController } from '../controllers';
-import { AuthMiddleware } from '@/middlewares/auth_example';
 
 const setupEventRoutes = (app: OpenAPIHono) => {
   // Event Routes
@@ -26,6 +25,13 @@ const setupEventRoutes = (app: OpenAPIHono) => {
   app.openapi(EventSchemas.deleteEventRoute, async (c) => {
     return EventController.deleteEvent(c);
   });
+  app.openapi(EventSchemas.createEventRoute, EventController.createEvent);
+
+  // Update existing event (admin only)
+  app.openapi(EventSchemas.updateEventRoute, EventController.updateEvent);
+
+  // Delete event (admin only)
+  app.openapi(EventSchemas.deleteEventRoute, EventController.deleteEvent);
 
   // Get daily event count (analytics or calendar view)
   app.openapi(
