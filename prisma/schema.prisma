@@ -1238,9 +1238,6 @@ enum power_bi_report_type {
 enum report_visibility {
   citizens
   admin
-<<<<<<< HEAD
-}
-=======
 }
 
 enum binstatus {
@@ -1256,4 +1253,3 @@ enum bintype {
   HAZARDOUS
   ORGANIC
 }
->>>>>>> origin
