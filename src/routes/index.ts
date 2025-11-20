@@ -76,6 +76,15 @@ import { reportRoutes } from '@/modules/power-bi';
 // Support Map
 import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
 
+// Traffic
+import {
+  setupIntersectionRoutes,
+  setupLightRequestRoutes,
+  setupRoadRoutes,
+  setupTrafficEmergencyRoutes,
+  setupTrafficLightRoutes,
+} from '@/modules/traffic';
+
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
 
@@ -144,6 +153,13 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupExerciseRoute(app);
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
+
+  // Traffic
+  setupIntersectionRoutes(app);
+  setupTrafficLightRoutes(app);
+  setupLightRequestRoutes(app);
+  setupRoadRoutes(app);
+  setupTrafficEmergencyRoutes(app);
 
   // Waste
   setupWasteRoutes(app);
