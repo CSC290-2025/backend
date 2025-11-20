@@ -5,50 +5,14 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { serve } from '@hono/node-server';
 import { setupRoutes } from '@/routes';
 import routeStopsRoutes from './modules/public-transportation/routes/routeFinder.route';
-
-const app = new OpenAPIHono();
-app.use(
-  cors({
-    // อนุญาตให้ Frontend (Vite/React) ที่รันบน Localhost เข้าถึงได้
-    origin: [
-      'http://localhost:5173', 
-      'http://localhost:3000', 
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000',
-    ],
-    allowHeaders: ['Content-Type'],
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
-    maxAge: 600,
-  })
-);
-
-// กำหนด Error handler
-app.onError(errorHandler);
-
-// กำหนด OpenAPI Documentation
-app.doc('/doc', {
-  openapi: '3.0.0',
-  info: {
-    version: '1.0.0',
-    title: 'Smart City Hub',
-    description: 'A comprehensive API',
-  },
-  servers: [
-    {
-      url: `http://localhost:${config.port}`,
-      description: 'Local development server',
-    },
-  ],
-});
-
-// กำหนด Swagger UI เพื่อแสดงเอกสาร API
-app.get('/swagger', swaggerUI({ url: '/doc' }));
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
 
+let serverInstance: ReturnType<typeof serve> | null = null;
 const app = new OpenAPIHono();
+
 app.onError(errorHandler);
 
 app.use(
@@ -61,6 +25,7 @@ app.use(
     },
     allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
+    maxAge: 600,
   })
 );
 
@@ -75,7 +40,6 @@ app.notFound((c) => {
   );
 });
 
-// Health check route
 app.get('/', (c) => {
   return c.json({
     name: 'Smart City Hub API',
@@ -86,10 +50,9 @@ app.get('/', (c) => {
   });
 });
 
-// เชื่อมโยง routes ที่เกี่ยวข้องกับ route stops
+setupRoutes(app);
 app.route('/api', routeStopsRoutes);
 
-// เรียกใช้ฟังก์ชัน setupRoutes สำหรับการกำหนด routes อื่นๆ
 app.get('/doc', (c) => {
   let port = config.port;
   const addr = serverInstance?.address();
@@ -118,51 +81,30 @@ app.get('/doc', (c) => {
 
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
-setupRoutes(app);
 startAir4ThaiAggregationJob();
-
-// ตั้งค่าเซิร์ฟเวอร์
-const server = serve(
-  {
-    fetch: app.fetch,
-    port: config.port,
-  },
-  (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-    console.log(`API Documentation on http://localhost:${info.port}/swagger`);
-    console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
-  }
-);
-
-// การจัดการ Signal เมื่อโปรเซสได้รับคำสั่งหยุด
-process.on('SIGINT', () => {
-  server.close();
-  process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-  server.close((err) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-let serverInstance: ReturnType<typeof serve> | null = null;
 
 async function shutdown() {
   console.log('Shutting down server...');
   try {
     if (serverInstance) {
-      serverInstance.close((err) => {
-        if (err) console.error('Error closing server:', err);
+      await new Promise<void>((resolve, reject) => {
+        serverInstance!.close((err) => {
+          if (err) {
+            console.error('Error closing server:', err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
       });
     }
     await prisma.$disconnect();
     console.log('Prisma disconnected');
   } catch (err) {
     console.error('Error during shutdown:', err);
+    process.exit(1);
   } finally {
     process.exit(0);
-  });
-});
   }
 }
 
@@ -181,7 +123,6 @@ async function startServer(startPort: number, maxRetries = 10) {
         );
         console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
 
-        // Start the booking cleanup job
         startBookingCleanupJob();
         console.log('Booking cleanup job started - will run every hour');
       });
