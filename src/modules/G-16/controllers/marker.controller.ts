@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { successResponse } from '@/utils/response';
-import * as MarkerService  from '@/modules/G-16/services/marker.service';
+import * as MarkerService from '@/modules/G-16/services/marker.service';
 
 import type {
   CreateMarkerInput,
@@ -9,15 +9,16 @@ import type {
   BoundingBox,
 } from '@/modules/G-16/types';
 
-
 // GET /api/markers
 export const getAllMarkers = async (c: Context) => {
   try {
     const query = c.req.query();
     const filters: Partial<MarkerQuery> = {
-      marker_type_id: query.marker_type_id ? Number(query.marker_type_id) : undefined,
-      marker_type_ids: query.marker_type_ids 
-        ? query.marker_type_ids.split(',').map(Number) 
+      marker_type_id: query.marker_type_id
+        ? Number(query.marker_type_id)
+        : undefined,
+      marker_type_ids: query.marker_type_ids
+        ? query.marker_type_ids.split(',').map(Number)
         : undefined,
       limit: query.limit ? Number(query.limit) : 100,
       offset: query.offset ? Number(query.offset) : 0,
@@ -108,7 +109,7 @@ export const updateMarker = async (c: Context) => {
   try {
     const id = c.req.param('id');
     const markerData = await c.req.json<UpdateMarkerInput>();
-    
+
     // console.log('Updating marker:', id, markerData);
 
     const updatedMarker = await MarkerService.updateMarker(id, markerData);
@@ -120,7 +121,7 @@ export const updateMarker = async (c: Context) => {
     });
   } catch (error: any) {
     console.error('Error updating marker:', error);
-    
+
     if (error.message && error.message.includes('not found')) {
       return c.json(
         {
@@ -130,7 +131,7 @@ export const updateMarker = async (c: Context) => {
         404
       );
     }
-    
+
     return c.json(
       {
         success: false,
@@ -145,7 +146,7 @@ export const updateMarker = async (c: Context) => {
 export const deleteMarker = async (c: Context) => {
   try {
     const id = c.req.param('id');
-    
+
     // console.log('Deleting marker:', id);
 
     await MarkerService.deleteMarker(id);
@@ -156,7 +157,7 @@ export const deleteMarker = async (c: Context) => {
     });
   } catch (error: any) {
     console.error('Error deleting marker:', error);
-    
+
     if (error.message && error.message.includes('not found')) {
       return c.json(
         {
@@ -166,7 +167,7 @@ export const deleteMarker = async (c: Context) => {
         404
       );
     }
-    
+
     return c.json(
       {
         success: false,

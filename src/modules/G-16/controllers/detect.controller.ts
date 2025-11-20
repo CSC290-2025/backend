@@ -1,14 +1,15 @@
 // src/controllers/detect.controller.ts
 import type { Context } from 'hono';
 import { detectDangerFromImage } from '../services/gemini.service';
-import { addtheMarker } from '../services/marker.service';
+// import { addMarker } from '../services/marker.service';
 import { ValidationError } from '@/errors';
+import { addtheMarker } from '../services/marker.service';
 
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const THRESHOLD = 0.8;
 const DANGER_MARKER_TYPE_ID = 999;
 
-// normalize value to string
+//normalize value to string
 function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((v) => String(v));
@@ -58,7 +59,7 @@ export async function detectHarm(c: Context) {
   const reasons = toStringArray(ai.reasons);
 
   // 4) Create marker if dangerous or have problem
-  const marker: any = null;
+  let marker: any = null;
   const over_threshold = has_issue && confidence >= THRESHOLD;
 
   if (over_threshold && checkCordinate) {
@@ -67,16 +68,31 @@ export async function detectHarm(c: Context) {
       confidence * 100
     )}%)`;
 
-    // marker = await addMarker({
-    //   lat,
-    //   lng,
-    //   marker_type_id: DANGER_MARKER_TYPE_ID,
-    //   title,
-    //   description,
-    //   confidence,
-    //   category,
-    // });
+    try {
+      marker = await addtheMarker({
+        location: {
+          lat: lat,
+          lng: lng,
+        },
+        marker_type_id: null,
+        description: description,
+      });
+
+      console.log('Auto-marker created success');
+    } catch (e) {
+      console.error('Failed to create marker automatically', e);
+    }
   }
+
+  // marker = await addMarker({
+  //   lat,
+  //   lng,
+  //   marker_type_id: DANGER_MARKER_TYPE_ID,
+  //   title,
+  //   description,
+  //   confidence,
+  //   categories: types,
+  // });
 
   // 5) Send result to frontend
   return c.json({

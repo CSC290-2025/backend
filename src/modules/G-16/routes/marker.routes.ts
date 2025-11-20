@@ -10,8 +10,8 @@ import {
 const markerRoutes = new Hono();
 markerRoutes.get('/markers', getAllMarkers); // /api/markers
 markerRoutes.get('/markers/:id', getMarkerById);
-markerRoutes.post('/api/markers', createMarker);
-markerRoutes.put('/api/markers/:id', updateMarker);
-markerRoutes.delete('/api/markers/:id', deleteMarker);
+markerRoutes.post('/markers', createMarker); // แบบเดิม ('/api/markers', createMarker)
+markerRoutes.put('/markers/:id', updateMarker); // แบบเดิม ('/api/markers/:id', updateMarker)
+markerRoutes.delete('/markers/:id', deleteMarker); // แบบเดิม  ('/api/markers/:id', deleteMarker)
 
 export { markerRoutes };

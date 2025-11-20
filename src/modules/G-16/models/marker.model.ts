@@ -1,5 +1,8 @@
 import prisma from '@/config/client.ts';
 import { handlePrismaError, ValidationError } from '@/errors';
+// import type { CreateMarkerTypeInput, UpdateMarkerTypeInput, MarkerTypeResponse } from '../types/markerType.types';
+// import type { CreateMarkerInput, MarkerResponse, UpdateMarkerInput } from '../types/marker.types';
+// // import { PrismaClient } from '@prisma/client';
 import type {
   CreateMarkerTypeInput,
   UpdateMarkerTypeInput,
@@ -10,7 +13,6 @@ import type {
   MarkerResponse,
   UpdateMarkerInput,
 } from '../types/marker.types';
-// import { PrismaClient } from '@prisma/client';
 // import { PrismaClient } from '@prisma/client';
 import type { BoundingBox } from '../types/marker.types';
 import type { marker } from '@/generated/prisma';
@@ -215,7 +217,7 @@ export const getAllMarkers = async (options?: {
 
   const markers = rows.map((row) => ({
     ...row,
-    // ST_AsGeoJSON คืนมาเป็น string → parse เป็น object { type, coordinates }
+    // ST_AsGeoJSON to string -> parse to object { type, coordinates }
     location: row.location ? JSON.parse(row.location) : null,
   }));
 
