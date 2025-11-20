@@ -1,22 +1,48 @@
-import { ForbiddenError } from '@/errors';
+import { ForbiddenError, UnauthorizedError } from '@/errors';
 import type { MiddlewareHandler } from 'hono';
 import type { AuthTypes } from '@/modules/Auth/types';
-import config from '@/config/env';
+import { ROLES } from '@/constants/roles';
 
-const ADMIN_ROLE_ID = config.adminRoleId;
+/**
+ * Role-based access control middleware factory
+ * @param allowedRoleNames - One or more role names that are allowed
+ * @param message - Optional custom error message
+ * @returns Middleware handler
+ */
+const requireRole = (
+  allowedRoleNames: string | string[],
+  message?: string
+): MiddlewareHandler => {
+  const roleNames = Array.isArray(allowedRoleNames)
+    ? allowedRoleNames
+    : [allowedRoleNames];
 
-const adminMiddleware: MiddlewareHandler = async (c, next) => {
-  const user = c.get('user') as AuthTypes.JwtPayload;
+  return async (c, next) => {
+    const user = c.get('user') as AuthTypes.JwtPayload | undefined;
 
-  if (!user) {
-    throw new ForbiddenError('User context not found');
-  }
+    if (!user) {
+      throw new UnauthorizedError('Authentication required');
+    }
 
-  if (user.roleId !== ADMIN_ROLE_ID) {
-    throw new ForbiddenError('Admin access required');
-  }
+    if (!user.role_name) {
+      throw new ForbiddenError('User role not assigned');
+    }
 
-  await next();
+    if (!roleNames.includes(user.role_name)) {
+      throw new ForbiddenError(
+        message || `Access requires one of roles: ${roleNames.join(', ')}`
+      );
+    }
+
+    await next();
+  };
 };
 
-export { adminMiddleware };
+/**
+ * Admin-only access middleware
+ * just call the function instead of doing another [role]Middleware here, and exporting
+ * this is an example
+ */
+const adminMiddleware = requireRole(ROLES.ADMIN, 'Admin access required');
+
+export { adminMiddleware, requireRole };
