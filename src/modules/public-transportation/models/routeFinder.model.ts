@@ -146,12 +146,10 @@ export const getRoutes = async (
 
   if (origLat && origLng) {
     finalOrigin = `${origLat},${origLng}`;
-  } 
-
-  else if (origin && origin.length > 0) {
+  } else if (origin && origin.length > 0) {
     finalOrigin = origin;
   }
-  
+
   if (!finalOrigin) {
     throw new Error(
       'Could not determine a starting point (origin or GPS location).'
@@ -160,24 +158,20 @@ export const getRoutes = async (
 
   let finalDestination = '';
 
-
   if (destLat && destLng) {
-    finalDestination = `${destLat},${destLng}`; 
-  }
- 
-  else if (destination && destination.length > 0) {
+    finalDestination = `${destLat},${destLng}`;
+  } else if (destination && destination.length > 0) {
     finalDestination = destination;
   }
 
   if (!finalDestination) {
     throw new Error('Could not determine a destination point.');
   }
-  
 
   const encodedOrigin = encodeURIComponent(finalOrigin);
   const encodedDestination = encodeURIComponent(finalDestination);
-  
-  const currentTimestamp = Math.floor(Date.now() / 1000); 
+
+  const currentTimestamp = Math.floor(Date.now() / 1000);
 
   const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
 
@@ -206,8 +200,10 @@ export const getRoutes = async (
       const errorMessage =
         data.error_message ||
         `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
-      
-      throw new Error(`Google API status: ${data.status}. No valid routes found.`);
+
+      throw new Error(
+        `Google API status: ${data.status}. No valid routes found.`
+      );
     }
   } catch (error) {
     console.error('Error fetching route stops:', error);
