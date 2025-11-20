@@ -112,7 +112,7 @@ const createPutRoute = <
   summary: string;
   requestSchema: TRequest;
   responseSchema: TResponse;
-  params: TParams;
+  params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
 }) =>
@@ -123,7 +123,7 @@ const createPutRoute = <
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
     request: {
-      params: config.params,
+      ...(config.params && { params: config.params }),
       body: {
         content: {
           'application/json': { schema: config.requestSchema },
@@ -140,7 +140,7 @@ const createPutRoute = <
 const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
   path: string;
   summary: string;
-  params: TParams;
+  params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
 }) =>
@@ -151,7 +151,7 @@ const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
     request: {
-      params: config.params,
+      ...(config.params && { params: config.params }),
     },
     responses: {
       200: successResponse(z.null(), 'Deleted'),

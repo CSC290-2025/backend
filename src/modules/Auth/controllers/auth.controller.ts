@@ -4,8 +4,10 @@ import { successResponse } from '@/utils/response';
 import { AuthService } from '../services';
 import type { AuthTypes } from '../types';
 import config from '@/config/env';
-import { UnauthorizedError } from '@/errors';
+import { UnauthorizedError, ConflictError } from '@/errors';
 
+// now implemented in auth middleware
+// keeping it just in case of manual retrieval to /refresh endpoint
 const ACCESS_TOKEN_COOKIE = 'accessToken';
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
 const DAYS = Number(config.jwtRefreshExpiresIn);
@@ -33,6 +35,11 @@ const setAuthCookies = (
 };
 
 const login = async (c: Context) => {
+  const existingUser = c.get('user');
+  if (existingUser) {
+    throw new ConflictError('You are already logged in');
+  }
+
   const body: AuthTypes.LoginRequest = await c.req.json();
   const tokens = await AuthService.login(body);
 
@@ -42,6 +49,11 @@ const login = async (c: Context) => {
 };
 
 const register = async (c: Context) => {
+  const existingUser = c.get('user');
+  if (existingUser) {
+    throw new ConflictError('You are already logged in. Please logout first');
+  }
+
   const body: AuthTypes.RegisterRequest = await c.req.json();
   const tokens = await AuthService.register(body);
 
@@ -82,9 +94,7 @@ const logout = async (c: Context) => {
 const me = async (c: Context) => {
   const user = c.get('user') as AuthTypes.JwtPayload;
 
-  const currentUser = await AuthService.getCurrentUser(user.userId);
-
-  return successResponse(c, { user: currentUser }, 200);
+  return successResponse(c, { authenticated: true, userId: user.userId }, 200);
 };
 
 export { login, refreshToken, logout, me, register };
