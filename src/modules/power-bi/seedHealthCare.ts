@@ -1,5 +1,4 @@
-import { Prisma, PrismaClient } from '../../generated/prisma';
-import prisma from '../../config/client';
+import prisma from '@/config/client';
 
 // --- Configuration ---
 const NUM_FACILITIES = 25;

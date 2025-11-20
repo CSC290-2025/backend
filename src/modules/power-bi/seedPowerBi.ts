@@ -1,4 +1,4 @@
-import prisma from '../../config/client'; // Assumes your client path
+import prisma from '@/config/client';
 
 // --- Configuration Constants ---
 const TOTAL_DAYS = 365; // 1 year of data

@@ -1,4 +1,4 @@
-import prisma from '../../config/client';
+import prisma from '@/config/client';
 
 // --- Configuration ---
 const NUM_LOCATIONS = 20; // Number of distinct locations (districts)

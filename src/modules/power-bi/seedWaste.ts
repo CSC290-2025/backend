@@ -1,4 +1,4 @@
-import prisma from '../../config/client';
+import prisma from '@/config/client';
 
 // --- Configuration ---
 const NUM_WASTE_TYPES = 10;
