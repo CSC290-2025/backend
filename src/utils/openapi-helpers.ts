@@ -51,6 +51,7 @@ const createGetRoute = <
   query?: TQuery;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'get',
@@ -58,6 +59,7 @@ const createGetRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
       ...(config.params && { params: config.params }),
       ...(config.query && { query: config.query }),
@@ -80,6 +82,7 @@ const createPostRoute = <
   params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'post',
@@ -87,6 +90,7 @@ const createPostRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
       ...(config.params && { params: config.params }),
       body: {
@@ -115,6 +119,7 @@ const createPutRoute = <
   params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'put',
@@ -122,6 +127,7 @@ const createPutRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
       ...(config.params && { params: config.params }),
       body: {
@@ -143,6 +149,7 @@ const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
   params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'delete',
@@ -150,6 +157,7 @@ const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
       ...(config.params && { params: config.params }),
     },
