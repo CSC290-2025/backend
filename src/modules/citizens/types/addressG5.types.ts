@@ -1,4 +1,5 @@
 export interface AddressG5 {
+  user_id: number;
   id: number;
   address_line: string | null;
   province: string | null;

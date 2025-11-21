@@ -72,10 +72,19 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-import { reportRoutes } from '@/modules/power-bi';
+import { setupReportsRoutes } from '@/modules/power-bi';
 
 // Support Map
 import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+
+// Traffic
+import {
+  setupIntersectionRoutes,
+  setupLightRequestRoutes,
+  setupRoadRoutes,
+  setupTrafficEmergencyRoutes,
+  setupTrafficLightRoutes,
+} from '@/modules/traffic';
 
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
@@ -152,6 +161,16 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Power BI
+  setupReportsRoutes(app);
+
+  // Traffic
+  setupIntersectionRoutes(app);
+  setupTrafficLightRoutes(app);
+  setupLightRequestRoutes(app);
+  setupRoadRoutes(app);
+  setupTrafficEmergencyRoutes(app);
+
   // Waste
   setupWasteRoutes(app);
 
@@ -170,9 +189,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   //   app.route('/fcm', fcmRoutes);
   //   app.route('/tokens', tokenRoutes);
   //   app.route('/emergency', emergencyRoutes);
-
-  // Power BI
-  app.route('/reports', reportRoutes);
 
   // Support Map
   app.route('/api', detectRoutes);
