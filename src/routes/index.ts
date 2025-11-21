@@ -20,6 +20,16 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
+// // Citizen
+// Citizen
+// import {
+//   setupCitizenAddressRoutes,
+//   setupUserSpecialtyRoutes,
+//   setupUserG8Routes,
+//   setupRoleUserRoutes,
+//   setupUserRoutes,
+//   setupUserSpecialistRoutes,
+// } from '@/modules/citizens/routes';
 // Citizen
 import {
   setupCitizenAddressRoutes,
@@ -33,6 +43,13 @@ import {
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
+// // Emergency
+// Emergency
+// import {
+//   setupReportRoutes,
+//   setupFcmRoutes,
+//   setupTokenRoutes,
+// } from '@/modules/emergency';
 // Emergency
 import {
   setupReportRoutes,
@@ -69,7 +86,6 @@ import {
 import {
   setupEnrollmentRoutes,
   setupCourseRoutes,
-  setupOnsiteSessionRoutes,
   setupExerciseRoute,
   setupQuestionRoutes,
   setupLevelRoutes,
@@ -79,7 +95,11 @@ import {
 import { setupReportsRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+import {
+  detectRoutes,
+  markerRoutes,
+  distanceRoutes,
+} from '@/modules/G-16/routes';
 
 // Traffic
 import {
@@ -96,6 +116,12 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
+// // Weather
+// Weather
+// import {
+//   setupWeatherRoutes,
+//   setupOpenMeteoRoutes,
+// } from '@/modules/weather/routes';
 // Weather
 import {
   setupWeatherRoutes,
@@ -124,6 +150,17 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupCleanAirRoutes(app);
 
   // Citizen
+  // setupCitizenAddressRoutes(app);
+  // setupUserSpecialistRoutes(app);
+  // setupUserSpecialtyRoutes(app);
+  // setupUserG8Routes(app);
+  // setupRoleUserRoutes(app);
+  // setupUserRoutes(app);
+
+  // //Emergency
+  // setupReportRoutes(app);
+  // setupFcmRoutes(app);
+  // setupTokenRoutes(app);
   setupCitizenAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
@@ -154,7 +191,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Know AI
   setupEnrollmentRoutes(app);
   setupCourseRoutes(app);
-  setupOnsiteSessionRoutes(app);
   setupExerciseRoute(app);
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
@@ -173,6 +209,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWasteRoutes(app);
 
   // Weather
+  // setupOpenMeteoRoutes(app);
+  // setupWeatherRoutes(app);
+  // Weather
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
 
@@ -189,6 +228,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
+  app.route('/api', distanceRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

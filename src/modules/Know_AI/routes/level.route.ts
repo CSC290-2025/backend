@@ -4,6 +4,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 
 const setupLevelRoutes = (app: OpenAPIHono) => {
   app.openapi(LevelSchema.getUserLevel, LevelController.getLevel);
+  app.openapi(LevelSchema.completeLevel, LevelController.completeLevel);
 };
 
 export { setupLevelRoutes };
