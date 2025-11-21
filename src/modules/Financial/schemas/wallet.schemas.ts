@@ -5,6 +5,13 @@ import {
   createPutRoute,
 } from '@/utils/openapi-helpers';
 
+//Enum
+const OrganizationTypeEnum = z.enum([
+  'Volunteer',
+  'Transportation',
+  'Healthcare',
+]);
+
 // Base
 const WalletSchema = z.object({
   id: z.number(),
@@ -39,6 +46,10 @@ const TransferFundsSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
 });
 
+const OrganizationTypeSchema = z.object({
+  organizationType: OrganizationTypeEnum,
+});
+
 // Parameter schemas
 const UserIdParam = z.object({
   userId: z.coerce.number(),
@@ -46,6 +57,10 @@ const UserIdParam = z.object({
 
 const WalletIdParam = z.object({
   walletId: z.coerce.number(),
+});
+
+const OrganizationTypeParam = z.object({
+  organizationType: z.enum(['Volunteer', 'Transportation', 'Healthcare']),
 });
 
 // OpenAPI route
@@ -107,11 +122,24 @@ const transferFundsRoute = createPostRoute({
   requestSchema: TransferFundsSchema,
   responseSchema: z.object({
     status: z.string(),
+    transactionId: z.number().optional(),
   }),
   tags: ['Wallets'],
 });
 
+const getOrganizationBalanceRoute = createGetRoute({
+  path: '/wallets/organization/{organizationType}/balance',
+  summary: 'Get organization wallet balance',
+  responseSchema: z.object({
+    balance: z.number(),
+    organizationType: OrganizationTypeEnum,
+  }),
+  params: OrganizationTypeParam,
+  tags: ['Wallets'],
+});
+
 export const WalletSchemas = {
+  OrganizationTypeEnum,
   WalletSchema,
   CreateWalletSchema,
   UpdateWalletSchema,
@@ -119,10 +147,12 @@ export const WalletSchemas = {
   TransferFundsSchema,
   UserIdParam,
   WalletIdParam,
+  OrganizationTypeParam,
   createWalletRoute,
   getUserWalletsRoute,
   getWalletRoute,
   updateWalletRoute,
   topUpBalanceRoute,
   transferFundsRoute,
+  getOrganizationBalanceRoute,
 };

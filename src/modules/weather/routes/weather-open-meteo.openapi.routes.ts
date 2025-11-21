@@ -4,13 +4,28 @@ import { OpenMeteoController } from '../controllers';
 
 const setupOpenMeteoRoutes = (app: OpenAPIHono) => {
   app.openapi(
-    WeatherOpenMeteoSchemas.getExternalWeatherRoute,
-    OpenMeteoController.getOpenMeteoWeather
+    WeatherOpenMeteoSchemas.getExternalCurrentRoute,
+    OpenMeteoController.getOpenMeteoCurrent
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.getExternalHourlyRoute,
+    OpenMeteoController.getOpenMeteoHourly
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.getExternalDailyRoute,
+    OpenMeteoController.getOpenMeteoDaily
   );
 
   app.openapi(
     WeatherOpenMeteoSchemas.importDailyRoute,
     OpenMeteoController.importDailyOpenMeteo
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.importDailyAllRoute,
+    OpenMeteoController.importDailyOpenMeteoAll
   );
 };
 

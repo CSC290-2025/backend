@@ -1,8 +1,10 @@
 import { FcmController } from '@/modules/emergency/controllers';
 import { Hono } from 'hono';
 
-const fcmRoutes = new Hono();
+export function fcmRoutes() {
+  const app = new Hono();
 
-fcmRoutes.post('/all', FcmController.sendAllNotification);
+  app.post('/fcm/all', FcmController.sendAllNotification);
 
-export { fcmRoutes };
+  return app;
+}

@@ -1218,12 +1218,6 @@ enum wallet_type {
   organization
 }
 
-enum report_type {
-  traffic
-  accident
-  disaster
-}
-
 enum blood_type {
   A
   B
@@ -1234,6 +1228,12 @@ enum blood_type {
 enum power_bi_report_type {
   summary
   trends
+}
+
+enum report_type {
+  traffic
+  accident
+  disaster
 }
 
 enum report_visibility {
