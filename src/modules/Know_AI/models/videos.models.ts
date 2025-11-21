@@ -23,28 +23,31 @@ const getCourseVideoById = async (id: number): Promise<CourseVideo> => {
 };
 
 const createCourseVideo = async (
-  data: CreateCourseVideo
+  data: CreateCourseVideo,
+  tx?: any
 ): Promise<CourseVideo> => {
   try {
-    return await prisma.course_videos.create({ data });
+    const prismaClient = tx || prisma;
+    return await prismaClient.course_videos.create({ data });
   } catch (error) {
     handlePrismaError(error);
   }
 };
 
 const createMultipleCourseVideos = async (
-  videos: CreateCourseVideo[]
+  videos: CreateCourseVideo[],
+  tx?: any
 ): Promise<CourseVideo[]> => {
   try {
+    const prismaClient = tx || prisma;
     const results = await Promise.all(
       videos.map(async (video) => {
-        return await prisma.course_videos.create({ data: video });
+        return await prismaClient.course_videos.create({ data: video });
       })
     );
     return results;
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -57,15 +60,16 @@ const deleteCourseVideo = async (id: number): Promise<CourseVideo> => {
 };
 
 const deleteCourseVideosByCourseId = async (
-  courseId: number
+  courseId: number,
+  tx?: any
 ): Promise<{ count: number }> => {
   try {
-    return await prisma.course_videos.deleteMany({
+    const prismaClient = tx || prisma;
+    return await prismaClient.course_videos.deleteMany({
       where: { course_id: courseId },
     });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
