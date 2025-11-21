@@ -22,10 +22,10 @@ const addCategoryToPost = async (
 ): Promise<PostCategory> => {
   const post = await PostsModel.findPostById(postId);
   if (!post) throw new NotFoundError('Post not found');
-  if (post.donater_id !== userId)
-    throw new ValidationError(
-      'Unauthorized: You can only manage your own posts'
-    );
+  // if (post.donater_id !== userId)
+  //   throw new ValidationError(
+  //     'Unauthorized: You can only manage your own posts'
+  //   );
   const hasCategory = await PostCategoryModel.checkPostHasCategory(
     postId,
     data.category_id
@@ -43,13 +43,13 @@ const addCategoriesToPost = async (
 ): Promise<PostCategory[]> => {
   const post = await PostsModel.findPostById(postId);
   if (!post) throw new NotFoundError('Post not found');
-  if (post.donater_id !== userId)
-    throw new ValidationError(
-      'Unauthorized: You can only manage your own posts'
-    );
+  // if (post.donater_id !== userId)
+  //   throw new ValidationError(
+  //     'Unauthorized: You can only manage your own posts'
+  //   );
 
-  const uniqueCategoryIds = [...new Set(data.category_ids)];
-  if (uniqueCategoryIds.length !== data.category_ids.length) {
+  const uniqueCategoryIds = [...new Set(data.category_id)];
+  if (uniqueCategoryIds.length !== data.category_id.length) {
     throw new ValidationError('Duplicate category IDs found');
   }
 
@@ -63,10 +63,10 @@ const removeCategoryFromPost = async (
 ): Promise<void> => {
   const post = await PostsModel.findPostById(postId);
   if (!post) throw new NotFoundError('Post not found');
-  if (post.donater_id !== userId)
-    throw new ValidationError(
-      'Unauthorized: You can only manage your own posts'
-    );
+  // if (post.donater_id !== userId)
+  //   throw new ValidationError(
+  //     'Unauthorized: You can only manage your own posts'
+  //   );
 
   const hasCategory = await PostCategoryModel.checkPostHasCategory(
     postId,

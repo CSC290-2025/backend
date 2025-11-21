@@ -1,7 +1,8 @@
 import crypto from 'crypto';
+import config from '@/config/env';
 
 const ALGO = 'aes-256-gcm';
-const KEY = Buffer.from(process.env.G11_CARD_ENC_KEY!, 'hex');
+const KEY = Buffer.from(config.metroCardEncryptionKey, 'hex');
 
 export function encrypt(plaintext: string): string {
   const iv = crypto.randomBytes(12);
@@ -45,10 +46,23 @@ export function decrypt(encryptedText: string): string {
   return decrypted + lastFour;
 }
 
+export function hashCardNumber(cardNumber: string) {
+  const hashKey = config.metroCardHashKey;
+  return crypto.createHmac('sha256', hashKey).update(cardNumber).digest('hex');
+}
+
 export function maskCardNumber19(full: string) {
   const visible = full.slice(-4);
 
   const masked = '•••• •••• •••• ';
 
   return masked + visible;
+}
+
+export function normalizeCardNumber(cardNumber: string): string {
+  const cleaned = cardNumber.replace(/\s/g, '');
+  if (cleaned.startsWith('MET-')) {
+    return cleaned;
+  }
+  return `MET-${cleaned}`;
 }

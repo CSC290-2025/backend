@@ -5,4 +5,5 @@ export {
   fcmRoutes,
   setupTokenRoutes,
   tokenRoutes,
+  contactRoutes,
 } from './routes';

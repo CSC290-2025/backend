@@ -22,13 +22,15 @@ const getPostByDonater = async (
   return await PostsModel.findPostByDonater(donaterId);
 };
 
+//not authorize
 const createPost = async (
   data: CreateFreecyclePostData,
-  donaterId: number
+  donaterId: number | null
 ): Promise<FreecyclePost> => {
   if (!data.item_name || data.item_name.trim().length === 0) {
-    throw new ValidationError('Item name is require');
+    throw new ValidationError('Item name is required');
   }
+
   if (data.item_weight !== null && data.item_weight <= 0) {
     throw new ValidationError('Item weight must be greater than 0');
   }
@@ -96,6 +98,10 @@ const getPostsByCategory = async (
   return await PostsModel.findPostsByCategoryId(categoryId);
 };
 
+const getPostsByUserId = async (userId: number): Promise<FreecyclePost[]> => {
+  return await PostsModel.findPostByDonater(userId);
+};
+
 export {
   getAllPost,
   getPostById,
@@ -107,4 +113,5 @@ export {
   getNotGivenPost,
   markAsNotGiven,
   getPostsByCategory,
+  getPostsByUserId,
 };

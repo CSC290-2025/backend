@@ -4,8 +4,6 @@ import type { RequiredAddress } from '../types/address.type';
 
 const findAddressId = async (data: RequiredAddress) => {
   try {
-    console.log('find', data);
-
     const address = await prisma.addresses.findFirst({
       where: {
         address_line: data.address_line,
@@ -26,8 +24,6 @@ const findAddressId = async (data: RequiredAddress) => {
 
 const createAddress = async (data: RequiredAddress) => {
   try {
-    console.log('create', data);
-
     const address = await prisma.addresses.create({
       data: {
         address_line: data.address_line,

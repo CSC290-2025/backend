@@ -7,8 +7,8 @@ type OnsiteSession = z.infer<typeof CourseSchema.onsiteSession>;
 type CourseVideo = z.infer<typeof CourseSchema.courseVideo>;
 type CreateCourseVideo = z.infer<typeof CourseSchema.createCourseVideo>;
 type CreateOnsiteSession = z.infer<typeof CourseSchema.createOnsiteSession>;
-type CreateCourseVideoDB = z.infer<typeof CourseSchema.createCourseVideoDB>;
-type CreateOnsiteSessionDB = z.infer<typeof CourseSchema.createOnsiteSessionDB>;
+type UpdateCourseVideos = z.infer<typeof CourseSchema.updateCourseVideos>;
+type UpdateOnsiteSessions = z.infer<typeof CourseSchema.updateOnsiteSessions>;
 type CreateCourse = z.infer<typeof CourseSchema.createCourse>;
 type UpdateCourse = z.infer<typeof CourseSchema.updateCourse>;
 type courseTypeEnum = z.infer<typeof CourseSchema.courseTypeEnum>;
@@ -23,6 +23,6 @@ export type {
   CreateCourseVideo,
   OnsiteSession,
   CreateOnsiteSession,
-  CreateCourseVideoDB,
-  CreateOnsiteSessionDB,
+  UpdateCourseVideos,
+  UpdateOnsiteSessions,
 };
