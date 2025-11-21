@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_API_KEY = process.env.G08_VITE_GOOGLE_MAPS_API_KEY;
 
 const mapVehicleType = (vehicleType: string, lineName: string): string => {
   if (lineName.includes('ARL')) {
