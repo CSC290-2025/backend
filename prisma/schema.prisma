@@ -1055,7 +1055,7 @@ model users_specialty {
 }
 
 model event_organization {
-  id           Int      @id
+  id           Int      @id @default(autoincrement())
   name         String?  @db.VarChar(255)
   email        String?  @db.VarChar(255)
   phone_number String?  @db.VarChar(255)
@@ -1095,6 +1095,12 @@ model bin_locations {
   @@index([bin_type], map: "idx_bin_type")
   @@index([latitude, longitude], map: "idx_latitude_longitude")
   @@index([status], map: "idx_status")
+}
+
+model favourite_district {
+  id       Int    @id @default(autoincrement())
+  user_id  Int
+  district String @db.VarChar(255)
 }
 
 enum air_quality_category {

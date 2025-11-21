@@ -1,5 +1,9 @@
 import { z } from '@hono/zod-openapi';
-import { createGetRoute } from '@/utils/openapi-helpers';
+import {
+  createGetRoute,
+  createPostRoute,
+  createDeleteRoute,
+} from '@/utils/openapi-helpers';
 
 const CLEAN_AIR_TAG = ['Clean Air'];
 
@@ -245,6 +249,52 @@ const searchDistrictsRoute = createGetRoute({
   tags: CLEAN_AIR_TAG,
 });
 
+const FavouriteDistrictsResponseSchema = z
+  .object({ favorites: z.array(DistrictAirQualitySchema) })
+  .openapi('FavouriteDistrictsResponse');
+
+const FavouriteDistrictResponseSchema = z
+  .object({ favorite: DistrictAirQualitySchema })
+  .openapi('FavouriteDistrictResponse');
+
+const FavouriteDistrictParamSchema = z.object({
+  district: z
+    .string()
+    .min(1)
+    .openapi({
+      param: {
+        name: 'district',
+        in: 'path',
+        required: true,
+        description: 'District name (case-insensitive).',
+      },
+      example: 'Thung Khru',
+    }),
+});
+
+const getFavouriteDistrictsRoute = createGetRoute({
+  path: '/clean-air/favorites',
+  summary: 'List user favourite Bangkok districts',
+  responseSchema: FavouriteDistrictsResponseSchema,
+  tags: CLEAN_AIR_TAG,
+});
+
+const addFavouriteDistrictRoute = createPostRoute({
+  path: '/clean-air/favorites/{district}',
+  summary: 'Add a district to favourites',
+  params: FavouriteDistrictParamSchema,
+  requestSchema: z.object({}),
+  responseSchema: FavouriteDistrictResponseSchema,
+  tags: CLEAN_AIR_TAG,
+});
+
+const removeFavouriteDistrictRoute = createDeleteRoute({
+  path: '/clean-air/favorites/{district}',
+  summary: 'Remove a district from favourites',
+  params: FavouriteDistrictParamSchema,
+  tags: CLEAN_AIR_TAG,
+});
+
 export {
   AirQualityCategorySchema,
   DistrictAirQualitySchema,
@@ -266,4 +316,9 @@ export {
   getDistrictHealthTipsRoute,
   getAir4ThaiDistrictsRoute,
   searchDistrictsRoute,
+  FavouriteDistrictsResponseSchema,
+  FavouriteDistrictResponseSchema,
+  getFavouriteDistrictsRoute,
+  addFavouriteDistrictRoute,
+  removeFavouriteDistrictRoute,
 };

@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { ValidationError } from '@/errors';
+import { ValidationError, UnauthorizedError } from '@/errors';
 import { successResponse } from '@/utils/response';
 import { CleanAirService } from '../services';
 
@@ -58,6 +58,37 @@ const getDistrictHealthTips = async (c: Context) => {
   return successResponse(c, { tips });
 };
 
+const requireUserId = (c: Context) => {
+  const user = c.get('user') as { id?: number } | undefined;
+  const userId = user?.id;
+  if (!userId) {
+    throw new UnauthorizedError('User is not authenticated');
+  }
+  return userId;
+};
+
+const getFavoriteDistricts = async (c: Context) => {
+  const userId = requireUserId(c);
+  const favorites = await CleanAirService.getFavoriteDistricts(userId);
+  return successResponse(c, { favorites });
+};
+
+const addFavoriteDistrict = async (c: Context) => {
+  const userId = requireUserId(c);
+  const district = c.req.param('district');
+  if (!district) throw new ValidationError('District parameter is required');
+  const favorite = await CleanAirService.addFavoriteDistrict(userId, district);
+  return successResponse(c, { favorite }, 201);
+};
+
+const removeFavoriteDistrict = async (c: Context) => {
+  const userId = requireUserId(c);
+  const district = c.req.param('district');
+  if (!district) throw new ValidationError('District parameter is required');
+  await CleanAirService.removeFavoriteDistrict(userId, district);
+  return successResponse(c, { success: true });
+};
+
 export {
   getDistricts,
   getDistrictDetail,
@@ -65,4 +96,7 @@ export {
   getDistrictSummary,
   searchDistricts,
   getDistrictHealthTips,
+  getFavoriteDistricts,
+  addFavoriteDistrict,
+  removeFavoriteDistrict,
 };
