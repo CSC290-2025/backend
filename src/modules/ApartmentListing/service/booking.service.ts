@@ -92,6 +92,7 @@ const updateBookingStatus = async (
   const updateData: updateBookingData = {
     user_id: existingBooking.user_id,
     room_id: existingBooking.room_id,
+    apartment_id: existingBooking.apartment_id,
     guest_name: existingBooking.guest_name,
     guest_phone: existingBooking.guest_phone,
     guest_email: existingBooking.guest_email,

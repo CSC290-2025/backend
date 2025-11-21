@@ -16,6 +16,8 @@ import type {
   UpdateUserPersonal,
   UpdateUserHealth,
   UpdateUserAccount,
+  CreateUserRoleData,
+  UserRolesResponse,
 } from '../types/user.types';
 import type { RequiredAddress } from '../types/address.type';
 import {
@@ -309,6 +311,45 @@ const getUsersByRole = async (
   });
 };
 
+const getUserRoles = async (user_id: number): Promise<UserRolesResponse> => {
+  const user = await UserModel.getUserRoles(user_id);
+
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  const roles = user.roles ? [user.roles] : [];
+
+  return {
+    userId: user.id,
+    roles: roles,
+  };
+};
+
+const createUserRole = async (data: CreateUserRoleData) => {
+  // Check if user exists
+  const user = await UserModel.findUserById(data.user_id);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  // Validate role_id
+  if (!data.role_id) {
+    throw new ValidationError('Role ID is required');
+  }
+
+  const userRole = await UserModel.createUserRole(data);
+
+  if (!userRole) {
+    throw new Error('Failed to assign role to user');
+  }
+
+  return {
+    user_id: userRole.id,
+    role_id: userRole.role_id,
+  };
+};
+
 export {
   getUserById,
   updatePersonalInfo,
@@ -326,4 +367,6 @@ export {
   updateUserPersonalData,
   updateUserHealthData,
   updateUserAccountData,
+  getUserRoles,
+  createUserRole,
 };

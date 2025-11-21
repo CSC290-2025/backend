@@ -72,7 +72,6 @@ const findReportByStatus = async (
       totalPage: totalPage,
     };
   } catch (error) {
-    console.log(error);
     handlePrismaError(error);
   }
 };
