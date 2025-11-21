@@ -91,11 +91,11 @@ const create = async (data: CreateEventInput) => {
         total_seats: data.total_seats,
         created_by_user_id: data.created_by_user_id,
         image_url: data.image_url,
-        department_id: data.department_id,
+        //department_id: data.department_id, not done
         registration_deadline: data.registration_deadline
           ? new Date(data.registration_deadline)
           : undefined,
-        address_id: data.address_id,
+        //address_id: data.address_id, not done
         //status: data.status,
       },
     });
@@ -115,13 +115,13 @@ const update = async (id: number, data: UpdateEventInput) => {
         end_at: data.end_at ? new Date(data.end_at) : undefined,
         total_seats: data.total_seats,
         image_url: data.image_url,
-        department_id: data.department_id,
+        //department_id: data.department_id, not done
         registration_deadline: data.registration_deadline
           ? new Date(data.registration_deadline)
           : data.registration_deadline === null
             ? null
             : undefined,
-        address_id: data.address_id,
+        //address_id: data.address_id, not done
         //status: data.status,
       },
     });

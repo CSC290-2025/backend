@@ -1,6 +1,6 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
-/* 
+/*
 ROUTING OPTIONS:
 Choose ONE approach per module that you're comfortable with:
   1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
@@ -20,17 +20,6 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
-// // Citizen
-// Citizen
-// import {
-//   setupCitizenAddressRoutes,
-//   setupUserSpecialtyRoutes,
-//   setupUserG8Routes,
-//   setupRoleUserRoutes,
-//   setupUserRoutes,
-//   setupUserSpecialistRoutes,
-// } from '@/modules/citizens/routes';
-// Citizen
 import {
   setupCitizenAddressRoutes,
   setupUserSpecialtyRoutes,
@@ -43,13 +32,6 @@ import {
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
-// // Emergency
-// Emergency
-// import {
-//   setupReportRoutes,
-//   setupFcmRoutes,
-//   setupTokenRoutes,
-// } from '@/modules/emergency';
 // Emergency
 import {
   setupReportRoutes,
@@ -123,17 +105,11 @@ import {
 } from '@/modules/traffic';
 
 // Volunteer
-import { eventRoutes } from '@/modules/Volunteer/routes';
+import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
-// // Weather
-// Weather
-// import {
-//   setupWeatherRoutes,
-//   setupOpenMeteoRoutes,
-// } from '@/modules/weather/routes';
 // Weather
 import {
   setupWeatherRoutes,
@@ -161,18 +137,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
-  // Citizen
-  // setupCitizenAddressRoutes(app);
-  // setupUserSpecialistRoutes(app);
-  // setupUserSpecialtyRoutes(app);
-  // setupUserG8Routes(app);
-  // setupRoleUserRoutes(app);
-  // setupUserRoutes(app);
-
-  // //Emergency
-  // setupReportRoutes(app);
-  // setupFcmRoutes(app);
-  // setupTokenRoutes(app);
   setupCitizenAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
@@ -231,11 +195,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWasteRoutes(app);
 
   // Weather
-  // setupOpenMeteoRoutes(app);
-  // setupWeatherRoutes(app);
-  // Weather
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
+
+  // Volunteer
+  setupVolunteerRoutes(app);
 
   /*
   ============================================
