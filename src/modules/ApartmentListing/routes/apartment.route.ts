@@ -23,6 +23,22 @@ const setupApartmentRoutes = (app: OpenAPIHono) => {
     ApartmentSchemas.DeleteApartmentRoute,
     apartmentController.deleteApartment
   );
+  app.openapi(
+    ApartmentSchemas.apartmentFilterRoute,
+    apartmentController.filterApartments
+  );
+  app.openapi(
+    ApartmentSchemas.countAvailableRoomsRoute,
+    apartmentController.countAvailableRooms
+  );
+  app.openapi(
+    ApartmentSchemas.getApartmentsByUserRoute,
+    apartmentController.getApartmentbyUser
+  );
+  app.openapi(
+    ApartmentSchemas.getRoomPriceRangeRoute,
+    apartmentController.getRoomPriceRange
+  );
 };
 
 export { setupApartmentRoutes };
