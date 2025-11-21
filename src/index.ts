@@ -4,7 +4,6 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { serve } from '@hono/node-server';
 import { setupRoutes } from '@/routes';
-import routeStopsRoutes from './modules/public-transportation/routes/routeFinder.route';
 import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
@@ -51,7 +50,6 @@ app.get('/', (c) => {
 });
 
 setupRoutes(app);
-app.route('/api', routeStopsRoutes);
 
 app.get('/doc', (c) => {
   let port = config.port;

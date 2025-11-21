@@ -1,4 +1,3 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -120,8 +119,8 @@ const findNearestTransitStop = async (
   const nearbySearchUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=500&type=${TRANSIT_TYPES}&key=${GOOGLE_API_KEY}`;
 
   try {
-    const response = await axios.get(nearbySearchUrl);
-    const data = response.data;
+    const response = await fetch(nearbySearchUrl);
+    const data = await response.json();
 
     if (data.status === 'OK' && data.results.length > 0) {
       const nearestStop = data.results[0];
@@ -176,8 +175,8 @@ export const getRoutes = async (
   const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
 
   try {
-    const response = await axios.get(googleMapsUrl);
-    const data = response.data;
+    const response = await fetch(googleMapsUrl);
+    const data = await response.json();
 
     if (data.status === 'OK' && data.routes && data.routes.length > 0) {
       const allRoutes = data.routes;
