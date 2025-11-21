@@ -16,6 +16,8 @@ import type {
   UpdateUserPersonal,
   UpdateUserHealth,
   UpdateUserAccount,
+  Role,
+  CreateUserRoleData,
 } from '../types/user.types';
 
 const findUserById = async (user_id: number) => {
@@ -422,6 +424,49 @@ const findUsersByRole = async (roleName: string): Promise<User[]> => {
   }
 };
 
+//new code
+const getUserRoles = async (user_id: number) => {
+  try {
+    const user = await prisma.users.findUnique({
+      where: {
+        id: user_id,
+      },
+      select: {
+        id: true,
+        roles: {
+          select: {
+            id: true,
+            role_name: true,
+          },
+        },
+      },
+    });
+    return user;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const createUserRole = async (data: CreateUserRoleData) => {
+  try {
+    const userRole = await prisma.users.update({
+      where: {
+        id: data.user_id,
+      },
+      data: {
+        role_id: data.role_id,
+      },
+      select: {
+        id: true,
+        role_id: true,
+      },
+    });
+    return userRole;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   findUserById,
   findByUsername,
@@ -439,4 +484,6 @@ export {
   updateUserPersonalData,
   updateUserHealthData,
   updateUserAccountData,
+  getUserRoles,
+  createUserRole,
 };

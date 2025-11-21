@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { authMiddleware, adminMiddleware } from '@/middlewares';
 
 const UserinfoAndWalletSchema = z.object({
   id: z.number(),
@@ -72,12 +73,12 @@ const UserPersonalData = z.object({
 
 const UserHealthData = z.object({
   birth_date: z.coerce.date().nullable(),
-  blood_type: z.string().nullable(),
+  blood_type: z.enum(['A', 'B', 'AB', 'O']).nullable(),
   congenital_disease: z.string().nullable(),
   allergy: z.string().nullable(),
   height: z.number().nullable(),
   weight: z.number().nullable(),
-  gender: z.string().nullable(),
+  gender: z.enum(['male', 'female', 'none']).nullable(),
 });
 
 const UserAccountData = z.object({
@@ -96,6 +97,7 @@ const getUserinfoAndWallet = createGetRoute({
   responseSchema: UserinfoAndWalletSchema,
   params: UserIdParam,
   tags: ['User'],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 const getUserAddress = createGetRoute({
@@ -112,6 +114,7 @@ const getUserProflie = createGetRoute({
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 // const updateUserProfile = createPutRoute({
@@ -125,28 +128,102 @@ const getUserProflie = createGetRoute({
 
 const updateUserPersonal = createPutRoute({
   path: '/user/profile/personal/{id}',
-  summary: 'Update user personal data from frontend',
+  summary: 'Update user personal data (admin only)',
   requestSchema: UserPersonalData,
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 const updateUserHealth = createPutRoute({
   path: '/user/profile/health/{id}',
-  summary: 'Update user health data from frontend',
+  summary: 'Update user health data (admin only)',
   requestSchema: UserHealthData,
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
+  middleware: [authMiddleware, adminMiddleware],
 });
 
 const updateUserAccount = createPutRoute({
   path: '/user/profile/account/{id}',
-  summary: 'Update user account data from frontend',
+  summary: 'Update user account data (admin only)',
   requestSchema: UserAccountData,
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
+  tags: ['User'],
+  // middleware: [authMiddleware, adminMiddleware],
+});
+
+const getCurrentUserProfile = createGetRoute({
+  path: '/user/me',
+  summary: 'Get current user profile (authenticated)',
+  responseSchema: UserSettingPageSchema,
+  tags: ['User'],
+  middleware: [authMiddleware],
+});
+
+const updateCurrentUserPersonal = createPutRoute({
+  path: '/user/me/personal',
+  summary: 'Update current user personal data',
+  requestSchema: UserPersonalData,
+  responseSchema: UserSettingPageSchema,
+  tags: ['User'],
+  // middleware: [authMiddleware],
+});
+
+const updateCurrentUserHealth = createPutRoute({
+  path: '/user/me/health',
+  summary: 'Update current user health data',
+  requestSchema: UserHealthData,
+  responseSchema: UserSettingPageSchema,
+  tags: ['User'],
+  middleware: [authMiddleware],
+});
+
+const updateCurrentUserAccount = createPutRoute({
+  path: '/user/me/account',
+  summary: 'Update current user account data',
+  requestSchema: UserAccountData,
+  responseSchema: UserSettingPageSchema,
+  tags: ['User'],
+  // middleware: [authMiddleware],
+});
+
+const RoleSchema = z.object({
+  id: z.number(),
+  role_name: z.string(),
+});
+
+const UserRolesResponseSchema = z.object({
+  userId: z.number(),
+  roles: z.array(RoleSchema),
+});
+
+const CreateUserRoleSchema = z.object({
+  user_id: z.number(),
+  role_id: z.number(),
+});
+
+const UserRoleResponseSchema = z.object({
+  user_id: z.number(),
+  role_id: z.number().nullable(),
+});
+
+const getUserRoles = createGetRoute({
+  path: '/user/roles/{id}',
+  summary: 'Get roles by user ID',
+  responseSchema: UserRolesResponseSchema,
+  params: UserIdParam,
+  tags: ['User'],
+});
+
+const createUserRole = createPostRoute({
+  path: '/user/roles',
+  summary: 'Create new user role',
+  requestSchema: CreateUserRoleSchema,
+  responseSchema: UserRoleResponseSchema,
   tags: ['User'],
 });
 
@@ -157,4 +234,10 @@ export const UserSchemas = {
   updateUserHealth,
   updateUserAccount,
   getUserAddress,
+  getUserRoles,
+  createUserRole,
+  getCurrentUserProfile,
+  updateCurrentUserPersonal,
+  updateCurrentUserHealth,
+  updateCurrentUserAccount,
 };

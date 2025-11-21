@@ -15,9 +15,30 @@ app.onError(errorHandler);
 app.use(
   '*',
   cors({
-    origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    // Echo back the incoming origin when it's allowed — required when sending credentials
+    origin: (requestOrigin) => {
+      // Note: origins must match the incoming request origin exactly
+      // Do NOT include trailing slashes — browsers send origins without a trailing slash
+      const devAllowed = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+      const prodAllowed = [
+        'https://smartcity.sit.kmutt.ac.th',
+        'https://smartcity.sit.kmutt.ac.th',
+      ];
+      const allowed = config.isProduction ? prodAllowed : devAllowed;
+      if (!requestOrigin) return undefined;
+      return allowed.includes(requestOrigin) ? requestOrigin : undefined;
+    },
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'X-Requested-With',
+      'X-CSRF-Token',
+    ],
+    exposeHeaders: ['Set-Cookie'],
+    credentials: true,
+    maxAge: 86400,
   })
 );
 

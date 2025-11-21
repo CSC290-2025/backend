@@ -7,6 +7,9 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
+// Auth
+import { setupAuthRoutes } from '@/modules/Auth/routes';
+
 // Apartment
 import {
   setupApartmentRoutes,
@@ -80,12 +83,21 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
+// Weather
+import {
+  setupWeatherRoutes,
+  setupOpenMeteoRoutes,
+} from '@/modules/weather/routes';
+
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
   ============================================
   OpenAPI Routes (documented in Swagger)
   ============================================
   */
+
+  // Auth
+  setupAuthRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
@@ -138,11 +150,16 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Waste
   setupWasteRoutes(app);
 
+  // Weather
+  setupOpenMeteoRoutes(app);
+  setupWeatherRoutes(app);
+
   /*
   ============================================
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
+
   //Emergency
   //   app.route('/reports', reportRoutes);
   //   app.route('/fcm', fcmRoutes);

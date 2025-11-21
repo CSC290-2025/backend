@@ -107,3 +107,23 @@ export interface CompleteUserData {
   address?: Address;
   emergencyContacts?: EmergencyContact[];
 }
+
+export interface Role {
+  id: number;
+  role_name: string;
+}
+
+export interface UserRole {
+  user_id: number;
+  role_id: number;
+}
+
+export interface UserRolesResponse {
+  userId: number;
+  roles: Role[];
+}
+
+export interface CreateUserRoleData {
+  user_id: number;
+  role_id: number;
+}
