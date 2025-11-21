@@ -122,7 +122,7 @@ const createReportRoute = createPostRoute({
   requestSchema: CreateReportSchema,
   responseSchema: ReportResponseSchema,
   tags: ['PowerBI - Reports'],
-  middleware: [authMiddleware, adminMiddleware],
+  // middleware: [authMiddleware, adminMiddleware],
 });
 
 const updateReportRoute = createPutRoute({
