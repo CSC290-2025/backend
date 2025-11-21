@@ -14,6 +14,7 @@ import 'dotenv/config';
 const app = new OpenAPIHono();
 app.onError(errorHandler);
 
+// CORS middleware - allow requests from frontend
 app.use(
   cors({
     origin: (origin) => {
