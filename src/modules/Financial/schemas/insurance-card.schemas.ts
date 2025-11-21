@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createRoute } from '@hono/zod-openapi';
 import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
 
 // Base schema

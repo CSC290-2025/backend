@@ -7,7 +7,7 @@ import {
 } from '@/utils/openapi-helpers';
 
 const questionsSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
   question: z.string(),
   level: z.number().nullable(),
   created_at: z.date(),
@@ -15,7 +15,7 @@ const questionsSchema = z.object({
 });
 
 const questionId = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
 });
 
 const getQuestion = createGetRoute({

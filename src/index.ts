@@ -5,19 +5,26 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
+
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
+import 'dotenv/config';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
 
+// CORS middleware - allow requests from frontend
 app.use(
-  '*',
   cors({
-    origin: config.isProduction ? 'https://smartcity.sit.kmutt.ac.th' : '*',
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    origin: (origin) => {
+      if (config.isProduction) {
+        return 'https://smartcity.sit.kmutt.ac.th';
+      }
+      return origin || 'http://localhost:5173';
+    },
+    allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
   })
 );
 

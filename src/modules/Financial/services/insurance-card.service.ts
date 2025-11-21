@@ -1,4 +1,4 @@
-import { NotFoundError, ValidationError, ConflictError } from '@/errors';
+import { NotFoundError, ValidationError } from '@/errors';
 import { InsuranceCardModel, WalletModel } from '../models';
 import type {
   InsuranceCard,
@@ -19,15 +19,15 @@ const getCardByUserId = async (userId: number): Promise<InsuranceCard> => {
   return card;
 };
 
+const getCardsByUserId = async (userId: number): Promise<InsuranceCard[]> => {
+  const cards = await InsuranceCardModel.findCardsByUserId(userId);
+  return cards;
+};
+
 const createCard = async (
   data: CreateInsuranceCardData
 ): Promise<InsuranceCard> => {
-  // Check if user already has a card
-  const existingCard = await InsuranceCardModel.findCardByUserId(data.user_id);
-  if (existingCard) {
-    throw new ConflictError('User already has an insurance card');
-  }
-
+  // Users can now have multiple insurance cards
   return await InsuranceCardModel.createCard(data);
 };
 
@@ -85,9 +85,20 @@ const topUpFromWallet = async (
         data: {
           wallet_id: wallet.id,
           transaction_type: 'transfer_to_service',
-          amount: -data.amount, // Negative for deduction
+          amount: data.amount,
           target_service: `insurance_card:${card.id}`,
           description: `Top-up to insurance card ${card.card_number}`,
+        },
+      });
+      // Record card transaction
+      await tx.card_transactions.create({
+        data: {
+          card_id: card.id,
+          card_type: 'insurance',
+          transaction_type: 'top_up',
+          reference: String(transaction.id),
+          amount: data.amount,
+          description: `Top-up from wallet ${wallet.id} to insurance card ${card.card_number}`,
         },
       });
 
@@ -111,4 +122,10 @@ const topUpFromWallet = async (
   }
 };
 
-export { getCardById, getCardByUserId, createCard, topUpFromWallet };
+export {
+  getCardById,
+  getCardByUserId,
+  getCardsByUserId,
+  createCard,
+  topUpFromWallet,
+};

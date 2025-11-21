@@ -1,4 +1,7 @@
-import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
+import {
+  isReportStatus,
+  isReportId,
+} from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
 
 const CreateReportSchema = z.object({

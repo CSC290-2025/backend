@@ -25,6 +25,13 @@ const UpdateMetroCardSchema = z.object({
 });
 
 const TopUpMetroCardSchema = z.object({
+  cardNumber: z.string(),
+  walletId: z.number(),
+  amount: z.number(),
+});
+
+const TransferToTransportationSchema = z.object({
+  cardNumber: z.string(),
   amount: z.number(),
 });
 
@@ -75,12 +82,14 @@ const updateMetroCardRoute = createPutRoute({
   tags: ['MetroCards'],
 });
 
-const topUpBalanceRoute = createPutRoute({
-  path: '/metro-cards/{metroCardId}/top-up',
+const topUpBalanceRoute = createPostRoute({
+  path: '/metro-cards/top-up',
   summary: 'Top up metro card balance',
   requestSchema: TopUpMetroCardSchema,
-  responseSchema: MetroCardSchema,
-  params: MetroCardIdParam,
+  responseSchema: z.object({
+    metroCard: MetroCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
   tags: ['MetroCards'],
 });
 
@@ -91,11 +100,23 @@ const deleteMetroCardRoute = createDeleteRoute({
   tags: ['MetroCards'],
 });
 
+const transferToTransportationRoute = createPostRoute({
+  path: '/metro-cards/transfer-to-transportation',
+  summary: 'Transfer metro card balance to transportation organization',
+  requestSchema: TransferToTransportationSchema,
+  responseSchema: z.object({
+    metroCard: MetroCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
+  tags: ['MetroCards'],
+});
+
 export const MetroCardSchemas = {
   MetroCardSchema,
   CreateMetroCardSchema,
   UpdateMetroCardSchema,
   TopUpMetroCardSchema,
+  TransferToTransportationSchema,
   MetroCardListSchema,
   UserIdParam,
   MetroCardIdParam,
@@ -105,4 +126,5 @@ export const MetroCardSchemas = {
   updateMetroCardRoute,
   topUpBalanceRoute,
   deleteMetroCardRoute,
+  transferToTransportationRoute,
 };

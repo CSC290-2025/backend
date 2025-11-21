@@ -11,7 +11,10 @@ interface Config {
   isProduction: boolean;
   jwtSecret: string;
   jwtRefreshSecret: string;
+  jwtExpiresIn: string;
   jwtRefreshExpiresIn: string;
+  metroCardEncryptionKey: string;
+  metroCardHashKey: string;
   adminRoleId: number;
 }
 
@@ -23,9 +26,14 @@ const config: Config = {
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY || '',
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET || '',
   isProduction: process.env.NODE_ENV === 'production',
+
   jwtSecret: process.env.JWT_SECRET || 'secret-key',
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'secret-key',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7',
+
+  metroCardEncryptionKey: process.env.G11_CARD_ENC_KEY || 'secret-key',
+  metroCardHashKey: process.env.G11_CARD_HASH_KEY || 'secret-key',
 
   adminRoleId: Number(process.env.ADMIN_ROLE_ID) || 1,
 };
