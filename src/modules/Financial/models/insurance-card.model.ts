@@ -53,6 +53,18 @@ const findCardByUserId = async (
   }
 };
 
+const findCardsByUserId = async (userId: number): Promise<InsuranceCard[]> => {
+  try {
+    const cards = await prisma.insurance_cards.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
+    });
+    return cards.map(transformInsuranceCard);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const findCardById = async (id: number): Promise<InsuranceCard | null> => {
   try {
     const card = await prisma.insurance_cards.findUnique({
@@ -82,4 +94,10 @@ const updateCardBalance = async (
   }
 };
 
-export { createCard, findCardByUserId, findCardById, updateCardBalance };
+export {
+  createCard,
+  findCardByUserId,
+  findCardsByUserId,
+  findCardById,
+  updateCardBalance,
+};

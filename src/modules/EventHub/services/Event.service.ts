@@ -24,9 +24,11 @@ const getEventById = async (id: number) => {
 const listEvents = async (page: number, limit: number) => {
   return await EventModel.list(page, limit);
 };
-
 const createEvent = async (data: CreateEventInput) => {
-  ensureDatesValid(data.start_at, data.end_at);
+  const start_at = `${data.start_date}T${data.start_time}`;
+  const end_at = `${data.end_date}T${data.end_time}`;
+  ensureDatesValid(start_at, end_at);
+
   if (data.total_seats !== undefined && data.total_seats < 0) {
     throw new ValidationError('total_seats must be >= 0');
   }
@@ -36,7 +38,13 @@ const createEvent = async (data: CreateEventInput) => {
 const updateEvent = async (id: number, data: UpdateEventInput) => {
   const existing = await EventModel.findById(id);
   if (!existing) throw new NotFoundError('Event not found');
-  ensureDatesValid(data.start_at, data.end_at);
+
+  if (data.start_date && data.end_date && data.start_time && data.end_time) {
+    const start_at = `${data.start_date}T${data.start_time}`;
+    const end_at = `${data.end_date}T${data.end_time}`;
+    ensureDatesValid(start_at, end_at);
+  }
+
   const updated = await EventModel.update(id, data);
   if (!updated) throw new NotFoundError('Event not found');
   return updated;

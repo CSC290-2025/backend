@@ -2,6 +2,7 @@ import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { MetroCardModel, WalletModel } from '../models';
 import type { MetroCard, UpdateMetroCardData } from '../types';
 import prisma from '@/config/client';
+import { hashCardNumber, normalizeCardNumber } from '../utils';
 
 const getMetroCardById = async (id: number): Promise<MetroCard> => {
   const wallet = await MetroCardModel.findMetroCardById(id);
@@ -34,15 +35,23 @@ const updateMetroCard = async (
 };
 
 const topUpBalance = async (
-  metroCardId: number,
+  cardNumber: string,
   walletId: number,
   amount: number
-): Promise<MetroCard> => {
+): Promise<{
+  metroCard: MetroCard;
+  cardTransactionId: number;
+}> => {
   if (amount <= 0) {
     throw new ValidationError('Amount must be positive');
   }
 
-  const existingMetroCard = await MetroCardModel.findMetroCardById(metroCardId);
+  const normalizedCardNumber = normalizeCardNumber(cardNumber);
+
+  const hashedCardNumber = hashCardNumber(normalizedCardNumber);
+
+  const existingMetroCard =
+    await MetroCardModel.findMetroCardByHash(hashedCardNumber);
 
   if (!existingMetroCard) {
     throw new NotFoundError('Metro card not found');
@@ -62,14 +71,39 @@ const topUpBalance = async (
 
   return await prisma.$transaction(async (trx) => {
     await WalletModel.WalletBalanceTopup(walletId, amount, 'decrement', trx);
+    // Log transfer from user wallet to metro card
+    const walletTransactionId = await WalletModel.createTransaction(
+      {
+        wallet_id: walletId,
+        transaction_type: 'transfer_to_service',
+        amount: amount,
+        target_service: `metro_card:${existingMetroCard.id}`,
+        description: `Top-up to metro card ${existingMetroCard.card_number}`,
+      },
+      trx
+    );
+    // Record card transaction for this top-up
+    const cardTransaction = await trx.card_transactions.create({
+      data: {
+        card_id: existingMetroCard.id,
+        card_type: 'metro',
+        transaction_type: 'top_up',
+        reference: String(walletTransactionId),
+        amount: amount,
+        description: `Top-up from wallet ${walletId} to metro card ${existingMetroCard.card_number}`,
+      },
+    });
     const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
-      metroCardId,
+      existingMetroCard.id,
       amount,
       'increment',
       trx
     );
 
-    return updatedMetroCard;
+    return {
+      metroCard: updatedMetroCard,
+      cardTransactionId: cardTransaction.id,
+    };
   });
 };
 
@@ -81,6 +115,81 @@ const deleteMetroCardById = async (id: number): Promise<void> => {
   await MetroCardModel.deleteMetroCard(id);
 };
 
+const transferToTransportation = async (
+  cardNumber: string,
+  amount: number
+): Promise<{ metroCard: MetroCard; cardTransactionId: number }> => {
+  if (amount <= 0) {
+    throw new ValidationError('Amount must be positive');
+  }
+
+  const normalizedCardNumber = normalizeCardNumber(cardNumber);
+  const hashedCardNumber = hashCardNumber(normalizedCardNumber);
+
+  const existingMetroCard =
+    await MetroCardModel.findMetroCardByHash(hashedCardNumber);
+
+  if (!existingMetroCard) {
+    throw new NotFoundError('Metro card not found');
+  }
+
+  if (existingMetroCard.status === 'suspended')
+    throw new ForbiddenError('This card is suspended');
+
+  if (existingMetroCard.balance < amount) {
+    throw new ValidationError('Insufficient metro card balance');
+  }
+
+  const transportationWallet =
+    await WalletModel.findWalletByOrganizationType('Transportation');
+  if (!transportationWallet) {
+    throw new NotFoundError('Transportation wallet not found');
+  }
+
+  return await prisma.$transaction(async (trx) => {
+    const updatedMetroCard = await MetroCardModel.updateMetroCardBalance(
+      existingMetroCard.id,
+      amount,
+      'decrement',
+      trx
+    );
+    await WalletModel.WalletBalanceTopup(
+      transportationWallet.id,
+      amount,
+      'increment',
+      trx
+    );
+
+    // Record a transaction for the organization receiving the funds
+    const organizationTransactionId = await WalletModel.createTransaction(
+      {
+        wallet_id: transportationWallet.id,
+        transaction_type: 'transfer_in',
+        amount: amount,
+        target_service: 'transportation',
+        description: `Transfer from metro card ${existingMetroCard.card_number}`,
+      },
+      trx
+    );
+    // Create card transaction record for the metro card that was charged
+    const cardTransaction = await trx.card_transactions.create({
+      data: {
+        card_id: existingMetroCard.id,
+        card_type: 'metro',
+        transaction_type: 'charge',
+        reference: String(organizationTransactionId),
+        amount: amount,
+        description: `Transfer to transportation from metro card ${existingMetroCard.card_number}`,
+      },
+    });
+
+    return {
+      metroCard: updatedMetroCard,
+      cardTransactionId: cardTransaction.id,
+    };
+  });
+};
+
 export {
   getMetroCardById,
   createMetroCard,
@@ -88,4 +197,5 @@ export {
   updateMetroCard,
   topUpBalance,
   deleteMetroCardById,
+  transferToTransportation,
 };

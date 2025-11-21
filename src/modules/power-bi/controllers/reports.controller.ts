@@ -14,7 +14,6 @@ const getAllReports = async (c: Context) => {
 // Reports listing (metadata-driven across categories, filtered by role)
 const getReports = async (c: Context) => {
   const user = c.get('user');
-  console.log('Getting reports by role', user);
   // const role = user.roleId === ADMIN_ROLE_ID ? 'admin' : 'citizen';
 
   // Temp fix for role naming difference

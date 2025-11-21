@@ -7,5 +7,6 @@ export {
   ConflictError,
   DatabaseError,
   InternalServerError,
+  PaymentNotConfirmedError,
 } from './types';
 export { handlePrismaError } from './prisma';

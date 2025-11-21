@@ -23,6 +23,7 @@ async function getPicturesByApartmentIdController(c: Context) {
     c,
     pictures.map((picture) => ({
       id: picture.id.toString(),
+      fileId: picture.name,
       url: picture.file_path,
       apartmentId: picture.apartment_id,
     }))

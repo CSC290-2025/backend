@@ -5,7 +5,6 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { createRoute } from '@hono/zod-openapi';
 
 // Base Category Schema
 const CategorySchema = z.object({
