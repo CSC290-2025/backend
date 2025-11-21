@@ -20,17 +20,17 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
-// // Citizen
-// Citizen
-// import {
-//   setupCitizenAddressRoutes,
-//   setupUserSpecialtyRoutes,
-//   setupUserG8Routes,
-//   setupRoleUserRoutes,
-//   setupUserRoutes,
-//   setupUserSpecialistRoutes,
-// } from '@/modules/citizens/routes';
-// Citizen
+//citizen
+import {
+  setupCitizenAddressRoutes,
+  setupUserSpecialtyRoutes,
+  setupUserG8Routes,
+  setupRoleUserRoutes,
+  setupUserRoutes,
+  setupUserSpecialistRoutes,
+} from '@/modules/citizens/routes';
+
+//Citizen
 import {
   setupCitizenAddressRoutes,
   setupUserSpecialtyRoutes,
@@ -43,21 +43,20 @@ import {
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
-// // Emergency
-// Emergency
-// import {
-//   setupReportRoutes,
-//   setupFcmRoutes,
-//   setupTokenRoutes,
-// } from '@/modules/emergency';
-// Emergency
+//Emergency
+import {
+  setupReportRoutes,
+  setupFcmRoutes,
+  setupTokenRoutes,
+} from '@/modules/emergency';
+//Emergency
 import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
 } from '@/modules/emergency';
 
-// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
+import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
 import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
@@ -103,13 +102,12 @@ import { eventRoutes } from '@/modules/Volunteer/routes';
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
-// // Weather
 // Weather
-// import {
-//   setupWeatherRoutes,
-//   setupOpenMeteoRoutes,
-// } from '@/modules/weather/routes';
-// Weather
+import {
+  setupWeatherRoutes,
+  setupOpenMeteoRoutes,
+} from '@/modules/weather/routes';
+//Weather
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
@@ -136,18 +134,18 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
-  // Citizen
-  // setupCitizenAddressRoutes(app);
-  // setupUserSpecialistRoutes(app);
-  // setupUserSpecialtyRoutes(app);
-  // setupUserG8Routes(app);
-  // setupRoleUserRoutes(app);
-  // setupUserRoutes(app);
+  //Citizen
+  setupCitizenAddressRoutes(app);
+  setupUserSpecialistRoutes(app);
+  setupUserSpecialtyRoutes(app);
+  setupUserG8Routes(app);
+  setupRoleUserRoutes(app);
+  setupUserRoutes(app);
 
-  // //Emergency
-  // setupReportRoutes(app);
-  // setupFcmRoutes(app);
-  // setupTokenRoutes(app);
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
   setupCitizenAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
@@ -186,12 +184,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Waste
   setupWasteRoutes(app);
 
-  // SupportMap
-
-  // Weather
-  // setupOpenMeteoRoutes(app);
-  // setupWeatherRoutes(app);
-  // Weather
+  //Weather
+  setupOpenMeteoRoutes(app);
+  setupWeatherRoutes(app);
+  //Weather
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
 
@@ -202,10 +198,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   */
 
   //Emergency
-  //   app.route('/reports', reportRoutes);
-  //   app.route('/fcm', fcmRoutes);
-  //   app.route('/tokens', tokenRoutes);
-  //   app.route('/emergency', emergencyRoutes);
+  app.route('/reports', reportRoutes);
+  app.route('/fcm', fcmRoutes);
+  app.route('/tokens', tokenRoutes);
+  app.route('/emergency', emergencyRoutes);
 
   // Power BI
   app.route('/reports', reportRoutes);
