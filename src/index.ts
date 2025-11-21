@@ -1,19 +1,20 @@
+import { serve } from '@hono/node-server';
 import config from '@/config/env';
 import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
-import { serve } from '@hono/node-server';
 import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
+
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
+import 'dotenv/config';
 
-let serverInstance: ReturnType<typeof serve> | null = null;
 const app = new OpenAPIHono();
-
 app.onError(errorHandler);
 
+// CORS middleware - allow requests from frontend
 app.use(
   cors({
     origin: (origin) => {
@@ -24,7 +25,6 @@ app.use(
     },
     allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    maxAge: 600,
   })
 );
 
@@ -48,8 +48,6 @@ app.get('/', (c) => {
     docs: `/swagger`,
   });
 });
-
-setupRoutes(app);
 
 app.get('/doc', (c) => {
   let port = config.port;
@@ -79,28 +77,23 @@ app.get('/doc', (c) => {
 
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
+setupRoutes(app);
 startAir4ThaiAggregationJob();
+
+let serverInstance: ReturnType<typeof serve> | null = null;
 
 async function shutdown() {
   console.log('Shutting down server...');
   try {
     if (serverInstance) {
-      await new Promise<void>((resolve, reject) => {
-        serverInstance!.close((err) => {
-          if (err) {
-            console.error('Error closing server:', err);
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
+      serverInstance.close((err) => {
+        if (err) console.error('Error closing server:', err);
       });
     }
     await prisma.$disconnect();
     console.log('Prisma disconnected');
   } catch (err) {
     console.error('Error during shutdown:', err);
-    process.exit(1);
   } finally {
     process.exit(0);
   }
@@ -121,6 +114,7 @@ async function startServer(startPort: number, maxRetries = 10) {
         );
         console.log(`OpenAPI Spec on http://localhost:${info.port}/doc`);
 
+        // Start the booking cleanup job
         startBookingCleanupJob();
         console.log('Booking cleanup job started - will run every hour');
       });
