@@ -1,36 +1,50 @@
 import type { Context } from 'hono';
-import { BookmarkService } from '../services/';
+import { successResponse } from '@/utils/response';
+import * as BookmarkService from '../services/Bookmark.services';
 
 const listBookmarks = async (c: Context) => {
-  const userId = Number(c.get('userId'));
-  const page = Number(c.req.query('page')) || 1;
-  const limit = Number(c.req.query('limit')) || 10;
-  const data = await BookmarkService.listBookmarks(userId, page, limit);
-  return c.json({ ...data, page, limit }, 200);
+  const page = Number(c.req.query('page') || '1');
+  const limit = Number(c.req.query('limit') || '10');
+
+  const user = c.get('user') as { id: number };
+  const userId = user.id;
+
+  const result = await BookmarkService.listBookmarks(userId, page, limit);
+  return successResponse(c, result);
 };
 
 const createBookmark = async (c: Context) => {
-  const userId = Number(c.get('userId'));
+  const user = c.get('user') as { id: number };
+  const userId = user.id;
+
   const body = await c.req.json();
-  const bookmark = await BookmarkService.createBookmark(userId, body);
-  return c.json({ bookmark }, 201);
+  const eventId = Number(body.event_id);
+
+  const bookmark = await BookmarkService.createBookmark(userId, {
+    event_id: eventId,
+  });
+
+  return successResponse(c, bookmark, 201, 'Event bookmarked successfully');
 };
 
 const deleteBookmark = async (c: Context) => {
-  const userId = Number(c.get('userId'));
-  const event_id = c.req.param('event_id');
-  await BookmarkService.deleteBookmark(userId, Number(event_id));
-  return c.json({ success: true as const }, 200);
+  const user = c.get('user') as { id: number };
+  const userId = user.id;
+
+  const eventId = Number(c.req.param('event_id'));
+
+  await BookmarkService.deleteBookmark(userId, eventId);
+  return successResponse(c, { success: true });
 };
 
 const checkBookmarkStatus = async (c: Context) => {
-  const userId = Number(c.get('userId'));
-  const event_id = c.req.param('event_id');
-  const bookmarked = await BookmarkService.checkBookmarkStatus(
-    userId,
-    Number(event_id)
-  );
-  return c.json({ bookmarked }, 200);
+  const user = c.get('user') as { id: number };
+  const userId = user.id;
+
+  const eventId = Number(c.req.param('event_id'));
+
+  const bookmarked = await BookmarkService.checkBookmarkStatus(userId, eventId);
+  return successResponse(c, { bookmarked });
 };
 
 export { listBookmarks, createBookmark, deleteBookmark, checkBookmarkStatus };

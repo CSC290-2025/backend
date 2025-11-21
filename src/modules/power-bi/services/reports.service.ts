@@ -25,6 +25,7 @@ const getReportsByRole = async (role: string): Promise<ReportsByCategory> => {
       `Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`
     );
   }
+  console.log('Fetching reports for role:', normalizedRole);
 
   // Get all reports with category information
   const reports = await ReportsModel.getReportsMetadataWithCategory();
