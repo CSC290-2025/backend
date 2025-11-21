@@ -82,6 +82,18 @@ import {
   setupFreecyclePostCategoriesPostRoutes,
 } from '@/modules/freecycle';
 
+//Healthcare
+import {
+  setupPatientRoutes,
+  setupBedRoutes,
+  setupFacilityRoutes,
+  setupAppointmentRoutes,
+  setupPrescriptionRoutes,
+  setupAmbulanceRoutes,
+  setupEmergencyCallRoutes,
+  setupPaymentRoutes,
+} from '@/modules/healthcare/routes';
+
 // Know AI
 import {
   setupEnrollmentRoutes,
@@ -182,6 +194,16 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWalletRoutes(app);
   setupScbRoutes(app);
   setupInsuranceCardRoutes(app);
+
+  //Healthcare
+  setupPatientRoutes(app);
+  setupBedRoutes(app);
+  setupFacilityRoutes(app);
+  setupAppointmentRoutes(app);
+  setupPrescriptionRoutes(app);
+  setupAmbulanceRoutes(app);
+  setupEmergencyCallRoutes(app);
+  setupPaymentRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
