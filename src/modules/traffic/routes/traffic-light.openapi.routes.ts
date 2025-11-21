@@ -32,6 +32,9 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
   // PATCH route - use normal Hono route (no OpenAPI validation) to allow any body structure
   app.patch('/traffic-lights/:id', TrafficLightController.patchTrafficLight);
 
+  // SSE: stream traffic light status changes (clients can filter for broken/maintenance)
+  app.get('/traffic-lights/stream', TrafficLightController.streamBroken);
+
   app.openapi(
     TrafficLightSchemas.deleteTrafficLightRoute,
     TrafficLightController.deleteTrafficLight

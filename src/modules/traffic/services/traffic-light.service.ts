@@ -12,6 +12,7 @@ import type {
 } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
 import { RoadModel, IntersectionModel } from '../models';
+import { emitStatusChange } from '../types';
 
 /**
  * Get traffic light by ID with current status
@@ -154,6 +155,14 @@ const partialUpdateTrafficLight = async (
 
   if (Object.keys(updates).length === 0) {
     throw new ValidationError('At least one field must be provided for update');
+  }
+  // Emit status change events when status field changed
+  if (Object.prototype.hasOwnProperty.call(updates, 'status')) {
+    const oldStatus = (existing as any).status ?? null;
+    const newStatus = (updates as any).status ?? null;
+    if (oldStatus !== newStatus) {
+      emitStatusChange(id, oldStatus, newStatus);
+    }
   }
 
   // Validate location if provided
