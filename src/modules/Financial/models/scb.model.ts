@@ -17,7 +17,7 @@ import {
 import prisma from '@/config/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { findWalletById, WalletBalanceTopup } from './wallet.model';
-import { ScbEventEmitter } from '../utils';
+import { triggerEvent } from '../utils/pusher';
 import type { transaction_type } from '@/generated/prisma';
 
 const SCB_BASE_URL = 'https://api-sandbox.partners.scb/partners/sandbox';
@@ -260,15 +260,23 @@ const updateTransactionDescription = async (
         'increment',
         tx
       );
-      // Emit an event so any SSE listeners can be notified immediately.
-      // Use a unique event key `scb:confirmed:<ref1>` to allow clients to subscribe to only events matching their ref1.
-      // this is use by the frontend topup page to be notified when payment is confirmed
       try {
-        ScbEventEmitter.emit(`scb:confirmed:${reference1}`, {
+        // Inform connected clients using Pusher so frontend subscribed to our
+        // Pusher channel receive the confirmation in realtime.
+        // Use environment-configurable defaults to keep things simple.
+        const CHANNEL = process.env.G11_PUSHER_CHANNEL!;
+        const EVENT = process.env.G11_PUSHER_EVENT!;
+        // Trigger in background, don't fail the whole transaction if Pusher errors.
+        triggerEvent(CHANNEL, EVENT, {
           ref1: reference1,
           transactionId,
           sendingBank,
           walletId: transaction.wallet_id,
+        }).catch((err) => {
+          // Keep behaviour non-fatal for the DB transaction; log the error.
+          // we will keep the app going even if pusher fails here
+          // will add a failover mechanism later
+          console.error('Failed to notify Pusher about SCB confirmation', err);
         });
       } catch (err) {
         throw new InternalServerError(
