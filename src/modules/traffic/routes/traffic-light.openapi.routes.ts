@@ -10,6 +10,11 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    TrafficLightSchemas.getTrafficDataForCalculationRoute,
+    TrafficLightController.getTrafficDataForCalculation
+  );
+
+  app.openapi(
     TrafficLightSchemas.getTrafficLightRoute,
     TrafficLightController.getTrafficLight
   );
@@ -23,6 +28,9 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
     TrafficLightSchemas.updateTrafficLightRoute,
     TrafficLightController.updateTrafficLight
   );
+
+  // PATCH route - use normal Hono route (no OpenAPI validation) to allow any body structure
+  app.patch('/traffic-lights/:id', TrafficLightController.patchTrafficLight);
 
   app.openapi(
     TrafficLightSchemas.deleteTrafficLightRoute,
@@ -43,14 +51,4 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
     TrafficLightSchemas.getTrafficLightsByRoadRoute,
     TrafficLightController.getTrafficLightsByRoad
   );
-
-  /*app.openapi(
-    TrafficLightSchemas.calculateDensityRoute,
-    TrafficLightController.calculateDensity
-  );
-
-  app.openapi(
-    TrafficLightSchemas.updateTimingRoute,
-    TrafficLightController.updateTiming
-  );*/
 };

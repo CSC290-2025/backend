@@ -237,6 +237,15 @@ const getAllStatusRoute = createGetRoute({
   tags: ['Status'],
 });
 
+const getTrafficDataForCalculationRoute = createGetRoute({
+  path: '/traffic-lights/{id}/calculation',
+  summary: 'Get traffic light data for calculation (no sensitive fields)',
+  // Response is dynamic; use a permissive schema
+  responseSchema: z.any(),
+  params: TrafficLightIdParam,
+  tags: ['Traffic Lights'],
+});
+
 export const TrafficLightSchemas = {
   // Base schemas
   TrafficLightColorEnum,
@@ -275,6 +284,7 @@ export const TrafficLightSchemas = {
   createLightRequestRoute,
   getLightRequestsRoute,
   getAllStatusRoute,
+  getTrafficDataForCalculationRoute,
 
   // Status schemas
   TrafficLightStatusDetailSchema,

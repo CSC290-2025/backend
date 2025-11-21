@@ -45,6 +45,25 @@ export const updateTrafficLight = async (c: Context) => {
 };
 
 /**
+ * Partially update traffic light (only allowed fields)
+ * PATCH /traffic-lights/:id
+ */
+export const patchTrafficLight = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const body = await c.req.json();
+  const trafficLight = await TrafficLightService.partialUpdateTrafficLight(
+    id,
+    body
+  );
+  return successResponse(
+    c,
+    { trafficLight },
+    200,
+    'Traffic light updated successfully'
+  );
+};
+
+/**
  * Delete traffic light
  * DELETE /traffic-lights/:id
  */
@@ -177,4 +196,14 @@ export const getIntersectionTiming = async (c: Context) => {
 export const getAllStatus = async (c: Context) => {
   const result = await TrafficLightService.getAllStatus();
   return successResponse(c, result);
+};
+
+/**
+ * Get traffic light data for calculation
+ * GET /traffic-lights/:id/calculation
+ */
+export const getTrafficDataForCalculation = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const data = await TrafficLightService.getTrafficDataForCalculation(id);
+  return successResponse(c, data);
 };
