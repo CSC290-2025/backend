@@ -1,4 +1,10 @@
 import * as z from 'zod';
+// import {
+//   createGetRoute,
+//   createPostRoute,
+//   createPutRoute,
+//   createDeleteRoute,
+// } from "@/utils/openapi-helpers";
 
 export const LocationSchema = z.object({
   lat: z.number().min(-90).max(90),
@@ -50,7 +56,7 @@ export const MarkerQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
 });
 
-// Schema สำหรับ bounding box query
+// Schema for bounding box query
 export const BoundingBoxSchema = z.object({
   north: z.string().transform(Number),
   south: z.string().transform(Number),

@@ -20,6 +20,7 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
+// Citizen
 import {
   setupCitizenAddressRoutes,
   setupUserSpecialtyRoutes,
@@ -202,6 +203,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Waste
   setupWasteRoutes(app);
+
+  // SupportMap
 
   // Weather
   setupOpenMeteoRoutes(app);
