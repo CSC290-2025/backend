@@ -14,8 +14,10 @@ const CreateTokenFcmSchema = z.object({
 });
 
 const NotificationSchema = z.object({
-  title: z.string(),
-  body: z.string(),
+  notification: z.object({
+    title: z.string(),
+    body: z.string(),
+  }),
 });
 
 export { FcmResponseSchema, CreateTokenFcmSchema, NotificationSchema };

@@ -39,7 +39,7 @@ const login = async (data: LoginRequest): Promise<AuthTokens> => {
     userId: user.id,
     email: user.email,
     username: user.username,
-    roleId: user.role_id ?? undefined,
+    role_name: user.roles?.role_name,
   };
 
   const accessToken = await generateAccessToken(payload);
@@ -85,7 +85,7 @@ const register = async (data: RegisterRequest): Promise<AuthTokens> => {
     userId: user.id,
     email: user.email,
     username: user.username,
-    roleId: user.role_id ?? undefined,
+    role_name: user.roles?.role_name,
   };
 
   const accessToken = await generateAccessToken(payload);
@@ -124,7 +124,7 @@ const refreshAccessToken = async (
     userId: payload.userId,
     email: payload.email,
     username: payload.username,
-    roleId: payload.roleId,
+    role_name: payload.role_name,
   };
 
   const newAccessToken = await generateAccessToken(jwtPayload);

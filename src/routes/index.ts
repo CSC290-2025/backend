@@ -1,6 +1,6 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
-/* 
+/*
 ROUTING OPTIONS:
 Choose ONE approach per module that you're comfortable with:
   1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
@@ -40,7 +40,12 @@ import {
   setupTokenRoutes,
 } from '@/modules/emergency';
 
-// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
+import {
+  reportRoutes,
+  fcmRoutes,
+  tokenRoutes,
+  contactRoutes,
+} from '@/modules/emergency';
 
 // Event Hub
 import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
@@ -50,6 +55,7 @@ import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupTransactionRoutes,
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
@@ -58,32 +64,60 @@ import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
+  setupReceiverRequestsRoutes,
 } from '@/modules/freecycle';
+
+//Healthcare
+import {
+  setupPatientRoutes,
+  setupBedRoutes,
+  setupFacilityRoutes,
+  setupAppointmentRoutes,
+  setupPrescriptionRoutes,
+  setupAmbulanceRoutes,
+  setupEmergencyCallRoutes,
+  setupPaymentRoutes,
+} from '@/modules/healthcare/routes';
 
 // Know AI
 import {
   setupEnrollmentRoutes,
   setupCourseRoutes,
-  setupOnsiteSessionRoutes,
   setupExerciseRoute,
   setupQuestionRoutes,
   setupLevelRoutes,
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-import { reportRoutes } from '@/modules/power-bi';
+import { setupReportsRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+import {
+  detectRoutes,
+  markerRoutes,
+  distanceRoutes,
+} from '@/modules/G-16/routes';
+
+// Traffic
+import {
+  setupIntersectionRoutes,
+  setupLightRequestRoutes,
+  setupRoadRoutes,
+  setupTrafficEmergencyRoutes,
+  setupTrafficLightRoutes,
+} from '@/modules/traffic';
 
 // Volunteer
-import { eventRoutes } from '@/modules/Volunteer/routes';
+import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
 // Public Transportation
 import { routeStopsRoutes } from '@/modules/public-transportation/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
+
+//Bin
+import { setupBinRoutes } from '@/modules/waste-management/routes';
 
 // Weather
 import {
@@ -112,7 +146,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
-  // Citizen
   setupCitizenAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
@@ -132,47 +165,75 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
-  setupScbRoutes(app);
+  setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
+  //
+  // ============================================
+  // Normal Hono Routes (not in Swagger docs)
+  // ============================================
+  // app.route('/products', productRoutes);
+  setupScbRoutes(app);
+
+  //Healthcare
+  setupPatientRoutes(app);
+  setupBedRoutes(app);
+  setupFacilityRoutes(app);
+  setupAppointmentRoutes(app);
+  setupPrescriptionRoutes(app);
+  setupAmbulanceRoutes(app);
+  setupEmergencyCallRoutes(app);
+  setupPaymentRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
+  setupReceiverRequestsRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
   setupCourseRoutes(app);
-  setupOnsiteSessionRoutes(app);
   setupExerciseRoute(app);
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Power BI
+  setupReportsRoutes(app);
+
+  // Traffic
+  setupIntersectionRoutes(app);
+  setupTrafficLightRoutes(app);
+  setupLightRequestRoutes(app);
+  setupRoadRoutes(app);
+  setupTrafficEmergencyRoutes(app);
+
   // Waste
   setupWasteRoutes(app);
+  setupBinRoutes(app);
+
+  // SupportMap
 
   // Weather
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
+
+  // Volunteer
+  setupVolunteerRoutes(app);
 
   /*
   ============================================
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-
   //Emergency
-  //   app.route('/reports', reportRoutes);
-  //   app.route('/fcm', fcmRoutes);
-  //   app.route('/tokens', tokenRoutes);
-  //   app.route('/emergency', emergencyRoutes);
-
-  // Power BI
-  app.route('/reports', reportRoutes);
+  app.route('/emergency', reportRoutes());
+  app.route('/emergency', contactRoutes());
+  app.route('/emergency', fcmRoutes());
 
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
+  app.route('/api', distanceRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

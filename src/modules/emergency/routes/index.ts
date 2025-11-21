@@ -6,3 +6,5 @@ export { fcmRoutes } from './fcm/fcm.route.ts';
 
 export { setupTokenRoutes } from './token/token.openapi.ts';
 export { tokenRoutes } from './token/token.route.ts';
+
+export { contactRoutes } from './contacts/contact.route.ts';
