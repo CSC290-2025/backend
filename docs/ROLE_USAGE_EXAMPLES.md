@@ -67,7 +67,6 @@ export const getWasteDataRoute = createGetRoute({
   tags: ['Waste'],
   middleware: [requireRole(ROLES.WASTE_MANAGER)],
 });
-```
 
 // Volunteer Coordinator only
 export const approveVolunteerRoute = createPostRoute({
@@ -79,6 +78,7 @@ export const approveVolunteerRoute = createPostRoute({
   tags: ['Volunteers'],
   middleware: [requireRole(ROLES.VOLUNTEER_COORDINATOR)],
 });
+```
 
 // ============================================
 // EXAMPLE 2: In Routes Setup (routes file)
