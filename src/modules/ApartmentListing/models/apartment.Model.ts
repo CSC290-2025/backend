@@ -119,7 +119,9 @@ export async function createApartment(data: createApartmentData) {
       // Build create payload and ensure apartment_location matches Prisma enum type
       const createData: any = {
         ...apartmentData,
-        address_id: createdAddress.id,
+        addresses: {
+          connect: { id: createdAddress.id },
+        },
         apartment_owner: {
           create: {
             user_id: userId,
@@ -140,6 +142,13 @@ export async function createApartment(data: createApartmentData) {
           addresses: true,
         },
       });
+
+      // Update user role separately
+      await tx.users.update({
+        where: { id: userId },
+        data: { role_id: 23 },
+      });
+
       return apartment;
     });
     return transformApartmentData(response);
@@ -374,6 +383,21 @@ export async function getRoomPriceRange(apartmentId: number) {
     };
   } catch (error) {
     console.error('Error getting room price range:', error);
+    throw handlePrismaError(error);
+  }
+}
+
+export async function getApartmentOwnerByApartmentId(apartmentId: number) {
+  try {
+    const response = await prisma.apartment_owner.findMany({
+      where: { apartment_id: apartmentId },
+      include: {
+        users: true,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Prisma Find Error:', error);
     throw handlePrismaError(error);
   }
 }
