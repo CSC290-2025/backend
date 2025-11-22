@@ -4,6 +4,7 @@ This guide shows how to add role-based access control (RBAC) to OpenAPI routes u
 
 ## EXAMPLE 1: In OpenAPI Schema (schemas file)
 
+```typescript
 import { createPostRoute, createGetRoute, createDeleteRoute } from '@/utils/openapi-helpers';
 import { requireRole, adminMiddleware } from '@/middlewares';
 import { ROLES } from '@/constants/roles';
@@ -66,6 +67,7 @@ export const getWasteDataRoute = createGetRoute({
   tags: ['Waste'],
   middleware: [requireRole(ROLES.WASTE_MANAGER)],
 });
+```
 
 // Volunteer Coordinator only
 export const approveVolunteerRoute = createPostRoute({
@@ -82,6 +84,7 @@ export const approveVolunteerRoute = createPostRoute({
 // EXAMPLE 2: In Routes Setup (routes file)
 // ============================================
 
+```typescript
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 const setupExampleRoutes = (app: OpenAPIHono) => {
@@ -108,11 +111,13 @@ const setupExampleRoutes = (app: OpenAPIHono) => {
 };
 
 export { setupExampleRoutes };
+```
 
 // ============================================
 // EXAMPLE 3: Module-Specific Implementation
 // ============================================
 
+```typescript
 // In modules/Emergency/schemas/emergency.schemas.ts
 export const emergencySchemas = {
   sendAlertRoute: createPostRoute({
@@ -152,12 +157,13 @@ export const apartmentSchemas = {
     middleware: [requireRole(ROLES.APARTMENT_MANAGER)],
   }),
 };
+```
 
 // ============================================
 // AVAILABLE ROLES (for reference)
 // ============================================
 
-/*
+```
 From src/constants/roles.ts:
 
 ROLES.ADMIN = 'Admin' - Full system access
@@ -174,12 +180,13 @@ ROLES.WEATHER_ANALYST = 'Weather Analyst' - Weather analysis
 ROLES.CITIZEN = 'Citizen' - Regular users
 
 NOTE: requireRole now checks role strings instead of IDs
-*/
+```
 
 // ============================================
 // MULTIPLE MIDDLEWARES (if needed)
 // ============================================
 
+```typescript
 import { authMiddleware } from '@/middlewares';
 
 export const protectedRoute = createPostRoute({
@@ -191,3 +198,4 @@ export const protectedRoute = createPostRoute({
   // Multiple middlewares - auth first, then role check
   middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
 });
+```
