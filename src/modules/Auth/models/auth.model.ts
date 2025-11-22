@@ -1,5 +1,8 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
+import type { Prisma } from '@prisma/client/scripts/default-index';
+import { WalletModel } from '@/modules/Financial';
+import type { CreateWalletData } from '@/modules/Financial/types';
 
 const findUserById = async (userId: number) => {
   try {
@@ -132,14 +135,17 @@ const updateLastLogin = async (userId: number) => {
   }
 };
 
-const createUser = async (data: {
-  email: string;
-  username: string;
-  password_hash: string;
-  phone?: string;
-}) => {
+const createUser = async (
+  data: {
+    email: string;
+    username: string;
+    password_hash: string;
+    phone?: string;
+  },
+  tx?: Prisma.TransactionClient // required to make the create user part of a transaction to make it atomic
+) => {
   try {
-    return await prisma.users.create({
+    return await (tx ?? prisma).users.create({
       data: {
         email: data.email,
         username: data.username,
@@ -165,6 +171,32 @@ const createUser = async (data: {
   }
 };
 
+const registerUser = async (data: {
+  email: string;
+  username: string;
+  password_hash: string;
+}) => {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const newUser = await createUser(data, tx);
+      if (!newUser) {
+        throw new Error('Failed to create user');
+      }
+      const wallet = await WalletModel.createWallet(
+        newUser.id,
+        { user_id: newUser.id, wallet_type: 'individual' } as CreateWalletData,
+        tx
+      );
+      if (!wallet) {
+        throw new Error('Failed to create wallet');
+      }
+      return newUser;
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   findUserById,
   findUserByEmail,
@@ -175,4 +207,5 @@ export {
   revokeAllUserTokens,
   updateLastLogin,
   createUser,
+  registerUser,
 };
