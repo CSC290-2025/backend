@@ -14,13 +14,18 @@ const setupFreecyclePostsRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    FreecyclePostsSchemas.getUserFreecyclePostsRoute,
+    PostsController.getPostByDonater
+  );
+
+  app.openapi(
     FreecyclePostsSchemas.getFreecyclePostRoute,
     PostsController.getPostById
   );
 
   app.openapi(
-    FreecyclePostsSchemas.getUserFreecyclePostsRoute,
-    PostsController.getPostByDonater
+    FreecyclePostsSchemas.getPostsByUserIdRoute,
+    PostsController.getPostsByUserId
   );
 
   app.openapi(

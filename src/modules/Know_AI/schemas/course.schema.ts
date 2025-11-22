@@ -29,32 +29,6 @@ const onsiteSession = z.object({
   updated_at: z.coerce.date(),
 });
 
-const createCourseVideo = z.object({
-  course_id: z.number(),
-  video_name: z.string().max(255),
-  video_description: z.string().nullable(),
-  duration_minutes: z.number(),
-  video_order: z.number(),
-  video_file_path: z.string().nullable(),
-});
-
-const createOnsiteSession = z.object({
-  course_id: z.number(),
-  address_id: z.number().nullable(),
-  duration_hours: z.number().nullable(),
-  event_at: z.coerce.date(),
-  registration_deadline: z.coerce.date(),
-  total_seats: z.number().int().default(1),
-});
-
-const createCourseVideoDB = createCourseVideo.extend({
-  course_id: z.number(),
-});
-
-const createOnsiteSessionDB = createOnsiteSession.extend({
-  course_id: z.number(),
-});
-
 const course = z.object({
   id: z.number(),
   author_id: z.number().nullable(),
@@ -67,6 +41,41 @@ const course = z.object({
   updated_at: z.date().optional(),
   course_videos: z.array(courseVideo).optional(),
   onsite_sessions: z.array(onsiteSession).optional(),
+});
+
+const createCourseVideo = z.object({
+  video_name: z.string().max(255),
+  video_description: z.string().nullable(),
+  duration_minutes: z.number(),
+  video_order: z.number(),
+  video_file_path: z.string().nullable(),
+});
+
+const createOnsiteSession = z.object({
+  address_id: z.number().nullable(),
+  duration_hours: z.number().nullable(),
+  event_at: z.coerce.date(),
+  registration_deadline: z.coerce.date(),
+  total_seats: z.number().int().default(1),
+});
+
+const updateCourse = z
+  .object({
+    author_id: z.number().nullable(),
+    course_name: z.string().max(255),
+    course_description: z.string().nullable(),
+    course_type: courseTypeEnum,
+    course_status: courseStatusEnum,
+    cover_image: z.string().nullable(),
+  })
+  .partial();
+
+const updateCourseVideos = z.object({
+  course_videos: z.array(createCourseVideo),
+});
+
+const updateOnsiteSessions = z.object({
+  onsite_sessions: z.array(createOnsiteSession),
 });
 
 const courseId = z.object({
@@ -87,8 +96,6 @@ const createCourse = z.object({
   course_videos: z.array(createCourseVideo).optional(),
   onsite_sessions: z.array(createOnsiteSession).optional(),
 });
-
-const updateCourse = createCourse.partial();
 
 const createCourseRoute = createPostRoute({
   path: '/createCourse',
@@ -123,9 +130,31 @@ const getCourseByTypeRoute = createGetRoute({
 
 const updateCourseRoute = createPutRoute({
   path: '/course/{id}',
-  summary: 'Update course',
+  summary: 'Update course basic information',
   requestSchema: updateCourse,
   responseSchema: course,
+  params: courseId,
+  tags: ['Know-AI', 'Course'],
+});
+
+const updateCourseVideosRoute = createPutRoute({
+  path: '/course/{id}/videos',
+  summary: 'Update course videos',
+  requestSchema: updateCourseVideos,
+  responseSchema: z.object({
+    course_videos: z.array(courseVideo),
+  }),
+  params: courseId,
+  tags: ['Know-AI', 'Course'],
+});
+
+const updateOnsiteSessionsRoute = createPutRoute({
+  path: '/course/{id}/sessions',
+  summary: 'Update onsite sessions',
+  requestSchema: updateOnsiteSessions,
+  responseSchema: z.object({
+    onsite_sessions: z.array(onsiteSession),
+  }),
   params: courseId,
   tags: ['Know-AI', 'Course'],
 });
@@ -146,8 +175,8 @@ export {
   onsiteSession,
   createCourseVideo,
   createOnsiteSession,
-  createCourseVideoDB,
-  createOnsiteSessionDB,
+  updateCourseVideos,
+  updateOnsiteSessions,
   createCourse,
   updateCourse,
   createCourseRoute,
@@ -155,5 +184,7 @@ export {
   getCourseRoute,
   getCourseByTypeRoute,
   updateCourseRoute,
+  updateCourseVideosRoute,
+  updateOnsiteSessionsRoute,
   deleteCourseRoute,
 };

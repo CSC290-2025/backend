@@ -8,14 +8,28 @@ const RAW = process.env.G16_GEMINI_MODEL || 'models/gemini-2.0-flash-001';
 const MODEL = RAW.startsWith('models/') ? RAW : `models/${RAW}`;
 
 //prompt
-const PROMPT = `You are a safety checker. Return ONLY JSON like:
-{"is_danger":boolean,"confidence":number,"danger_types":string[],"reasons":string[]}`;
+const PROMPT = `You're an AI assistant in smart city hub, your task are:
+                1. Analyze the image 
+                2. Detect that situation is dangerous or have a problem
+                3. Classify the situation into one of the following: harm - weapons, violence, fire, dangerous object, hazardous situations
+                                                                     health - have a sick person, injured, collapsed, fainting, wounded
+                                                                     trash - overflowing trash bin, garbage on the street
+                                                                     other - any urban issue not fitting above
+                return only the following json format
+                {
+                "has_issue": boolean,
+                "confidence": number, 
+                "types": string[],
+                "category": "harm" | "health" | "trash" | "traffic" | "other",
+                "reason": string[]
+                }`;
 
 //result
 export type DetectResult = {
-  is_danger: boolean;
+  has_issue: boolean;
   confidence: number;
-  danger_types: string[];
+  types: string[];
+  category: 'harm' | 'health' | 'trash' | 'traffic' | 'other';
   reasons: string[];
 };
 

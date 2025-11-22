@@ -1,6 +1,7 @@
 import { successResponse } from '@/utils/response';
 import { WalletService } from '../services';
 import type { Context } from 'hono';
+import type { OrganizationType } from '../types';
 
 const getWallet = async (c: Context) => {
   const walletId = Number(c.req.param('walletId'));
@@ -44,6 +45,12 @@ const transferBetweenUsers = async (c: Context) => {
   return successResponse(c, result, 200, 'Transfer completed successfully');
 };
 
+const getOrganizationBalance = async (c: Context) => {
+  const organizationType = c.req.param('organizationType') as OrganizationType;
+  const balance = await WalletService.getOrganizationBalance(organizationType);
+  return successResponse(c, { balance, organizationType });
+};
+
 export {
   getWallet,
   createWallet,
@@ -51,4 +58,5 @@ export {
   getUserWallets,
   topUpBalance,
   transferBetweenUsers,
+  getOrganizationBalance,
 };
