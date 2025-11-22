@@ -121,6 +121,14 @@ const listFacilitiesRoute = createGetRoute({
   tags: ['Facilities'],
 });
 
+const listAllFacilitiesRoute = createGetRoute({
+  path: '/facilities/all',
+  summary: 'List all facilities (no pagination)',
+  responseSchema: FacilitiesListSchema,
+  query: FacilityFilterSchema,
+  tags: ['Facilities'],
+});
+
 export const FacilitySchemas = {
   FacilitySchema,
   CreateFacilitySchema,
@@ -135,4 +143,5 @@ export const FacilitySchemas = {
   updateFacilityRoute,
   deleteFacilityRoute,
   listFacilitiesRoute,
+  listAllFacilitiesRoute,
 };

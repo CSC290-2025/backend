@@ -119,6 +119,14 @@ const listBedsRoute = createGetRoute({
   tags: ['Beds'],
 });
 
+const listAllBedsRoute = createGetRoute({
+  path: '/beds/all',
+  summary: 'List all beds (no pagination)',
+  responseSchema: BedsListSchema,
+  query: BedFilterSchema,
+  tags: ['Beds'],
+});
+
 export const BedSchemas = {
   BedSchema,
   CreateBedSchema,
@@ -133,4 +141,5 @@ export const BedSchemas = {
   updateBedRoute,
   deleteBedRoute,
   listBedsRoute,
+  listAllBedsRoute,
 };

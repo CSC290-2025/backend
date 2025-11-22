@@ -119,6 +119,14 @@ const listPrescriptionsRoute = createGetRoute({
   tags: ['Prescriptions'],
 });
 
+const listAllPrescriptionsRoute = createGetRoute({
+  path: '/prescriptions/all',
+  summary: 'List all prescriptions (no pagination)',
+  responseSchema: PrescriptionsListSchema,
+  query: PrescriptionFilterSchema,
+  tags: ['Prescriptions'],
+});
+
 export const PrescriptionSchemas = {
   PrescriptionSchema,
   CreatePrescriptionSchema,
@@ -133,4 +141,5 @@ export const PrescriptionSchemas = {
   updatePrescriptionRoute,
   deletePrescriptionRoute,
   listPrescriptionsRoute,
+  listAllPrescriptionsRoute,
 };

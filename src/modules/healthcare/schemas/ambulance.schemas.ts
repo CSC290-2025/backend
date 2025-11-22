@@ -117,6 +117,14 @@ const listAmbulancesRoute = createGetRoute({
   tags: ['Ambulances'],
 });
 
+const listAllAmbulancesRoute = createGetRoute({
+  path: '/ambulances/all',
+  summary: 'List all ambulances (no pagination)',
+  responseSchema: AmbulancesListSchema,
+  query: AmbulanceFilterSchema,
+  tags: ['Ambulances'],
+});
+
 export const AmbulanceSchemas = {
   GeoPointSchema,
   AmbulanceSchema,
@@ -132,4 +140,5 @@ export const AmbulanceSchemas = {
   updateAmbulanceRoute,
   deleteAmbulanceRoute,
   listAmbulancesRoute,
+  listAllAmbulancesRoute,
 };

@@ -160,6 +160,14 @@ const listPaymentsRoute = createGetRoute({
   tags: ['Payments'],
 });
 
+const listAllPaymentsRoute = createGetRoute({
+  path: '/payments/all',
+  summary: 'List all payments (no pagination)',
+  responseSchema: PaymentsListSchema,
+  query: PaymentFilterSchema,
+  tags: ['Payments'],
+});
+
 export const PaymentSchemas = {
   PaymentSchema,
   CreatePaymentSchema,
@@ -174,4 +182,5 @@ export const PaymentSchemas = {
   updatePaymentRoute,
   deletePaymentRoute,
   listPaymentsRoute,
+  listAllPaymentsRoute,
 };

@@ -109,6 +109,14 @@ const listAppointmentsRoute = createGetRoute({
   tags: ['Appointments'],
 });
 
+const listAllAppointmentsRoute = createGetRoute({
+  path: '/appointments/all',
+  summary: 'List all appointments (no pagination)',
+  responseSchema: AppointmentsListSchema,
+  query: AppointmentFilterSchema,
+  tags: ['Appointments'],
+});
+
 export const AppointmentSchemas = {
   AppointmentSchema,
   CreateAppointmentSchema,
@@ -123,4 +131,5 @@ export const AppointmentSchemas = {
   updateAppointmentRoute,
   deleteAppointmentRoute,
   listAppointmentsRoute,
+  listAllAppointmentsRoute,
 };

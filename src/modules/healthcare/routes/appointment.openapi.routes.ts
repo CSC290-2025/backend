@@ -8,6 +8,10 @@ const setupAppointmentRoutes = (app: OpenAPIHono) => {
     AppointmentController.listAppointments
   );
   app.openapi(
+    AppointmentSchemas.listAllAppointmentsRoute,
+    AppointmentController.listAllAppointments
+  );
+  app.openapi(
     AppointmentSchemas.getAppointmentRoute,
     AppointmentController.getAppointment
   );

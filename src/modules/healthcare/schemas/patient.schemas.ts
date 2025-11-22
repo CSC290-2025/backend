@@ -101,6 +101,14 @@ const listPatientsRoute = createGetRoute({
   tags: ['Patients'],
 });
 
+const listAllPatientsRoute = createGetRoute({
+  path: '/patients/all',
+  summary: 'List all patients (no pagination)',
+  responseSchema: PatientsListSchema,
+  query: PatientFilterSchema,
+  tags: ['Patients'],
+});
+
 export const PatientSchemas = {
   PatientSchema,
   CreatePatientSchema,
@@ -115,4 +123,5 @@ export const PatientSchemas = {
   updatePatientRoute,
   deletePatientRoute,
   listPatientsRoute,
+  listAllPatientsRoute,
 };

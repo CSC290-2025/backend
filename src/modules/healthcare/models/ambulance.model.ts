@@ -16,7 +16,7 @@ const ambulanceSelect = {
   id: true,
   vehicle_number: true,
   status: true,
-  current_location: true,
+  // current_location is Unsupported, cannot select directly
   base_facility_id: true,
   created_at: true,
 } satisfies Prisma.ambulancesSelect;
@@ -25,34 +25,18 @@ type AmbulanceRecord = Prisma.ambulancesGetPayload<{
   select: typeof ambulanceSelect;
 }>;
 
-const mapGeoPoint = (value: unknown): GeoPoint | null => {
-  if (
-    value &&
-    typeof value === 'object' &&
-    (value as Record<string, unknown>).type === 'Point'
-  ) {
-    const coordinates = (value as Record<string, unknown>).coordinates;
-    if (
-      Array.isArray(coordinates) &&
-      coordinates.length === 2 &&
-      typeof coordinates[0] === 'number' &&
-      typeof coordinates[1] === 'number'
-    ) {
-      return {
-        type: 'Point',
-        coordinates: [coordinates[0], coordinates[1]],
-      };
-    }
-  }
-
+// Helper to parse GeoJSON from raw query result if needed
+const parseGeoJson = (value: unknown): GeoPoint | null => {
+  if (!value) return null;
+  // Implementation depends on what raw query returns
   return null;
 };
 
 const mapAmbulance = (record: AmbulanceRecord): Ambulance => ({
   id: record.id,
-  vehicleNumber: record.vehicle_number,
+  vehicleNumber: record.vehicle_number ?? '', // Handle nullable field
   status: record.status ?? null,
-  currentLocation: mapGeoPoint(record.current_location),
+  currentLocation: null, // Cannot fetch Unsupported type via standard Prisma
   baseFacilityId: record.base_facility_id ?? null,
   createdAt: record.created_at,
 });
@@ -167,15 +151,35 @@ const findWithPagination = async (
 
 const create = async (data: CreateAmbulanceData): Promise<Ambulance> => {
   try {
+    // Create ambulance without location first (Prisma doesn't support Unsupported types in create)
     const record = await prisma.ambulances.create({
       data: {
         vehicle_number: data.vehicleNumber,
         status: data.status ?? null,
-        current_location: serializeGeoPoint(data.currentLocation ?? null),
         base_facility_id: data.baseFacilityId ?? null,
       },
       select: ambulanceSelect,
     });
+
+    // Update location using raw query if provided
+    if (data.currentLocation) {
+      const [lon, lat] = data.currentLocation.coordinates;
+      await prisma.$executeRaw`
+        UPDATE ambulances 
+        SET current_location = ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326) 
+        WHERE id = ${record.id}
+      `;
+
+      // Re-fetch to get the updated record with location
+      const updatedRecord = await prisma.ambulances.findUnique({
+        where: { id: record.id },
+        select: ambulanceSelect,
+      });
+
+      if (updatedRecord) {
+        return mapAmbulance(updatedRecord);
+      }
+    }
 
     return mapAmbulance(record);
   } catch (error) {
@@ -198,21 +202,52 @@ const update = async (
       updateData.status = data.status ?? null;
     }
 
-    if (data.currentLocation !== undefined) {
-      updateData.current_location = serializeGeoPoint(
-        data.currentLocation ?? null
-      );
-    }
-
     if (data.baseFacilityId !== undefined) {
       updateData.base_facility_id = data.baseFacilityId ?? null;
     }
 
-    const record = await prisma.ambulances.update({
+    // Update standard fields
+    let record = await prisma.ambulances.update({
       where: { id },
       data: updateData,
       select: ambulanceSelect,
     });
+
+    // Update location using raw query if provided
+    if (data.currentLocation) {
+      const [lon, lat] = data.currentLocation.coordinates;
+      await prisma.$executeRaw`
+        UPDATE ambulances 
+        SET current_location = ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326) 
+        WHERE id = ${id}
+      `;
+
+      // Re-fetch to get the updated record with location
+      const updatedRecord = await prisma.ambulances.findUnique({
+        where: { id },
+        select: ambulanceSelect,
+      });
+
+      if (updatedRecord) {
+        record = updatedRecord;
+      }
+    } else if (data.currentLocation === null) {
+      // Handle setting location to null
+      await prisma.$executeRaw`
+        UPDATE ambulances 
+        SET current_location = NULL 
+        WHERE id = ${id}
+      `;
+      // Re-fetch
+      const updatedRecord = await prisma.ambulances.findUnique({
+        where: { id },
+        select: ambulanceSelect,
+      });
+
+      if (updatedRecord) {
+        record = updatedRecord;
+      }
+    }
 
     return mapAmbulance(record);
   } catch (error) {

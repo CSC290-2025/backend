@@ -4,6 +4,7 @@ import { BedController } from '../controllers';
 
 const setupBedRoutes = (app: OpenAPIHono) => {
   app.openapi(BedSchemas.listBedsRoute, BedController.listBeds);
+  app.openapi(BedSchemas.listAllBedsRoute, BedController.listAllBeds);
   app.openapi(BedSchemas.getBedRoute, BedController.getBed);
   app.openapi(BedSchemas.createBedRoute, BedController.createBed);
   app.openapi(BedSchemas.updateBedRoute, BedController.updateBed);

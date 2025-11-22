@@ -7,6 +7,10 @@ const setupFacilityRoutes = (app: OpenAPIHono) => {
     FacilitySchemas.listFacilitiesRoute,
     FacilityController.listFacilities
   );
+  app.openapi(
+    FacilitySchemas.listAllFacilitiesRoute,
+    FacilityController.listAllFacilities
+  );
   app.openapi(FacilitySchemas.getFacilityRoute, FacilityController.getFacility);
   app.openapi(
     FacilitySchemas.createFacilityRoute,

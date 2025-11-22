@@ -141,6 +141,14 @@ const listEmergencyCallsRoute = createGetRoute({
   tags: ['Emergency Calls'],
 });
 
+const listAllEmergencyCallsRoute = createGetRoute({
+  path: '/emergency-calls/all',
+  summary: 'List all emergency calls (no pagination)',
+  responseSchema: EmergencyCallsListSchema,
+  query: EmergencyCallFilterSchema,
+  tags: ['Emergency Calls'],
+});
+
 export const EmergencyCallSchemas = {
   EmergencyCallSchema,
   CreateEmergencyCallSchema,
@@ -155,4 +163,5 @@ export const EmergencyCallSchemas = {
   updateEmergencyCallRoute,
   deleteEmergencyCallRoute,
   listEmergencyCallsRoute,
+  listAllEmergencyCallsRoute,
 };

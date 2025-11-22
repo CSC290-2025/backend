@@ -8,6 +8,10 @@ const setupAmbulanceRoutes = (app: OpenAPIHono) => {
     AmbulanceController.listAmbulances
   );
   app.openapi(
+    AmbulanceSchemas.listAllAmbulancesRoute,
+    AmbulanceController.listAllAmbulances
+  );
+  app.openapi(
     AmbulanceSchemas.getAmbulanceRoute,
     AmbulanceController.getAmbulance
   );

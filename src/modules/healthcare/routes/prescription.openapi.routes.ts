@@ -8,6 +8,10 @@ const setupPrescriptionRoutes = (app: OpenAPIHono) => {
     PrescriptionController.listPrescriptions
   );
   app.openapi(
+    PrescriptionSchemas.listAllPrescriptionsRoute,
+    PrescriptionController.listAllPrescriptions
+  );
+  app.openapi(
     PrescriptionSchemas.getPrescriptionRoute,
     PrescriptionController.getPrescription
   );

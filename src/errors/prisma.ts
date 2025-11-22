@@ -98,5 +98,6 @@ export function handlePrismaError(error: unknown): never {
     throw new DatabaseError('Database connection failed');
   }
 
+  console.error('Unhandled Prisma Error:', error);
   throw new InternalServerError('Unexpected error occurred');
 }

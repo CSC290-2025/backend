@@ -8,6 +8,10 @@ const setupEmergencyCallRoutes = (app: OpenAPIHono) => {
     EmergencyCallController.listEmergencyCalls
   );
   app.openapi(
+    EmergencyCallSchemas.listAllEmergencyCallsRoute,
+    EmergencyCallController.listAllEmergencyCalls
+  );
+  app.openapi(
     EmergencyCallSchemas.getEmergencyCallRoute,
     EmergencyCallController.getEmergencyCall
   );

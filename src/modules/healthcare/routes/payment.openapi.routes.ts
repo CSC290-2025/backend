@@ -4,6 +4,10 @@ import { PaymentController } from '../controllers';
 
 const setupPaymentRoutes = (app: OpenAPIHono) => {
   app.openapi(PaymentSchemas.listPaymentsRoute, PaymentController.listPayments);
+  app.openapi(
+    PaymentSchemas.listAllPaymentsRoute,
+    PaymentController.listAllPayments
+  );
   app.openapi(PaymentSchemas.getPaymentRoute, PaymentController.getPayment);
   app.openapi(
     PaymentSchemas.createPaymentRoute,

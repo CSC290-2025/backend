@@ -4,6 +4,10 @@ import { PatientController } from '../controllers';
 
 const setupPatientRoutes = (app: OpenAPIHono) => {
   app.openapi(PatientSchemas.listPatientsRoute, PatientController.listPatients);
+  app.openapi(
+    PatientSchemas.listAllPatientsRoute,
+    PatientController.listAllPatients
+  );
   app.openapi(PatientSchemas.getPatientRoute, PatientController.getPatient);
   app.openapi(
     PatientSchemas.createPatientRoute,
