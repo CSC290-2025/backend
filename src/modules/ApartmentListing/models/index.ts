@@ -5,3 +5,4 @@ export * as addressModel from './address.model';
 export * as uploadModel from './upload.models';
 export * as bookingModel from './booking.Model';
 export * as bookingCleanupModel from './bookingCleanup.model';
+export * as ownerModel from './owner.models';

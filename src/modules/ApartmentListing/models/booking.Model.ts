@@ -4,6 +4,7 @@ import type {
   createBookingData,
   updateBookingData,
 } from '../types/booking.types';
+import type { Prisma } from '@/generated/prisma';
 
 //for user to see all bookings
 export async function getAllBookingsForUser(userId: number) {
@@ -221,17 +222,26 @@ export async function createBooking(data: createBookingData) {
   }
 }
 
-export async function updateBooking(id: number, data: updateBookingData) {
+export async function updateBooking(
+  id: number,
+  data: updateBookingData,
+  tx?: Prisma.TransactionClient
+) {
   try {
-    const updatedBooking = await prisma.apartment_booking.update({
-      where: {
-        id,
-      },
-      data: {
-        ...data,
-        check_in: data.check_in ? new Date(data.check_in) : null,
-      },
-    });
+    const updateData = {
+      ...data,
+      check_in: data.check_in ? new Date(data.check_in) : null,
+    };
+    // Use transaction client
+    const updatedBooking = tx
+      ? await tx.apartment_booking.update({
+          where: { id },
+          data: updateData,
+        })
+      : await prisma.apartment_booking.update({
+          where: { id },
+          data: updateData,
+        });
 
     return {
       id: updatedBooking.id,
