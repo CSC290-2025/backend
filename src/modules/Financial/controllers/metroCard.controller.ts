@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '@/errors';
 import { successResponse } from '@/utils/response';
 import { MetroCardService } from '../services';
 import type { Context } from 'hono';
@@ -8,9 +9,9 @@ const getMetroCard = async (c: Context) => {
   return successResponse(c, metroCards);
 };
 
-const createMetroCard = async (c: Context) => {
-  const body = await c.req.json();
-  const metroCard = await MetroCardService.createMetroCard(body.user_id);
+const createMyMetroCard = async (c: Context) => {
+  const user = c.get('user');
+  const metroCard = await MetroCardService.createMetroCard(user.userId);
   return successResponse(
     c,
     { metroCard },
@@ -47,8 +48,13 @@ const topUpBalance = async (c: Context) => {
   return successResponse(c, result, 200, 'Balance topped up successfully');
 };
 
-const deleteMetroCard = async (c: Context) => {
+const deleteMyMetroCard = async (c: Context) => {
+  const user = c.get('user');
   const metroCardId = Number(c.req.param('metroCardId'));
+  const card = await MetroCardService.getMetroCardById(metroCardId);
+  if (card.user_id !== user.userId) {
+    throw new UnauthorizedError('You do not own this metro card');
+  }
   await MetroCardService.deleteMetroCardById(metroCardId);
   return successResponse(c, null, 200, 'Metro card deleted successfully');
 };
@@ -67,12 +73,19 @@ const transferToTransportation = async (c: Context) => {
   );
 };
 
+const getMyMetroCards = async (c: Context) => {
+  const user = c.get('user');
+  const metroCards = await MetroCardService.getUserMetroCards(user.userId);
+  return successResponse(c, { metroCards });
+};
+
 export {
   getMetroCard,
-  createMetroCard,
+  createMyMetroCard,
   getUserMetroCards,
   updateMetroCard,
   topUpBalance,
-  deleteMetroCard,
+  deleteMyMetroCard,
   transferToTransportation,
+  getMyMetroCards,
 };
