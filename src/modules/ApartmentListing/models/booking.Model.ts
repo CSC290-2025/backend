@@ -230,7 +230,7 @@ export async function updateBooking(
   try {
     const updateData = {
       ...data,
-      check_in: data.check_in ? new Date(data.check_in) : undefined,
+      check_in: data.check_in ? new Date(data.check_in) : null,
     };
     // Use transaction client
     const updatedBooking = tx

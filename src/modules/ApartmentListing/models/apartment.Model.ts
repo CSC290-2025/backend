@@ -386,18 +386,3 @@ export async function getRoomPriceRange(apartmentId: number) {
     throw handlePrismaError(error);
   }
 }
-
-export async function getApartmentOwnerByApartmentId(apartmentId: number) {
-  try {
-    const response = await prisma.apartment_owner.findMany({
-      where: { apartment_id: apartmentId },
-      include: {
-        users: true,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.error('Prisma Find Error:', error);
-    throw handlePrismaError(error);
-  }
-}
