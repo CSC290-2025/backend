@@ -80,9 +80,7 @@ export const approveVolunteerRoute = createPostRoute({
 });
 ```
 
-// ============================================
-// EXAMPLE 2: In Routes Setup (routes file)
-// ============================================
+## EXAMPLE 2: In Routes Setup (routes file)
 
 ```typescript
 import type { OpenAPIHono } from '@hono/zod-openapi';
@@ -113,9 +111,7 @@ const setupExampleRoutes = (app: OpenAPIHono) => {
 export { setupExampleRoutes };
 ```
 
-// ============================================
-// EXAMPLE 3: Module-Specific Implementation
-// ============================================
+## EXAMPLE 3: Module-Specific Implementation
 
 ```typescript
 // In modules/Emergency/schemas/emergency.schemas.ts
@@ -159,9 +155,7 @@ export const apartmentSchemas = {
 };
 ```
 
-// ============================================
-// AVAILABLE ROLES (for reference)
-// ============================================
+## AVAILABLE ROLES (for reference)
 
 ```
 From src/constants/roles.ts:
@@ -182,9 +176,7 @@ ROLES.CITIZEN = 'Citizen' - Regular users
 NOTE: requireRole now checks role strings instead of IDs
 ```
 
-// ============================================
-// MULTIPLE MIDDLEWARES (if needed)
-// ============================================
+## MULTIPLE MIDDLEWARES (if needed)
 
 ```typescript
 import { authMiddleware } from '@/middlewares';
