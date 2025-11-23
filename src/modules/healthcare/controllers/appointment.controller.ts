@@ -54,8 +54,7 @@ const parseFilters = (
 ): AppointmentFilterOptions => ({
   patientId: parseOptionalNumber(query.patientId),
   facilityId: parseOptionalNumber(query.facilityId),
-  staffUserId: parseOptionalNumber(query.staffUserId),
-  status: query.status,
+  doctorId: parseOptionalNumber(query.doctorId),
   type: query.type,
   search: query.search,
 });

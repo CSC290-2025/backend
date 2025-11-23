@@ -8,7 +8,7 @@ type FacilityFilterOptions = z.infer<
   typeof FacilitySchemas.FacilityFilterSchema
 >;
 type FacilityPaginationOptions = z.infer<
-  typeof FacilitySchemas.PaginationSchema
+  typeof FacilitySchemas.FacilityPaginationSchema
 >;
 type PaginatedFacilities = z.infer<
   typeof FacilitySchemas.PaginatedFacilitiesSchema

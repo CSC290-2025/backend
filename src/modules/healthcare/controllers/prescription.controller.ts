@@ -27,7 +27,6 @@ const parseFilters = (
   query: Record<string, string | undefined>
 ): PrescriptionFilterOptions => ({
   patientId: parseOptionalNumber(query.patientId),
-  prescriberUserId: parseOptionalNumber(query.prescriberUserId),
   facilityId: parseOptionalNumber(query.facilityId),
   status: query.status,
   search: query.search,
@@ -42,7 +41,7 @@ const parsePagination = (
   const validSortBy: PrescriptionPaginationOptions['sortBy'][] = [
     'id',
     'createdAt',
-    'medicationName',
+    'status',
   ];
 
   const sortBy = validSortBy.includes(

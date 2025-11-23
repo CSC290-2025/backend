@@ -1,6 +1,6 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { Prisma } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import type {
   Prescription,
   CreatePrescriptionData,
@@ -13,11 +13,10 @@ import type {
 const prescriptionSelect = {
   id: true,
   patient_id: true,
-  prescriber_user_id: true,
   facility_id: true,
-  medication_name: true,
-  quantity: true,
   status: true,
+  medicines_list: true,
+  total_amount: true,
   created_at: true,
 } satisfies Prisma.prescriptionsSelect;
 
@@ -28,11 +27,10 @@ type PrescriptionRecord = Prisma.prescriptionsGetPayload<{
 const mapPrescription = (record: PrescriptionRecord): Prescription => ({
   id: record.id,
   patientId: record.patient_id,
-  prescriberUserId: record.prescriber_user_id,
   facilityId: record.facility_id ?? null,
-  medicationName: record.medication_name,
-  quantity: record.quantity,
   status: record.status ?? null,
+  medicinesList: record.medicines_list ?? null,
+  totalAmount: record.total_amount ? Number(record.total_amount) : null,
   createdAt: record.created_at,
 });
 
@@ -45,10 +43,6 @@ const buildWhereClause = (
     where.patient_id = filters.patientId;
   }
 
-  if (filters.prescriberUserId !== undefined) {
-    where.prescriber_user_id = filters.prescriberUserId;
-  }
-
   if (filters.facilityId !== undefined) {
     where.facility_id = filters.facilityId;
   }
@@ -57,15 +51,8 @@ const buildWhereClause = (
     where.status = filters.status;
   }
 
-  if (filters.search) {
-    const searchTerm = filters.search.trim();
-    if (searchTerm.length > 0) {
-      where.medication_name = {
-        contains: searchTerm,
-        mode: 'insensitive',
-      };
-    }
-  }
+  // Search removed as medication_name is not a column.
+  // If search is needed, it would require JSON filtering or a different approach.
 
   return where;
 };
@@ -77,8 +64,6 @@ const getOrderBy = (
   switch (sortBy) {
     case 'id':
       return { id: sortOrder };
-    case 'medicationName':
-      return { medication_name: sortOrder };
     case 'createdAt':
     default:
       return { created_at: sortOrder };
@@ -150,11 +135,10 @@ const create = async (data: CreatePrescriptionData): Promise<Prescription> => {
     const record = await prisma.prescriptions.create({
       data: {
         patient_id: data.patientId,
-        prescriber_user_id: data.prescriberUserId,
         facility_id: data.facilityId ?? null,
-        medication_name: data.medicationName,
-        quantity: data.quantity,
         status: data.status ?? null,
+        medicines_list: data.medicinesList ?? Prisma.JsonNull,
+        total_amount: data.totalAmount ?? 0,
       },
       select: prescriptionSelect,
     });
@@ -176,24 +160,20 @@ const update = async (
       updateData.patient_id = data.patientId;
     }
 
-    if (data.prescriberUserId !== undefined) {
-      updateData.prescriber_user_id = data.prescriberUserId;
-    }
-
     if (data.facilityId !== undefined) {
       updateData.facility_id = data.facilityId ?? null;
     }
 
-    if (data.medicationName !== undefined) {
-      updateData.medication_name = data.medicationName;
-    }
-
-    if (data.quantity !== undefined) {
-      updateData.quantity = data.quantity;
-    }
-
     if (data.status !== undefined) {
       updateData.status = data.status ?? null;
+    }
+
+    if (data.medicinesList !== undefined) {
+      updateData.medicines_list = data.medicinesList ?? Prisma.JsonNull;
+    }
+
+    if (data.totalAmount !== undefined) {
+      updateData.total_amount = data.totalAmount;
     }
 
     const record = await prisma.prescriptions.update({

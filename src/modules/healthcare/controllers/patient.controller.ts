@@ -5,7 +5,7 @@ import type {
   CreatePatientData,
   UpdatePatientData,
   PatientFilterOptions,
-  PaginationOptions,
+  PatientPaginationOptions,
 } from '../types';
 import * as PatientModel from '../models/patient.model';
 
@@ -28,7 +28,7 @@ const parseOptionalNumber = (value?: string): number | undefined => {
 
 const parsePagination = (
   query: Record<string, string | undefined>
-): PaginationOptions => {
+): PatientPaginationOptions => {
   const page = parseOptionalNumber(query.page) ?? 1;
   const limit = parseOptionalNumber(query.limit) ?? 10;
 
@@ -46,7 +46,6 @@ const parsePagination = (
 const parseFilters = (
   query: Record<string, string | undefined>
 ): PatientFilterOptions => ({
-  userId: parseOptionalNumber(query.userId),
   search: query.search,
 });
 
