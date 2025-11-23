@@ -2,6 +2,7 @@ import { NotFoundError, ValidationError } from '@/errors';
 import { InsuranceCardModel, WalletModel } from '../models';
 import type { InsuranceCard } from '../types';
 import prisma from '@/config/client';
+import { formatInsuranceCardNumber } from '../utils/crypto';
 
 const getCardById = async (id: number): Promise<InsuranceCard> => {
   const card = await InsuranceCardModel.findCardById(id);
@@ -12,7 +13,9 @@ const getCardById = async (id: number): Promise<InsuranceCard> => {
 const getCardByCardNumber = async (
   cardNumber: string
 ): Promise<InsuranceCard> => {
-  const card = await InsuranceCardModel.findCardByCardNumber(cardNumber);
+  const formattedCardNumber = formatInsuranceCardNumber(cardNumber);
+  const card =
+    await InsuranceCardModel.findCardByCardNumber(formattedCardNumber);
   if (!card) throw new NotFoundError('Insurance card not found');
   return card;
 };
@@ -43,7 +46,9 @@ const topUpFromWallet = async (
   }
 
   // Get insurance card
-  const card = await InsuranceCardModel.findCardByCardNumber(cardNumber);
+  const formattedCardNumber = formatInsuranceCardNumber(cardNumber);
+  const card =
+    await InsuranceCardModel.findCardByCardNumber(formattedCardNumber);
   if (!card) {
     throw new NotFoundError('Insurance card not found');
   }
@@ -52,13 +57,6 @@ const topUpFromWallet = async (
   const wallet = await WalletModel.findWalletById(walletId);
   if (!wallet) {
     throw new NotFoundError('Wallet not found');
-  }
-
-  // Verify wallet belongs to the same user as the card
-  if (wallet.owner_id !== card.user_id) {
-    throw new ValidationError(
-      'Wallet does not belong to the insurance card owner'
-    );
   }
 
   // Check sufficient balance
@@ -135,6 +133,12 @@ const updateInsuranceCard = async (
   return await InsuranceCardModel.updateCard(id, data);
 };
 
+const deleteCardById = async (id: number): Promise<void> => {
+  const card = await InsuranceCardModel.findCardById(id);
+  if (!card) throw new NotFoundError('Insurance card not found');
+  await InsuranceCardModel.deleteCard(id);
+};
+
 export {
   getCardById,
   getCardByCardNumber,
@@ -143,4 +147,5 @@ export {
   createCard,
   topUpFromWallet,
   updateInsuranceCard,
+  deleteCardById,
 };

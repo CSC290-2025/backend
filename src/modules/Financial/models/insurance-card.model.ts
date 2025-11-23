@@ -123,6 +123,16 @@ const updateCard = async (
   }
 };
 
+const deleteCard = async (id: number): Promise<void> => {
+  try {
+    await prisma.insurance_cards.delete({
+      where: { id },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createCard,
   findCardByUserId,
@@ -131,4 +141,5 @@ export {
   findCardByCardNumber,
   updateCardBalance,
   updateCard,
+  deleteCard,
 };
