@@ -5,7 +5,6 @@ import { adminMiddleware, authMiddleware } from '@/middlewares';
 
 const setupReportsRoutes = (app: OpenAPIHono) => {
   // Public routes
-  // app.use(authMiddleware);
   app.openapi(
     ReportsSchemas.getAllReportsRoute,
     ReportsController.getAllReports
@@ -16,7 +15,6 @@ const setupReportsRoutes = (app: OpenAPIHono) => {
   );
 
   // Admin routes
-  // app.use(adminMiddleware);
   app.openapi(ReportsSchemas.createReportRoute, ReportsController.createReport);
   app.openapi(ReportsSchemas.updateReportRoute, ReportsController.updateReport);
   app.openapi(ReportsSchemas.deleteReportRoute, ReportsController.deleteReport);
