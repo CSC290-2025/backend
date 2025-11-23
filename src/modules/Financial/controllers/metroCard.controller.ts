@@ -83,7 +83,6 @@ const transferToTransportation = async (c: Context) => {
 
 const getMyMetroCards = async (c: Context) => {
   const user = c.get('user');
-  console.log(user);
   const metroCards = await MetroCardService.getUserMetroCards(user.userId);
   return successResponse(c, { metroCards });
 };
