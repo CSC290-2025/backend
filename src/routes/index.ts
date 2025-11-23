@@ -110,6 +110,9 @@ import {
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
+// Public Transportation
+import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
@@ -234,4 +237,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
+
+  // Public Transportation
+  app.route('/api', routeStopsRoutes);
 };
