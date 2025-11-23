@@ -1,5 +1,6 @@
 import { createPostRoute } from '@/utils/openapi-helpers.ts';
 import { ReportSchemas } from '@/modules/emergency/schemas';
+import { authMiddleware } from '@/middlewares';
 
 const createReportRoute = createPostRoute({
   path: '/report',

@@ -59,8 +59,8 @@ const getDistrictHealthTips = async (c: Context) => {
 };
 
 const requireUserId = (c: Context) => {
-  const user = c.get('user') as { id?: number } | undefined;
-  const userId = user?.id;
+  const user = c.get('user') as { userId?: number } | undefined;
+  const userId = user?.userId;
   if (!userId) {
     throw new UnauthorizedError('User is not authenticated');
   }

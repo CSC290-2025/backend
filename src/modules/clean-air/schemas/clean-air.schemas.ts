@@ -4,6 +4,7 @@ import {
   createPostRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 
 const CLEAN_AIR_TAG = ['Clean Air'];
 
@@ -277,6 +278,7 @@ const getFavouriteDistrictsRoute = createGetRoute({
   summary: 'List user favourite Bangkok districts',
   responseSchema: FavouriteDistrictsResponseSchema,
   tags: CLEAN_AIR_TAG,
+  middleware: [authMiddleware],
 });
 
 const addFavouriteDistrictRoute = createPostRoute({
@@ -286,6 +288,7 @@ const addFavouriteDistrictRoute = createPostRoute({
   requestSchema: z.object({}),
   responseSchema: FavouriteDistrictResponseSchema,
   tags: CLEAN_AIR_TAG,
+  middleware: [authMiddleware],
 });
 
 const removeFavouriteDistrictRoute = createDeleteRoute({
@@ -293,6 +296,7 @@ const removeFavouriteDistrictRoute = createDeleteRoute({
   summary: 'Remove a district from favourites',
   params: FavouriteDistrictParamSchema,
   tags: CLEAN_AIR_TAG,
+  middleware: [authMiddleware],
 });
 
 export {
