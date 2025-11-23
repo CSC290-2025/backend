@@ -16,6 +16,8 @@ interface Config {
   metroCardEncryptionKey: string;
   metroCardHashKey: string;
   adminRoleId: number;
+  G11_PUSHER_CHANNEL: string;
+  G11_PUSHER_EVENT: string;
 }
 
 const config: Config = {
@@ -36,6 +38,9 @@ const config: Config = {
   metroCardHashKey: process.env.G11_CARD_HASH_KEY || 'secret-key',
 
   adminRoleId: Number(process.env.ADMIN_ROLE_ID) || 1,
+
+  G11_PUSHER_CHANNEL: process.env.G11_PUSHER_CHANNEL || '',
+  G11_PUSHER_EVENT: process.env.G11_PUSHER_EVENT || '',
 };
 
 export default config;
