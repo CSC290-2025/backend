@@ -17,7 +17,11 @@ type DistrictAggregate = {
 
 type DistricAddDataToArray = Map<string, DistrictAggregate>;
 
-const { ensureBangkokDistrictAddress, createAirQualityRecord } = CleanAirModel;
+const {
+  ensureBangkokDistrictAddress,
+  createAirQualityRecord,
+  hasAirQualityRecord,
+} = CleanAirModel;
 
 const BANGKOK_TIMEZONE = 'Asia/Bangkok';
 const aggregates = new Map<string, DistrictAggregate>();
@@ -182,6 +186,7 @@ const saveDailyAverages = async (
 
     try {
       const locationId = await ensureBangkokDistrictAddress(district);
+      if (await hasAirQualityRecord({ locationId, measuredAt })) continue;
       await createAirQualityRecord({
         locationId,
         pm25: roundTo(pm25Average, 3),
