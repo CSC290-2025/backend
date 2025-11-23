@@ -8,3 +8,9 @@ export async function getApartmentOwnerByApartmentId(c: Context) {
     await ownerService.getApartmentOwnerByApartmentId(apartment_id);
   return successResponse(c, owners, 200);
 }
+
+export async function getUserById(c: Context) {
+  const userId = Number(c.req.param('id'));
+  const user = await ownerService.getUserById(userId);
+  return successResponse(c, user, 200);
+}

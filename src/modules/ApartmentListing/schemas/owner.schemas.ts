@@ -26,8 +26,19 @@ const getApartmentOwnerByApartmentIdRoute = createGetRoute({
   tags: ['APTOwner'],
 });
 
+const findUserByIdRoute = createGetRoute({
+  path: '/users/{id}',
+  summary: 'Find user by ID',
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
+  responseSchema: UserSchema,
+  tags: ['User'],
+});
+
 export const ownerSchemas = {
   ApartmentOwnerSchema,
   UserSchema,
   getApartmentOwnerByApartmentIdRoute,
+  findUserByIdRoute,
 };
