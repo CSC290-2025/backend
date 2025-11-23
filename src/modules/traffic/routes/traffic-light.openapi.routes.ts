@@ -9,6 +9,16 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
     TrafficLightController.getAllStatus
   );
 
+  // SSE: stream traffic light status changes (clients can filter for broken/maintenance)
+  // Register this static route before any dynamic `:id` routes so the literal
+  // path `stream` isn't captured by `:id` and rejected by OpenAPI/Zod validation.
+  app.get('/traffic-lights/stream', TrafficLightController.streamBroken);
+
+  app.openapi(
+    TrafficLightSchemas.getTrafficDataForCalculationRoute,
+    TrafficLightController.getTrafficDataForCalculation
+  );
+
   app.openapi(
     TrafficLightSchemas.getTrafficLightRoute,
     TrafficLightController.getTrafficLight
@@ -23,6 +33,9 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
     TrafficLightSchemas.updateTrafficLightRoute,
     TrafficLightController.updateTrafficLight
   );
+
+  // PATCH route - use normal Hono route (no OpenAPI validation) to allow any body structure
+  app.patch('/traffic-lights/:id', TrafficLightController.patchTrafficLight);
 
   app.openapi(
     TrafficLightSchemas.deleteTrafficLightRoute,
@@ -43,14 +56,4 @@ export const setupTrafficLightRoutes = (app: OpenAPIHono) => {
     TrafficLightSchemas.getTrafficLightsByRoadRoute,
     TrafficLightController.getTrafficLightsByRoad
   );
-
-  /*app.openapi(
-    TrafficLightSchemas.calculateDensityRoute,
-    TrafficLightController.calculateDensity
-  );
-
-  app.openapi(
-    TrafficLightSchemas.updateTimingRoute,
-    TrafficLightController.updateTiming
-  );*/
 };

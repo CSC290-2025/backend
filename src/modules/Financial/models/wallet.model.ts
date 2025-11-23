@@ -21,10 +21,11 @@ const transformWallet = (wallet: wallets): Wallet => ({
 // Wallet operations
 const createWallet = async (
   ownerId: number,
-  data: CreateWalletData
+  data: CreateWalletData,
+  tx?: Prisma.TransactionClient
 ): Promise<Wallet> => {
   try {
-    const wallet = await prisma.wallets.create({
+    const wallet = await (tx ?? prisma).wallets.create({
       data: {
         owner_id: ownerId,
         wallet_type: data.wallet_type,

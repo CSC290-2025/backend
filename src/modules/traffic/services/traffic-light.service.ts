@@ -11,6 +11,8 @@ import type {
   TrafficLightCycleConfig,
 } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
+import { RoadModel, IntersectionModel } from '../models';
+import { emitStatusChange } from '../types';
 
 /**
  * Get traffic light by ID with current status
@@ -109,6 +111,76 @@ const updateTrafficLight = async (
   }
 
   return await TrafficLightModel.update(id, data);
+};
+
+/**
+ * Partially update a traffic light — only allow a fixed set of fields.
+ */
+const partialUpdateTrafficLight = async (
+  id: number,
+  data: Record<string, unknown>
+): Promise<TrafficLight> => {
+  const existing = await TrafficLightModel.findById(id);
+  if (!existing) throw new NotFoundError('Traffic light not found');
+
+  const allowedKeys = [
+    'status',
+    'auto_mode',
+    'location',
+    'density_level',
+    'green_duration',
+    'red_duration',
+  ] as const;
+
+  // Check for disallowed keys
+  const providedKeys = Object.keys(data || {});
+  const disallowedKeys = providedKeys.filter(
+    (key) =>
+      !allowedKeys.includes(key as unknown as (typeof allowedKeys)[number])
+  );
+
+  if (disallowedKeys.length > 0) {
+    throw new ValidationError(
+      `The following fields are not allowed: ${disallowedKeys.join(', ')}. Allowed fields: ${allowedKeys.join(', ')}`
+    );
+  }
+
+  const updates: Partial<UpdateTrafficLightData> = {};
+  for (const key of allowedKeys) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      // @ts-expect-error intentionally allowing any value type for allowed keys
+      updates[key] = data[key];
+    }
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new ValidationError('At least one field must be provided for update');
+  }
+  // Emit status change events when status field changed
+  if (Object.prototype.hasOwnProperty.call(updates, 'status')) {
+    const oldStatus = (existing as any).status ?? null;
+    const newStatus = (updates as any).status ?? null;
+    if (oldStatus !== newStatus) {
+      emitStatusChange(id, oldStatus, newStatus);
+    }
+  }
+
+  // Validate location if provided
+  if (updates.location !== undefined && updates.location !== null) {
+    const [longitude, latitude] = updates.location.coordinates;
+    if (latitude < -90 || latitude > 90) {
+      throw new ValidationError('Latitude must be between -90 and 90');
+    }
+    if (longitude < -180 || longitude > 180) {
+      throw new ValidationError('Longitude must be between -180 and 180');
+    }
+  }
+
+  const updated = await TrafficLightModel.update(
+    id,
+    updates as UpdateTrafficLightData
+  );
+  return updated;
 };
 
 /**
@@ -340,6 +412,92 @@ const getAllStatus = async (): Promise<{
   };
 };
 
+/**
+ * Get traffic data tailored for calculation use.
+ * Omits sensitive fields and expands `road_id` into a road object
+ * with start/end intersection locations (only `location`).
+ */
+const getTrafficDataForCalculation = async (
+  id: number
+): Promise<{
+  id: number;
+  intersection_id: number | null;
+  road: {
+    id: number;
+    start_intersection_id: number | null;
+    end_intersection_id: number | null;
+    length_meters: number | null;
+    start_intersection?: {
+      location: { type: 'Point'; coordinates: [number, number] } | null;
+    } | null;
+    end_intersection?: {
+      location: { type: 'Point'; coordinates: [number, number] } | null;
+    } | null;
+  } | null;
+  status: number | null;
+  statusLabel?: string;
+  intersection?: number | null;
+  current_color?: never;
+  location: { type: 'Point'; coordinates: [number, number] } | null;
+  density_level: number;
+  auto_mode: boolean;
+  green_duration: number | null;
+  red_duration: number | null;
+  last_updated: string | null;
+}> => {
+  const tl = await TrafficLightModel.findById(id);
+  if (!tl) throw new NotFoundError('Traffic light not found');
+
+  // Build base result copying allowed fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: any = {
+    id: tl.id,
+    intersection_id: tl.intersection_id,
+    road: null,
+    status: tl.status,
+    location: tl.location,
+    density_level: tl.density_level,
+    auto_mode: tl.auto_mode,
+    green_duration: tl.green_duration,
+    red_duration: tl.red_duration,
+    last_updated: tl.last_updated,
+  };
+
+  if (tl.road_id) {
+    const road = await RoadModel.findById(tl.road_id);
+    if (road) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (result as any).road = {
+        id: road.id,
+        start_intersection_id: road.start_intersection_id ?? null,
+        end_intersection_id: road.end_intersection_id ?? null,
+        length_meters: road.length_meters ?? null,
+      };
+
+      // Fetch intersection locations and include only location
+      if (road.start_intersection_id) {
+        const startInt = await IntersectionModel.findById(
+          road.start_intersection_id
+        );
+        result.road.start_intersection = {
+          location: startInt ? startInt.location : null,
+        };
+      }
+
+      if (road.end_intersection_id) {
+        const endInt = await IntersectionModel.findById(
+          road.end_intersection_id
+        );
+        result.road.end_intersection = {
+          location: endInt ? endInt.location : null,
+        };
+      }
+    }
+  }
+
+  return result;
+};
+
 export {
   getTrafficLightById,
   createTrafficLight,
@@ -353,4 +511,6 @@ export {
   updateTrafficLightColor,
   getIntersectionCoordinatedTiming,
   getAllStatus,
+  getTrafficDataForCalculation,
+  partialUpdateTrafficLight,
 };
