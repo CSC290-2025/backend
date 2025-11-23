@@ -15,6 +15,7 @@ import {
   PaymentNotConfirmedError,
 } from '@/errors';
 import prisma from '@/config/client';
+import config from '@/config/env';
 import { Decimal } from '@prisma/client/runtime/library';
 import { findWalletById, WalletBalanceTopup } from './wallet.model';
 import { triggerEvent } from '../utils/pusher';
@@ -264,8 +265,9 @@ const updateTransactionDescription = async (
         // Inform connected clients using Pusher so frontend subscribed to our
         // Pusher channel receive the confirmation in realtime.
         // Use environment-configurable defaults to keep things simple.
-        const CHANNEL = process.env.G11_PUSHER_CHANNEL!;
-        const EVENT = process.env.G11_PUSHER_EVENT!;
+        // Constants have been moved to src/config. check src/config
+        const CHANNEL = config.G11_PUSHER_CHANNEL;
+        const EVENT = config.G11_PUSHER_EVENT;
         // Trigger in background, don't fail the whole transaction if Pusher errors.
         triggerEvent(CHANNEL, EVENT, {
           ref1: reference1,
