@@ -143,18 +143,20 @@ export async function createApartment(data: createApartmentData) {
         },
       });
 
-      // Find role that contains 'apartment' or 'apt' in the name
+      // Find role that contains 'apartment'
       const roleResult = await tx.roles.findFirst({
         where: {
-          OR: [{ role_name: { contains: 'apartment', mode: 'insensitive' } }],
+          role_name: { contains: 'apartment', mode: 'insensitive' },
         },
       });
-
-      // Update user role if a matching role is found
       if (roleResult) {
         await tx.users.update({
-          where: { id: userId },
-          data: { role_id: roleResult.id },
+          where: {
+            id: userId,
+          },
+          data: {
+            role_id: roleResult.id,
+          },
         });
       }
 
