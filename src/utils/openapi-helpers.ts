@@ -51,6 +51,7 @@ const createGetRoute = <
   query?: TQuery;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'get',
@@ -58,6 +59,7 @@ const createGetRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
       ...(config.params && { params: config.params }),
       ...(config.query && { query: config.query }),
@@ -69,9 +71,9 @@ const createGetRoute = <
   });
 
 const createPostRoute = <
-  TParams extends z.ZodObject<any>,
-  TRequest extends z.ZodTypeAny,
-  TResponse extends z.ZodTypeAny,
+  TParams extends z.ZodObject<any> | undefined = undefined,
+  TRequest extends z.ZodTypeAny = z.ZodTypeAny,
+  TResponse extends z.ZodTypeAny = z.ZodTypeAny,
 >(config: {
   path: string;
   summary: string;
@@ -80,6 +82,7 @@ const createPostRoute = <
   params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'post',
@@ -87,8 +90,9 @@ const createPostRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
-      params: config.params,
+      ...(config.params && { params: config.params }),
       body: {
         content: {
           'application/json': { schema: config.requestSchema },
@@ -112,9 +116,10 @@ const createPutRoute = <
   summary: string;
   requestSchema: TRequest;
   responseSchema: TResponse;
-  params: TParams;
+  params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'put',
@@ -122,8 +127,9 @@ const createPutRoute = <
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
-      params: config.params,
+      ...(config.params && { params: config.params }),
       body: {
         content: {
           'application/json': { schema: config.requestSchema },
@@ -140,9 +146,10 @@ const createPutRoute = <
 const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
   path: string;
   summary: string;
-  params: TParams;
+  params?: TParams;
   tags?: string[];
   middleware?: MiddlewareHandler[];
+  operationId?: string;
 }) =>
   createRoute({
     method: 'delete',
@@ -150,8 +157,9 @@ const createDeleteRoute = <TParams extends z.ZodObject<any>>(config: {
     summary: config.summary,
     ...(config.tags && { tags: config.tags }),
     ...(config.middleware && { middleware: config.middleware }),
+    ...(config.operationId && { operationId: config.operationId }),
     request: {
-      params: config.params,
+      ...(config.params && { params: config.params }),
     },
     responses: {
       200: successResponse(z.null(), 'Deleted'),

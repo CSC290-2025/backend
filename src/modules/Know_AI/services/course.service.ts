@@ -1,7 +1,12 @@
 import { CourseModel } from '../models';
 import { CourseVideoModel } from '../models';
 import { OnsiteSessionModel } from '../models';
-import type { CreateCourse, UpdateCourse } from '../types';
+import type {
+  CreateCourse,
+  UpdateCourse,
+  CreateCourseVideo,
+  CreateOnsiteSession,
+} from '../types';
 import prisma from '@/config/client';
 
 const createCourse = async (data: CreateCourse) => {
@@ -49,51 +54,66 @@ const getAllCourse = async () => CourseModel.getAllCourse();
 const getCourse = async (id: number) => CourseModel.getCourse(id);
 const getCourseByType = async (type: string) =>
   CourseModel.getCourseByType(type);
-
-// still fix bug in update
 const updateCourse = async (id: number, data: UpdateCourse) => {
+  return await CourseModel.updateCourse(id, data);
+};
+
+const updateCourseVideos = async (
+  courseId: number,
+  videos: CreateCourseVideo[]
+) => {
   return await prisma.$transaction(async (tx) => {
-    const course = await CourseModel.updateCourse(id, data);
-    await CourseVideoModel.deleteCourseVideosByCourseId(id);
-    await OnsiteSessionModel.deleteOnsiteSessionsByCourseId(id);
+    await CourseVideoModel.deleteCourseVideosByCourseId(courseId, tx);
+    if (videos.length > 0) {
+      return await CourseVideoModel.createMultipleCourseVideos(
+        videos.map((v) => ({ ...v, course_id: courseId })),
+        tx
+      );
+    }
+    return [];
+  });
+};
 
-    if (
-      (data.course_type === 'online' ||
-        data.course_type === 'online_and_onsite') &&
-      data.course_videos?.length
-    ) {
-      for (const video of data.course_videos) {
-        await CourseVideoModel.createCourseVideo({
-          ...video,
-          course_id: course.id,
-        });
-      }
+const updateOnsiteSessions = async (
+  courseId: number,
+  sessions: CreateOnsiteSession[]
+) => {
+  return await prisma.$transaction(async (tx) => {
+    const course = await tx.courses.findUnique({
+      where: { id: courseId },
+      select: { course_type: true },
+    });
+
+    if (!course) {
+      throw new Error(`Course with id ${courseId} not found`);
     }
 
-    if (
-      (data.course_type === 'onsite' ||
-        data.course_type === 'online_and_onsite') &&
-      data.onsite_sessions?.length
-    ) {
-      for (const session of data.onsite_sessions) {
-        if (session.address_id) {
-          const addressExists = await tx.addresses.findUnique({
-            where: { id: session.address_id },
-          });
-          if (!addressExists) {
-            throw new Error(
-              `Address with id ${session.address_id} does not exist`
-            );
-          }
+    if (course.course_type === 'online') {
+      throw new Error('Cannot add onsite sessions to online-only course');
+    }
+
+    for (const session of sessions) {
+      if (session.address_id) {
+        const addressExists = await tx.addresses.findUnique({
+          where: { id: session.address_id },
+        });
+        if (!addressExists) {
+          throw new Error(
+            `Address with id ${session.address_id} does not exist`
+          );
         }
-        await OnsiteSessionModel.createOnsiteSession({
-          ...session,
-          course_id: course.id,
-        });
       }
     }
 
-    return course;
+    await OnsiteSessionModel.deleteOnsiteSessionsByCourseId(courseId, tx);
+
+    if (sessions.length > 0) {
+      return await OnsiteSessionModel.createMultipleOnsiteSessions(
+        sessions.map((s) => ({ ...s, course_id: courseId })),
+        tx
+      );
+    }
+    return [];
   });
 };
 
@@ -111,5 +131,7 @@ export {
   getCourse,
   getCourseByType,
   updateCourse,
+  updateCourseVideos,
+  updateOnsiteSessions,
   deleteCourse,
 };

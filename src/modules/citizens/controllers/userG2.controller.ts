@@ -48,16 +48,29 @@ const updatePersonalInfo = async (c: Context) => {
 const updateUserPersonalData = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
   const body = await c.req.json();
-  let addressData = body.address;
+
+  const personalData = {
+    phone: body.user.phone,
+    id_card_number: body.user.user_profile.id_card_number,
+    first_name: body.user.user_profile.first_name,
+    middle_name: body.user.user_profile.middle_name,
+    last_name: body.user.user_profile.last_name,
+    ethnicity: body.user.user_profile.ethnicity,
+    nationality: body.user.user_profile.nationality,
+    religion: body.user.user_profile.religion,
+  };
+
+  let addressData = body.user.address;
   if (Array.isArray(addressData)) {
     addressData = addressData[0];
   }
 
   const updateUser = await UserService.updateUserPersonalData(
     id,
-    body.user,
+    personalData,
     addressData
   );
+
   return successResponse(c, { updateUser }, 200, 'User update successfully');
 };
 
@@ -176,6 +189,82 @@ const getUsersByRole = async (c: Context) => {
   );
 };
 
+const getUserRoles = async (c: Context) => {
+  const id = parseInt(c.req.param('id'));
+  const userRoles = await UserService.getUserRoles(id);
+
+  const roleCount = userRoles.roles.length;
+
+  return successResponse(
+    c,
+    userRoles,
+    200,
+    `Fetched ${roleCount} ${roleCount === 1 ? 'role' : 'roles'} for user ID ${id}`
+  );
+};
+
+const createUserRole = async (c: Context) => {
+  const body = await c.req.json();
+
+  const userRole = await UserService.createUserRole(body);
+
+  return successResponse(c, userRole, 201, 'User role created successfully');
+};
+
+const getCurrentUserProfile = async (c: Context) => {
+  const user = c.get('user');
+  const userProfile = await UserService.getUserProflie(user.userId);
+  return successResponse(
+    c,
+    { user: userProfile },
+    200,
+    'User profile fetched successfully'
+  );
+};
+
+const updateCurrentUserPersonal = async (c: Context) => {
+  const user = c.get('user');
+  const body = await c.req.json();
+  const updatedUser = await UserService.updateUserPersonalData(
+    user.userId,
+    body.user,
+    body.address
+  );
+  return successResponse(
+    c,
+    { updateUser: updatedUser },
+    200,
+    'Personal data updated successfully'
+  );
+};
+
+const updateCurrentUserHealth = async (c: Context) => {
+  const user = c.get('user');
+  const body = await c.req.json();
+  const updatedUser = await UserService.updateUserHealthData(user.userId, body);
+  return successResponse(
+    c,
+    { updateUser: updatedUser },
+    200,
+    'Health data updated successfully'
+  );
+};
+
+const updateCurrentUserAccount = async (c: Context) => {
+  const user = c.get('user');
+  const body = await c.req.json();
+  const updatedUser = await UserService.updateUserAccountData(
+    user.userId,
+    body
+  );
+  return successResponse(
+    c,
+    { updateUser: updatedUser },
+    200,
+    'Account data updated successfully'
+  );
+};
+
 export {
   getUser,
   updatePersonalInfo,
@@ -192,4 +281,10 @@ export {
   updateUserPersonalData,
   updateUserHealthData,
   updateUserAccountData,
+  getUserRoles,
+  createUserRole,
+  getCurrentUserProfile,
+  updateCurrentUserPersonal,
+  updateCurrentUserHealth,
+  updateCurrentUserAccount,
 };

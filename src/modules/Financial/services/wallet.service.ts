@@ -1,6 +1,11 @@
 import { NotFoundError, ValidationError } from '@/errors';
 import { WalletModel } from '../models';
-import type { Wallet, CreateWalletData, UpdateWalletData } from '../types';
+import type {
+  Wallet,
+  CreateWalletData,
+  UpdateWalletData,
+  OrganizationType,
+} from '../types';
 
 const getWalletById = async (id: number): Promise<Wallet> => {
   const wallet = await WalletModel.findWalletById(id);
@@ -23,7 +28,7 @@ const transferFunds = async (
   fromUserId: number,
   toUserId: number,
   amount: number
-): Promise<{ status: string }> => {
+): Promise<{ status: string; transactionId?: number }> => {
   if (amount <= 0) {
     throw new ValidationError('Transfer amount must be positive');
   }
@@ -52,9 +57,14 @@ const transferFunds = async (
       'Recipient wallet is not active. Suspended wallets cannot receive funds.'
     );
   }
-  await WalletModel.atomicTransferFunds(fromWallet.id, toWallet.id, amount);
+  const result = await WalletModel.atomicTransferFunds(
+    fromWallet.id,
+    toWallet.id,
+    amount
+  );
 
-  return { status: 'success' };
+  // Return a transaction id (transfer_out) as the canonical id for tracking
+  return { status: 'success', transactionId: result.fromTransactionId };
 };
 
 const updateWallet = async (
@@ -87,6 +97,15 @@ const topUpBalance = async (
   return await WalletModel.WalletBalanceTopup(walletId, amount);
 };
 
+const getOrganizationBalance = async (
+  organizationType: OrganizationType
+): Promise<number> => {
+  const wallet =
+    await WalletModel.findWalletByOrganizationType(organizationType);
+
+  return Number(wallet?.balance);
+};
+
 export {
   getWalletById,
   createWallet,
@@ -94,4 +113,5 @@ export {
   getUserWallets,
   topUpBalance,
   transferFunds,
+  getOrganizationBalance,
 };

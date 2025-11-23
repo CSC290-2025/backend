@@ -1,4 +1,11 @@
 import { z, createRoute } from '@hono/zod-openapi';
+//import { authMiddleware, adminMiddleware } from '@/middlewares';
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+  createDeleteRoute,
+} from '../../../utils/openapi-helpers';
 
 const EventSchema = z
   .object({
@@ -14,22 +21,41 @@ const EventSchema = z
     address_id: z.number().int().nullable(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
-    event_tag_id: z.number().int().nullable(),
   })
   .openapi('Event');
+
+const OrganizationSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  phone_number: z.string().min(1),
+});
+
+const AddressSchema = z.object({
+  address_line: z.string().optional(),
+  province: z.string().optional(),
+  district: z.string().optional(),
+  subdistrict: z.string().optional(),
+  postal_code: z.string().optional(),
+});
 
 const CreateEventSchema = z
   .object({
     host_user_id: z.number().int().positive(),
     title: z.string().min(1),
     description: z.string().optional(),
-    image_url: z.string().optional(),
     total_seats: z.number().int().min(0).optional(),
-    start_at: z.string().datetime({ message: 'Must be ISO date-time' }),
-    end_at: z.string().datetime({ message: 'Must be ISO date-time' }),
-    address_id: z.number().int().positive().optional(),
+    start_date: z.string().date(),
+    start_time: z.string().time(),
+    end_date: z.string().date(),
+    end_time: z.string().time(),
+    // Can provide either organization object or organization_id
+    organization: OrganizationSchema.optional(),
     organization_id: z.number().int().positive().optional(),
-    event_tag_id: z.number().int().positive().optional(),
+    // Can provide either address object or address_id
+    address: AddressSchema.optional(),
+    address_id: z.number().int().positive().optional(),
+    // Event tag name
+    event_tag_name: z.string().optional(),
   })
   .openapi('CreateEvent');
 
@@ -38,13 +64,16 @@ const UpdateEventSchema = z
     host_user_id: z.number().int().positive().optional(),
     title: z.string().min(1).optional(),
     description: z.string().optional().nullable(),
-    image_url: z.string().optional().nullable(),
     total_seats: z.number().int().min(0).optional(),
-    start_at: z.string().datetime().optional(),
-    end_at: z.string().datetime().optional(),
-    address_id: z.number().int().positive().optional().nullable(),
-    organization_id: z.number().int().positive().optional().nullable(),
-    event_tag_id: z.number().int().positive().optional().nullable(),
+    start_date: z.string().date().optional(),
+    start_time: z.string().time().optional(),
+    end_date: z.string().date().optional(),
+    end_time: z.string().time().optional(),
+    organization: OrganizationSchema.optional(),
+    organization_id: z.number().int().positive().optional(),
+    address: AddressSchema.optional(),
+    address_id: z.number().int().positive().optional(),
+    event_tag_name: z.string().optional(),
   })
   .openapi('UpdateEvent');
 
@@ -58,11 +87,6 @@ const EventListQuery = z
   .object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
-    q: z.string().max(255).optional(),
-    organization_id: z.coerce.number().int().optional(),
-    event_tag_id: z.coerce.number().int().optional(),
-    from: z.string().datetime().optional(),
-    to: z.string().datetime().optional(),
   })
   .openapi('EventListQuery');
 
@@ -107,21 +131,31 @@ const EventSchemas = {
     tags: ['Events'],
   }),
 
-  createEventRoute: createRoute({
-    method: 'post',
+  // createEventRoute: createRoute({
+  //   method: 'post',
+  //   path: '/events',
+  //   request: {
+  //     body: { content: { 'application/json': { schema: CreateEventSchema } } },
+  //   },
+  //   responses: {
+  //     201: {
+  //       description: 'Created',
+  //       content: {
+  //         'application/json': { schema: z.object({ event: EventSchema }) },
+  //       },
+  //     },
+  //   },
+  //   tags: ['Events'],
+  //   //middleware: [authMiddleware, adminMiddleware],
+  // }),
+
+  createEventRoute: createPostRoute({
     path: '/events',
-    request: {
-      body: { content: { 'application/json': { schema: CreateEventSchema } } },
-    },
-    responses: {
-      201: {
-        description: 'Created',
-        content: {
-          'application/json': { schema: z.object({ event: EventSchema }) },
-        },
-      },
-    },
+    summary: 'post event',
+    requestSchema: CreateEventSchema.partial(),
+    responseSchema: z.array(CreateEventSchema),
     tags: ['Events'],
+    // middleware: [authMiddleware, adminMiddleware],
   }),
 
   updateEventRoute: createRoute({
@@ -140,6 +174,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
+    //middleware: [authMiddleware, adminMiddleware],
   }),
 
   deleteEventRoute: createRoute({
@@ -157,6 +192,7 @@ const EventSchemas = {
       },
     },
     tags: ['Events'],
+    // middleware: [authMiddleware, adminMiddleware],
   }),
 
   dayEventCountRoute: createRoute({

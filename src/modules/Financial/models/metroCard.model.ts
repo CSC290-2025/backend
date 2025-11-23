@@ -1,10 +1,15 @@
 import prisma from '@/config/client';
-import type { metro_cards } from '@/generated/prisma';
+import type { metro_cards, card_transactions } from '@/generated/prisma';
 import type { MetroCard, UpdateMetroCardData } from '../types';
 import { customAlphabet } from 'nanoid';
 import { handlePrismaError } from '@/errors';
 import type { Prisma } from '@prisma/client/scripts/default-index';
-import { decrypt, encrypt, maskCardNumber19 } from '../utils/crypto';
+import {
+  decrypt,
+  encrypt,
+  hashCardNumber,
+  maskCardNumber19,
+} from '@/modules/Financial/utils';
 
 //Helper
 export const generateMetroCard = (user_id: number) => {
@@ -34,13 +39,12 @@ const transformMetroCard = (
 const createMetroCard = async (user_id: number): Promise<MetroCard> => {
   const card = generateMetroCard(user_id);
 
-  const encrypted = encrypt(card);
-
   try {
     const metroCard = await prisma.metro_cards.create({
       data: {
         user_id: user_id,
-        card_number: encrypted,
+        card_number: encrypt(card),
+        card_hash: hashCardNumber(card),
         balance: 0,
       },
     });
@@ -66,6 +70,19 @@ const findMetroCardById = async (id: number): Promise<MetroCard | null> => {
   try {
     const metroCard = await prisma.metro_cards.findUnique({
       where: { id },
+    });
+    return metroCard ? transformMetroCard(metroCard, false) : null;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const findMetroCardByHash = async (
+  cardHash: string
+): Promise<MetroCard | null> => {
+  try {
+    const metroCard = await prisma.metro_cards.findUnique({
+      where: { card_hash: cardHash },
     });
     return metroCard ? transformMetroCard(metroCard, false) : null;
   } catch (error) {
@@ -124,11 +141,38 @@ const deleteMetroCard = async (id: number): Promise<void> => {
   }
 };
 
+const findCardTransactionById = async (
+  id: number
+): Promise<card_transactions> => {
+  try {
+    const cardTransaction = await prisma.card_transactions.findUniqueOrThrow({
+      where: { id },
+    });
+    return cardTransaction;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const findAllCardTransactions = async (): Promise<card_transactions[]> => {
+  try {
+    const transactions = await prisma.card_transactions.findMany({
+      orderBy: { created_at: 'desc' },
+    });
+    return transactions;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createMetroCard,
   findMetroCardsByUserId,
   findMetroCardById,
+  findMetroCardByHash,
   updateMetroCard,
   updateMetroCardBalance,
   deleteMetroCard,
+  findCardTransactionById,
+  findAllCardTransactions,
 };

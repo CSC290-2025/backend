@@ -1,33 +1,6 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type {
-  WeatherData,
-  CreateWeatherData,
-  UpdateWeatherData,
-} from '../types';
-
-const normalizeCreateData = (data: CreateWeatherData) => {
-  return {
-    ...data,
-  };
-};
-
-const normalizeUpdateData = (data: UpdateWeatherData) => {
-  return {
-    ...data,
-  };
-};
-
-const findById = async (id: number): Promise<WeatherData | null> => {
-  try {
-    const weather = await prisma.weather_data.findUnique({
-      where: { id },
-    });
-    return weather as unknown as WeatherData | null;
-  } catch (error) {
-    handlePrismaError(error);
-  }
-};
+import type { WeatherData } from '../types';
 
 const findAll = async (): Promise<WeatherData[]> => {
   try {
@@ -36,6 +9,7 @@ const findAll = async (): Promise<WeatherData[]> => {
     });
     return items as unknown as WeatherData[];
   } catch (error) {
+    console.error('Prisma error in findAll:', error);
     handlePrismaError(error);
   }
 };
@@ -48,44 +22,81 @@ const findByLocationId = async (locationId: number): Promise<WeatherData[]> => {
     });
     return items as unknown as WeatherData[];
   } catch (error) {
+    console.error('Prisma error in findByLocationId:', error);
     handlePrismaError(error);
   }
 };
 
-const create = async (data: CreateWeatherData): Promise<WeatherData> => {
+const findByDate = async (date: string): Promise<WeatherData[]> => {
   try {
-    const payload = normalizeCreateData(data);
+    const startOfDay = new Date(`${date}T00:00:00Z`);
+    const endOfDay = new Date(`${date}T23:59:59Z`);
+    const items = await prisma.weather_data.findMany({
+      where: {
+        created_at: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+    return items as unknown as WeatherData[];
+  } catch (error) {
+    console.error('Prisma error in findByDate:', error);
+    handlePrismaError(error);
+  }
+};
+
+const findByDateRange = async (
+  fromDate: string,
+  toDate: string
+): Promise<WeatherData[]> => {
+  try {
+    const startOfDay = new Date(`${fromDate}T00:00:00Z`);
+    const endOfDay = new Date(`${toDate}T23:59:59Z`);
+    const items = await prisma.weather_data.findMany({
+      where: {
+        created_at: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+    return items as unknown as WeatherData[];
+  } catch (error) {
+    console.error('Prisma error in findByDateRange:', error);
+    handlePrismaError(error);
+  }
+};
+
+const create = async (data: any): Promise<WeatherData> => {
+  try {
     const weather = await prisma.weather_data.create({
-      data: payload,
+      data,
     });
     return weather as unknown as WeatherData;
   } catch (error) {
+    console.error('Prisma error in create:', error);
     handlePrismaError(error);
   }
 };
 
-const update = async (
-  id: number,
-  data: UpdateWeatherData
-): Promise<WeatherData> => {
+const deleteByDate = async (date: string): Promise<number> => {
   try {
-    const payload = normalizeUpdateData(data);
-    const weather = await prisma.weather_data.update({
-      where: { id },
-      data: payload,
+    const startOfDay = new Date(`${date}T00:00:00Z`);
+    const endOfDay = new Date(`${date}T23:59:59Z`);
+    const result = await prisma.weather_data.deleteMany({
+      where: {
+        created_at: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
     });
-    return weather as unknown as WeatherData;
+    return result.count;
   } catch (error) {
-    handlePrismaError(error);
-  }
-};
-
-const deleteById = async (id: number): Promise<void> => {
-  try {
-    await prisma.weather_data.delete({
-      where: { id },
-    });
-  } catch (error) {
+    console.error('Prisma error in deleteByDate:', error);
     handlePrismaError(error);
   }
 };
@@ -95,16 +106,17 @@ const deleteAll = async (): Promise<number> => {
     const result = await prisma.weather_data.deleteMany({});
     return result.count;
   } catch (error) {
+    console.error('Prisma error in deleteAll:', error);
     handlePrismaError(error);
   }
 };
 
 export {
-  findById,
   findAll,
   findByLocationId,
+  findByDate,
+  findByDateRange,
   create,
-  update,
-  deleteById,
+  deleteByDate,
   deleteAll,
 };
