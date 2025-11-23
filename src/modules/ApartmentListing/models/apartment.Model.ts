@@ -143,11 +143,20 @@ export async function createApartment(data: createApartmentData) {
         },
       });
 
-      // Update user role separately
-      await tx.users.update({
-        where: { id: userId },
-        data: { role_id: 23 },
+      // Find role that contains 'apartment' or 'apt' in the name
+      const roleResult = await tx.roles.findFirst({
+        where: {
+          OR: [{ role_name: { contains: 'apartment', mode: 'insensitive' } }],
+        },
       });
+
+      // Update user role if a matching role is found
+      if (roleResult) {
+        await tx.users.update({
+          where: { id: userId },
+          data: { role_id: roleResult.id },
+        });
+      }
 
       return apartment;
     });

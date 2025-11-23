@@ -7,7 +7,6 @@ const setupAPTOwnerRoutes = (app: OpenAPIHono) => {
     ownerSchemas.getApartmentOwnerByApartmentIdRoute,
     ownerController.getApartmentOwnerByApartmentId
   );
-  app.openapi(ownerSchemas.getAPTOwnerRoute, ownerController.getOwnerRole);
 };
 
 export { setupAPTOwnerRoutes };

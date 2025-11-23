@@ -8,8 +8,4 @@ const getApartmentOwnerByApartmentId = async (apartment_id: number) => {
   return owners;
 };
 
-const getOwnerRole = async () => {
-  const roles = await ownerModel.getOwnerRole();
-  return roles;
-};
-export { getApartmentOwnerByApartmentId, getOwnerRole };
+export { getApartmentOwnerByApartmentId };

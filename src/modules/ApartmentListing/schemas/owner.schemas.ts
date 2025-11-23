@@ -16,13 +16,6 @@ const UserSchema = z.object({
   created_at: z.string(),
 });
 
-const getAPTOwnerRoute = createGetRoute({
-  path: '/users/roles/apartment-owners',
-  summary: 'Get all apartment owners',
-  responseSchema: z.array(UserSchema),
-  tags: ['APTOwner'],
-});
-
 const getApartmentOwnerByApartmentIdRoute = createGetRoute({
   path: '/apartments/{id}/owners',
   summary: 'Get apartment owners by apartment ID',
@@ -36,6 +29,5 @@ const getApartmentOwnerByApartmentIdRoute = createGetRoute({
 export const ownerSchemas = {
   ApartmentOwnerSchema,
   UserSchema,
-  getAPTOwnerRoute,
   getApartmentOwnerByApartmentIdRoute,
 };
