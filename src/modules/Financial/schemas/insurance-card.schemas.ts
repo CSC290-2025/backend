@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { createRoute } from '@hono/zod-openapi';
-import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers';
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+} from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 
 // Base schema
 const InsuranceCardSchema = z.object({
@@ -13,13 +18,38 @@ const InsuranceCardSchema = z.object({
   updated_at: z.date(),
 });
 
-const CreateInsuranceCardSchema = z.object({
-  user_id: z.number().positive('User ID must be positive'),
-});
+const CreateInsuranceCardSchema = z.object({});
 
 const TopUpInsuranceCardSchema = z.object({
+  cardNumber: z.string(),
   wallet_id: z.number().positive('Wallet ID must be positive'),
   amount: z.number().positive('Amount must be positive'),
+});
+
+const UpdateInsuranceCardSchema = z.object({
+  status: z.enum(['active', 'suspended']).optional(),
+});
+
+// Response schemas
+const GetInsuranceCardResponseSchema = z.object({
+  card: InsuranceCardSchema,
+});
+
+const GetInsuranceCardsResponseSchema = z.object({
+  cards: z.array(InsuranceCardSchema),
+});
+
+const CreateInsuranceCardResponseSchema = z.object({
+  card: InsuranceCardSchema,
+});
+
+const TopUpInsuranceCardResponseSchema = z.object({
+  card: InsuranceCardSchema,
+  transaction_id: z.number(),
+});
+
+const UpdateInsuranceCardResponseSchema = z.object({
+  card: InsuranceCardSchema,
 });
 
 // Parameter schemas
@@ -27,8 +57,12 @@ const UserIdParam = z.object({
   userId: z.coerce.number(),
 });
 
-const CardIdParam = z.object({
-  cardId: z.coerce.number(),
+const InsuranceCardIdParam = z.object({
+  insuranceCardId: z.coerce.number(),
+});
+
+const CardNumberParam = z.object({
+  cardNumber: z.string(),
 });
 
 // OpenAPI routes
@@ -36,52 +70,86 @@ const createInsuranceCardRoute = createPostRoute({
   path: '/insurance-cards',
   summary: 'Create new insurance card',
   requestSchema: CreateInsuranceCardSchema,
-  responseSchema: z.object({
-    card: InsuranceCardSchema,
-  }),
+  responseSchema: InsuranceCardSchema,
   tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useCreateInsuranceCard',
 });
 
-const getUserInsuranceCardRoute = createGetRoute({
-  path: '/insurance-cards/user/{userId}',
-  summary: 'Get user insurance card',
+const getMeInsuranceCardsRoute = createGetRoute({
+  path: '/insurance-cards/me',
+  summary: 'Get my insurance cards',
   responseSchema: z.object({
-    card: InsuranceCardSchema,
+    insuranceCards: z.array(InsuranceCardSchema),
   }),
-  params: UserIdParam,
   tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useGetMyInsuranceCards',
 });
 
 const getInsuranceCardRoute = createGetRoute({
-  path: '/insurance-cards/{cardId}',
+  path: '/insurance-cards/{insuranceCardId}',
   summary: 'Get insurance card by ID',
-  responseSchema: z.object({
-    card: InsuranceCardSchema,
-  }),
-  params: CardIdParam,
+  responseSchema: InsuranceCardSchema,
+  params: InsuranceCardIdParam,
   tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useGetInsuranceCardById',
 });
 
 const topUpInsuranceCardRoute = createPostRoute({
-  path: '/insurance-cards/{cardId}/top-up',
+  path: '/insurance-cards/top-up',
   summary: 'Top up insurance card from wallet',
   requestSchema: TopUpInsuranceCardSchema,
   responseSchema: z.object({
-    card: InsuranceCardSchema,
+    insuranceCard: InsuranceCardSchema,
     transaction_id: z.number(),
   }),
-  params: CardIdParam,
   tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useTopUpInsuranceCard',
+});
+
+const getUserInsuranceCardsRoute = createGetRoute({
+  path: '/insurance-cards/user/{userId}',
+  summary: 'Get user insurance cards',
+  responseSchema: z.object({
+    insuranceCards: z.array(InsuranceCardSchema),
+  }),
+  params: UserIdParam,
+  tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useGetUserInsuranceCards',
+});
+
+const updateInsuranceCardRoute = createPutRoute({
+  path: '/insurance-cards/{insuranceCardId}',
+  summary: 'Update insurance card',
+  requestSchema: UpdateInsuranceCardSchema,
+  responseSchema: InsuranceCardSchema,
+  params: InsuranceCardIdParam,
+  tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useUpdateInsuranceCard',
 });
 
 export const InsuranceCardSchemas = {
   InsuranceCardSchema,
   CreateInsuranceCardSchema,
   TopUpInsuranceCardSchema,
+  UpdateInsuranceCardSchema,
+  GetInsuranceCardResponseSchema,
+  GetInsuranceCardsResponseSchema,
+  CreateInsuranceCardResponseSchema,
+  TopUpInsuranceCardResponseSchema,
+  UpdateInsuranceCardResponseSchema,
   UserIdParam,
-  CardIdParam,
+  InsuranceCardIdParam,
+  CardNumberParam,
   createInsuranceCardRoute,
-  getUserInsuranceCardRoute,
+  getMeInsuranceCardsRoute,
   getInsuranceCardRoute,
   topUpInsuranceCardRoute,
+  getUserInsuranceCardsRoute,
+  updateInsuranceCardRoute,
 };

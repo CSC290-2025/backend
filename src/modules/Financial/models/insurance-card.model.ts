@@ -1,7 +1,7 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { insurance_cards } from '@/generated/prisma';
-import type { InsuranceCard, CreateInsuranceCardData } from '../types';
+import type { InsuranceCard } from '../types';
 
 // Helper to transform Prisma model to app type
 const transformInsuranceCard = (card: insurance_cards): InsuranceCard => ({
@@ -20,15 +20,13 @@ const generateCardNumber = (userId: number): string => {
 };
 
 // Insurance card operations
-const createCard = async (
-  data: CreateInsuranceCardData
-): Promise<InsuranceCard> => {
+const createCard = async (userId: number): Promise<InsuranceCard> => {
   try {
-    const cardNumber = generateCardNumber(data.user_id);
+    const cardNumber = generateCardNumber(userId);
 
     const card = await prisma.insurance_cards.create({
       data: {
-        user_id: data.user_id,
+        user_id: userId,
         card_number: cardNumber,
         balance: 0,
         status: 'active',
@@ -76,6 +74,19 @@ const findCardById = async (id: number): Promise<InsuranceCard | null> => {
   }
 };
 
+const findCardByCardNumber = async (
+  cardNumber: string
+): Promise<InsuranceCard | null> => {
+  try {
+    const card = await prisma.insurance_cards.findUnique({
+      where: { card_number: cardNumber },
+    });
+    return card ? transformInsuranceCard(card) : null;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const updateCardBalance = async (
   id: number,
   balance: number
@@ -94,10 +105,30 @@ const updateCardBalance = async (
   }
 };
 
+const updateCard = async (
+  id: number,
+  data: { status?: 'active' | 'suspended' }
+): Promise<InsuranceCard> => {
+  try {
+    const card = await prisma.insurance_cards.update({
+      where: { id },
+      data: {
+        ...data,
+        updated_at: new Date(),
+      },
+    });
+    return transformInsuranceCard(card);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createCard,
   findCardByUserId,
   findCardsByUserId,
   findCardById,
+  findCardByCardNumber,
   updateCardBalance,
+  updateCard,
 };
