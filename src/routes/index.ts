@@ -20,6 +20,7 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
+// Citizen
 import {
   setupCitizenAddressRoutes,
   setupUserSpecialtyRoutes,
@@ -54,6 +55,7 @@ import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupTransactionRoutes,
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
@@ -62,6 +64,7 @@ import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
+  setupReceiverRequestsRoutes,
 } from '@/modules/freecycle';
 
 //Healthcare
@@ -107,8 +110,14 @@ import {
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
+// Public Transportation
+import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
+
+//Bin
+import { setupBinRoutes } from '@/modules/waste-management/routes';
 
 // Weather
 import {
@@ -156,8 +165,14 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
-  setupScbRoutes(app);
+  setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
+  //
+  // ============================================
+  // Normal Hono Routes (not in Swagger docs)
+  // ============================================
+  // app.route('/products', productRoutes);
+  setupScbRoutes(app);
 
   //Healthcare
   setupPatientRoutes(app);
@@ -173,6 +188,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
+  setupReceiverRequestsRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
@@ -193,6 +209,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Waste
   setupWasteRoutes(app);
+  setupBinRoutes(app);
+
+  // SupportMap
 
   // Weather
   setupOpenMeteoRoutes(app);
@@ -218,4 +237,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
+
+  // Public Transportation
+  app.route('/api', routeStopsRoutes);
 };

@@ -54,9 +54,9 @@ const findMany = async (
           //status: true,
           created_at: true,
           updated_at: true,
-          created_by_user_id: true,
+          //created_by_user_id: true,
           department_id: true,
-          address_id: true,
+          //address_id: true,
         },
       }),
       prisma.volunteer_events.count({
@@ -89,13 +89,13 @@ const create = async (data: CreateEventInput) => {
         start_at: new Date(data.start_at),
         end_at: new Date(data.end_at),
         total_seats: data.total_seats,
-        created_by_user_id: data.created_by_user_id,
+        //created_by_user_id: data.created_by_user_id,
         image_url: data.image_url,
         //department_id: data.department_id, not done
         registration_deadline: data.registration_deadline
           ? new Date(data.registration_deadline)
           : undefined,
-        //address_id: data.address_id, not done
+        //address_id: data.address_id,
         //status: data.status,
       },
     });
@@ -121,7 +121,7 @@ const update = async (id: number, data: UpdateEventInput) => {
           : data.registration_deadline === null
             ? null
             : undefined,
-        //address_id: data.address_id, not done
+        //address_id: data.address_id,
         //status: data.status,
       },
     });
@@ -252,12 +252,12 @@ const findEventsByUserId = async (userId: number) => {
         start_at: true,
         end_at: true,
         registration_deadline: true,
-        status: true,
+        //status: true,
         created_at: true,
         updated_at: true,
-        created_by_user_id: true,
+        //created_by_user_id: true,
         department_id: true,
-        address_id: true,
+        //address_id: true,
       },
       orderBy: {
         start_at: 'asc', // Show upcoming events first

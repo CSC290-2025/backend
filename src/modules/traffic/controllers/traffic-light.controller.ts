@@ -2,6 +2,7 @@
 import type { Context } from 'hono';
 import { TrafficLightService } from '../services';
 import { successResponse } from '@/utils/response';
+import { trafficEmitter } from '../types';
 
 /**
  * Get traffic light status by ID
@@ -36,6 +37,25 @@ export const updateTrafficLight = async (c: Context) => {
   const id = Number(c.req.param('id'));
   const body = await c.req.json();
   const trafficLight = await TrafficLightService.updateTrafficLight(id, body);
+  return successResponse(
+    c,
+    { trafficLight },
+    200,
+    'Traffic light updated successfully'
+  );
+};
+
+/**
+ * Partially update traffic light (only allowed fields)
+ * PATCH /traffic-lights/:id
+ */
+export const patchTrafficLight = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const body = await c.req.json();
+  const trafficLight = await TrafficLightService.partialUpdateTrafficLight(
+    id,
+    body
+  );
   return successResponse(
     c,
     { trafficLight },
@@ -177,4 +197,61 @@ export const getIntersectionTiming = async (c: Context) => {
 export const getAllStatus = async (c: Context) => {
   const result = await TrafficLightService.getAllStatus();
   return successResponse(c, result);
+};
+
+/**
+ * Get traffic light data for calculation
+ * GET /traffic-lights/:id/calculation
+ */
+export const getTrafficDataForCalculation = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const data = await TrafficLightService.getTrafficDataForCalculation(id);
+  return successResponse(c, data);
+};
+
+/**
+ * SSE stream for traffic light status changes
+ * Clients should connect and listen for `status_change` events.
+ */
+export const streamBroken = (c: Context) => {
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    start(controller) {
+      const send = (evt: any) => {
+        // send all status_change events (frontend can filter to newStatus 1/2)
+        const payload = JSON.stringify(evt);
+        controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+      };
+
+      trafficEmitter.on('status_change', send);
+
+      // cleanup when client disconnects
+      const cleanup = () => {
+        trafficEmitter.off('status_change', send);
+        try {
+          controller.close();
+        } catch (e) {
+          // ignore
+        }
+      };
+
+      // try to detect client abort
+      const signal = (c.req as any).raw?.signal || (c as any).req?.signal;
+      if (signal && typeof signal.addEventListener === 'function') {
+        signal.addEventListener('abort', cleanup);
+      }
+    },
+    cancel() {
+      // nothing; emitter listener removed on cleanup
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
 };
