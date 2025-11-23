@@ -121,17 +121,17 @@ model apartment_picture {
 }
 
 model appointments {
-  id             Int         @id @default(autoincrement())
-  patient_id     Int?
-  facility_id    Int?
-  staff_user_id  Int?
-  appointment_at DateTime?   @db.Timestamptz(6)
-  type           String?     @db.VarChar(50)
-  status         String?     @db.VarChar(50)
-  created_at     DateTime    @default(now()) @db.Timestamptz(6)
-  facilities     facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
-  patients       patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
-  users          users?      @relation(fields: [staff_user_id], references: [id], onUpdate: NoAction)
+  id               Int         @id @default(autoincrement())
+  patient_id       Int?
+  facility_id      Int?
+  appointment_at   DateTime?   @db.Timestamptz(6)
+  type             String?     @db.VarChar(50)
+  created_at       DateTime    @default(now()) @db.Timestamptz(6)
+  doctor_id        Int?
+  consultation_fee Decimal?    @db.Decimal(12, 2)
+  facilities       facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
+  patients         patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
+  doctors          doctors?    @relation(fields: [doctor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_doctor_id")
 }
 
 model beds {
@@ -377,6 +377,7 @@ model facilities {
   emergency_calls    emergency_calls[]
   addresses          addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   departments        departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
+  medicine_inventory medicine_inventory[]
   payments           payments[]
   prescriptions      prescriptions[]
 
@@ -575,16 +576,20 @@ model onsite_sessions {
 }
 
 model patients {
-  id                Int               @id @default(autoincrement())
-  user_id           Int?
-  emergency_contact String?           @db.VarChar(200)
-  created_at        DateTime          @default(now()) @db.Timestamptz(6)
-  appointments      appointments[]
-  beds              beds[]
-  emergency_calls   emergency_calls[]
-  users             users?            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
-  payments          payments[]
-  prescriptions     prescriptions[]
+  id                  Int               @id @default(autoincrement())
+  user_id             Int?
+  emergency_contact   String?           @db.VarChar(200)
+  created_at          DateTime          @default(now()) @db.Timestamptz(6)
+  date_of_birth       DateTime?         @db.Date
+  blood_type          String?           @db.VarChar(5)
+  total_payments      Decimal?          @db.Decimal(12, 2)
+  appointment_history Json?
+  appointments        appointments[]
+  beds                beds[]
+  emergency_calls     emergency_calls[]
+  users               users?            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  payments            payments[]
+  prescriptions       prescriptions[]
 }
 
 model payments {
@@ -619,10 +624,10 @@ model prescriptions {
   patient_id         Int?
   prescriber_user_id Int?
   facility_id        Int?
-  medication_name    String?     @db.VarChar(255)
-  quantity           Int?
   status             String?     @db.VarChar(50)
   created_at         DateTime    @default(now()) @db.Timestamptz(6)
+  medicines_list     Json?
+  total_amount       Decimal?    @default(0) @db.Decimal(12, 2)
   facilities         facilities? @relation(fields: [facility_id], references: [id], onUpdate: NoAction)
   patients           patients?   @relation(fields: [patient_id], references: [id], onUpdate: NoAction)
   users              users?      @relation(fields: [prescriber_user_id], references: [id], onUpdate: NoAction)
@@ -886,17 +891,17 @@ model users {
   email                         String                          @unique @db.VarChar(255)
   phone                         String?                         @unique @db.VarChar(20)
   password_hash                 String                          @db.VarChar(512)
-  role_id                       Int?
+  role_id                       Int?                            @default(1)
   created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
   updated_at                    DateTime                        @default(now()) @db.Timestamptz(6)
   last_login                    DateTime?                       @db.Timestamptz(6)
   alerts                        alerts[]
   apartment_booking             apartment_booking[]
   apartment_owner               apartment_owner[]
-  appointments                  appointments[]
   conversation_participants     conversation_participants[]
   courses                       courses[]
   digital_cards                 digital_cards[]
+  doctors                       doctors[]
   emergency_contacts            emergency_contacts[]
   emergency_reports             emergency_reports[]
   event_bookmarks               event_bookmarks[]
@@ -1019,6 +1024,7 @@ model waste_event_statistics {
   waste_type_id           Int?
   collection_date         DateTime?          @db.Timestamptz(6)
   total_collection_weight Decimal?           @db.Decimal(12, 3)
+  user_id                 Int?
   power_bi_reports        power_bi_reports[]
   events                  events?            @relation(fields: [event_id], references: [id], onUpdate: NoAction)
   waste_types             waste_types?       @relation(fields: [waste_type_id], references: [id], onUpdate: NoAction)
@@ -1078,23 +1084,44 @@ model event_tag_name {
   users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model bin_locations {
-  id                     Int        @id @default(autoincrement())
-  bin_name               String     @db.VarChar(255)
-  bin_type               bintype
-  latitude               Decimal    @db.Decimal(10, 8)
-  longitude              Decimal    @db.Decimal(11, 8)
-  address                String?
-  capacity_kg            Decimal?   @db.Decimal(10, 2)
-  status                 binstatus? @default(NORMAL)
-  last_collected_at      DateTime?  @default(now()) @db.Timestamp(6)
-  total_collected_weight Decimal?   @default(0) @db.Decimal(10, 2)
-  created_at             DateTime?  @default(now()) @db.Timestamp(6)
-  updated_at             DateTime?  @default(now()) @db.Timestamp(6)
+model bin {
+  id         Int       @id @default(autoincrement())
+  bin_name   String?   @db.VarChar(255)
+  bin_type   bin_type?
+  latitude   Decimal?  @db.Decimal(10, 8)
+  longitude  Decimal?  @db.Decimal(11, 8)
+  address    String?
+  capacity   Decimal?  @db.Decimal(10, 2)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+}
 
-  @@index([bin_type], map: "idx_bin_type")
-  @@index([latitude, longitude], map: "idx_latitude_longitude")
-  @@index([status], map: "idx_status")
+model doctors {
+  id               Int            @id @default(autoincrement())
+  user_id          Int?
+  specialization   String?        @db.VarChar(255)
+  current_status   String?        @default("available") @db.VarChar(255)
+  consultation_fee Decimal?       @default(0) @db.Decimal(12, 2)
+  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  appointments     appointments[]
+  users            users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_id")
+}
+
+model favourite_district {
+  id       Int    @id @default(autoincrement())
+  user_id  Int
+  district String @db.VarChar(255)
+}
+
+model medicine_inventory {
+  id             Int         @id @default(autoincrement())
+  facility_id    Int?
+  medicine_name  String?     @db.VarChar(255)
+  stock_quantity Int?        @default(0)
+  unit_price     Decimal?    @default(0) @db.Decimal(12, 2)
+  is_in_stock    Boolean?    @default(true)
+  created_at     DateTime?   @default(now()) @db.Timestamptz(6)
+  facilities     facilities? @relation(fields: [facility_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_facility_id")
 }
 
 enum air_quality_category {
@@ -1241,16 +1268,8 @@ enum report_visibility {
   admin
 }
 
-enum binstatus {
-  NORMAL
-  OVERFLOW
-  NEEDS_COLLECTION
-  MAINTENANCE
-}
-
-enum bintype {
+enum bin_type {
   RECYCLABLE
   GENERAL
   HAZARDOUS
-  ORGANIC
 }
