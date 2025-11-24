@@ -34,7 +34,7 @@ const TrafficLightSchema = z.object({
   road_id: z.number().int().positive().nullable(),
   ip_address: z.ipv4().nullable(),
   location: LocationSchema.nullable(),
-  status: z.number().int().nullable(),
+  status: z.number().int().min(0).max(2).nullable(), // 0=normal, 1=broken/offline, 2=maintenance
   current_color: z.number().int().min(1).max(3), // 1=Red, 2=Yellow, 3=Green
   density_level: z.number().int().min(1).max(4), // 1=Low, 2=Moderate, 3=High, 4=Severe
   auto_mode: z.boolean(),
@@ -50,7 +50,7 @@ const CreateTrafficLightSchema = z.object({
   road_id: z.number().int().positive(),
   ip_address: z.ipv4(),
   location: LocationSchema.nullable(),
-  status: z.number().int().default(1),
+  status: z.number().int().min(0).max(2).nullable().default(0),
   auto_mode: z.boolean().default(true),
   green_duration: z.number().int().optional(),
   red_duration: z.number().int().optional(),
@@ -59,7 +59,7 @@ const CreateTrafficLightSchema = z.object({
 
 // Update schema - all fields optional
 const UpdateTrafficLightSchema = z.object({
-  status: z.number().int().optional(),
+  status: z.number().int().min(0).max(2).optional(),
   current_color: z.number().int().min(1).max(3).optional(),
   auto_mode: z.boolean().optional(),
   ip_address: z.ipv4().optional(),
@@ -237,6 +237,15 @@ const getAllStatusRoute = createGetRoute({
   tags: ['Status'],
 });
 
+const getTrafficDataForCalculationRoute = createGetRoute({
+  path: '/traffic-lights/{id}/calculation',
+  summary: 'Get traffic light data for calculation (no sensitive fields)',
+  // Response is dynamic; use a permissive schema
+  responseSchema: z.any(),
+  params: TrafficLightIdParam,
+  tags: ['Traffic Lights'],
+});
+
 export const TrafficLightSchemas = {
   // Base schemas
   TrafficLightColorEnum,
@@ -275,6 +284,7 @@ export const TrafficLightSchemas = {
   createLightRequestRoute,
   getLightRequestsRoute,
   getAllStatusRoute,
+  getTrafficDataForCalculationRoute,
 
   // Status schemas
   TrafficLightStatusDetailSchema,
