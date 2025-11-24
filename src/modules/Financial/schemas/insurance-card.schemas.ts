@@ -4,6 +4,7 @@ import {
   createGetRoute,
   createPostRoute,
   createPutRoute,
+  createDeleteRoute,
 } from '@/utils/openapi-helpers';
 import { authMiddleware } from '@/middlewares';
 
@@ -133,6 +134,15 @@ const updateInsuranceCardRoute = createPutRoute({
   operationId: 'useUpdateInsuranceCard',
 });
 
+const deleteMyInsuranceCardRoute = createDeleteRoute({
+  path: '/insurance-cards/{insuranceCardId}',
+  summary: 'Delete my insurance card',
+  params: InsuranceCardIdParam,
+  tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useDeleteMyInsuranceCard',
+});
+
 export const InsuranceCardSchemas = {
   InsuranceCardSchema,
   CreateInsuranceCardSchema,
@@ -152,4 +162,5 @@ export const InsuranceCardSchemas = {
   topUpInsuranceCardRoute,
   getUserInsuranceCardsRoute,
   updateInsuranceCardRoute,
+  deleteMyInsuranceCardRoute,
 };

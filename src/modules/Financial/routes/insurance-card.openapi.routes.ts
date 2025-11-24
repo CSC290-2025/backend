@@ -27,6 +27,10 @@ const setupInsuranceCardRoutes = (app: OpenAPIHono) => {
     InsuranceCardSchemas.updateInsuranceCardRoute,
     InsuranceCardController.updateInsuranceCard
   );
+  app.openapi(
+    InsuranceCardSchemas.deleteMyInsuranceCardRoute,
+    InsuranceCardController.deleteMyInsuranceCard
+  );
 };
 
 export { setupInsuranceCardRoutes };

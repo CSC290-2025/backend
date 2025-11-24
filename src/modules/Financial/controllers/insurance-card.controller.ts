@@ -59,6 +59,17 @@ const updateInsuranceCard = async (c: Context) => {
   return successResponse(c, card, 200, 'Insurance card updated successfully');
 };
 
+const deleteMyInsuranceCard = async (c: Context) => {
+  const user = c.get('user');
+  const insuranceCardId = Number(c.req.param('insuranceCardId'));
+  const card = await InsuranceCardService.getCardById(insuranceCardId);
+  if (card.user_id !== user.userId) {
+    throw new UnauthorizedError('You do not own this insurance card');
+  }
+  await InsuranceCardService.deleteCardById(insuranceCardId);
+  return successResponse(c, null, 200, 'Insurance card deleted successfully');
+};
+
 export {
   getInsuranceCard,
   getMyCards,
@@ -66,4 +77,5 @@ export {
   topUpCard,
   getUserInsuranceCards,
   updateInsuranceCard,
+  deleteMyInsuranceCard,
 };
