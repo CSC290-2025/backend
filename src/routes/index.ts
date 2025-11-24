@@ -18,6 +18,7 @@ import {
   setupAddressRoutes,
   setupUploadRoutes,
   setupBookingRoutes,
+  setupAPTOwnerRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -127,6 +128,7 @@ import { setupBinRoutes } from '@/modules/waste-management/routes';
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
+  setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 import cardRoute from '@/modules/public-transportation/routes/digital_card.route';
 
@@ -147,7 +149,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-
+  setupAPTOwnerRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
@@ -220,6 +222,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Weather
   setupOpenMeteoRoutes(app);
+  setupWeatherRatingRoutes(app);
   setupWeatherRoutes(app);
 
   // Volunteer

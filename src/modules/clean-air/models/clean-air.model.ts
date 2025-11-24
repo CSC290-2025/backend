@@ -46,6 +46,20 @@ const createBangkokDistrictAddress = async (district: string) => {
   }
 };
 
+export const hasAirQualityRecord = async ({
+  locationId,
+  measuredAt,
+}: {
+  locationId: number;
+  measuredAt: string;
+}) =>
+  Boolean(
+    await prisma.air_quality.findFirst({
+      where: { location_id: locationId, measured_at: new Date(measuredAt) },
+      select: { id: true },
+    })
+  );
+
 export const ensureBangkokDistrictAddress = async (
   district: string
 ): Promise<number> => {

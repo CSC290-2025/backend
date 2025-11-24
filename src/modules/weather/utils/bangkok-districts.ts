@@ -29,8 +29,12 @@ export const bangkokDistricts = [
   },
 ];
 
+// Find district metadata using the public location id (1-4).
 export const getDistrictByLocationId = (locationId: number) => {
   return bangkokDistricts.find((d) => d.location_id === locationId);
 };
 
-//ตั้ง location_id 1-4
+// Find district metadata using the stored address id.
+export const getDistrictByAddressId = (addressId: number) => {
+  return bangkokDistricts.find((d) => d.address_id === addressId);
+};

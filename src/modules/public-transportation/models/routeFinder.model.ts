@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const GOOGLE_API_KEY = process.env.G08_VITE_GOOGLE_MAPS_API_KEY; 
+const GOOGLE_API_KEY = process.env.G08_VITE_GOOGLE_MAPS_API_KEY;
 
 const mapVehicleType = (vehicleType: string, lineName: string): string => {
   if (lineName.includes('ARL')) {
@@ -148,71 +148,86 @@ export const getRoutes = async (
   // 1. ORIGIN: ให้ความสำคัญกับพิกัด (Lat,Lng) ที่ส่งมาเป็นอันดับแรก
   if (origLat && origLng) {
     finalOrigin = `${origLat},${origLng}`;
-  } 
+  }
   // 2. ORIGIN: ถ้าไม่มีพิกัด ให้ใช้ชื่อที่ Geocode แล้ว
   else if (origin && origin.length > 0) {
-    finalOrigin = origin;
-  }
-
-  if (!finalOrigin) {
-    throw new Error(
-      'Could not determine a starting point (origin or GPS location).'
-    );
-  }
-
-  let finalDestination = '';
-
-  // 1. DESTINATION: ใช้พิกัดโดยตรงเป็นอันดับแรก
-  if (destLat && destLng) {
-    finalDestination = `${destLat},${destLng}`; 
-  }
-  // 2. DESTINATION: ถ้าไม่มีพิกัด ให้ใช้ชื่อที่ Geocode แล้ว
-  else if (destination && destination.length > 0) {
-    finalDestination = destination;
-  }
-
-  if (!finalDestination) {
-    throw new Error('Could not determine a destination point.');
-  }
-  
-
-  const encodedOrigin = encodeURIComponent(finalOrigin);
-  const encodedDestination = encodeURIComponent(finalDestination);
-  
-  const currentTimestamp = Math.floor(Date.now() / 1000); 
-
-  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
-
-  try {
-    const response = await fetch(googleMapsUrl);
-    const data = await response.json();
-
-    if (data.status === 'OK' && data.routes && data.routes.length > 0) {
-      const allRoutes = data.routes;
-
-      const allRoutesSummarized = allRoutes
-        .map(extractRouteDetails)
-        .filter((route: any) => route !== null);
-
-      const fastestRouteSummary = allRoutesSummarized.reduce(
-        (prev: any, current: any) => {
-          return prev.duration.value < current.duration.value ? prev : current;
-        }
-      );
-
-      return {
-        allRoutesSummarized: allRoutesSummarized,
-        fastestRouteSummary: fastestRouteSummary,
-      };
-    } else {
-      const errorMessage =
-        data.error_message ||
-        `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
-      
-      throw new Error(`Google API status: ${data.status}. No valid routes found.`);
+    if (origLat && origLng) {
+      finalOrigin = `${origLat},${origLng}`;
+    } else if (origin && origin.length > 0) {
+      finalOrigin = origin;
     }
-  } catch (error) {
-    console.error('Error fetching route stops:', error);
-    throw error;
+
+    if (!finalOrigin) {
+      throw new Error(
+        'Could not determine a starting point (origin or GPS location).'
+      );
+    }
+
+    let finalDestination = '';
+
+    // 1. DESTINATION: ใช้พิกัดโดยตรงเป็นอันดับแรก
+    if (destLat && destLng) {
+      finalDestination = `${destLat},${destLng}`;
+    }
+    // 2. DESTINATION: ถ้าไม่มีพิกัด ให้ใช้ชื่อที่ Geocode แล้ว
+    else if (destination && destination.length > 0) {
+      if (destLat && destLng) {
+        finalDestination = `${destLat},${destLng}`;
+      } else if (destination && destination.length > 0) {
+        finalDestination = destination;
+      }
+
+      if (!finalDestination) {
+        throw new Error('Could not determine a destination point.');
+      }
+
+      const encodedOrigin = encodeURIComponent(finalOrigin);
+      const encodedDestination = encodeURIComponent(finalDestination);
+
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+
+      const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
+
+      try {
+        const response = await fetch(googleMapsUrl);
+        const data = await response.json();
+
+        if (data.status === 'OK' && data.routes && data.routes.length > 0) {
+          const allRoutes = data.routes;
+
+          const allRoutesSummarized = allRoutes
+            .map(extractRouteDetails)
+            .filter((route: any) => route !== null);
+
+          const fastestRouteSummary = allRoutesSummarized.reduce(
+            (prev: any, current: any) => {
+              return prev.duration.value < current.duration.value
+                ? prev
+                : current;
+            }
+          );
+
+          return {
+            allRoutesSummarized: allRoutesSummarized,
+            fastestRouteSummary: fastestRouteSummary,
+          };
+        } else {
+          const errorMessage =
+            data.error_message ||
+            `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
+
+          throw new Error(
+            `Google API status: ${data.status}. No valid routes found.`
+          );
+
+          throw new Error(
+            `Google API status: ${data.status}. No valid routes found.`
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching route stops:', error);
+        throw error;
+      }
+    }
   }
 };

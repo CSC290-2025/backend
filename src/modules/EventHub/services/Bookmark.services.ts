@@ -7,23 +7,20 @@ const listBookmarks = async (userId: number, page: number, limit: number) => {
 };
 
 const createBookmark = async (userId: number, data: CreateBookmarkInput) => {
-  const existing = await BookmarkModel.findByUserAndEvent(
-    userId,
-    data.event_id
-  );
-  if (existing) throw new ConflictError('Event already bookmarked');
+  const exists = await BookmarkModel.findByUserAndEvent(userId, data.event_id);
+  if (exists) throw new ConflictError('Event already bookmarked');
   return await BookmarkModel.create(userId, data);
 };
 
 const deleteBookmark = async (userId: number, eventId: number) => {
-  const existing = await BookmarkModel.findByUserAndEvent(userId, eventId);
-  if (!existing) throw new NotFoundError('Bookmark not found');
+  const exists = await BookmarkModel.findByUserAndEvent(userId, eventId);
+  if (!exists) throw new NotFoundError('Bookmark not found');
   return await BookmarkModel.remove(userId, eventId);
 };
 
 const checkBookmarkStatus = async (userId: number, eventId: number) => {
-  const existing = await BookmarkModel.findByUserAndEvent(userId, eventId);
-  return Boolean(existing);
+  const exists = await BookmarkModel.findByUserAndEvent(userId, eventId);
+  return Boolean(exists);
 };
 
 export { listBookmarks, createBookmark, deleteBookmark, checkBookmarkStatus };
