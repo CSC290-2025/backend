@@ -124,6 +124,7 @@ import { setupBinRoutes } from '@/modules/waste-management/routes';
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
+  setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
@@ -216,6 +217,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Weather
   setupOpenMeteoRoutes(app);
+  setupWeatherRatingRoutes(app);
   setupWeatherRoutes(app);
 
   // Volunteer

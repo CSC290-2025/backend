@@ -1,5 +1,5 @@
 export type * from './types';
-export { WeatherSchemas } from './schemas';
-export { WeatherModel } from './models';
-export { WeatherService } from './services';
-export { setupWeatherRoutes } from './routes';
+export { WeatherSchemas, WeatherRatingSchemas } from './schemas';
+export { WeatherModel, WeatherRatingModel } from './models';
+export { WeatherService, WeatherRatingService } from './services';
+export { setupWeatherRoutes, setupWeatherRatingRoutes } from './routes';

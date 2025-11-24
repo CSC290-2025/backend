@@ -1,190 +1,215 @@
 import prisma from '@/config/client';
-import type { BinStatus, BinType } from '../types';
+import type {
+  Prisma,
+  bin as BinLocation,
+  bin_type as PrismaBinType,
+} from '@/generated/prisma';
+import type {
+  BinWithDistance,
+  CreateBinRequest,
+  UpdateBinRequest,
+} from '../types/bin.types';
+
+const EARTH_RADIUS_KM = 6371;
+const DEGREE_LAT_KM = 111;
 
 export class BinModel {
-  static async findAllBins(filters?: {
-    binType?: BinType;
-    status?: BinStatus;
-  }) {
-    return await prisma.bin_locations.findMany({
+  static async findAllBins(filters: { binType?: PrismaBinType }) {
+    const { binType } = filters;
+
+    return prisma.bin.findMany({
       where: {
-        bin_type: filters?.binType,
-        status: filters?.status,
+        ...(binType ? { bin_type: binType } : {}),
       },
       orderBy: {
-        created_at: 'desc',
+        bin_name: 'asc',
       },
     });
   }
 
   static async findBinById(id: number) {
-    return await prisma.bin_locations.findUnique({
+    return prisma.bin.findUnique({
       where: { id },
     });
   }
 
-  static async createBin(data: {
-    bin_name: string;
-    bin_type: BinType;
-    latitude: number;
-    longitude: number;
-    address?: string;
-    capacity_kg?: number;
-    status?: BinStatus;
-  }) {
-    return await prisma.bin_locations.create({
+  static async createBin(data: CreateBinRequest) {
+    return prisma.bin.create({
       data: {
         bin_name: data.bin_name,
         bin_type: data.bin_type,
         latitude: data.latitude,
         longitude: data.longitude,
-        address: data.address,
-        capacity_kg: data.capacity_kg,
-        status: data.status || 'NORMAL',
-        last_collected_at: new Date(),
+        address: data.address ?? null,
+        capacity: data.capacity_kg ?? null,
       },
     });
   }
 
-  static async updateBin(
-    id: number,
-    data: {
-      bin_name?: string;
-      bin_type?: BinType;
-      latitude?: number;
-      longitude?: number;
-      address?: string;
-      capacity_kg?: number;
-      status?: BinStatus;
-    }
-  ) {
-    return await prisma.bin_locations.update({
-      where: { id },
-      data,
-    });
-  }
+  static async updateBin(id: number, data: UpdateBinRequest) {
+    const updateData: Prisma.binUpdateInput = {};
 
-  static async deleteBin(id: number) {
-    return await prisma.bin_locations.delete({
-      where: { id },
-    });
-  }
+    if (data.bin_name !== undefined) updateData.bin_name = data.bin_name;
+    if (data.bin_type !== undefined) updateData.bin_type = data.bin_type;
+    if (data.latitude !== undefined) updateData.latitude = data.latitude;
+    if (data.longitude !== undefined) updateData.longitude = data.longitude;
+    if (data.address !== undefined) updateData.address = data.address;
+    if (data.capacity_kg !== undefined) updateData.capacity = data.capacity_kg;
 
-  static async updateBinStatus(id: number, status: BinStatus) {
-    return await prisma.bin_locations.update({
-      where: { id },
-      data: { status },
-    });
-  }
-
-  static async recordCollection(id: number, collectedWeight?: number) {
-    const updateData: any = {
-      last_collected_at: new Date(),
-      status: 'NORMAL',
-    };
-
-    if (collectedWeight !== undefined) {
-      updateData.total_collected_weight = {
-        increment: collectedWeight,
-      };
-    }
-
-    return await prisma.bin_locations.update({
+    return prisma.bin.update({
       where: { id },
       data: updateData,
     });
   }
 
-  static async getBinStats() {
-    const totalBins = await prisma.bin_locations.count();
-
-    const byType = await prisma.bin_locations.groupBy({
-      by: ['bin_type'],
-      _count: {
-        id: true,
-      },
+  static async deleteBin(id: number) {
+    return prisma.bin.delete({
+      where: { id },
     });
-
-    const byStatus = await prisma.bin_locations.groupBy({
-      by: ['status'],
-      _count: {
-        id: true,
-      },
-    });
-
-    const overflowBins = await prisma.bin_locations.count({
-      where: {
-        status: 'OVERFLOW',
-      },
-    });
-
-    return {
-      totalBins,
-      byType,
-      byStatus,
-      overflowBins,
-    };
   }
 
-  // Helper function to calculate distance between two coordinates (Haversine formula)
-  static calculateDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number {
-    const R = 6371; // Radius of the Earth in kilometers
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in kilometers
+  static async findBinsInRadius(
+    lat: number,
+    lng: number,
+    radiusKm: number
+  ): Promise<BinWithDistance[]> {
+    const bounds = this.getBoundingBox(lat, lng, radiusKm);
+
+    const candidates = await prisma.bin.findMany({
+      where: {
+        latitude: {
+          gte: bounds.minLat,
+          lte: bounds.maxLat,
+        },
+        longitude: {
+          gte: bounds.minLng,
+          lte: bounds.maxLng,
+        },
+      },
+    });
+
+    return candidates
+      .map((bin) => this.withDistance(bin, lat, lng))
+      .filter((bin) => bin.numericDistance <= radiusKm)
+      .sort((a, b) => a.numericDistance - b.numericDistance);
   }
 
   static async findNearestBins(
     lat: number,
     lng: number,
-    binType?: BinType,
+    binType?: PrismaBinType,
     limit: number = 5
-  ) {
-    // Get all bins (with optional type filter)
-    const bins = await prisma.bin_locations.findMany({
+  ): Promise<BinWithDistance[]> {
+    const candidates = await prisma.bin.findMany({
       where: binType ? { bin_type: binType } : undefined,
     });
 
-    // Calculate distances and sort
-    const binsWithDistance = bins
-      .map((bin) => ({
-        ...bin,
-        distance_km: this.calculateDistance(
-          lat,
-          lng,
-          Number(bin.latitude),
-          Number(bin.longitude)
-        ),
-      }))
-      .sort((a, b) => a.distance_km - b.distance_km)
+    return candidates
+      .map((bin) => this.withDistance(bin, lat, lng))
+      .sort((a, b) => a.numericDistance - b.numericDistance)
       .slice(0, limit);
-
-    return binsWithDistance;
   }
 
-  static async findBinsInRadius(lat: number, lng: number, radiusKm: number) {
-    const bins = await prisma.bin_locations.findMany();
+  static async findNearbyBins(
+    lat: number,
+    lng: number,
+    binType?: PrismaBinType,
+    search?: string
+  ): Promise<BinWithDistance[]> {
+    const where: Prisma.binWhereInput = {};
 
-    return bins.filter((bin) => {
-      const distance = this.calculateDistance(
-        lat,
-        lng,
-        Number(bin.latitude),
-        Number(bin.longitude)
-      );
-      return distance <= radiusKm;
+    if (binType) {
+      where.bin_type = binType;
+    }
+
+    if (search) {
+      where.OR = [
+        {
+          bin_name: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          address: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    const candidates = await prisma.bin.findMany({
+      where,
     });
+
+    return candidates
+      .map((bin) => this.withDistance(bin, lat, lng))
+      .sort((a, b) => a.numericDistance - b.numericDistance);
+  }
+
+  private static getBoundingBox(lat: number, lng: number, radiusKm: number) {
+    const latDelta = radiusKm / DEGREE_LAT_KM;
+    const lngDelta =
+      radiusKm / (DEGREE_LAT_KM * Math.cos((lat * Math.PI) / 180)) || latDelta;
+
+    return {
+      minLat: lat - latDelta,
+      maxLat: lat + latDelta,
+      minLng: lng - lngDelta,
+      maxLng: lng + lngDelta,
+    };
+  }
+
+  private static withDistance(
+    bin: BinLocation,
+    lat: number,
+    lng: number
+  ): BinWithDistance {
+    const numericLat = Number(bin.latitude);
+    const numericLng = Number(bin.longitude);
+    const numericDistance = this.calculateDistanceKm(
+      lat,
+      lng,
+      numericLat,
+      numericLng
+    );
+
+    return {
+      ...bin,
+      numericDistance,
+      distance: this.formatDistance(numericDistance),
+    };
+  }
+
+  private static calculateDistanceKm(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+  ) {
+    const dLat = this.degToRad(lat2 - lat1);
+    const dLng = this.degToRad(lng2 - lng1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.degToRad(lat1)) *
+        Math.cos(this.degToRad(lat2)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return EARTH_RADIUS_KM * c;
+  }
+
+  private static degToRad(value: number) {
+    return (value * Math.PI) / 180;
+  }
+
+  private static formatDistance(distanceKm: number) {
+    if (distanceKm >= 1) {
+      return `${distanceKm.toFixed(2)} km`;
+    }
+    return `${Math.round(distanceKm * 1000)} m`;
   }
 }
