@@ -1,6 +1,12 @@
-import { ValidationError } from '@/errors';
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+  handlePrismaError,
+} from '@/errors';
 import { CleanAirConfigurationError, CleanAirProviderError } from '../error';
 import { GoogleGenAI } from '@google/genai';
+import prisma from '@/config/client';
 
 import type {
   CleanAirService as CleanAirServiceContract,
@@ -674,11 +680,141 @@ async function getHealthTips(district: string): Promise<string[]> {
   }
 }
 
+function ensureUserId(userId: number) {
+  if (!Number.isFinite(userId) || userId <= 0) {
+    throw new ValidationError('User id is required');
+  }
+}
+
+async function getFavoriteDistricts(
+  userId: number
+): Promise<DistrictAirQuality[]> {
+  ensureUserId(userId);
+
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
+  if (!baseUrl) {
+    throw new CleanAirConfigurationError(
+      'OPEN_METEO_BASE_URL is not configured'
+    );
+  }
+
+  let favorites: { district: string }[] = [];
+  try {
+    favorites = await prisma.favourite_district.findMany({
+      where: { user_id: userId },
+      select: { district: true },
+      orderBy: { district: 'asc' },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+
+  if (!favorites.length) return [];
+
+  const districts = favorites.map((f) => resolveDistrictInfo(f.district));
+
+  return await Promise.all(
+    districts.map(async (districtInfo) => {
+      const current = await fetchCurrentAirQuality(
+        baseUrl,
+        districtInfo.lat,
+        districtInfo.lng
+      );
+      const pm25Value = makeSafeNumber(current?.pm2_5);
+      const aqi = calculateAQI(pm25Value);
+
+      return {
+        province: 'Bangkok',
+        district: districtInfo.name,
+        aqi,
+        pm25: pm25Value,
+        category: getAirCategory(aqi),
+        measured_at: makeTimestamp(current?.time),
+      };
+    })
+  );
+}
+
+async function addFavoriteDistrict(
+  userId: number,
+  district: string
+): Promise<DistrictAirQuality> {
+  ensureUserId(userId);
+  if (!district) throw new ValidationError('District parameter is required');
+
+  const districtInfo = resolveDistrictInfo(district);
+
+  try {
+    const existing = await prisma.favourite_district.findFirst({
+      where: { user_id: userId, district: districtInfo.name },
+    });
+    if (existing)
+      throw new ConflictError('District already added to favorites');
+  } catch (error) {
+    if (error instanceof ConflictError) throw error;
+    handlePrismaError(error);
+  }
+
+  try {
+    await prisma.favourite_district.create({
+      data: { user_id: userId, district: districtInfo.name },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
+  if (!baseUrl) {
+    throw new CleanAirConfigurationError(
+      'OPEN_METEO_BASE_URL is not configured'
+    );
+  }
+
+  const current = await fetchCurrentAirQuality(
+    baseUrl,
+    districtInfo.lat,
+    districtInfo.lng
+  );
+  const pm25Value = makeSafeNumber(current?.pm2_5);
+  const aqi = calculateAQI(pm25Value);
+
+  return {
+    province: 'Bangkok',
+    district: districtInfo.name,
+    aqi,
+    pm25: pm25Value,
+    category: getAirCategory(aqi),
+    measured_at: makeTimestamp(current?.time),
+  };
+}
+
+async function removeFavoriteDistrict(userId: number, district: string) {
+  ensureUserId(userId);
+  if (!district) throw new ValidationError('District parameter is required');
+
+  const districtInfo = resolveDistrictInfo(district);
+
+  try {
+    const deleted = await prisma.favourite_district.deleteMany({
+      where: { user_id: userId, district: districtInfo.name },
+    });
+    if (deleted.count === 0) {
+      throw new NotFoundError('Favorite not found for this user and district');
+    }
+  } catch (error) {
+    if (error instanceof NotFoundError) throw error;
+    handlePrismaError(error);
+  }
+}
+
 export {
+  addFavoriteDistrict,
+  getFavoriteDistricts,
   getDistricts,
   getDistrictDetail,
   getDistrictHistory,
   getDistrictSummary,
   getHealthTips,
+  removeFavoriteDistrict,
   searchDistricts,
 };

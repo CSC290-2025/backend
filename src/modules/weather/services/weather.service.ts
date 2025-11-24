@@ -1,22 +1,21 @@
-// ของ database
 import { WeatherModel } from '../models';
 import type { WeatherData } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
 
-// ตรวจสอบว่า format วันที่เป็น YYYY-MM-DD ไม่งั้นจะ ValidationError , // Validate that the date format is YYYY-MM-DD, otherwise ValidationError
+// Ensure a date string follows the strict YYYY-MM-DD format.
 const validateDateFormat = (date: string): void => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     throw new ValidationError('Invalid date format. Use YYYY-MM-DD');
   }
 };
 
-// ดึงข้อมูลทั้งหมดที่ถูกสร้างในวันที่ระบุ , // Get all weather data created on the specified date
+// Fetch all weather records created on the provided date.
 const getWeatherByDate = async (date: string): Promise<WeatherData[]> => {
   validateDateFormat(date);
   return await WeatherModel.findByDate(date);
 };
 
-// ดึงข้อมูลตามช่วงวันที่ (รวมวันต้นและปลาย) หลังตรวจสอบเงื่อนไข , // Get weather data by date range (inclusive) after validating conditions
+// Fetch weather records across an inclusive date range after validation.
 const listWeatherByDateRange = async (
   fromDate: string,
   toDate: string
@@ -31,11 +30,12 @@ const listWeatherByDateRange = async (
   return await WeatherModel.findByDateRange(fromDate, toDate);
 };
 
+// Fetch every weather record ordered by creation date.
 const listWeather = async (): Promise<WeatherData[]> => {
   return await WeatherModel.findAll();
 };
 
-// ส่งคืนข้อมูลทั้งหมดของ location id ที่ระบุ (บังคับเป็น number) , // Return all data for the specified location id (forced to number)
+// Fetch weather records filtered by a numeric location id.
 const listWeatherByLocation = async (
   locationId: string | number
 ): Promise<WeatherData[]> => {
@@ -47,7 +47,7 @@ const listWeatherByLocation = async (
   return await WeatherModel.findByLocationId(numLoc);
 };
 
-// ลบข้อมูลตามวันที่และคืนค่าจำนวนแถวที่ถูกลบ (ถ้าไม่มีจะโยน NotFoundError) , // Delete data by date and return the number of rows deleted (if none, throw NotFoundError)
+// Delete weather records on a specific date and error if nothing was removed.
 const deleteWeatherByDate = async (
   date: string
 ): Promise<{ deleted: number }> => {
@@ -59,7 +59,7 @@ const deleteWeatherByDate = async (
   return { deleted: count };
 };
 
-// ลบข้อมูลทั้งหมดในตาราง weather_data และรายงานจำนวนแถว , // Delete all data in the weather_data table and report the number of rows
+// Delete every row in weather_data and return the number of rows removed.
 const deleteAllWeather = async (): Promise<{ deleted: number }> => {
   const count = await WeatherModel.deleteAll();
   return { deleted: count };

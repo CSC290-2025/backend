@@ -1,14 +1,21 @@
 import { NotFoundError, ValidationError } from '@/errors';
 import { InsuranceCardModel, WalletModel } from '../models';
-import type {
-  InsuranceCard,
-  CreateInsuranceCardData,
-  TopUpInsuranceCardData,
-} from '../types';
+import type { InsuranceCard } from '../types';
 import prisma from '@/config/client';
+import { formatInsuranceCardNumber } from '../utils/crypto';
 
 const getCardById = async (id: number): Promise<InsuranceCard> => {
   const card = await InsuranceCardModel.findCardById(id);
+  if (!card) throw new NotFoundError('Insurance card not found');
+  return card;
+};
+
+const getCardByCardNumber = async (
+  cardNumber: string
+): Promise<InsuranceCard> => {
+  const formattedCardNumber = formatInsuranceCardNumber(cardNumber);
+  const card =
+    await InsuranceCardModel.findCardByCardNumber(formattedCardNumber);
   if (!card) throw new NotFoundError('Insurance card not found');
   return card;
 };
@@ -24,42 +31,36 @@ const getCardsByUserId = async (userId: number): Promise<InsuranceCard[]> => {
   return cards;
 };
 
-const createCard = async (
-  data: CreateInsuranceCardData
-): Promise<InsuranceCard> => {
+const createCard = async (userId: number): Promise<InsuranceCard> => {
   // Users can now have multiple insurance cards
-  return await InsuranceCardModel.createCard(data);
+  return await InsuranceCardModel.createCard(userId);
 };
 
 const topUpFromWallet = async (
-  cardId: number,
-  data: TopUpInsuranceCardData
+  cardNumber: string,
+  walletId: number,
+  amount: number
 ): Promise<{ card: InsuranceCard; transaction_id: number }> => {
-  if (data.amount <= 0) {
+  if (amount <= 0) {
     throw new ValidationError('Amount must be positive');
   }
 
   // Get insurance card
-  const card = await InsuranceCardModel.findCardById(cardId);
+  const formattedCardNumber = formatInsuranceCardNumber(cardNumber);
+  const card =
+    await InsuranceCardModel.findCardByCardNumber(formattedCardNumber);
   if (!card) {
     throw new NotFoundError('Insurance card not found');
   }
 
   // Get wallet
-  const wallet = await WalletModel.findWalletById(data.wallet_id);
+  const wallet = await WalletModel.findWalletById(walletId);
   if (!wallet) {
     throw new NotFoundError('Wallet not found');
   }
 
-  // Verify wallet belongs to the same user as the card
-  if (wallet.owner_id !== card.user_id) {
-    throw new ValidationError(
-      'Wallet does not belong to the insurance card owner'
-    );
-  }
-
   // Check sufficient balance
-  if (wallet.balance < data.amount) {
+  if (wallet.balance < amount) {
     throw new ValidationError('Insufficient wallet balance');
   }
 
@@ -67,14 +68,14 @@ const topUpFromWallet = async (
   try {
     const result = await prisma.$transaction(async (tx) => {
       // Deduct from wallet
-      const newWalletBalance = wallet.balance - data.amount;
+      const newWalletBalance = wallet.balance - amount;
       await tx.wallets.update({
         where: { id: wallet.id },
         data: { balance: newWalletBalance, updated_at: new Date() },
       });
 
       // Add to insurance card
-      const newCardBalance = card.balance + data.amount;
+      const newCardBalance = card.balance + amount;
       const updatedCard = await tx.insurance_cards.update({
         where: { id: card.id },
         data: { balance: newCardBalance, updated_at: new Date() },
@@ -85,7 +86,7 @@ const topUpFromWallet = async (
         data: {
           wallet_id: wallet.id,
           transaction_type: 'transfer_to_service',
-          amount: data.amount,
+          amount: amount,
           target_service: `insurance_card:${card.id}`,
           description: `Top-up to insurance card ${card.card_number}`,
         },
@@ -97,7 +98,7 @@ const topUpFromWallet = async (
           card_type: 'insurance',
           transaction_type: 'top_up',
           reference: String(transaction.id),
-          amount: data.amount,
+          amount: amount,
           description: `Top-up from wallet ${wallet.id} to insurance card ${card.card_number}`,
         },
       });
@@ -122,10 +123,29 @@ const topUpFromWallet = async (
   }
 };
 
+const updateInsuranceCard = async (
+  id: number,
+  data: { status?: 'active' | 'suspended' }
+): Promise<InsuranceCard> => {
+  const existingCard = await InsuranceCardModel.findCardById(id);
+  if (!existingCard) throw new NotFoundError('Insurance card not found');
+
+  return await InsuranceCardModel.updateCard(id, data);
+};
+
+const deleteCardById = async (id: number): Promise<void> => {
+  const card = await InsuranceCardModel.findCardById(id);
+  if (!card) throw new NotFoundError('Insurance card not found');
+  await InsuranceCardModel.deleteCard(id);
+};
+
 export {
   getCardById,
+  getCardByCardNumber,
   getCardByUserId,
   getCardsByUserId,
   createCard,
   topUpFromWallet,
+  updateInsuranceCard,
+  deleteCardById,
 };

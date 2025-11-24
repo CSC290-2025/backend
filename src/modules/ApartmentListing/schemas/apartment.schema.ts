@@ -1,3 +1,4 @@
+import { authMiddleware } from '@/middlewares';
 import {
   createDeleteRoute,
   createGetRoute,
@@ -45,7 +46,7 @@ const createApartmentSchema = z.object({
   ]),
   electric_price: z.number().min(0),
   water_price: z.number().min(0),
-  internet_price: z.coerce.number().min(0),
+  internet_price: z.coerce.number().min(0).nullable(),
   internet: z.enum(['free', 'not_free', 'none']),
   userId: z.int(),
   address: z.object({
@@ -108,6 +109,7 @@ const CreateApartmentRoute = createPostRoute({
   requestSchema: createApartmentSchema,
   responseSchema: ApartmentSchema,
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 const UpdateApartmentRoute = createPutRoute({
@@ -117,12 +119,14 @@ const UpdateApartmentRoute = createPutRoute({
   responseSchema: ApartmentSchema,
   params: UpdateApartmentParamsSchema,
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 const DeleteApartmentRoute = createDeleteRoute({
   path: '/apartments/{id}',
   summary: 'Delete an existing apartment',
   params: DeleteApartmentParamsSchema,
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 const getApartmentbyIDRoute = createGetRoute({
@@ -131,6 +135,7 @@ const getApartmentbyIDRoute = createGetRoute({
   params: ApartmentIdParam,
   responseSchema: ApartmentSchema,
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 const getAllApartmentsRoute = createGetRoute({
@@ -138,6 +143,7 @@ const getAllApartmentsRoute = createGetRoute({
   summary: 'Get all apartments',
   responseSchema: z.array(ApartmentSchema),
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 const apartmentFilterRoute = createGetRoute({
@@ -146,6 +152,7 @@ const apartmentFilterRoute = createGetRoute({
   query: ApartmentFilterSchema,
   responseSchema: z.array(ApartmentSchema),
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 const countAvailableRoomsRoute = createGetRoute({
   path: '/apartments/{id}/available-rooms',
@@ -153,6 +160,7 @@ const countAvailableRoomsRoute = createGetRoute({
   params: ApartmentIdParam,
   responseSchema: z.object({ availableRooms: z.number().int().nonnegative() }),
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 const getApartmentsByUserRoute = createGetRoute({
@@ -163,6 +171,7 @@ const getApartmentsByUserRoute = createGetRoute({
   }),
   responseSchema: z.array(ApartmentSchema),
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 const getRoomPriceRangeRoute = createGetRoute({
@@ -175,6 +184,7 @@ const getRoomPriceRangeRoute = createGetRoute({
     roomCount: z.number().int().nonnegative(),
   }),
   tags: ['Apartment'],
+  middleware: [authMiddleware],
 });
 
 export const ApartmentSchemas = {

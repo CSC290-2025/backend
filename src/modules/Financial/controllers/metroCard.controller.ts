@@ -1,4 +1,4 @@
-import { UnauthorizedError } from '@/errors';
+import { NotFoundError, UnauthorizedError } from '@/errors';
 import { successResponse } from '@/utils/response';
 import { MetroCardService } from '../services';
 import type { Context } from 'hono';
@@ -7,6 +7,9 @@ const getMetroCard = async (c: Context) => {
   const user = c.get('user');
   const metroCardId = Number(c.req.param('metroCardId'));
   const card = await MetroCardService.getMetroCardById(metroCardId);
+  if (card === null) {
+    throw new NotFoundError('Metro Card not found');
+  }
   if (card.user_id !== user.userId) {
     throw new UnauthorizedError('You do not own this metro card');
   }
@@ -80,7 +83,6 @@ const transferToTransportation = async (c: Context) => {
 
 const getMyMetroCards = async (c: Context) => {
   const user = c.get('user');
-  console.log(user);
   const metroCards = await MetroCardService.getUserMetroCards(user.userId);
   return successResponse(c, { metroCards });
 };
