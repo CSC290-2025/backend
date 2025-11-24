@@ -107,15 +107,6 @@ import {
   setupTrafficLightRoutes,
 } from '@/modules/traffic';
 
-// Traffic
-import {
-  setupIntersectionRoutes,
-  setupLightRequestRoutes,
-  setupRoadRoutes,
-  setupTrafficEmergencyRoutes,
-  setupTrafficLightRoutes,
-} from '@/modules/traffic';
-
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
@@ -132,6 +123,7 @@ import { setupBinRoutes } from '@/modules/waste-management/routes';
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
+  setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
@@ -224,6 +216,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Weather
   setupOpenMeteoRoutes(app);
+  setupWeatherRatingRoutes(app);
   setupWeatherRoutes(app);
 
   // Volunteer
