@@ -10,7 +10,7 @@ const EmergencyCallSchema = z.object({
   id: z.number().int(),
   patientId: z.number().int().nullable(),
   callerPhone: z.string().max(20).nullable(),
-  emergencyType: z.string().max(100),
+  emergencyType: z.string().max(100).nullable(),
   severity: z.string().max(50).nullable(),
   addressId: z.number().int().nullable(),
   ambulanceId: z.number().int().nullable(),
@@ -21,65 +21,42 @@ const EmergencyCallSchema = z.object({
 
 const CreateEmergencyCallSchema = z.object({
   patientId: z.number().int().optional(),
-  callerPhone: z
-    .string()
-    .max(20, 'Caller phone must be at most 20 characters')
-    .optional(),
-  emergencyType: z
-    .string()
-    .min(1, 'Emergency type is required')
-    .max(100, 'Emergency type must be at most 100 characters'),
-  severity: z
-    .string()
-    .max(50, 'Severity must be at most 50 characters')
-    .optional(),
+  callerPhone: z.string().max(20).optional(),
+  emergencyType: z.string().max(100).optional(),
+  severity: z.string().max(50).optional(),
   addressId: z.number().int().optional(),
   ambulanceId: z.number().int().optional(),
   facilityId: z.number().int().optional(),
-  status: z.string().max(50, 'Status must be at most 50 characters').optional(),
+  status: z.string().max(50).optional(),
 });
 
 const UpdateEmergencyCallSchema = z.object({
   patientId: z.number().int().nullable().optional(),
-  callerPhone: z
-    .string()
-    .max(20, 'Caller phone must be at most 20 characters')
-    .nullable()
-    .optional(),
-  emergencyType: z
-    .string()
-    .min(1, 'Emergency type is required')
-    .max(100, 'Emergency type must be at most 100 characters')
-    .optional(),
-  severity: z
-    .string()
-    .max(50, 'Severity must be at most 50 characters')
-    .nullable()
-    .optional(),
+  callerPhone: z.string().max(20).nullable().optional(),
+  emergencyType: z.string().max(100).nullable().optional(),
+  severity: z.string().max(50).nullable().optional(),
   addressId: z.number().int().nullable().optional(),
   ambulanceId: z.number().int().nullable().optional(),
   facilityId: z.number().int().nullable().optional(),
-  status: z
-    .string()
-    .max(50, 'Status must be at most 50 characters')
-    .nullable()
-    .optional(),
+  status: z.string().max(50).nullable().optional(),
 });
 
 const EmergencyCallFilterSchema = z.object({
   patientId: z.coerce.number().int().optional(),
-  severity: z.string().optional(),
-  status: z.string().optional(),
+  callerPhone: z.string().optional(),
   emergencyType: z.string().optional(),
+  severity: z.string().optional(),
+  addressId: z.coerce.number().int().optional(),
   ambulanceId: z.coerce.number().int().optional(),
   facilityId: z.coerce.number().int().optional(),
+  status: z.string().optional(),
   search: z.string().optional(),
 });
 
 const EmergencyCallPaginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
-  sortBy: z.enum(['id', 'createdAt']).default('createdAt'),
+  sortBy: z.enum(['id', 'createdAt', 'severity']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
@@ -103,7 +80,7 @@ const getEmergencyCallRoute = createGetRoute({
   summary: 'Get emergency call by ID',
   responseSchema: EmergencyCallSchema,
   params: EmergencyCallIdParam,
-  tags: ['Emergency Calls'],
+  tags: ['EmergencyCalls'],
 });
 
 const createEmergencyCallRoute = createPostRoute({
@@ -111,7 +88,7 @@ const createEmergencyCallRoute = createPostRoute({
   summary: 'Create new emergency call',
   requestSchema: CreateEmergencyCallSchema,
   responseSchema: EmergencyCallSchema,
-  tags: ['Emergency Calls'],
+  tags: ['EmergencyCalls'],
 });
 
 const updateEmergencyCallRoute = createPutRoute({
@@ -120,14 +97,14 @@ const updateEmergencyCallRoute = createPutRoute({
   requestSchema: UpdateEmergencyCallSchema,
   responseSchema: EmergencyCallSchema,
   params: EmergencyCallIdParam,
-  tags: ['Emergency Calls'],
+  tags: ['EmergencyCalls'],
 });
 
 const deleteEmergencyCallRoute = createDeleteRoute({
   path: '/emergency-calls/{id}',
   summary: 'Delete emergency call',
   params: EmergencyCallIdParam,
-  tags: ['Emergency Calls'],
+  tags: ['EmergencyCalls'],
 });
 
 const listEmergencyCallsRoute = createGetRoute({
@@ -138,7 +115,15 @@ const listEmergencyCallsRoute = createGetRoute({
     ...EmergencyCallFilterSchema.shape,
     ...EmergencyCallPaginationSchema.shape,
   }),
-  tags: ['Emergency Calls'],
+  tags: ['EmergencyCalls'],
+});
+
+const listAllEmergencyCallsRoute = createGetRoute({
+  path: '/emergency-calls/all',
+  summary: 'List all emergency calls (no pagination)',
+  responseSchema: EmergencyCallsListSchema,
+  query: EmergencyCallFilterSchema,
+  tags: ['EmergencyCalls'],
 });
 
 export const EmergencyCallSchemas = {
