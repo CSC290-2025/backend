@@ -12,7 +12,7 @@ type AppointmentFilterOptions = z.infer<
   typeof AppointmentSchemas.AppointmentFilterSchema
 >;
 type AppointmentPaginationOptions = z.infer<
-  typeof AppointmentSchemas.PaginationSchema
+  typeof AppointmentSchemas.AppointmentPaginationSchema
 >;
 type PaginatedAppointments = z.infer<
   typeof AppointmentSchemas.PaginatedAppointmentsSchema
