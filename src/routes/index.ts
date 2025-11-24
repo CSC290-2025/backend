@@ -108,15 +108,6 @@ import {
   setupTrafficLightRoutes,
 } from '@/modules/traffic';
 
-// Traffic
-import {
-  setupIntersectionRoutes,
-  setupLightRequestRoutes,
-  setupRoadRoutes,
-  setupTrafficEmergencyRoutes,
-  setupTrafficLightRoutes,
-} from '@/modules/traffic';
-
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
