@@ -71,14 +71,15 @@ const register = async (data: RegisterRequest): Promise<AuthTokens> => {
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  const user = await AuthModel.createUser({
+  // --- Create user and wallet ---
+  const user = await AuthModel.registerUser({
     email: data.email,
     username: data.username,
     password_hash: hashedPassword,
   });
 
   if (!user) {
-    throw new ValidationError('Failed to create user, please try again');
+    throw new ValidationError('Failed to register user');
   }
 
   const payload: JwtPayload = {

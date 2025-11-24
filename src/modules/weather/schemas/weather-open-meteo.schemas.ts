@@ -40,6 +40,10 @@ const ExternalRawDailyOnlySchema = z.object({
   longitude: z.number(),
   utc_offset_seconds: z.number(),
   timezone: z.string(),
+  hourly: z.object({
+    time: z.array(z.string()),
+    relative_humidity_2m: z.array(z.number()),
+  }),
   daily: z.object({
     time: z.array(z.string()),
     temperature_2m_max: z.array(z.number()),

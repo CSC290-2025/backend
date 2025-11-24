@@ -18,6 +18,7 @@ import {
   setupAddressRoutes,
   setupUploadRoutes,
   setupBookingRoutes,
+  setupAPTOwnerRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -112,6 +113,9 @@ import {
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
+// Public Transportation
+import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
@@ -122,6 +126,7 @@ import { setupBinRoutes } from '@/modules/waste-management/routes';
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
+  setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
@@ -141,7 +146,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-
+  setupAPTOwnerRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
@@ -211,6 +216,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Weather
   setupOpenMeteoRoutes(app);
+  setupWeatherRatingRoutes(app);
   setupWeatherRoutes(app);
 
   // Volunteer
@@ -233,4 +239,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
+
+  // Public Transportation
+  app.route('/api', routeStopsRoutes);
 };

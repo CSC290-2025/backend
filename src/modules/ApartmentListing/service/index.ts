@@ -3,3 +3,4 @@ export * as roomService from './room.service';
 export * as ratingService from './rating.service';
 export * as addressService from './address.service';
 export * as bookingService from './booking.service';
+export * as ownerService from './owner.service';
