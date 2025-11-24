@@ -34,6 +34,144 @@ const mapPrescription = (record: PrescriptionRecord): Prescription => ({
   createdAt: record.created_at,
 });
 
+const normalizeStatus = (status?: string | null) =>
+  (status ?? '').trim().toLowerCase();
+
+const isDispensedStatus = (status?: string | null) =>
+  normalizeStatus(status) === 'dispensed';
+
+type MedicineListEntry = {
+  medicineId?: unknown;
+  name?: unknown;
+  quantity?: unknown;
+};
+
+const asNumber = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+};
+
+const extractMedicineId = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0)
+    return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return null;
+};
+
+const buildAdjustmentPlan = (medicinesList: unknown) => {
+  const byId = new Map<number, number>();
+  const byName = new Map<string, number>();
+
+  if (!Array.isArray(medicinesList)) {
+    return { byId, byName };
+  }
+
+  medicinesList.forEach((entry) => {
+    if (!entry || typeof entry !== 'object') return;
+    const item = entry as MedicineListEntry;
+
+    const quantity = asNumber(item.quantity);
+    if (quantity === null || quantity <= 0) return;
+
+    const medicineId = extractMedicineId(item.medicineId);
+    if (medicineId !== null) {
+      byId.set(medicineId, (byId.get(medicineId) ?? 0) + quantity);
+      return;
+    }
+
+    const name =
+      typeof item.name === 'string' ? item.name.trim().toLowerCase() : '';
+    if (!name) return;
+
+    byName.set(name, (byName.get(name) ?? 0) + quantity);
+  });
+
+  return { byId, byName };
+};
+
+const adjustInventoryForMedicines = async (
+  tx: Prisma.TransactionClient,
+  medicinesList: unknown
+) => {
+  const { byId, byName } = buildAdjustmentPlan(medicinesList);
+
+  if (byId.size === 0 && byName.size === 0) return;
+
+  for (const [id, quantity] of byId.entries()) {
+    const inventoryItem = await tx.medicine_inventory.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        stock_quantity: true,
+        medicine_name: true,
+      },
+    });
+    if (!inventoryItem) continue;
+
+    const currentQty = inventoryItem.stock_quantity ?? 0;
+    const nextQty = Math.max(0, currentQty - quantity);
+    if (nextQty === currentQty) continue;
+
+    await tx.medicine_inventory.update({
+      where: { id },
+      data: {
+        stock_quantity: nextQty,
+        is_in_stock: nextQty > 0,
+      },
+    });
+
+    const normalizedName = inventoryItem.medicine_name
+      ? inventoryItem.medicine_name.trim().toLowerCase()
+      : '';
+    if (normalizedName) {
+      byName.delete(normalizedName);
+    }
+  }
+
+  for (const [name, quantity] of byName.entries()) {
+    const inventoryItem = await tx.medicine_inventory.findFirst({
+      where: {
+        medicine_name: {
+          equals: name,
+          mode: 'insensitive',
+        },
+      },
+      select: {
+        id: true,
+        stock_quantity: true,
+      },
+    });
+
+    if (!inventoryItem) continue;
+
+    const currentQty = inventoryItem.stock_quantity ?? 0;
+    const nextQty = Math.max(0, currentQty - quantity);
+    if (nextQty === currentQty) continue;
+
+    await tx.medicine_inventory.update({
+      where: { id: inventoryItem.id },
+      data: {
+        stock_quantity: nextQty,
+        is_in_stock: nextQty > 0,
+      },
+    });
+  }
+};
+
+const shouldAdjustInventory = (
+  previousStatus?: string | null,
+  nextStatus?: string | null
+) => isDispensedStatus(nextStatus) && !isDispensedStatus(previousStatus);
+
 const buildWhereClause = (
   filters: PrescriptionFilterOptions = {}
 ): Prisma.prescriptionsWhereInput => {
@@ -132,15 +270,23 @@ const findWithPagination = async (
 
 const create = async (data: CreatePrescriptionData): Promise<Prescription> => {
   try {
-    const record = await prisma.prescriptions.create({
-      data: {
-        patient_id: data.patientId,
-        facility_id: data.facilityId ?? null,
-        status: data.status ?? null,
-        medicines_list: data.medicinesList ?? Prisma.JsonNull,
-        total_amount: data.totalAmount ?? 0,
-      },
-      select: prescriptionSelect,
+    const record = await prisma.$transaction(async (tx) => {
+      const created = await tx.prescriptions.create({
+        data: {
+          patient_id: data.patientId,
+          facility_id: data.facilityId ?? null,
+          status: data.status ?? null,
+          medicines_list: data.medicinesList ?? Prisma.JsonNull,
+          total_amount: data.totalAmount ?? 0,
+        },
+        select: prescriptionSelect,
+      });
+
+      if (isDispensedStatus(created.status)) {
+        await adjustInventoryForMedicines(tx, created.medicines_list);
+      }
+
+      return created;
     });
 
     return mapPrescription(record);
@@ -154,32 +300,45 @@ const update = async (
   data: UpdatePrescriptionData
 ): Promise<Prescription> => {
   try {
-    const updateData: Prisma.prescriptionsUncheckedUpdateInput = {};
+    const record = await prisma.$transaction(async (tx) => {
+      const previous = await tx.prescriptions.findUniqueOrThrow({
+        where: { id },
+        select: { status: true },
+      });
 
-    if (data.patientId !== undefined) {
-      updateData.patient_id = data.patientId;
-    }
+      const updateData: Prisma.prescriptionsUncheckedUpdateInput = {};
 
-    if (data.facilityId !== undefined) {
-      updateData.facility_id = data.facilityId ?? null;
-    }
+      if (data.patientId !== undefined) {
+        updateData.patient_id = data.patientId;
+      }
 
-    if (data.status !== undefined) {
-      updateData.status = data.status ?? null;
-    }
+      if (data.facilityId !== undefined) {
+        updateData.facility_id = data.facilityId ?? null;
+      }
 
-    if (data.medicinesList !== undefined) {
-      updateData.medicines_list = data.medicinesList ?? Prisma.JsonNull;
-    }
+      if (data.status !== undefined) {
+        updateData.status = data.status ?? null;
+      }
 
-    if (data.totalAmount !== undefined) {
-      updateData.total_amount = data.totalAmount;
-    }
+      if (data.medicinesList !== undefined) {
+        updateData.medicines_list = data.medicinesList ?? Prisma.JsonNull;
+      }
 
-    const record = await prisma.prescriptions.update({
-      where: { id },
-      data: updateData,
-      select: prescriptionSelect,
+      if (data.totalAmount !== undefined) {
+        updateData.total_amount = data.totalAmount;
+      }
+
+      const updated = await tx.prescriptions.update({
+        where: { id },
+        data: updateData,
+        select: prescriptionSelect,
+      });
+
+      if (shouldAdjustInventory(previous.status, updated.status)) {
+        await adjustInventoryForMedicines(tx, updated.medicines_list);
+      }
+
+      return updated;
     });
 
     return mapPrescription(record);

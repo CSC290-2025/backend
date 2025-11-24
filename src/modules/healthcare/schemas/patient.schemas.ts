@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { AppointmentSchemas } from './appointment.schemas';
 
 // Helper schema for appointment history JSON
 const AppointmentHistoryItemSchema = z
@@ -28,7 +29,7 @@ const PatientSchema = z.object({
     .string()
     .transform((val) => Number(val))
     .nullable(),
-  appointmentHistory: z.any().nullable(),
+  appointmentHistory: z.array(AppointmentSchemas.AppointmentSchema).default([]),
 });
 
 const CreatePatientSchema = z.object({
@@ -36,7 +37,6 @@ const CreatePatientSchema = z.object({
   dateOfBirth: z.coerce.date().optional(),
   bloodType: z.string().max(5).optional(),
   totalPayments: z.number().optional(),
-  appointmentHistory: z.any().optional(),
 });
 
 const UpdatePatientSchema = z.object({
@@ -44,7 +44,6 @@ const UpdatePatientSchema = z.object({
   dateOfBirth: z.coerce.date().nullable().optional(),
   bloodType: z.string().max(5).nullable().optional(),
   totalPayments: z.number().nullable().optional(),
-  appointmentHistory: z.any().nullable().optional(),
 });
 
 const PatientFilterSchema = z.object({

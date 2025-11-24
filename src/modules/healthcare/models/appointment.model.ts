@@ -195,6 +195,25 @@ const update = async (
   }
 };
 
+const isDoctorSlotAvailable = async (
+  doctorId: number,
+  appointmentAt: Date
+): Promise<boolean> => {
+  try {
+    const existing = await prisma.appointments.findFirst({
+      where: {
+        doctor_id: doctorId,
+        appointment_at: appointmentAt,
+      },
+      select: { id: true },
+    });
+
+    return !existing;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const deleteById = async (id: number): Promise<void> => {
   try {
     await prisma.appointments.delete({ where: { id } });
@@ -203,4 +222,12 @@ const deleteById = async (id: number): Promise<void> => {
   }
 };
 
-export { findById, findMany, findWithPagination, create, update, deleteById };
+export {
+  findById,
+  findMany,
+  findWithPagination,
+  create,
+  update,
+  deleteById,
+  isDoctorSlotAvailable,
+};

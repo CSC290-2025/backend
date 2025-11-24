@@ -7,6 +7,7 @@ import type {
   PatientFilterOptions,
   PatientPaginationOptions,
 } from '../types';
+import { PatientSchemas } from '../schemas';
 import * as PatientModel from '../models/patient.model';
 
 const parseRequiredNumber = (value: string, fieldName: string): number => {
@@ -61,7 +62,7 @@ const getPatient = async (c: Context) => {
 };
 
 const createPatient = async (c: Context) => {
-  const payload = (await c.req.json()) as CreatePatientData;
+  const payload = PatientSchemas.CreatePatientSchema.parse(await c.req.json());
   const patient = await PatientModel.create(payload);
 
   return successResponse(c, { patient }, 201, 'Patient created successfully');
@@ -69,7 +70,7 @@ const createPatient = async (c: Context) => {
 
 const updatePatient = async (c: Context) => {
   const id = parseRequiredNumber(c.req.param('id'), 'patient id');
-  const payload = (await c.req.json()) as UpdatePatientData;
+  const payload = PatientSchemas.UpdatePatientSchema.parse(await c.req.json());
 
   const patient = await PatientModel.update(id, payload);
   return successResponse(c, { patient }, 200, 'Patient updated successfully');

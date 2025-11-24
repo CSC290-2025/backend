@@ -8,6 +8,7 @@ import type {
   AppointmentPaginationOptions,
 } from '../types';
 import * as AppointmentModel from '../models/appointment.model';
+import { AppointmentSchemas } from '../schemas';
 
 const parseRequiredNumber = (value: string, fieldName: string): number => {
   const parsed = Number(value);
@@ -71,7 +72,24 @@ const getAppointment = async (c: Context) => {
 };
 
 const createAppointment = async (c: Context) => {
-  const payload = (await c.req.json()) as CreateAppointmentData;
+  const body = await c.req.json();
+  const payload = AppointmentSchemas.CreateAppointmentSchema.parse(
+    body
+  ) as CreateAppointmentData;
+
+  if (payload.doctorId && payload.appointmentAt) {
+    const isAvailable = await AppointmentModel.isDoctorSlotAvailable(
+      payload.doctorId,
+      payload.appointmentAt
+    );
+
+    if (!isAvailable) {
+      throw new ValidationError(
+        'Doctor is not available for the selected time slot'
+      );
+    }
+  }
+
   const appointment = await AppointmentModel.create(payload);
   return successResponse(
     c,

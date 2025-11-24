@@ -1,7 +1,8 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import { Prisma } from '@/generated/prisma';
+import type { Prisma } from '@/generated/prisma';
 import type {
+  Appointment,
   Patient,
   CreatePatientData,
   UpdatePatientData,
@@ -10,19 +11,52 @@ import type {
   PaginatedPatients,
 } from '../types';
 
+const appointmentHistorySelect = {
+  id: true,
+  patient_id: true,
+  facility_id: true,
+  appointment_at: true,
+  type: true,
+  created_at: true,
+  doctor_id: true,
+  consultation_fee: true,
+} satisfies Prisma.appointmentsSelect;
+
 const patientSelect = {
   id: true,
   emergency_contact: true,
   date_of_birth: true,
   blood_type: true,
   total_payments: true,
-  appointment_history: true,
   created_at: true,
+  appointments: {
+    select: appointmentHistorySelect,
+    orderBy: { appointment_at: 'desc' },
+  },
 } satisfies Prisma.patientsSelect;
+
+type AppointmentHistoryRecord = Prisma.appointmentsGetPayload<{
+  select: typeof appointmentHistorySelect;
+}>;
 
 type PatientRecord = Prisma.patientsGetPayload<{
   select: typeof patientSelect;
 }>;
+
+const mapAppointmentHistory = (
+  appointment: AppointmentHistoryRecord
+): Appointment => ({
+  id: appointment.id,
+  patientId: appointment.patient_id ?? null,
+  facilityId: appointment.facility_id ?? null,
+  appointmentAt: appointment.appointment_at ?? null,
+  type: appointment.type ?? null,
+  createdAt: appointment.created_at,
+  doctorId: appointment.doctor_id ?? null,
+  consultationFee: appointment.consultation_fee
+    ? Number(appointment.consultation_fee)
+    : null,
+});
 
 const mapPatient = (patient: PatientRecord): Patient => ({
   id: patient.id,
@@ -30,7 +64,7 @@ const mapPatient = (patient: PatientRecord): Patient => ({
   dateOfBirth: patient.date_of_birth ?? null,
   bloodType: patient.blood_type ?? null,
   totalPayments: patient.total_payments ? Number(patient.total_payments) : null,
-  appointmentHistory: patient.appointment_history ?? null,
+  appointmentHistory: (patient.appointments ?? []).map(mapAppointmentHistory),
   createdAt: patient.created_at,
 });
 
@@ -108,7 +142,6 @@ const create = async (data: CreatePatientData): Promise<Patient> => {
         date_of_birth: data.dateOfBirth ?? null,
         blood_type: data.bloodType ?? null,
         total_payments: data.totalPayments ?? 0,
-        appointment_history: data.appointmentHistory ?? Prisma.JsonNull,
       },
       select: patientSelect,
     });
@@ -140,11 +173,6 @@ const update = async (
 
     if (data.totalPayments !== undefined) {
       updateData.total_payments = data.totalPayments;
-    }
-
-    if (data.appointmentHistory !== undefined) {
-      updateData.appointment_history =
-        data.appointmentHistory ?? Prisma.JsonNull;
     }
 
     const patient = await prisma.patients.update({
