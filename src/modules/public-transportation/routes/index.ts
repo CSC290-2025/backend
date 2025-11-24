@@ -7,5 +7,3 @@ export { routeStopsRoutes };
 export { transactionRoute };
 export { handleCreateDigitalCard };
 export { topUpRoute };
-
-export { routeStopsRoutes };
