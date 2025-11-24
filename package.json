@@ -27,6 +27,7 @@
     "@prisma/extension-accelerate": "^2.0.2",
     "@ttwrpz/zipline-client": "github:ttwrpz/zipline-client-ts",
     "@types/multer": "^2.0.0",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "dotenv": "^17.2.2",
