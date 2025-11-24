@@ -114,7 +114,11 @@ import {
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
 // Public Transportation
-import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+import {
+  routeStopsRoutes,
+  topUpRoute,
+} from '@/modules/public-transportation/routes';
+import { transactionRoute } from '@/modules/public-transportation/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
@@ -128,6 +132,7 @@ import {
   setupOpenMeteoRoutes,
   setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
+import cardRoute from '@/modules/public-transportation/routes/digital_card.route';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
@@ -242,4 +247,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Public Transportation
   app.route('/api', routeStopsRoutes);
+  app.route('/api', transactionRoute);
+  app.route('/api', cardRoute);
+  app.route('/api', topUpRoute);
 };

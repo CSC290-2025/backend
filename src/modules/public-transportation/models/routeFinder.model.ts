@@ -106,6 +106,8 @@ const extractRouteDetails = (route: any) => {
     duration: leg.duration,
     detailedSteps: detailedSteps,
     fare: formattedFare,
+    // 🟢 เพิ่ม Polyline เพื่อส่งกลับ Frontend
+    overview_polyline: route.overview_polyline,
   };
 };
 
@@ -132,6 +134,10 @@ const findNearestTransitStop = async (
   }
 };
 
+/**
+ * [แก้ไขแล้ว] ปรับปรุงตรรกะการกำหนด Origin/Destination และแก้ไข Missing Return Path
+ * เพื่อป้องกันไม่ให้ฟังก์ชันคืนค่าเป็น undefined
+ */
 export const getRoutes = async (
   origin: string | undefined,
   origLat: string | undefined,
@@ -142,29 +148,26 @@ export const getRoutes = async (
   waypoints: string = ''
 ) => {
   let finalOrigin = '';
+  let finalDestination = '';
 
+  // 1. กำหนด ORIGIN: ใช้ GPS ก่อน แล้วตามด้วยชื่อ
   if (origLat && origLng) {
     finalOrigin = `${origLat},${origLng}`;
   } else if (origin && origin.length > 0) {
     finalOrigin = origin;
   }
 
-  if (!finalOrigin) {
-    throw new Error(
-      'Could not determine a starting point (origin or GPS location).'
-    );
-  }
-
-  let finalDestination = '';
-
+  // 2. กำหนด DESTINATION: ใช้ GPS ก่อน แล้วตามด้วยชื่อ
   if (destLat && destLng) {
     finalDestination = `${destLat},${destLng}`;
   } else if (destination && destination.length > 0) {
     finalDestination = destination;
   }
 
-  if (!finalDestination) {
-    throw new Error('Could not determine a destination point.');
+  // 3. ตรวจสอบว่ามี Origin และ Destination หรือไม่
+  if (!finalOrigin || !finalDestination) {
+    // ในทางปฏิบัติ Controller ได้ตรวจสอบแล้ว แต่ควรมีใน Model เพื่อความปลอดภัย
+    throw new Error('Missing Origin or Destination coordinates/name.');
   }
 
   const encodedOrigin = encodeURIComponent(finalOrigin);
@@ -191,6 +194,7 @@ export const getRoutes = async (
         }
       );
 
+      // 🎯 RETURN PATH 1: ส่งผลลัพธ์ที่ถูกต้อง
       return {
         allRoutesSummarized: allRoutesSummarized,
         fastestRouteSummary: fastestRouteSummary,
@@ -199,10 +203,7 @@ export const getRoutes = async (
       const errorMessage =
         data.error_message ||
         `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
-
-      throw new Error(
-        `Google API status: ${data.status}. No valid routes found.`
-      );
+      throw new Error(errorMessage);
     }
   } catch (error) {
     console.error('Error fetching route stops:', error);
