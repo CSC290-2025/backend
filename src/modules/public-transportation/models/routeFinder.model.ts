@@ -134,6 +134,10 @@ const findNearestTransitStop = async (
   }
 };
 
+/**
+ * [แก้ไขแล้ว] ปรับปรุงตรรกะการกำหนด Origin/Destination และแก้ไข Missing Return Path
+ * เพื่อป้องกันไม่ให้ฟังก์ชันคืนค่าเป็น undefined
+ */
 export const getRoutes = async (
   origin: string | undefined,
   origLat: string | undefined,
@@ -144,90 +148,65 @@ export const getRoutes = async (
   waypoints: string = ''
 ) => {
   let finalOrigin = '';
+  let finalDestination = '';
 
-  // 1. ORIGIN: ให้ความสำคัญกับพิกัด (Lat,Lng) ที่ส่งมาเป็นอันดับแรก
+  // 1. กำหนด ORIGIN: ใช้ GPS ก่อน แล้วตามด้วยชื่อ
   if (origLat && origLng) {
     finalOrigin = `${origLat},${origLng}`;
+  } else if (origin && origin.length > 0) {
+    finalOrigin = origin;
   }
-  // 2. ORIGIN: ถ้าไม่มีพิกัด ให้ใช้ชื่อที่ Geocode แล้ว
-  else if (origin && origin.length > 0) {
-    if (origLat && origLng) {
-      finalOrigin = `${origLat},${origLng}`;
-    } else if (origin && origin.length > 0) {
-      finalOrigin = origin;
-    }
 
-    if (!finalOrigin) {
-      throw new Error(
-        'Could not determine a starting point (origin or GPS location).'
-      );
-    }
+  // 2. กำหนด DESTINATION: ใช้ GPS ก่อน แล้วตามด้วยชื่อ
+  if (destLat && destLng) {
+    finalDestination = `${destLat},${destLng}`;
+  } else if (destination && destination.length > 0) {
+    finalDestination = destination;
+  }
 
-    let finalDestination = '';
+  // 3. ตรวจสอบว่ามี Origin และ Destination หรือไม่
+  if (!finalOrigin || !finalDestination) {
+    // ในทางปฏิบัติ Controller ได้ตรวจสอบแล้ว แต่ควรมีใน Model เพื่อความปลอดภัย
+    throw new Error('Missing Origin or Destination coordinates/name.');
+  }
 
-    // 1. DESTINATION: ใช้พิกัดโดยตรงเป็นอันดับแรก
-    if (destLat && destLng) {
-      finalDestination = `${destLat},${destLng}`;
-    }
-    // 2. DESTINATION: ถ้าไม่มีพิกัด ให้ใช้ชื่อที่ Geocode แล้ว
-    else if (destination && destination.length > 0) {
-      if (destLat && destLng) {
-        finalDestination = `${destLat},${destLng}`;
-      } else if (destination && destination.length > 0) {
-        finalDestination = destination;
-      }
+  const encodedOrigin = encodeURIComponent(finalOrigin);
+  const encodedDestination = encodeURIComponent(finalDestination);
 
-      if (!finalDestination) {
-        throw new Error('Could not determine a destination point.');
-      }
+  const currentTimestamp = Math.floor(Date.now() / 1000);
 
-      const encodedOrigin = encodeURIComponent(finalOrigin);
-      const encodedDestination = encodeURIComponent(finalDestination);
+  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
 
-      const currentTimestamp = Math.floor(Date.now() / 1000);
+  try {
+    const response = await fetch(googleMapsUrl);
+    const data = await response.json();
 
-      const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&waypoints=${waypoints}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
+    if (data.status === 'OK' && data.routes && data.routes.length > 0) {
+      const allRoutes = data.routes;
 
-      try {
-        const response = await fetch(googleMapsUrl);
-        const data = await response.json();
+      const allRoutesSummarized = allRoutes
+        .map(extractRouteDetails)
+        .filter((route: any) => route !== null);
 
-        if (data.status === 'OK' && data.routes && data.routes.length > 0) {
-          const allRoutes = data.routes;
-
-          const allRoutesSummarized = allRoutes
-            .map(extractRouteDetails)
-            .filter((route: any) => route !== null);
-
-          const fastestRouteSummary = allRoutesSummarized.reduce(
-            (prev: any, current: any) => {
-              return prev.duration.value < current.duration.value
-                ? prev
-                : current;
-            }
-          );
-
-          return {
-            allRoutesSummarized: allRoutesSummarized,
-            fastestRouteSummary: fastestRouteSummary,
-          };
-        } else {
-          const errorMessage =
-            data.error_message ||
-            `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
-
-          throw new Error(
-            `Google API status: ${data.status}. No valid routes found.`
-          );
-
-          throw new Error(
-            `Google API status: ${data.status}. No valid routes found.`
-          );
+      const fastestRouteSummary = allRoutesSummarized.reduce(
+        (prev: any, current: any) => {
+          return prev.duration.value < current.duration.value ? prev : current;
         }
-      } catch (error) {
-        console.error('Error fetching route stops:', error);
-        throw error;
-      }
+      );
+
+      // 🎯 RETURN PATH 1: ส่งผลลัพธ์ที่ถูกต้อง
+      return {
+        allRoutesSummarized: allRoutesSummarized,
+        fastestRouteSummary: fastestRouteSummary,
+      };
+    } else {
+      const errorMessage =
+        data.error_message ||
+        `Google API status: ${data.status || 'UNKNOWN'}. No valid routes found.`;
+      throw new Error(errorMessage);
     }
+  } catch (error) {
+    console.error('Error fetching route stops:', error);
+    throw error;
   }
 };
