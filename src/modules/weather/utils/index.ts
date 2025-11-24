@@ -1,1 +1,5 @@
-export { bangkokDistricts, getDistrictByLocationId } from './bangkok-districts';
+export {
+  bangkokDistricts,
+  getDistrictByLocationId,
+  getDistrictByAddressId,
+} from './bangkok-districts';
