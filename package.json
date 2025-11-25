@@ -7,6 +7,8 @@
     "start": "node dist/index.cjs",
     "migrate": "prisma migrate dev",
     "seed": "tsx prisma/users.seed.ts",
+    "seed:roles": "tsx prisma/roles.seed.ts",
+    "seed:all": "tsx prisma/roles.seed.ts && tsx prisma/users.seed.ts",
     "type-check": "tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",

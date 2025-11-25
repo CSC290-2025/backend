@@ -13,32 +13,15 @@ const app = new OpenAPIHono();
 app.onError(errorHandler);
 
 app.use(
-  '*',
   cors({
-    // Echo back the incoming origin when it's allowed — required when sending credentials
-    origin: (requestOrigin) => {
-      // Note: origins must match the incoming request origin exactly
-      // Do NOT include trailing slashes — browsers send origins without a trailing slash
-      const devAllowed = ['http://localhost:5173', 'http://127.0.0.1:5173'];
-      const prodAllowed = [
-        'https://smartcity.sit.kmutt.ac.th',
-        'https://smartcity.sit.kmutt.ac.th',
-      ];
-      const allowed = config.isProduction ? prodAllowed : devAllowed;
-      if (!requestOrigin) return undefined;
-      return allowed.includes(requestOrigin) ? requestOrigin : undefined;
+    origin: (origin) => {
+      if (config.isProduction) {
+        return 'https://smartcity.sit.kmutt.ac.th';
+      }
+      return origin || 'http://localhost:5173';
     },
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Accept',
-      'X-Requested-With',
-      'X-CSRF-Token',
-    ],
-    exposeHeaders: ['Set-Cookie'],
+    allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
-    maxAge: 86400,
   })
 );
 
