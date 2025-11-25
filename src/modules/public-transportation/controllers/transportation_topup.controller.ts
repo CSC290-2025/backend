@@ -15,7 +15,7 @@ export const handleTopUp = async (c: Context) => {
 
     return successResponse(c, result, 200, 'Balance topped up successfully.');
   } catch (error: any) {
-    console.error('Top Up transaction failed:', error.message);
+    console.error('Top Up transaction failed:', error);
     return errorResponse(c, error.message, 400);
   }
 };
