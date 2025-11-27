@@ -9,14 +9,14 @@ const listWeather = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-// Return every weather record created on the provided YYYY-MM-DD date.
+// Return every weather record created on the provided YYYY-MM-DD Bangkok date.
 const getWeatherByDate = async (c: Context) => {
   const { date } = WeatherSchemas.WeatherDateParam.parse(c.req.param());
   const data = await WeatherService.getWeatherByDate(date);
   return successResponse(c, { data });
 };
 
-// Return weather records between the `from` and `to` query bounds (inclusive).
+// Return weather records between the `from` and `to` Bangkok dates (inclusive).
 const listWeatherByDateRange = async (c: Context) => {
   const { from, to } = WeatherSchemas.WeatherDateRangeQuery.parse(
     c.req.query()
@@ -34,7 +34,7 @@ const getWeatherByLocation = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-// Delete all weather records on the provided date and report the count removed.
+// Delete all weather records on the provided Bangkok date and report the count removed.
 const deleteWeatherByDate = async (c: Context) => {
   const { date } = WeatherSchemas.WeatherDateParam.parse(c.req.param());
   const result = await WeatherService.deleteWeatherByDate(date);

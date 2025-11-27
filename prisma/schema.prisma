@@ -220,13 +220,12 @@ model departments {
 }
 
 model digital_cards {
-  id                          Int                           @id @default(autoincrement())
-  user_id                     Int?
-  status                      String                        @default("active") @db.VarChar(20)
-  balance                     Decimal?                      @db.Decimal(14, 2)
-  finance_card_number         String?                       @unique @db.VarChar(100)
-  users                       users?                        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  transportation_transactions transportation_transactions[]
+  id                  Int      @id @default(autoincrement())
+  user_id             Int?
+  status              String   @default("active") @db.VarChar(20)
+  balance             Decimal? @db.Decimal(14, 2)
+  finance_card_number String?  @unique @db.VarChar(100)
+  users               users?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model dim_category {
@@ -376,12 +375,14 @@ model facilities {
   ambulances         ambulances[]
   appointments       appointments[]
   beds               beds[]
+  doctors            doctors[]
   emergency_calls    emergency_calls[]
   addresses          addresses?               @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   departments        departments?             @relation(fields: [department_id], references: [id], onUpdate: NoAction)
   medicine_inventory medicine_inventory[]
   payments           payments[]
   prescriptions      prescriptions[]
+  staff              staff[]
 
   @@index([location], map: "idx_facilities_location", type: Gist)
 }
@@ -540,15 +541,16 @@ model messages {
 }
 
 model metro_cards {
-  id          Int            @id @default(autoincrement())
-  user_id     Int?
-  balance     Decimal?       @default(0) @db.Decimal(14, 2)
-  card_number String?        @unique @db.VarChar(255)
-  status      wallet_status? @default(active)
-  created_at  DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime       @default(now()) @db.Timestamptz(6)
-  card_hash   String?        @unique(map: "unique_card_hash") @db.VarChar(255)
-  users       users?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                          Int                           @id @default(autoincrement())
+  user_id                     Int?
+  balance                     Decimal?                      @default(0) @db.Decimal(14, 2)
+  card_number                 String?                       @unique @db.VarChar(255)
+  status                      wallet_status?                @default(active)
+  created_at                  DateTime                      @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime                      @default(now()) @db.Timestamptz(6)
+  card_hash                   String?                       @unique(map: "unique_card_hash") @db.VarChar(255)
+  users                       users?                        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  transportation_transactions transportation_transactions[]
 }
 
 model onsite_enrollments {
@@ -829,16 +831,18 @@ model traffic_lights {
 }
 
 model transportation_transactions {
-  id               Int            @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   card_id          Int?
   route_id         Int?
-  amount           Decimal?       @db.Decimal(12, 2)
-  status           String?        @db.VarChar(50)
-  created_at       DateTime       @default(now()) @db.Timestamptz(6)
+  amount           Decimal?     @db.Decimal(12, 2)
+  status           String?      @db.VarChar(50)
+  created_at       DateTime     @default(now()) @db.Timestamptz(6)
   tap_in_location  String?
   tap_out_location String?
-  digital_cards    digital_cards? @relation(fields: [card_id], references: [id], onUpdate: NoAction)
-  routes           routes?        @relation(fields: [route_id], references: [id], onUpdate: NoAction)
+  digital_cards    metro_cards? @relation(fields: [card_id], references: [id], onUpdate: NoAction)
+  routes           routes?      @relation(fields: [route_id], references: [id], onUpdate: NoAction)
+
+  @@index([card_id], map: "fki_transac")
 }
 
 model transportation_vehicle_types {
@@ -924,6 +928,7 @@ model users {
   refresh_tokens                refresh_tokens[]
   sessions                      sessions[]
   sos                           sos[]
+  staff                         staff[]
   traffic_emergencies           traffic_emergencies[]
   user_exercises                user_exercises[]
   user_levels                   user_levels?
@@ -1106,7 +1111,9 @@ model doctors {
   current_status   String?        @default("available") @db.VarChar(255)
   consultation_fee Decimal?       @default(0) @db.Decimal(12, 2)
   created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  facility_id      Int?
   appointments     appointments[]
+  facilities       facilities?    @relation(fields: [facility_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_facility_id")
   users            users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_id")
 }
 
@@ -1133,9 +1140,19 @@ model medicine_inventory {
 model weather_rating {
   id         Int        @id @default(autoincrement())
   address_id Int?
-  date       DateTime?  @db.Date
-  rating     Decimal?   @db.Decimal(12, 2)
+  date       DateTime?  @default(now()) @db.Timestamptz(6)
+  rating     Decimal?   @db.Decimal(3, 2)
   addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
+}
+
+model staff {
+  id          Int         @id @default(autoincrement())
+  user_id     Int?
+  facility_id Int?
+  role        String?     @default("admin") @db.VarChar(100)
+  created_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  facilities  facilities? @relation(fields: [facility_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_staff_facility_id")
+  users       users?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_staff_user_id")
 }
 
 enum air_quality_category {
