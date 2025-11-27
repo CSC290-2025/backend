@@ -6,57 +6,57 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
+const GeoPointSchema = z.object({
+  type: z.literal('Point'),
+  coordinates: z
+    .tuple([
+      z.number().min(-180).max(180, 'Longitude must be between -180 and 180'),
+      z.number().min(-90).max(90, 'Latitude must be between -90 and 90'),
+    ])
+    .describe('Coordinates in [longitude, latitude] order'),
+});
+
 const FacilitySchema = z.object({
   id: z.number().int(),
-  name: z.string(),
-  facilityType: z.string().nullable(),
+  name: z.string().max(255),
+  facilityType: z.string().max(100).nullable(),
   addressId: z.number().int().nullable(),
-  phone: z.string().nullable(),
+  phone: z.string().max(20).nullable(),
+  location: GeoPointSchema.nullable(),
   emergencyServices: z.boolean().nullable(),
   departmentId: z.number().int().nullable(),
   createdAt: z.date(),
 });
 
 const CreateFacilitySchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(255, 'Name must be at most 255 characters'),
-  facilityType: z
-    .string()
-    .max(100, 'Facility type must be at most 100 characters')
-    .optional(),
+  name: z.string().min(1).max(255),
+  facilityType: z.string().max(100).optional(),
   addressId: z.number().int().optional(),
-  phone: z.string().max(20, 'Phone must be at most 20 characters').optional(),
+  phone: z.string().max(20).optional(),
+  location: GeoPointSchema.optional(),
   emergencyServices: z.boolean().optional(),
   departmentId: z.number().int().optional(),
 });
 
 const UpdateFacilitySchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name must be at least 1 character')
-    .max(255, 'Name must be at most 255 characters')
-    .optional(),
-  facilityType: z
-    .string()
-    .max(100, 'Facility type must be at most 100 characters')
-    .optional(),
-  addressId: z.number().int().optional(),
-  phone: z.string().max(20, 'Phone must be at most 20 characters').optional(),
-  emergencyServices: z.boolean().optional(),
-  departmentId: z.number().int().optional(),
+  name: z.string().min(1).max(255).optional(),
+  facilityType: z.string().max(100).nullable().optional(),
+  addressId: z.number().int().nullable().optional(),
+  phone: z.string().max(20).nullable().optional(),
+  location: GeoPointSchema.nullable().optional(),
+  emergencyServices: z.boolean().nullable().optional(),
+  departmentId: z.number().int().nullable().optional(),
 });
 
 const FacilityFilterSchema = z.object({
   addressId: z.coerce.number().int().optional(),
-  departmentId: z.coerce.number().int().optional(),
   facilityType: z.string().optional(),
   emergencyServices: z.coerce.boolean().optional(),
+  departmentId: z.coerce.number().int().optional(),
   search: z.string().optional(),
 });
 
-const PaginationSchema = z.object({
+const FacilityPaginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
   sortBy: z.enum(['id', 'createdAt', 'name']).default('createdAt'),
@@ -116,17 +116,18 @@ const listFacilitiesRoute = createGetRoute({
   responseSchema: PaginatedFacilitiesSchema,
   query: z.object({
     ...FacilityFilterSchema.shape,
-    ...PaginationSchema.shape,
+    ...FacilityPaginationSchema.shape,
   }),
   tags: ['Facilities'],
 });
 
 export const FacilitySchemas = {
+  GeoPointSchema,
   FacilitySchema,
   CreateFacilitySchema,
   UpdateFacilitySchema,
   FacilityFilterSchema,
-  PaginationSchema,
+  FacilityPaginationSchema,
   PaginatedFacilitiesSchema,
   FacilitiesListSchema,
   FacilityIdParam,

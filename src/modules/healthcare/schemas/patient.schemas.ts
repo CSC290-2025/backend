@@ -5,40 +5,56 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { AppointmentSchemas } from './appointment.schemas';
+
+// Helper schema for appointment history JSON
+const AppointmentHistoryItemSchema = z
+  .object({
+    id: z.number(),
+    date: z.string(),
+    type: z.string(),
+    status: z.string(),
+    // Add other fields as needed based on actual JSON structure
+  })
+  .passthrough();
 
 // Zod schemas
 const PatientSchema = z.object({
   id: z.number().int(),
-  userId: z.number().int().nullable(),
   emergencyContact: z.string().max(200).nullable(),
   createdAt: z.date(),
+  dateOfBirth: z.date().nullable(),
+  bloodType: z.string().max(5).nullable(),
+  totalPayments: z
+    .string()
+    .transform((val) => Number(val))
+    .nullable(),
+  appointmentHistory: z.array(AppointmentSchemas.AppointmentSchema).default([]),
 });
 
 const CreatePatientSchema = z.object({
-  userId: z.number().int().optional(),
-  emergencyContact: z
-    .string()
-    .max(200, 'Emergency contact must be at most 200 characters')
-    .optional(),
+  emergencyContact: z.string().max(200).optional(),
+  dateOfBirth: z.coerce.date().optional(),
+  bloodType: z.string().max(5).optional(),
+  totalPayments: z.number().optional(),
 });
 
 const UpdatePatientSchema = z.object({
-  userId: z.number().int().optional(),
-  emergencyContact: z
-    .string()
-    .max(200, 'Emergency contact must be at most 200 characters')
-    .optional(),
+  emergencyContact: z.string().max(200).nullable().optional(),
+  dateOfBirth: z.coerce.date().nullable().optional(),
+  bloodType: z.string().max(5).nullable().optional(),
+  totalPayments: z.number().nullable().optional(),
 });
 
 const PatientFilterSchema = z.object({
-  userId: z.coerce.number().int().optional(),
+  bloodType: z.string().optional(),
   search: z.string().optional(),
 });
 
-const PaginationSchema = z.object({
+const PatientPaginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
-  sortBy: z.enum(['id', 'createdAt']).default('createdAt'),
+  sortBy: z.enum(['id', 'createdAt', 'dateOfBirth']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
@@ -96,7 +112,7 @@ const listPatientsRoute = createGetRoute({
   responseSchema: PaginatedPatientsSchema,
   query: z.object({
     ...PatientFilterSchema.shape,
-    ...PaginationSchema.shape,
+    ...PatientPaginationSchema.shape,
   }),
   tags: ['Patients'],
 });
@@ -106,7 +122,7 @@ export const PatientSchemas = {
   CreatePatientSchema,
   UpdatePatientSchema,
   PatientFilterSchema,
-  PaginationSchema,
+  PatientPaginationSchema,
   PaginatedPatientsSchema,
   PatientsListSchema,
   PatientIdParam,
