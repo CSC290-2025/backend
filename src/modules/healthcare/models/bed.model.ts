@@ -25,15 +25,15 @@ type BedRecord = Prisma.bedsGetPayload<{
   select: typeof bedSelect;
 }>;
 
-const mapBed = (bed: BedRecord): Bed => ({
-  id: bed.id,
-  facilityId: bed.facility_id ?? null,
-  bedNumber: bed.bed_number ?? null,
-  bedType: bed.bed_type ?? null,
-  status: bed.status ?? null,
-  patientId: bed.patient_id ?? null,
-  admissionDate: bed.admission_date ?? null,
-  createdAt: bed.created_at,
+const mapBed = (record: BedRecord): Bed => ({
+  id: record.id,
+  facilityId: record.facility_id ?? null,
+  bedNumber: record.bed_number ?? null,
+  bedType: record.bed_type ?? null,
+  status: record.status ?? null,
+  patientId: record.patient_id ?? null,
+  admissionDate: record.admission_date ?? null,
+  createdAt: record.created_at,
 });
 
 const buildWhereClause = (
@@ -50,36 +50,20 @@ const buildWhereClause = (
   }
 
   if (filters.status) {
-    where.status = {
-      equals: filters.status,
-      mode: 'insensitive',
-    };
+    where.status = filters.status;
+  }
+
+  if (filters.bedType) {
+    where.bed_type = filters.bedType;
   }
 
   if (filters.search) {
     const searchTerm = filters.search.trim();
-
     if (searchTerm.length > 0) {
-      where.OR = [
-        {
-          bed_number: {
-            contains: searchTerm,
-            mode: 'insensitive',
-          },
-        },
-        {
-          bed_type: {
-            contains: searchTerm,
-            mode: 'insensitive',
-          },
-        },
-        {
-          status: {
-            contains: searchTerm,
-            mode: 'insensitive',
-          },
-        },
-      ];
+      where.bed_number = {
+        contains: searchTerm,
+        mode: 'insensitive',
+      };
     }
   }
 
@@ -95,6 +79,7 @@ const getOrderBy = (
       return { id: sortOrder };
     case 'bedNumber':
       return { bed_number: sortOrder };
+    case 'createdAt':
     default:
       return { created_at: sortOrder };
   }
@@ -102,84 +87,12 @@ const getOrderBy = (
 
 const findById = async (id: number): Promise<Bed | null> => {
   try {
-    const bed = await prisma.beds.findUnique({
+    const record = await prisma.beds.findUnique({
       where: { id },
       select: bedSelect,
     });
-    return bed ? mapBed(bed) : null;
-  } catch (error) {
-    handlePrismaError(error);
-  }
-};
 
-const create = async (data: CreateBedData): Promise<Bed> => {
-  try {
-    console.log('data', data);
-    const bed = await prisma.beds.create({
-      data: {
-        facility_id: data.facilityId ?? null,
-        bed_number: data.bedNumber ?? null,
-        bed_type: data.bedType ?? null,
-        status: data.status ?? null,
-        patient_id: data.patientId ?? null,
-        admission_date: data.admissionDate
-          ? new Date(data.admissionDate)
-          : null,
-      },
-      select: bedSelect,
-    });
-    return mapBed(bed);
-  } catch (error) {
-    console.log('error', error);
-    handlePrismaError(error);
-  }
-};
-
-const update = async (id: number, data: UpdateBedData): Promise<Bed> => {
-  try {
-    const updateData: Prisma.bedsUncheckedUpdateInput = {};
-
-    if (data.facilityId !== undefined) {
-      updateData.facility_id = data.facilityId;
-    }
-
-    if (data.bedNumber !== undefined) {
-      updateData.bed_number = data.bedNumber;
-    }
-
-    if (data.bedType !== undefined) {
-      updateData.bed_type = data.bedType;
-    }
-
-    if (data.status !== undefined) {
-      updateData.status = data.status;
-    }
-
-    if (data.patientId !== undefined) {
-      updateData.patient_id = data.patientId;
-    }
-
-    if (data.admissionDate !== undefined) {
-      updateData.admission_date = data.admissionDate
-        ? new Date(data.admissionDate)
-        : null;
-    }
-
-    const bed = await prisma.beds.update({
-      where: { id },
-      data: updateData,
-      select: bedSelect,
-    });
-
-    return mapBed(bed);
-  } catch (error) {
-    handlePrismaError(error);
-  }
-};
-
-const deleteById = async (id: number): Promise<void> => {
-  try {
-    await prisma.beds.delete({ where: { id } });
+    return record ? mapBed(record) : null;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -187,13 +100,13 @@ const deleteById = async (id: number): Promise<void> => {
 
 const findMany = async (filters: BedFilterOptions = {}): Promise<Bed[]> => {
   try {
-    const beds = await prisma.beds.findMany({
+    const records = await prisma.beds.findMany({
       where: buildWhereClause(filters),
       select: bedSelect,
       orderBy: { created_at: 'desc' },
     });
 
-    return beds.map(mapBed);
+    return records.map(mapBed);
   } catch (error) {
     handlePrismaError(error);
   }
@@ -230,4 +143,56 @@ const findWithPagination = async (
   }
 };
 
-export { findById, create, update, deleteById, findMany, findWithPagination };
+const create = async (data: CreateBedData): Promise<Bed> => {
+  try {
+    const record = await prisma.beds.create({
+      data: {
+        facility_id: data.facilityId,
+        bed_number: data.bedNumber,
+        bed_type: data.bedType,
+        status: data.status,
+        patient_id: data.patientId,
+        admission_date: data.admissionDate,
+      },
+      select: bedSelect,
+    });
+
+    return mapBed(record);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const update = async (id: number, data: UpdateBedData): Promise<Bed> => {
+  try {
+    const updateData: Prisma.bedsUncheckedUpdateInput = {};
+
+    if (data.facilityId !== undefined) updateData.facility_id = data.facilityId;
+    if (data.bedNumber !== undefined) updateData.bed_number = data.bedNumber;
+    if (data.bedType !== undefined) updateData.bed_type = data.bedType;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.patientId !== undefined) updateData.patient_id = data.patientId;
+    if (data.admissionDate !== undefined)
+      updateData.admission_date = data.admissionDate;
+
+    const record = await prisma.beds.update({
+      where: { id },
+      data: updateData,
+      select: bedSelect,
+    });
+
+    return mapBed(record);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const deleteById = async (id: number): Promise<void> => {
+  try {
+    await prisma.beds.delete({ where: { id } });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { findById, findMany, findWithPagination, create, update, deleteById };

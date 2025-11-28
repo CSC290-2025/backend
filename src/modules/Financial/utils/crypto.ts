@@ -66,3 +66,21 @@ export function normalizeCardNumber(cardNumber: string): string {
   }
   return `MET-${cleaned}`;
 }
+
+export function formatInsuranceCardNumber(cardNumber: string): string {
+  // Remove any non-digit characters
+  const cleaned = cardNumber.replace(/\D/g, '');
+
+  // Check if we have exactly 12 digits
+  if (cleaned.length !== 12) {
+    // If not 12 digits, return original (or handle error as needed,
+    // but for now we'll return original to let validation fail elsewhere if needed)
+    return cardNumber;
+  }
+
+  // Format as INS-XXXXXX-XXXXXX
+  const part1 = cleaned.slice(0, 6);
+  const part2 = cleaned.slice(6);
+
+  return `INS-${part1}-${part2}`;
+}

@@ -21,7 +21,6 @@ export class WasteModel {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    // 1️⃣ Find today's waste log with this type
     let wasteLog = await prisma.waste_event_statistics.findFirst({
       where: {
         collection_date: { gte: todayStart, lte: todayEnd },
@@ -32,14 +31,12 @@ export class WasteModel {
     });
 
     if (wasteLog) {
-      // 2️⃣ If exists, update total_collection_weight
       wasteLog = await prisma.waste_event_statistics.update({
         where: { id: wasteLog.id },
         data: { total_collection_weight: { increment: weight } },
         include: { waste_types: true },
       });
     } else {
-      // 3️⃣ If not, create new waste type and log
       const wasteType = await prisma.waste_types.create({
         data: { type_name: wasteTypeName },
       });
