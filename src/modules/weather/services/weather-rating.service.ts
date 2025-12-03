@@ -10,26 +10,11 @@ import type {
 import { NotFoundError, ValidationError } from '@/errors';
 import { getDistrictByAddressId, getDistrictByLocationId } from '../utils';
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
 type WeatherRatingRecord = Prisma.weather_ratingGetPayload<{
   include: {
     addresses: { select: { district: true } };
   };
 }>;
-
-const BANGKOK_TIMEZONE = 'Asia/Bangkok';
-
-const bangkokFormatter = new Intl.DateTimeFormat('en-CA', {
-  timeZone: BANGKOK_TIMEZONE,
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
-
-// Format the current time in Bangkok as YYYY-MM-DD.
-const getBangkokDate = (value: Date = new Date()): string =>
-  bangkokFormatter.format(value);
 
 // Guarded conversion to YYYY-MM-DD regardless of Date/string input.
 const formatDateOnly = (value: Date | string): string => {
@@ -68,23 +53,8 @@ const mapToWeatherRating = (record: WeatherRatingRecord): WeatherRating => {
   };
 };
 
-// Ensure incoming dates match YYYY-MM-DD format.
-const validateDate = (value: string): void => {
-  if (!DATE_REGEX.test(value)) {
-    throw new ValidationError('Invalid date format. Use YYYY-MM-DD');
-  }
-};
-
-// Ensure location ids are positive integers.
-const validateLocationId = (value: number): void => {
-  if (!Number.isInteger(value) || value <= 0) {
-    throw new ValidationError('location_id must be a positive integer');
-  }
-};
-
 // Resolve a public location id into a persisted address id, validating existence.
 const resolveAddressId = async (locationId: number): Promise<number> => {
-  validateLocationId(locationId);
   const district = getDistrictByLocationId(locationId);
   const addressId = district?.address_id ?? locationId;
   const address = await prisma.addresses.findUnique({
@@ -107,7 +77,6 @@ const createWeatherRating = async (
   const addressId = await resolveAddressId(payload.location_id);
   const record = await WeatherRatingModel.create({
     address_id: addressId,
-    date: getBangkokDate(),
     rating: payload.rating,
   });
   return mapToWeatherRating(record);
@@ -134,9 +103,6 @@ const listWeatherRatings = async (): Promise<WeatherRating[]> => {
 const getAverageWeatherRatings = async (
   query: WeatherRatingAverageQuery
 ): Promise<WeatherRatingAverageItem[]> => {
-  if (query.date) {
-    validateDate(query.date);
-  }
   const normalizedQuery: WeatherRatingAverageQuery = { ...query };
   if (query.location_id !== undefined) {
     normalizedQuery.location_id = await resolveAddressId(query.location_id);
@@ -153,7 +119,6 @@ const getAverageWeatherRatings = async (
 const deleteWeatherRatingsByDate = async (
   date: string
 ): Promise<{ deleted: number }> => {
-  validateDate(date);
   const deleted = await WeatherRatingModel.deleteByDate(date);
   if (deleted === 0) {
     throw new NotFoundError('No weather ratings found for the given date');

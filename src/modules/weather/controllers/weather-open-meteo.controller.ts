@@ -2,6 +2,11 @@ import type { Context } from 'hono';
 import { OpenMeteoService, OpenMeteoScheduler } from '../services';
 import { successResponse } from '@/utils/response';
 import type { ExternalWeatherQuery, ImportDailyBody } from '../types';
+import {
+  enableWeatherAutoImport,
+  disableWeatherAutoImport,
+  getWeatherAutoImportStatus as getWeatherAutoImportStatusState,
+} from '../services/weather-auto-import.scheduler';
 
 // Forward the `/current` endpoint to Open-Meteo and relay the structured DTO.
 const getOpenMeteoCurrent = async (c: Context) => {
@@ -47,10 +52,38 @@ const importDailyOpenMeteoAll = async (c: Context) => {
   );
 };
 
+const startWeatherAutoImport = async (c: Context) => {
+  const status = enableWeatherAutoImport();
+  return successResponse(
+    c,
+    { data: status },
+    200,
+    'Daily auto-import enabled (runs at 00:05 Asia/Bangkok)'
+  );
+};
+
+const stopWeatherAutoImport = async (c: Context) => {
+  const status = disableWeatherAutoImport();
+  return successResponse(
+    c,
+    { data: status },
+    200,
+    'Daily auto-import disabled'
+  );
+};
+
+const getWeatherAutoImportStatus = async (c: Context) => {
+  const status = getWeatherAutoImportStatusState();
+  return successResponse(c, { data: status });
+};
+
 export {
   getOpenMeteoCurrent,
   getOpenMeteoHourly,
   getOpenMeteoDaily,
   importDailyOpenMeteo,
   importDailyOpenMeteoAll,
+  startWeatherAutoImport,
+  stopWeatherAutoImport,
+  getWeatherAutoImportStatus,
 };

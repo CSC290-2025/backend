@@ -48,7 +48,7 @@ const WeatherRatingDateParam = z.object({
 
 const createWeatherRatingRoute = createPostRoute({
   path: '/weather/ratings',
-  summary: 'Create a weather rating entry',
+  summary: 'Submit a daily weather rating for a Bangkok district',
   requestSchema: WeatherRatingCreateSchema,
   responseSchema: WeatherRatingSchema,
   tags: [...RatingTag],
@@ -56,7 +56,7 @@ const createWeatherRatingRoute = createPostRoute({
 
 const listWeatherRatingsRoute = createGetRoute({
   path: '/weather/ratings',
-  summary: 'List all weather rating entries',
+  summary: 'List all weather rating entries (newest first)',
   responseSchema: WeatherRatingListSchema,
   tags: [...RatingTag],
 });
@@ -64,7 +64,7 @@ const listWeatherRatingsRoute = createGetRoute({
 const getAverageWeatherRatingsRoute = createGetRoute({
   path: '/weather/ratings/average',
   summary:
-    'Get average weather ratings grouped by day and district (query date uses YYYY-MM-DD)',
+    'Get average weather ratings by Bangkok date/district (YYYY-MM-DD, Asia/Bangkok)',
   query: WeatherRatingAverageQuerySchema,
   responseSchema: WeatherRatingAverageListSchema,
   tags: [...RatingTag],
@@ -72,14 +72,14 @@ const getAverageWeatherRatingsRoute = createGetRoute({
 
 const deleteWeatherRatingsByDateRoute = createDeleteRoute({
   path: '/weather/ratings/date/{date}',
-  summary: 'Delete weather ratings by date (path date uses YYYY-MM-DD)',
+  summary: 'Delete weather ratings by Bangkok date (YYYY-MM-DD, Asia/Bangkok)',
   params: WeatherRatingDateParam,
   tags: [...RatingTag],
 });
 
 const deleteAllWeatherRatingsRoute = createDeleteRoute({
   path: '/weather/ratings',
-  summary: 'Delete all weather ratings (irreversible)',
+  summary: 'Delete every weather rating (irreversible)',
   params: z.object({}),
   tags: [...RatingTag],
 });
