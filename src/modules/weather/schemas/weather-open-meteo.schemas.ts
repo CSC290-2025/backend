@@ -145,6 +145,20 @@ const SavedDailyPayloadSchema = z.object({
 // Ensures /daily-import/all receives an empty body.
 const EmptyBodySchema = z.object({}).strict();
 
+const WeatherAutoImportStatusSchema = z.object({
+  enabled: z.boolean(),
+  cron: z.string(),
+  timezone: z.string(),
+  lastRunAt: z.string().nullable(),
+  lastResult: z
+    .object({
+      success: z.boolean(),
+      message: z.string().optional(),
+    })
+    .nullable(),
+  running: z.boolean(),
+});
+
 // Route meta: GET current.
 const getExternalCurrentRoute = createGetRoute({
   path: '/weather/external/current',
@@ -210,6 +224,31 @@ const importDailyAllRoute = createPostRoute({
   tags: ['Weather', 'External'],
 });
 
+const getWeatherAutoImportStatusRoute = createGetRoute({
+  path: '/weather/external/daily-import/auto/status',
+  summary:
+    'Get daily auto-import status (runs at 00:05 Asia/Bangkok when enabled)',
+  responseSchema: WeatherAutoImportStatusSchema,
+  tags: ['Weather', 'External'],
+});
+
+const startWeatherAutoImportRoute = createPostRoute({
+  path: '/weather/external/daily-import/auto/start',
+  summary:
+    'Enable daily auto-import at 00:05 Asia/Bangkok (no immediate fetch)',
+  requestSchema: EmptyBodySchema,
+  responseSchema: WeatherAutoImportStatusSchema,
+  tags: ['Weather', 'External'],
+});
+
+const stopWeatherAutoImportRoute = createPostRoute({
+  path: '/weather/external/daily-import/auto/stop',
+  summary: 'Disable the daily auto-import scheduler',
+  requestSchema: EmptyBodySchema,
+  responseSchema: WeatherAutoImportStatusSchema,
+  tags: ['Weather', 'External'],
+});
+
 export const WeatherOpenMeteoSchemas = {
   ExternalRawFullSchema,
   ExternalRawDailyOnlySchema,
@@ -226,4 +265,7 @@ export const WeatherOpenMeteoSchemas = {
   getExternalDailyRoute,
   importDailyRoute,
   importDailyAllRoute,
+  getWeatherAutoImportStatusRoute,
+  startWeatherAutoImportRoute,
+  stopWeatherAutoImportRoute,
 };
