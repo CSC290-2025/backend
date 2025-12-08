@@ -24,14 +24,31 @@ const getAll = async (
   });
 };
 
-const getById = async (id: number) => {
+const getById = async (id: number, userId?: number) => {
+  // userId must be optional
+  // 1. Fetch the event details using your model
   const event = await EventModel.findById(id);
+
   if (!event) {
+    // If the event ID (e.g., 61) is not found in the DB, this error is thrown.
     throw new NotFoundError('Event not found');
   }
-  return event;
-};
 
+  // 2. Initialize participation status
+  let is_joined = false;
+
+  // 3. Check participation ONLY if a userId was provided
+  if (userId) {
+    const existingParticipation = await EventModel.findParticipation(
+      id,
+      userId
+    );
+    is_joined = !!existingParticipation;
+  }
+
+  // 4. Return the combined result
+  return { event, is_joined }; // Controller expects this shape
+};
 const getMyEvents = async (userId: number) => {
   return await EventModel.findEventsByUserId(userId);
 };

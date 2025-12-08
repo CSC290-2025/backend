@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-//export const VolunteerEventStatus = z.enum(['draft', 'pending', 'approved', 'rejected']);
-
+// Base
 const EventSchema = z.object({
   id: z.number().int(),
   title: z.string(),
@@ -75,10 +74,34 @@ const EventIdParam = z.object({
   id: z.coerce.number().int(),
 });
 
+// --- NEW SCHEMAS BELOW ---
+
+// In your schemas file (e.g., src/modules/Volunteer/schemas/volunteer.ts)
+
+const GetEventByIdQuerySchema = z.object({
+  userId: z.coerce
+    .number()
+    .int()
+    .positive()
+    // 1. Make the field optional for when it is missing from the query object
+    .optional()
+    // 2. Set the default value to undefined. This ensures that if the input is
+    //    an empty string ('') (often coerced to 0 or NaN) or truly missing,
+    //    the output is always clean 'undefined' for the service layer.
+    .default(undefined),
+});
+const EventDetailResponseSchema = z.object({
+  event: EventSchema,
+  is_joined: z.boolean().default(false),
+});
+
 export {
   EventSchema,
   CreateEventSchema,
   UpdateEventSchema,
   PaginationSchema,
   EventIdParam,
+  // Export new schemas
+  GetEventByIdQuerySchema,
+  EventDetailResponseSchema,
 };
