@@ -7,8 +7,9 @@ import {
   resolveCategory,
 } from './clean-air-air4thai.service';
 import { EventService } from '@/modules/Volunteer/services';
-// import { addressService } from '@/modules/citizens/services/addressG5.service';
-
+import { addressService } from '@/modules/citizens/services/addressG5.service';
+import { FcmService } from '@/modules/emergency/services';
+import { FcmModel } from '@/modules/emergency/models';
 type DistrictAggregate = {
   sumPm25: number;
   sumAqi: number;
@@ -46,7 +47,7 @@ const VOLUNTEER_EVENT_DURATION_MS = 10 * 24 * 60 * 60 * 1000;
 const VOLUNTEER_REGISTRATION_OFFSET_MS = 7 * 24 * 60 * 60 * 1000;
 const DEFAULT_VOLUNTEER_SEATS = 100;
 const volunteerSystemUserId = 1; //no dev user then mock up
-// const CITIZEN_EMERGENCY_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 1 วัน
+const CITIZEN_EMERGENCY_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 const AIR_CAMPAIGN_DESCRIPTION = `This poster is pointing at you for a reason. Our city's air is at a tipping point, and we are recruiting everyone for the fight.
 The "Green Air Initiative" is a community-wide mission built on 5 simple, powerful actions everyone can take:
@@ -66,7 +67,7 @@ const getNextVolunteerCount = (district: string) => {
 const volunteerEventCounts = new Map<string, number>();
 
 const volunteerCooldowns = new Map<string, number>();
-// const citizenEmergencyCooldowns = new Map<string, number>();
+const citizenEmergencyCooldowns = new Map<string, number>();
 
 const prepareDistrictarray = () => {
   AIR4THAI_DISTRICT_NAMES.forEach((district) => {
@@ -223,7 +224,7 @@ const checkPoorAirQuality = () => {
     lastAlertedMeasurements.set(record.district, record.measured_at);
 
     void handleVolunteerAlert(record);
-    // void handleCitizenAndEmergency(record);
+    void handleCitizenAndEmergency(record);
   });
 };
 const isUnderCooldown = (
@@ -292,27 +293,62 @@ const handleVolunteerAlert = async (record: Air4ThaiDistrictAirQuality) => {
 
 // prepare wait for emergency
 
-// const handleCitizenAndEmergency = async (record: Air4ThaiDistrictAirQuality) => {
-//   const now = Date.now();
-//   if (isUnderCooldown(citizenEmergencyCooldowns, record.district, CITIZEN_EMERGENCY_COOLDOWN_MS, now)) {
-//     return;
-//   }
+const handleCitizenAndEmergency = async (
+  record: Air4ThaiDistrictAirQuality
+) => {
+  const now = Date.now();
+  if (
+    isUnderCooldown(
+      citizenEmergencyCooldowns,
+      record.district,
+      CITIZEN_EMERGENCY_COOLDOWN_MS,
+      now
+    )
+  ) {
+    return;
+  }
 
-//   try {
-//     const users = await addressService.getUsersByDistrict(record.district);
-//     await FcmService.sendAllNotificationService({
-//       title: `Air quality alert: ${record.district}`,
-//       body: `AQI ${record.aqi} (${record.category}). Stay safe and reduce exposure.`,
-//     });
+  try {
+    const users = await addressService.getUsersByDistrict(record.district);
+    const userIds = users.map((u) => u.id).filter((id) => Number.isFinite(id));
 
-//     markTrigger(citizenEmergencyCooldowns, record.district, now);
-//   } catch (error) {
-//     console.error(
-//       `[clean-air][citizen+emergency] Failed for ${record.district}`,
-//       error
-//     );
-//   }
-// };
+    if (!userIds.length) {
+      return;
+    }
+
+    const payload = {
+      notification: {
+        title: `Air quality alert: ${record.district}`,
+        body: `AQI ${record.aqi} (${record.category}). Stay safe and reduce exposure.`,
+      },
+    };
+
+    const allTokens = await FcmModel.getAllFcmToken();
+    const userTokens = allTokens.filter(
+      (t) => t.user_id && userIds.includes(t.user_id)
+    );
+
+    for (const tokenRecord of userTokens) {
+      if (tokenRecord.tokens) {
+        try {
+          await FcmService.sendNotificationToToken(tokenRecord.tokens, payload);
+        } catch (err) {
+          console.error(
+            `[clean-air] Failed to send notification to token`,
+            err
+          );
+        }
+      }
+    }
+
+    markTrigger(citizenEmergencyCooldowns, record.district, now);
+  } catch (error) {
+    console.error(
+      `[clean-air][citizen+emergency] Failed for ${record.district}`,
+      error
+    );
+  }
+};
 
 const startSamplingJob = () => {
   if (sampleJob) {

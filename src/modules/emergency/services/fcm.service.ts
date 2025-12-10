@@ -33,3 +33,32 @@ export const sendAllNotificationService = async (
     throw new Error(error?.message || `Internal server error !`);
   }
 };
+
+export const sendNotificationToToken = async (
+  token: string,
+  data: Notification
+): Promise<string> => {
+  try {
+    const notification = data.notification;
+    const message = {
+      notification: {
+        title: notification.title || 'Notification Title',
+        body: notification.body || 'Notification Body',
+      },
+      token,
+    };
+
+    return await firebaseMessaging.send({
+      ...message,
+      webpush: {
+        notification: {
+          icon: 'https://www.google.com/favicon.ico',
+          title: 'Notification Title',
+          body: 'Notification Body',
+        },
+      },
+    });
+  } catch (error: any) {
+    throw new Error(error?.message || `Internal server error !`);
+  }
+};

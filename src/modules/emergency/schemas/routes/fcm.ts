@@ -6,7 +6,7 @@ const createFcmRoute = createPostRoute({
   summary: 'Create new fcm',
   requestSchema: FcmSchemas.CreateTokenFcmSchema,
   responseSchema: FcmSchemas.FcmResponseSchema,
-  tags: ['fcm'],
+  tags: ['Report'],
 });
 
 export { createFcmRoute };

@@ -6,7 +6,7 @@ const createTokenFcmRoute = createPostRoute({
   summary: 'Create new token',
   requestSchema: TokenFcmSchemas.CreateTokenFcmSchema,
   responseSchema: TokenFcmSchemas.TokenFcmResponseSchema,
-  tags: [`token`],
+  tags: [`Report`],
 });
 
 export { createTokenFcmRoute };
