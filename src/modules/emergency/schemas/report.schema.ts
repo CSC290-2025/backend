@@ -1,8 +1,9 @@
-import {
-  isReportStatus,
-  isReportId,
-} from '@/modules/emergency/schemas/branded.schema.ts';
+import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
+
+export const ReportStatusEnum = z
+  .enum(['pending', 'resolved', 'verified'])
+  .refine(isReportStatus);
 
 const CreateReportSchema = z.object({
   user_id: z.number().int().nullable().optional(),
@@ -33,14 +34,14 @@ const ReportResponseSchema = z.object({
   level: z
     .enum(['near_miss', 'minor', 'moderate', 'major', 'lethal'])
     .nullable(),
-  status: z.enum(['pending', 'resolved', 'verified']).refine(isReportStatus),
+  status: ReportStatusEnum,
   title: z.string().min(1).optional(),
   report_category: z
     .enum(['traffic', 'accident', 'disaster'])
     .optional()
     .nullable(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 
 const PaginatedReportSchema = z.object({
@@ -48,4 +49,13 @@ const PaginatedReportSchema = z.object({
   totalPage: z.number(),
 });
 
-export { CreateReportSchema, ReportResponseSchema, PaginatedReportSchema };
+const FindReportResponseSchema = z.object({
+  report: z.array(ReportResponseSchema),
+});
+
+export {
+  CreateReportSchema,
+  ReportResponseSchema,
+  PaginatedReportSchema,
+  FindReportResponseSchema,
+};

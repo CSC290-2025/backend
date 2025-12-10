@@ -1,12 +1,27 @@
-import { createPostRoute } from '@/utils/openapi-helpers.ts';
+import { createPostRoute, createGetRoute } from '@/utils/openapi-helpers.ts';
 import { ReportSchemas } from '@/modules/emergency/schemas';
+import * as z from 'zod';
 
 const createReportRoute = createPostRoute({
-  path: '/report',
+  path: '/reports',
   summary: 'Create new report',
   requestSchema: ReportSchemas.CreateReportSchema,
   responseSchema: ReportSchemas.ReportResponseSchema,
-  tags: [`report`],
+  tags: [`Report`],
 });
 
-export { createReportRoute };
+const findReportByStatusRoute = createGetRoute({
+  path: `/reports/:status`,
+  summary: 'Get report by status',
+  params: z.object({
+    status: ReportSchemas.ReportStatusEnum,
+  }),
+  query: z.object({
+    _page: z.string().optional(),
+    _limit: z.string().optional(),
+  }),
+  responseSchema: ReportSchemas.FindReportResponseSchema,
+  tags: [`Report`],
+});
+
+export { createReportRoute, findReportByStatusRoute };

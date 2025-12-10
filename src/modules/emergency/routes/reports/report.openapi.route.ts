@@ -8,7 +8,7 @@ const setupReportRoutes = (app: OpenAPIHono) => {
     ReportController.createReport
   );
   app.openapi(
-    RouteSchemas.Report.createReportRoute,
+    RouteSchemas.Report.findReportByStatusRoute,
     ReportController.findReportByStatus
   );
 };

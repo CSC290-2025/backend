@@ -1,4 +1,4 @@
-import type { Context } from 'hono';
+import type { Context, Handler } from 'hono';
 import { ReportService } from '@/modules/emergency/services';
 import { successResponse } from '@/utils/response.ts';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
@@ -9,7 +9,7 @@ export const createReport = async (c: Context) => {
   return successResponse(c, { report }, 201, 'Create report successfully');
 };
 
-export const findReportByStatus = async (c: Context) => {
+export const findReportByStatus: Handler = async (c: Context) => {
   const statusParam = c.req.param('status');
 
   const { _page, _limit } = c.req.query();
