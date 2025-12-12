@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import { getRoutes } from '../models/routeFinder.model';
+import { getTransitLinesOnly } from '../models/routeFinder.model';
 
 export const getRoutesController = async (c: Context) => {
   const origLat = c.req.query('origLat') || c.req.query('lat');
@@ -61,5 +62,47 @@ export const getRoutesController = async (c: Context) => {
     } else {
       return c.json({ success: false, message: 'Unknown error occurred' }, 500);
     }
+  }
+};
+export const getTransitLinesController = async (c: Context) => {
+  const origLat = c.req.query('origLat');
+  const origLng = c.req.query('origLng');
+  const destLat = c.req.query('destLat');
+  const destLng = c.req.query('destLng');
+
+  if (!origLat || !origLng || !destLat || !destLng) {
+    return c.json(
+      {
+        success: false,
+        message:
+          'Missing required parameters: Must provide origLat, origLng, destLat, and destLng.',
+      },
+      400
+    );
+  }
+
+  try {
+    const transitLines = await getTransitLinesOnly(
+      origLat,
+      origLng,
+      destLat,
+      destLng
+    );
+
+    return c.json({
+      success: true,
+      data: transitLines,
+      count: transitLines.length,
+      message: 'Transit lines retrieved successfully.',
+    });
+  } catch (error: unknown) {
+    console.error('Error in getTransitLinesController:', error);
+    return c.json(
+      {
+        success: false,
+        message: 'Unable to fetch transit lines.',
+      },
+      500
+    );
   }
 };
