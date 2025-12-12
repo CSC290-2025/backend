@@ -125,7 +125,8 @@ const transferToTransportation = async (
 
   const normalizedCardNumber = normalizeCardNumber(cardNumber);
   const hashedCardNumber = hashCardNumber(normalizedCardNumber);
-
+  console.log('CARD NUMBER', normalizedCardNumber);
+  console.log('HASHED CARD NUMBER', hashedCardNumber);
   const existingMetroCard =
     await MetroCardModel.findMetroCardByHash(hashedCardNumber);
 

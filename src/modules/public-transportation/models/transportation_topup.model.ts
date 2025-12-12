@@ -1,11 +1,16 @@
 import axios from 'axios';
 import prisma from '@/config/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import type { CookieTokens } from '../types/cookieTokens.types';
 
 const FINANCE_API_URL =
   'http://localhost:3000/metro-cards/transfer-to-transportation';
 
-export const transferBalanceToCard = async (cardId: number, amount: number) => {
+export const transferBalanceToCard = async (
+  cardId: number,
+  amount: number,
+  cookies: CookieTokens
+) => {
   if (amount <= 0) {
     throw new Error('Transfer amount must be greater than zero.');
   }
@@ -22,10 +27,19 @@ export const transferBalanceToCard = async (cardId: number, amount: number) => {
     );
   }
   try {
-    const response = await axios.post(FINANCE_API_URL, {
-      cardNumber: card.finance_card_number,
-      amount: amount,
-    });
+    const response = await axios.post(
+      FINANCE_API_URL,
+      {
+        cardNumber: card.finance_card_number,
+        amount: amount,
+      },
+      {
+        headers: {
+          Cookie: `accessToken=${cookies.accessToken}; refreshToken=${cookies.refreshToken}`,
+        },
+        withCredentials: true,
+      }
+    );
 
     if (response.status !== 200 || !response.data.success) {
       const financeMessage =
