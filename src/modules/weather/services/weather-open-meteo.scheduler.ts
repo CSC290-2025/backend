@@ -1,4 +1,3 @@
-//แปลงข้อมูล (ฟังก์ชั่นที่เก็บอดีตลง database) , // convert data (function to store past data into database)
 import { OpenMeteoClient, OPEN_METEO_TIMEZONE } from './open-meteo.client';
 import { WeatherOpenMeteoSchemas } from '../schemas';
 import type { ExternalRawDailyOnly, ImportDailyBody } from '../types';
@@ -7,7 +6,7 @@ import { WeatherModel } from '../models';
 import { getDistrictByLocationId, bangkokDistricts } from '../utils';
 import prisma from '@/config/client';
 
-// แปลงข้อมูลดิบของ Open-Meteo ให้เหลือค่าของเมื่อวานที่พร้อมบันทึก , // Convert raw Open-Meteo data to extract yesterday's values that ready for saving
+// Extract yesterday's values from the Open-Meteo response and normalize them.
 const pickYesterdayPayload = (
   raw: ExternalRawDailyOnly,
   location_id: number | null,
@@ -38,21 +37,43 @@ const pickYesterdayPayload = (
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const wd = degDom == null ? null : dirs[Math.round(degDom / 45) % 8];
 
+  let dailyHumidity: number | null = null;
+  const hourly = raw.hourly;
+  if (hourly?.time?.length && hourly?.relative_humidity_2m?.length) {
+    const values: number[] = [];
+    for (let i = 0; i < hourly.time.length; i += 1) {
+      if (!hourly.time[i].startsWith(target)) {
+        continue;
+      }
+      const value = hourly.relative_humidity_2m[i];
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        values.push(value);
+      }
+    }
+    if (values.length) {
+      dailyHumidity = values.reduce((sum, val) => sum + val, 0) / values.length;
+    }
+  }
+
+  // Round numeric values to two decimal places when they exist.
+  const round2 = (value: number | null | undefined) =>
+    value == null ? null : Math.round(value * 100) / 100;
+
   return {
     date: raw.daily.time[use],
     payload: {
       location_id: location_id ?? null,
-      temperature: avg(tmax ?? null, tmin ?? null),
-      feel_temperature: avg(appMax, appMin),
-      humidity: null,
-      wind_speed: wsMax,
+      temperature: round2(avg(tmax ?? null, tmin ?? null)),
+      feel_temperature: round2(avg(appMax, appMin)),
+      humidity: round2(dailyHumidity),
+      wind_speed: round2(wsMax ?? null),
       wind_direction: wd,
       rainfall_probability: pMax ?? null,
     },
   };
 };
 
-// import ข้อมูลเมื่อวานให้ location เดียว (ตรวจ request ก่อน) , // import yesterday's data for a single location (with request validation)
+// Validate input, fetch yesterday's data for one district, and persist it.
 const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   const b = WeatherOpenMeteoSchemas.ImportDailyBodySchema.parse(body);
   const district = getDistrictByLocationId(b.location_id);
@@ -107,7 +128,7 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   };
 };
 
-// import ข้อมูลเมื่อวานให้ครบทุกเขตที่ระบบมี , // import yesterday's data for all districts in the system
+// Iterate through every configured district and import yesterday's data.
 const importAllLocationsYesterday = async () => {
   const results: Array<{
     location_id: number;

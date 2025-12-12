@@ -1,7 +1,8 @@
 import crypto from 'crypto';
+import config from '@/config/env';
 
 const ALGO = 'aes-256-gcm';
-const KEY = Buffer.from(process.env.G11_CARD_ENC_KEY!, 'hex');
+const KEY = Buffer.from(config.metroCardEncryptionKey, 'hex');
 
 export function encrypt(plaintext: string): string {
   const iv = crypto.randomBytes(12);
@@ -45,10 +46,41 @@ export function decrypt(encryptedText: string): string {
   return decrypted + lastFour;
 }
 
+export function hashCardNumber(cardNumber: string) {
+  const hashKey = config.metroCardHashKey;
+  return crypto.createHmac('sha256', hashKey).update(cardNumber).digest('hex');
+}
+
 export function maskCardNumber19(full: string) {
   const visible = full.slice(-4);
 
   const masked = '•••• •••• •••• ';
 
   return masked + visible;
+}
+
+export function normalizeCardNumber(cardNumber: string): string {
+  const cleaned = cardNumber.replace(/\s/g, '');
+  if (cleaned.startsWith('MET-')) {
+    return cleaned;
+  }
+  return `MET-${cleaned}`;
+}
+
+export function formatInsuranceCardNumber(cardNumber: string): string {
+  // Remove any non-digit characters
+  const cleaned = cardNumber.replace(/\D/g, '');
+
+  // Check if we have exactly 12 digits
+  if (cleaned.length !== 12) {
+    // If not 12 digits, return original (or handle error as needed,
+    // but for now we'll return original to let validation fail elsewhere if needed)
+    return cardNumber;
+  }
+
+  // Format as INS-XXXXXX-XXXXXX
+  const part1 = cleaned.slice(0, 6);
+  const part2 = cleaned.slice(6);
+
+  return `INS-${part1}-${part2}`;
 }

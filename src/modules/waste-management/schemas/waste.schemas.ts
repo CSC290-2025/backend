@@ -1,13 +1,11 @@
 import { z } from 'zod';
 import { createPostRoute, createGetRoute } from '@/utils/openapi-helpers';
 
-// Schema for logging waste
 const WasteLogRequestSchema = z.object({
   waste_type_name: z.string().min(1, 'Waste type name is required'),
   weight: z.number().positive('Weight must be greater than 0'),
 });
 
-// Schema for waste type response
 const WasteTypeSchema = z.object({
   id: z.number(),
   type_name: z.string(),
@@ -18,7 +16,6 @@ const WasteTypesResponseSchema = z.object({
   wasteTypes: z.array(WasteTypeSchema),
 });
 
-// Schema for waste log response
 const WasteLogResponseSchema = z.object({
   id: z.number(),
   waste_type_id: z.number(),
@@ -30,7 +27,6 @@ const WasteLogResponseSchema = z.object({
   }),
 });
 
-// Schema for monthly stats response
 const MonthlyStatsResponseSchema = z.object({
   stats: z.object({
     month: z.number(),
@@ -46,7 +42,6 @@ const MonthlyStatsResponseSchema = z.object({
   }),
 });
 
-// Schema for daily stats response
 const DailyStatsResponseSchema = z.object({
   stats: z.object({
     date: z.string(),
@@ -61,7 +56,6 @@ const DailyStatsResponseSchema = z.object({
   }),
 });
 
-// OpenAPI route definitions
 const getWasteTypesRoute = createGetRoute({
   path: '/waste-types',
   summary: 'Get all waste types',
@@ -69,7 +63,6 @@ const getWasteTypesRoute = createGetRoute({
   tags: ['Waste'],
 });
 
-// OpenAPI route definition for daily stats
 const getDailyStatsRoute = createGetRoute({
   path: '/waste/stats/daily',
   summary: 'Get daily waste statistics',
@@ -80,7 +73,7 @@ const getDailyStatsRoute = createGetRoute({
 const logWasteRoute = createPostRoute({
   path: '/waste/log',
   summary: 'Log a waste collection event',
-  requestSchema: WasteLogRequestSchema, // now expects waste_type_name
+  requestSchema: WasteLogRequestSchema,
   responseSchema: WasteLogResponseSchema,
   tags: ['Waste'],
 });
@@ -98,9 +91,9 @@ export const WasteSchemas = {
   WasteTypesResponseSchema,
   WasteLogResponseSchema,
   MonthlyStatsResponseSchema,
-  DailyStatsResponseSchema, // Add this
+  DailyStatsResponseSchema,
   getWasteTypesRoute,
   logWasteRoute,
   getStatsRoute,
-  getDailyStatsRoute, // Add this
+  getDailyStatsRoute,
 };

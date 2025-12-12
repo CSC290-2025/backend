@@ -4,6 +4,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 import { z } from 'zod';
 
 const MetroCardSchema = z.object({
@@ -16,15 +17,20 @@ const MetroCardSchema = z.object({
   updated_at: z.date(),
 });
 
-const CreateMetroCardSchema = z.object({
-  user_id: z.number(),
-});
+const CreateMetroCardSchema = z.object({});
 
 const UpdateMetroCardSchema = z.object({
   status: z.enum(['active', 'suspended']).optional(),
 });
 
 const TopUpMetroCardSchema = z.object({
+  cardNumber: z.string(),
+  walletId: z.number(),
+  amount: z.number(),
+});
+
+const TransferToTransportationSchema = z.object({
+  cardNumber: z.string(),
   amount: z.number(),
 });
 
@@ -48,6 +54,7 @@ const createMetroCardRoute = createPostRoute({
   requestSchema: CreateMetroCardSchema,
   responseSchema: MetroCardSchema,
   tags: ['MetroCards'],
+  middleware: [authMiddleware],
 });
 
 const getUserMetroCardRoute = createGetRoute({
@@ -56,6 +63,7 @@ const getUserMetroCardRoute = createGetRoute({
   responseSchema: MetroCardListSchema,
   params: UserIdParam,
   tags: ['MetroCards'],
+  middleware: [authMiddleware],
 });
 
 const getMetroCardRoute = createGetRoute({
@@ -64,6 +72,7 @@ const getMetroCardRoute = createGetRoute({
   responseSchema: MetroCardSchema,
   params: MetroCardIdParam,
   tags: ['MetroCards'],
+  middleware: [authMiddleware],
 });
 
 const updateMetroCardRoute = createPutRoute({
@@ -73,15 +82,19 @@ const updateMetroCardRoute = createPutRoute({
   responseSchema: MetroCardSchema,
   params: MetroCardIdParam,
   tags: ['MetroCards'],
+  middleware: [authMiddleware],
 });
 
-const topUpBalanceRoute = createPutRoute({
-  path: '/metro-cards/{metroCardId}/top-up',
+const topUpBalanceRoute = createPostRoute({
+  path: '/metro-cards/top-up',
   summary: 'Top up metro card balance',
   requestSchema: TopUpMetroCardSchema,
-  responseSchema: MetroCardSchema,
-  params: MetroCardIdParam,
+  responseSchema: z.object({
+    metroCard: MetroCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
   tags: ['MetroCards'],
+  middleware: [authMiddleware],
 });
 
 const deleteMetroCardRoute = createDeleteRoute({
@@ -89,6 +102,27 @@ const deleteMetroCardRoute = createDeleteRoute({
   summary: 'Delete metro card by ID',
   params: MetroCardIdParam,
   tags: ['MetroCards'],
+  middleware: [authMiddleware],
+});
+
+const transferToTransportationRoute = createPostRoute({
+  path: '/metro-cards/transfer-to-transportation',
+  summary: 'Transfer metro card balance to transportation organization',
+  requestSchema: TransferToTransportationSchema,
+  responseSchema: z.object({
+    metroCard: MetroCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
+  tags: ['MetroCards'],
+  middleware: [authMiddleware],
+});
+
+const getMeMetroCardsRoute = createGetRoute({
+  path: '/metro-cards/me',
+  summary: 'Get my metro cards',
+  responseSchema: MetroCardListSchema,
+  tags: ['MetroCards'],
+  middleware: [authMiddleware],
 });
 
 export const MetroCardSchemas = {
@@ -96,6 +130,7 @@ export const MetroCardSchemas = {
   CreateMetroCardSchema,
   UpdateMetroCardSchema,
   TopUpMetroCardSchema,
+  TransferToTransportationSchema,
   MetroCardListSchema,
   UserIdParam,
   MetroCardIdParam,
@@ -105,4 +140,6 @@ export const MetroCardSchemas = {
   updateMetroCardRoute,
   topUpBalanceRoute,
   deleteMetroCardRoute,
+  transferToTransportationRoute,
+  getMeMetroCardsRoute,
 };

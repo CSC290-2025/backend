@@ -1,6 +1,6 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
-/* 
+/*
 ROUTING OPTIONS:
 Choose ONE approach per module that you're comfortable with:
   1. OpenAPI Routes - Documented in Swagger, type-safe with Zod
@@ -18,6 +18,7 @@ import {
   setupAddressRoutes,
   setupUploadRoutes,
   setupBookingRoutes,
+  setupAPTOwnerRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -55,6 +56,7 @@ import {
   setupWalletRoutes,
   setupScbRoutes,
   setupMetroCardRoutes,
+  setupTransactionRoutes,
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
@@ -63,13 +65,27 @@ import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
+  setupReceiverRequestsRoutes,
 } from '@/modules/freecycle';
+
+//Healthcare
+import {
+  setupPatientRoutes,
+  setupBedRoutes,
+  setupFacilityRoutes,
+  setupAppointmentRoutes,
+  setupPrescriptionRoutes,
+  setupAmbulanceRoutes,
+  setupEmergencyCallRoutes,
+  setupPaymentRoutes,
+  setupDoctorsRoutes,
+  setupMedicineInventoryRoutes,
+} from '@/modules/healthcare/routes';
 
 // Know AI
 import {
   setupEnrollmentRoutes,
   setupCourseRoutes,
-  setupOnsiteSessionRoutes,
   setupExerciseRoute,
   setupQuestionRoutes,
   setupLevelRoutes,
@@ -79,7 +95,11 @@ import {
 import { setupReportsRoutes } from '@/modules/power-bi';
 
 // Support Map
-import { detectRoutes, markerRoutes } from '@/modules/G-16/routes';
+import {
+  detectRoutes,
+  markerRoutes,
+  distanceRoutes,
+} from '@/modules/G-16/routes';
 
 // Traffic
 import {
@@ -91,15 +111,23 @@ import {
 } from '@/modules/traffic';
 
 // Volunteer
-import { eventRoutes } from '@/modules/Volunteer/routes';
+import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
+
+// Public Transportation
+import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+import { transactionRoute } from '@/modules/public-transportation/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
+
+//Bin
+import { setupBinRoutes } from '@/modules/waste-management/routes';
 
 // Weather
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
+  setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
@@ -119,11 +147,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-
+  setupAPTOwnerRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
-  // Citizen
   setupCitizenAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
@@ -143,18 +170,31 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Financial
   setupMetroCardRoutes(app);
   setupWalletRoutes(app);
-  setupScbRoutes(app);
+  setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
+  setupScbRoutes(app);
+
+  //Healthcare
+  setupPatientRoutes(app);
+  setupBedRoutes(app);
+  setupFacilityRoutes(app);
+  setupAppointmentRoutes(app);
+  setupPrescriptionRoutes(app);
+  setupAmbulanceRoutes(app);
+  setupEmergencyCallRoutes(app);
+  setupPaymentRoutes(app);
+  setupDoctorsRoutes(app);
+  setupMedicineInventoryRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
+  setupReceiverRequestsRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
   setupCourseRoutes(app);
-  setupOnsiteSessionRoutes(app);
   setupExerciseRoute(app);
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
@@ -171,10 +211,17 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Waste
   setupWasteRoutes(app);
+  setupBinRoutes(app);
+
+  // SupportMap
 
   // Weather
   setupOpenMeteoRoutes(app);
+  setupWeatherRatingRoutes(app);
   setupWeatherRoutes(app);
+
+  // Volunteer
+  setupVolunteerRoutes(app);
 
   /*
   ============================================
@@ -189,7 +236,12 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
+  app.route('/api', distanceRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
+
+  // Public Transportation
+  app.route('/api', routeStopsRoutes);
+  app.route('/api', transactionRoute);
 };

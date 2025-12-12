@@ -2,6 +2,16 @@ import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { WeatherData } from '../types';
 
+const BANGKOK_OFFSET = '+07:00';
+
+// Build the UTC range for a Bangkok-local day used in date filtering.
+const getBangkokDayRange = (date: string) => {
+  const start = new Date(`${date}T00:00:00${BANGKOK_OFFSET}`);
+  const end = new Date(`${date}T23:59:59.999${BANGKOK_OFFSET}`);
+  return { start, end };
+};
+
+// Fetch every weather_data row ordered by creation date.
 const findAll = async (): Promise<WeatherData[]> => {
   try {
     const items = await prisma.weather_data.findMany({
@@ -14,6 +24,7 @@ const findAll = async (): Promise<WeatherData[]> => {
   }
 };
 
+// Fetch weather_data rows filtered by location id.
 const findByLocationId = async (locationId: number): Promise<WeatherData[]> => {
   try {
     const items = await prisma.weather_data.findMany({
@@ -27,10 +38,10 @@ const findByLocationId = async (locationId: number): Promise<WeatherData[]> => {
   }
 };
 
+// Fetch weather_data rows that fall within a specific Bangkok-local day.
 const findByDate = async (date: string): Promise<WeatherData[]> => {
   try {
-    const startOfDay = new Date(`${date}T00:00:00Z`);
-    const endOfDay = new Date(`${date}T23:59:59Z`);
+    const { start: startOfDay, end: endOfDay } = getBangkokDayRange(date);
     const items = await prisma.weather_data.findMany({
       where: {
         created_at: {
@@ -47,18 +58,19 @@ const findByDate = async (date: string): Promise<WeatherData[]> => {
   }
 };
 
+// Fetch weather_data rows across an inclusive Bangkok-local date range.
 const findByDateRange = async (
   fromDate: string,
   toDate: string
 ): Promise<WeatherData[]> => {
   try {
-    const startOfDay = new Date(`${fromDate}T00:00:00Z`);
-    const endOfDay = new Date(`${toDate}T23:59:59Z`);
+    const { start: startOfFromDate } = getBangkokDayRange(fromDate);
+    const { end: endOfToDate } = getBangkokDayRange(toDate);
     const items = await prisma.weather_data.findMany({
       where: {
         created_at: {
-          gte: startOfDay,
-          lte: endOfDay,
+          gte: startOfFromDate,
+          lte: endOfToDate,
         },
       },
       orderBy: { created_at: 'desc' },
@@ -70,6 +82,7 @@ const findByDateRange = async (
   }
 };
 
+// Insert a new weather_data row.
 const create = async (data: any): Promise<WeatherData> => {
   try {
     const weather = await prisma.weather_data.create({
@@ -82,10 +95,10 @@ const create = async (data: any): Promise<WeatherData> => {
   }
 };
 
+// Delete weather_data rows for a specific Bangkok-local day.
 const deleteByDate = async (date: string): Promise<number> => {
   try {
-    const startOfDay = new Date(`${date}T00:00:00Z`);
-    const endOfDay = new Date(`${date}T23:59:59Z`);
+    const { start: startOfDay, end: endOfDay } = getBangkokDayRange(date);
     const result = await prisma.weather_data.deleteMany({
       where: {
         created_at: {
@@ -101,6 +114,7 @@ const deleteByDate = async (date: string): Promise<number> => {
   }
 };
 
+// Delete every row from weather_data.
 const deleteAll = async (): Promise<number> => {
   try {
     const result = await prisma.weather_data.deleteMany({});

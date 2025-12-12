@@ -22,12 +22,15 @@ const findAll = async (): Promise<Category[]> => {
   }
 };
 
-const findById = async (id: number): Promise<Category> => {
+const findById = async (id: number): Promise<Category | null> => {
   try {
-    const result = await prisma.freecycle_categories.findUniqueOrThrow({
+    const categories = await prisma.freecycle_categories.findUnique({
       where: { id },
     });
-    return transformCategory(result);
+    if (!categories) return null;
+    return {
+      ...categories,
+    };
   } catch (error) {
     handlePrismaError(error);
   }
