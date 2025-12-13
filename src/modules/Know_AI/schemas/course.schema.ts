@@ -180,7 +180,7 @@ const getPendingCourse = createGetRoute({
 const changeApprovePost = createPutRoute({
   path: '/courseApprove/{id}',
   summary: 'Approve course',
-  requestSchema: courseStatus,
+  requestSchema: z.optional(z.any()),
   responseSchema: course,
   params: courseId,
   tags: ['Know-AI', 'Course'],
