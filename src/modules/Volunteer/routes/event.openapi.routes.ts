@@ -14,6 +14,8 @@ import {
 } from '../schemas'; // Use relative path to schemas
 import type { PaginatedEvents } from '../types';
 import type { OpenAPIHono } from '@hono/zod-openapi';
+import { ROLES } from '@/constants/roles';
+import { adminMiddleware, requireRole } from '@/middlewares';
 import * as EventController from '../controllers';
 
 const PaginatedEventsSchemaForOpenAPI = z
