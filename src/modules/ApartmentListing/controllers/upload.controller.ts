@@ -1,5 +1,10 @@
 import { successResponse } from '@/utils/response';
-import { ValidationError, InternalServerError, NotFoundError } from '@/errors';
+import {
+  ValidationError,
+  InternalServerError,
+  NotFoundError,
+  BaseError,
+} from '@/errors';
 import type { Context } from 'hono';
 import { uploadModel } from '../models/index';
 
@@ -56,7 +61,10 @@ async function uploadFileController(c: Context) {
       'File uploaded successfully!'
     );
   } catch (err) {
-    console.error(err);
+    if (err instanceof BaseError) {
+      throw new Error(err.message);
+    }
+    console.error('UPLOAD ERROR:', err);
     throw new InternalServerError('Upload failed.');
   }
 }
