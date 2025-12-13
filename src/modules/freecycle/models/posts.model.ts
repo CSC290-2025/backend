@@ -38,7 +38,7 @@ const findPostById = async (id: number): Promise<FreecyclePost | null> => {
 const findPostByDonater = async (
   donaterId: number
 ): Promise<FreecyclePost[]> => {
-  // console.log('Finding posts by donater:', donaterId);
+  console.log('Finding posts by donater:', donaterId);
   try {
     const posts = await prisma.freecycle_posts.findMany({
       where: { donater_id: donaterId },
@@ -219,6 +219,28 @@ const findPostsByCategoryId = async (
   }
 };
 
+const findPostsByUserId = async (userId: number): Promise<FreecyclePost[]> => {
+  console.log('Finding posts by user:', userId);
+  try {
+    const posts = await prisma.freecycle_posts.findMany({
+      where: {
+        donater_id: userId,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return posts.map((p) => ({
+      ...p,
+      item_weight: p.item_weight ? Number(p.item_weight) : null,
+    }));
+  } catch (error) {
+    handlePrismaError(error);
+    throw error;
+  }
+};
+
 export {
   findAllPosts,
   findPostById,
@@ -230,4 +252,5 @@ export {
   findNotGivenPost,
   markAsNotGiven,
   findPostsByCategoryId,
+  findPostsByUserId,
 };

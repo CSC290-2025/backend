@@ -1,4 +1,3 @@
-import type { markerType } from '../types/markerType.types';
 import type {
   CreateMarkerInput,
   UpdateMarkerInput,
@@ -66,7 +65,7 @@ export const updateMarker = async (
   } catch (error: any) {
     console.error('Error updating marker:', error);
 
-    // ถ้าเป็น "not found" error ให้ throw ต่อไป
+    // if "not found" error then throw
     if (error.message && error.message.includes('not found')) {
       throw error;
     }
@@ -81,7 +80,7 @@ export const deleteMarker = async (id: string): Promise<void> => {
   } catch (error: any) {
     console.error('Error deleting marker:', error);
 
-    // ถ้าเป็น "not found" error ให้ throw ต่อไป
+    // if "not found" error then throw
     if (error.message && error.message.includes('not found')) {
       throw error;
     }

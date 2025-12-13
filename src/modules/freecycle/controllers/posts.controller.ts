@@ -17,9 +17,9 @@ const getPostByDonater: Handler = async (c: Context) => {
   console.log('Getting posts by donater');
   const user = c.get('user');
   const userId = user?.id;
-  // if (!userId) {
-  //   return c.json({ error: 'Unauthorized: Missing user ID in context' }, 401);
-  // }
+  if (!userId) {
+    return c.json({ error: 'Unauthorized: Missing user ID in context' }, 401);
+  }
   const posts = await PostsService.getPostByDonater(userId);
   return successResponse(c, { posts });
 };
@@ -79,6 +79,42 @@ const getPostsByUserId = async (c: Context) => {
   return successResponse(c, { posts });
 };
 
+const getMyPosts: Handler = async (c: Context) => {
+  console.log('📝 Getting my posts');
+
+  // ⭐ ดึง user จาก context ที่ authMiddleware set ไว้
+  const user = c.get('user');
+  const userId = user?.id;
+
+  if (!userId) {
+    return c.json(
+      {
+        success: false,
+        error: 'Unauthorized: Missing user ID in context',
+      },
+      401
+    );
+  }
+
+  try {
+    const posts = await PostsService.getMyPosts(userId);
+
+    return successResponse(c, {
+      posts,
+      total: posts.length,
+    });
+  } catch (error) {
+    console.error('❌ Failed to get my posts:', error);
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to fetch posts',
+      },
+      500
+    );
+  }
+};
+
 export {
   getAllPost,
   getPostById,
@@ -91,4 +127,5 @@ export {
   markAsNotGiven,
   getPostsByCategory,
   getPostsByUserId,
+  getMyPosts,
 };

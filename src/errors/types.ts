@@ -79,3 +79,13 @@ export class InternalServerError extends BaseError {
     };
   }
 }
+
+export class PaymentNotConfirmedError extends BaseError {
+  readonly name = 'PaymentNotConfirmedError';
+  readonly statusCode = 202;
+  readonly isOperational = true;
+
+  constructor(message: string = 'Payment not yet confirmed') {
+    super(message);
+  }
+}

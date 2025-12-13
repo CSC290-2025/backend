@@ -19,31 +19,19 @@ const BedSchema = z.object({
 
 const CreateBedSchema = z.object({
   facilityId: z.number().int().optional(),
-  bedNumber: z
-    .string()
-    .max(50, 'Bed number must be at most 50 characters')
-    .optional(),
-  bedType: z
-    .string()
-    .max(50, 'Bed type must be at most 50 characters')
-    .optional(),
-  status: z.string().max(50, 'Status must be at most 50 characters').optional(),
+  bedNumber: z.string().max(50).optional(),
+  bedType: z.string().max(50).optional(),
+  status: z.string().max(50).optional(),
   patientId: z.number().int().optional(),
-  admissionDate: z.coerce.date().nullable().optional(),
+  admissionDate: z.coerce.date().optional(),
 });
 
 const UpdateBedSchema = z.object({
-  facilityId: z.number().int().optional(),
-  bedNumber: z
-    .string()
-    .max(50, 'Bed number must be at most 50 characters')
-    .optional(),
-  bedType: z
-    .string()
-    .max(50, 'Bed type must be at most 50 characters')
-    .optional(),
-  status: z.string().max(50, 'Status must be at most 50 characters').optional(),
-  patientId: z.number().int().optional(),
+  facilityId: z.number().int().nullable().optional(),
+  bedNumber: z.string().max(50).nullable().optional(),
+  bedType: z.string().max(50).nullable().optional(),
+  status: z.string().max(50).nullable().optional(),
+  patientId: z.number().int().nullable().optional(),
   admissionDate: z.coerce.date().nullable().optional(),
 });
 
@@ -51,10 +39,11 @@ const BedFilterSchema = z.object({
   facilityId: z.coerce.number().int().optional(),
   patientId: z.coerce.number().int().optional(),
   status: z.string().optional(),
+  bedType: z.string().optional(),
   search: z.string().optional(),
 });
 
-const PaginationSchema = z.object({
+const BedPaginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
   sortBy: z.enum(['id', 'createdAt', 'bedNumber']).default('createdAt'),
@@ -114,7 +103,7 @@ const listBedsRoute = createGetRoute({
   responseSchema: PaginatedBedsSchema,
   query: z.object({
     ...BedFilterSchema.shape,
-    ...PaginationSchema.shape,
+    ...BedPaginationSchema.shape,
   }),
   tags: ['Beds'],
 });
@@ -124,7 +113,7 @@ export const BedSchemas = {
   CreateBedSchema,
   UpdateBedSchema,
   BedFilterSchema,
-  PaginationSchema,
+  BedPaginationSchema,
   PaginatedBedsSchema,
   BedsListSchema,
   BedIdParam,

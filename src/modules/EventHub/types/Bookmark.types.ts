@@ -1,7 +1,7 @@
 import type { z } from 'zod';
-import type { EventBookmarkSchema, CreateBookmarkSchema } from '../schemas';
+import type { BookmarkSchemas } from '../schemas';
 
-type Bookmark = z.infer<typeof EventBookmarkSchema>;
-type CreateBookmarkInput = z.infer<typeof CreateBookmarkSchema>;
+type Bookmark = z.infer<typeof BookmarkSchemas.EventBookmarkSchema>;
+type CreateBookmarkInput = z.infer<typeof BookmarkSchemas.CreateBookmarkSchema>;
 
 export type { Bookmark, CreateBookmarkInput };

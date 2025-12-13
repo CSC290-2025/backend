@@ -71,9 +71,9 @@ const createGetRoute = <
   });
 
 const createPostRoute = <
-  TParams extends z.ZodObject<any>,
-  TRequest extends z.ZodTypeAny,
-  TResponse extends z.ZodTypeAny,
+  TParams extends z.ZodObject<any> | undefined = undefined,
+  TRequest extends z.ZodTypeAny = z.ZodTypeAny,
+  TResponse extends z.ZodTypeAny = z.ZodTypeAny,
 >(config: {
   path: string;
   summary: string;
