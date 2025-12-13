@@ -34,6 +34,7 @@ let sampleJob: ScheduledTask | null = null;
 let flushJob: ScheduledTask | null = null;
 
 const POOR_AIR_QUALITY_CATEGORIES: ReadonlySet<AirQualityCategory> = new Set([
+  'GOOD',
   'UNHEALTHY_FOR_SENSITIVE',
   'UNHEALTHY',
   'VERY_UNHEALTHY',
@@ -227,15 +228,23 @@ const handleVolunteerAlert = async (record: Air4ThaiDistrictAirQuality) => {
     const today = new Date();
     const startDate = new Date(today);
     startDate.setDate(today.getDate() + 7);
+    startDate.setHours(9, 0, 0, 0);
 
     const endDate = new Date(startDate);
     endDate.setHours(startDate.getHours() + 4);
+
+    const registrationDeadline = new Date(startDate);
+    registrationDeadline.setDate(startDate.getDate() - 1);
+    registrationDeadline.setHours(23, 59, 59, 0);
 
     const eventData = {
       title: eventTitle,
       description: AIR_CAMPAIGN_DESCRIPTION,
       start_at: startDate.toISOString(),
       end_at: endDate.toISOString(),
+      registration_deadline: registrationDeadline.toISOString(),
+      image_url:
+        'https://res.cloudinary.com/dcpgrfpaf/image/upload/v1733988154/Untitled_design_mfbbac.png',
       total_seats: 50,
       created_by_user_id: 1,
     };
