@@ -20,17 +20,17 @@ import {
   setupBookingRoutes,
 } from '@/modules/ApartmentListing';
 
-//citizen
-import {
-  setupCitizenAddressRoutes,
-  setupUserSpecialtyRoutes,
-  setupUserG8Routes,
-  setupRoleUserRoutes,
-  setupUserRoutes,
-  setupUserSpecialistRoutes,
-} from '@/modules/citizens/routes';
-
-//Citizen
+// // Citizen
+// Citizen
+// import {
+//   setupCitizenAddressRoutes,
+//   setupUserSpecialtyRoutes,
+//   setupUserG8Routes,
+//   setupRoleUserRoutes,
+//   setupUserRoutes,
+//   setupUserSpecialistRoutes,
+// } from '@/modules/citizens/routes';
+// Citizen
 import {
   setupCitizenAddressRoutes,
   setupUserSpecialtyRoutes,
@@ -43,20 +43,21 @@ import {
 // Clean Air
 import { setupCleanAirRoutes } from '@/modules/clean-air/routes';
 
-//Emergency
-import {
-  setupReportRoutes,
-  setupFcmRoutes,
-  setupTokenRoutes,
-} from '@/modules/emergency';
-//Emergency
+// // Emergency
+// Emergency
+// import {
+//   setupReportRoutes,
+//   setupFcmRoutes,
+//   setupTokenRoutes,
+// } from '@/modules/emergency';
+// Emergency
 import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
 } from '@/modules/emergency';
 
-import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
+// import { reportRoutes, fcmRoutes, tokenRoutes } from '@/modules/emergency';
 
 // Event Hub
 import { setupEventRoutes, setupBookmarkRoutes } from '@/modules/EventHub';
@@ -87,7 +88,7 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-import { setupReportsRoutes } from '@/modules/power-bi';
+// import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
 import {
@@ -96,27 +97,19 @@ import {
   distanceRoutes,
 } from '@/modules/G-16/routes';
 
-// Traffic
-import {
-  setupIntersectionRoutes,
-  setupLightRequestRoutes,
-  setupRoadRoutes,
-  setupTrafficEmergencyRoutes,
-  setupTrafficLightRoutes,
-} from '@/modules/traffic';
-
 // Volunteer
 import { eventRoutes } from '@/modules/Volunteer/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
 
+// // Weather
 // Weather
-import {
-  setupWeatherRoutes,
-  setupOpenMeteoRoutes,
-} from '@/modules/weather/routes';
-//Weather
+// import {
+//   setupWeatherRoutes,
+//   setupOpenMeteoRoutes,
+// } from '@/modules/weather/routes';
+// Weather
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
@@ -143,18 +136,18 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Clean Air
   setupCleanAirRoutes(app);
 
-  //Citizen
-  setupCitizenAddressRoutes(app);
-  setupUserSpecialistRoutes(app);
-  setupUserSpecialtyRoutes(app);
-  setupUserG8Routes(app);
-  setupRoleUserRoutes(app);
-  setupUserRoutes(app);
+  // Citizen
+  // setupCitizenAddressRoutes(app);
+  // setupUserSpecialistRoutes(app);
+  // setupUserSpecialtyRoutes(app);
+  // setupUserG8Routes(app);
+  // setupRoleUserRoutes(app);
+  // setupUserRoutes(app);
 
-  //Emergency
-  setupReportRoutes(app);
-  setupFcmRoutes(app);
-  setupTokenRoutes(app);
+  // //Emergency
+  // setupReportRoutes(app);
+  // setupFcmRoutes(app);
+  // setupTokenRoutes(app);
   setupCitizenAddressRoutes(app);
   setupUserSpecialistRoutes(app);
   setupUserSpecialtyRoutes(app);
@@ -190,23 +183,15 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
-  // Power BI
-  setupReportsRoutes(app);
-
-  // Traffic
-  setupIntersectionRoutes(app);
-  setupTrafficLightRoutes(app);
-  setupLightRequestRoutes(app);
-  setupRoadRoutes(app);
-  setupTrafficEmergencyRoutes(app);
-
   // Waste
   setupWasteRoutes(app);
 
-  //Weather
-  setupOpenMeteoRoutes(app);
-  setupWeatherRoutes(app);
-  //Weather
+  // SupportMap
+
+  // Weather
+  // setupOpenMeteoRoutes(app);
+  // setupWeatherRoutes(app);
+  // Weather
   setupOpenMeteoRoutes(app);
   setupWeatherRoutes(app);
 
@@ -217,10 +202,13 @@ export const setupRoutes = (app: OpenAPIHono) => {
   */
 
   //Emergency
-  app.route('/reports', reportRoutes);
-  app.route('/fcm', fcmRoutes);
-  app.route('/tokens', tokenRoutes);
-  app.route('/emergency', emergencyRoutes);
+  //   app.route('/reports', reportRoutes);
+  //   app.route('/fcm', fcmRoutes);
+  //   app.route('/tokens', tokenRoutes);
+  //   app.route('/emergency', emergencyRoutes);
+
+  // Power BI
+  // app.route('/reports', reportRoutes);
 
   // Support Map
   app.route('/api', detectRoutes);
