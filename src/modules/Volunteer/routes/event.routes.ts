@@ -10,6 +10,7 @@ import {
   getEventParticipants,
   getMyEvents,
 } from '../controllers/event.controller';
+import { authMiddleware } from '@/middlewares';
 
 const eventRoutes = new Hono();
 
@@ -19,10 +20,10 @@ eventRoutes.get('/my-events', getMyEvents);
 
 eventRoutes.post('/:id/join', joinEvent);
 eventRoutes.delete('/:id/join', leaveEvent);
-eventRoutes.get('/:id/participants', getEventParticipants);
+eventRoutes.get('/:id/participants', authMiddleware, getEventParticipants);
 eventRoutes.put('/:id/update', updateEvent);
 
-eventRoutes.get('/:id', getEventById);
+eventRoutes.get('/:id', authMiddleware, getEventById);
 eventRoutes.delete('/:id', deleteEvent);
 
 export default eventRoutes;

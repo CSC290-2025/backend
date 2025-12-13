@@ -230,12 +230,14 @@ const findParticipantsByEventId = async (eventId: number) => {
 
 const findParticipation = async (eventId: number, userId: number) => {
   try {
-    return await prisma.volunteer_event_participation.findFirst({
+    const events = await prisma.volunteer_event_participation.findFirst({
       where: {
         volunteer_event_id: eventId,
         user_id: userId,
       },
     });
+
+    return events;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -272,8 +274,11 @@ const findEventsByUserId = async (userId: number) => {
         start_at: 'asc', // Show upcoming events first
       },
     });
+
     return events;
   } catch (error) {
+    console.log(error, ' THIS is erorr');
+
     handlePrismaError(error);
   }
 };
