@@ -89,7 +89,7 @@ const create = async (data: CreateEventInput) => {
         start_at: new Date(data.start_at),
         end_at: new Date(data.end_at),
         total_seats: data.total_seats,
-        //created_by_user_id: data.created_by_user_id,
+        created_by_user_id: data.created_by_user_id,
         image_url: data.image_url,
         //department_id: data.department_id, not done
         registration_deadline: data.registration_deadline
