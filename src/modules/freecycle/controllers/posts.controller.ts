@@ -1,6 +1,8 @@
 import type { Context, Handler } from 'hono';
 import { PostsService } from '../services';
 import { successResponse } from '@/utils/response';
+import type { AuthTypes } from '@/modules/Auth';
+import type { JwtPayload } from '../../Auth/types/auth.types';
 
 const getAllPost = async (c: Context) => {
   const posts = await PostsService.getAllPost();
@@ -16,7 +18,9 @@ const getPostById = async (c: Context) => {
 const getPostByDonater: Handler = async (c: Context) => {
   console.log('Getting posts by donater');
   const user = c.get('user');
-  const userId = user?.id;
+
+  const userId = user?.userId;
+
   if (!userId) {
     return c.json({ error: 'Unauthorized: Missing user ID in context' }, 401);
   }
@@ -79,40 +83,11 @@ const getPostsByUserId = async (c: Context) => {
   return successResponse(c, { posts });
 };
 
-const getMyPosts: Handler = async (c: Context) => {
-  console.log('📝 Getting my posts');
+const getMyPosts = async (c: Context) => {
+  const payload = c.get('user') as JwtPayload;
+  const posts = await PostsService.getMyPosts(payload.userId);
 
-  // ⭐ ดึง user จาก context ที่ authMiddleware set ไว้
-  const user = c.get('user');
-  const userId = user?.id;
-
-  if (!userId) {
-    return c.json(
-      {
-        success: false,
-        error: 'Unauthorized: Missing user ID in context',
-      },
-      401
-    );
-  }
-
-  try {
-    const posts = await PostsService.getMyPosts(userId);
-
-    return successResponse(c, {
-      posts,
-      total: posts.length,
-    });
-  } catch (error) {
-    console.error('❌ Failed to get my posts:', error);
-    return c.json(
-      {
-        success: false,
-        error: 'Failed to fetch posts',
-      },
-      500
-    );
-  }
+  return successResponse(c, posts, 200);
 };
 
 export {
