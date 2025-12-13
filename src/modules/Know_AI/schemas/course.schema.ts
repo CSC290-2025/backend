@@ -166,6 +166,26 @@ const deleteCourseRoute = createDeleteRoute({
   tags: ['Know-AI', 'Course'],
 });
 
+//Admin
+const courseStatus = z.object({
+  course_status: courseStatusEnum,
+});
+const getPendingCourse = createGetRoute({
+  path: '/coursePending',
+  summary: 'Get pending course',
+  responseSchema: course.array(),
+  tags: ['Know-AI', 'Course'],
+});
+
+const changeApprovePost = createPutRoute({
+  path: '/courseApprove/{id}',
+  summary: 'Approve course',
+  requestSchema: z.optional(z.any()),
+  responseSchema: course,
+  params: courseId,
+  tags: ['Know-AI', 'Course'],
+});
+
 export {
   courseStatusEnum,
   courseTypeEnum,
@@ -187,4 +207,7 @@ export {
   updateCourseVideosRoute,
   updateOnsiteSessionsRoute,
   deleteCourseRoute,
+  courseStatus,
+  getPendingCourse,
+  changeApprovePost,
 };

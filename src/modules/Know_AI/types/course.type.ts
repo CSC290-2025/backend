@@ -12,6 +12,7 @@ type UpdateOnsiteSessions = z.infer<typeof CourseSchema.updateOnsiteSessions>;
 type CreateCourse = z.infer<typeof CourseSchema.createCourse>;
 type UpdateCourse = z.infer<typeof CourseSchema.updateCourse>;
 type courseTypeEnum = z.infer<typeof CourseSchema.courseTypeEnum>;
+type courseStatus = z.infer<typeof CourseSchema.courseStatus>;
 
 export type {
   Course,
@@ -25,4 +26,5 @@ export type {
   CreateOnsiteSession,
   UpdateCourseVideos,
   UpdateOnsiteSessions,
+  courseStatus,
 };
