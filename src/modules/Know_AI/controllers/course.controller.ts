@@ -73,6 +73,18 @@ const deleteCourse = async (c: Context) => {
   );
 };
 
+//Admin
+const getPendingCourse = async (c: Context) => {
+  const courses = await CourseService.getPendingCourse();
+  return successResponse(c, { courses });
+};
+
+const changeApprove = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const course = await CourseService.changeApprove(id);
+  return successResponse(c, { course }, 200, 'Course approved successfully');
+};
+
 export {
   createCourse,
   getAllCourse,
@@ -82,4 +94,6 @@ export {
   updateCourseVideos,
   updateOnsiteSessions,
   deleteCourse,
+  getPendingCourse,
+  changeApprove,
 };
