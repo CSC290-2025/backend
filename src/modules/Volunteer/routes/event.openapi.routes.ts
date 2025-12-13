@@ -43,6 +43,10 @@ export const createEventRoute = createPostRoute({
   requestSchema: EventSchema.partial(),
   responseSchema: z.array(EventSchema),
   tags: ['Volunteer'],
+  middleware: [
+    adminMiddleware,
+    requireRole(ROLES.ADMIN, ROLES.VOLUNTEER_COORDINATOR),
+  ],
 });
 
 export const getEventRoute = createGetRoute({
@@ -60,6 +64,10 @@ export const updateEventRoute = createPutRoute({
   responseSchema: z.array(EventSchema),
   params: EventIdParam,
   tags: ['Volunteer'],
+  middleware: [
+    adminMiddleware,
+    requireRole(ROLES.ADMIN, ROLES.VOLUNTEER_COORDINATOR),
+  ],
 });
 
 export const deleteEventRoute = createDeleteRoute({
@@ -67,6 +75,10 @@ export const deleteEventRoute = createDeleteRoute({
   summary: 'Delete a volunteer event',
   params: EventIdParam,
   tags: ['Volunteer'],
+  middleware: [
+    adminMiddleware,
+    requireRole(ROLES.ADMIN, ROLES.VOLUNTEER_COORDINATOR),
+  ],
 });
 
 export const setupVolunteerRoutes = (app: OpenAPIHono) => {
