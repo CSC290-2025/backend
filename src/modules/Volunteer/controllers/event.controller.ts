@@ -10,6 +10,8 @@ import { z } from 'zod';
 
 const getAllEvents = async (c: Context) => {
   const query = PaginationSchema.parse(c.req.query());
+  console.log(query);
+
   const result = await EventService.getAll(query);
   return successResponse(c, result);
 };

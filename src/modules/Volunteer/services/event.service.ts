@@ -14,13 +14,14 @@ import {
 const getAll = async (
   query: PaginationOptions & { search?: string; department_id?: number }
 ): Promise<PaginatedEvents> => {
-  const { page, limit, search, department_id } = query;
+  const { page, limit, search, department_id, tag } = query;
 
   return await EventModel.findMany(page, limit, {
     page,
     limit,
     search,
     department_id,
+    tag,
   });
 };
 

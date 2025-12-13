@@ -11,6 +11,7 @@ import { NotFoundError } from '../../../errors';
 interface EventFilterOptions extends PaginationOptions {
   search?: string;
   department_id?: number;
+  tag?: string;
 }
 
 const findMany = async (
@@ -28,6 +29,11 @@ const findMany = async (
         { title: { contains: filters.search, mode: 'insensitive' } },
         { description: { contains: filters.search, mode: 'insensitive' } },
       ];
+    }
+    if (typeof filters.tag === 'string') {
+      where.tag = {
+        equals: filters.tag,
+      };
     }
     if (filters.department_id) {
       where.department_id = filters.department_id;
@@ -56,6 +62,7 @@ const findMany = async (
           updated_at: true,
           //created_by_user_id: true,
           department_id: true,
+          tag: true,
           //address_id: true,
         },
       }),
@@ -97,6 +104,7 @@ const create = async (data: CreateEventInput) => {
           : undefined,
         //address_id: data.address_id,
         //status: data.status,
+        tag: data.tag,
       },
     });
   } catch (error) {
@@ -121,6 +129,7 @@ const update = async (id: number, data: UpdateEventInput) => {
           : data.registration_deadline === null
             ? null
             : undefined,
+        tag: data?.tag,
         //address_id: data.address_id,
         //status: data.status,
       },

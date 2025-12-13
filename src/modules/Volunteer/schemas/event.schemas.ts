@@ -37,6 +37,7 @@ const CreateEventSchema = z.object({
     .datetime({ message: 'Deadline must be a valid ISO date string' })
     .optional(),
   address_id: z.number().int().positive().optional(),
+  tag: z.string().optional(),
   //status: VolunteerEventStatus.optional(),
 });
 
@@ -60,6 +61,7 @@ const UpdateEventSchema = z.object({
     .optional()
     .nullable(),
   address_id: z.number().int().positive().optional().nullable(),
+  tag: z.string().nullable().optional(),
   //status: VolunteerEventStatus.optional(),
 });
 
@@ -68,6 +70,7 @@ const PaginationSchema = z.object({
   limit: z.coerce.number().int().default(9),
   search: z.string().optional(),
   department_id: z.coerce.number().int().positive().optional(),
+  tag: z.string().optional(),
 });
 
 const EventIdParam = z.object({
