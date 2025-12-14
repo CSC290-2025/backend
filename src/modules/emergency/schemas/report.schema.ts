@@ -1,7 +1,4 @@
-import {
-  isReportStatus,
-  isReportId,
-} from '@/modules/emergency/schemas/branded.schema.ts';
+import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
 
 export const ReportStatusEnum = z

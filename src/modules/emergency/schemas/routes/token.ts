@@ -1,12 +1,23 @@
-import { createPostRoute } from '@/utils/openapi-helpers.ts';
+import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers.ts';
 import { TokenFcmSchemas } from '@/modules/emergency/schemas';
+import * as z from 'zod';
 
 const createTokenFcmRoute = createPostRoute({
-  path: '/tokens',
+  path: '/emergency/tokens',
   summary: 'Create new token',
   requestSchema: TokenFcmSchemas.CreateTokenFcmSchema,
   responseSchema: TokenFcmSchemas.TokenFcmResponseSchema,
-  tags: [`Report`],
+  tags: ['Report'],
 });
 
-export { createTokenFcmRoute };
+const findTokenByUserIdRoute = createGetRoute({
+  path: '/emergency/token/{user_id}',
+  summary: 'Get token by userId',
+  params: z.object({
+    user_id: z.string(),
+  }),
+  responseSchema: TokenFcmSchemas.TokenFcmResponseSchema,
+  tags: ['Report'],
+});
+
+export { createTokenFcmRoute, findTokenByUserIdRoute };

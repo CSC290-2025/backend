@@ -3,15 +3,15 @@ import { ReportSchemas } from '@/modules/emergency/schemas';
 import * as z from 'zod';
 
 const createReportRoute = createPostRoute({
-  path: '/reports',
+  path: '/emergency/reports',
   summary: 'Create new report',
   requestSchema: ReportSchemas.CreateReportSchema,
   responseSchema: ReportSchemas.ReportResponseSchema,
-  tags: [`Report`],
+  tags: ['Report'],
 });
 
 const findReportByStatusRoute = createGetRoute({
-  path: `/reports/:status`,
+  path: 'emergency/reports/{status}',
   summary: 'Get report by status',
   params: z.object({
     status: ReportSchemas.ReportStatusEnum,
@@ -21,7 +21,7 @@ const findReportByStatusRoute = createGetRoute({
     _limit: z.string().optional(),
   }),
   responseSchema: ReportSchemas.FindReportResponseSchema,
-  tags: [`Report`],
+  tags: ['Report'],
 });
 
 export { createReportRoute, findReportByStatusRoute };

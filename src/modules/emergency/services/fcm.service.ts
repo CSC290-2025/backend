@@ -2,12 +2,13 @@ import { FcmModel } from '@/modules/emergency/models';
 import { firebaseMessaging } from '@/config/firebase.ts';
 import { ValidationError } from '@/errors';
 import type {
-  Notification,
+  CreateNotification,
   NotificationResponse,
+  SendFcmResponse,
 } from '@/modules/emergency/types/fcm.type.ts';
 
 export const sendAllNotificationService = async (
-  data: Notification
+  data: CreateNotification
 ): Promise<NotificationResponse> => {
   try {
     const tokens = await FcmModel.getAllFcmToken();
@@ -36,8 +37,8 @@ export const sendAllNotificationService = async (
 
 export const sendNotificationToToken = async (
   token: string,
-  data: Notification
-): Promise<string> => {
+  data: CreateNotification
+): Promise<SendFcmResponse> => {
   try {
     const notification = data.notification;
     const message = {
@@ -48,7 +49,7 @@ export const sendNotificationToToken = async (
       token,
     };
 
-    return await firebaseMessaging.send({
+    const messageId = await firebaseMessaging.send({
       ...message,
       webpush: {
         notification: {
@@ -58,6 +59,8 @@ export const sendNotificationToToken = async (
         },
       },
     });
+
+    return { message_id: messageId };
   } catch (error: any) {
     throw new Error(error?.message || `Internal server error !`);
   }
