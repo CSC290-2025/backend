@@ -1,5 +1,5 @@
 import type { Context, Handler } from 'hono';
-import { ContactService } from '@/modules/emergency/services';
+import { ContactService, ReportService } from '@/modules/emergency/services';
 import { successResponse } from '@/utils/response.ts';
 
 export const createContact = async (c: Context) => {
@@ -9,7 +9,7 @@ export const createContact = async (c: Context) => {
 };
 
 export const findContactByUserId: Handler = async (c: Context) => {
-  const { user_id } = await c.req.param();
+  const { user_id } = c.req.param();
   const newUserId = Number(user_id);
 
   const contact = await ContactService.findContactByUserId(newUserId);
@@ -21,8 +21,23 @@ export const findContactByUserId: Handler = async (c: Context) => {
   );
 };
 
-export const updateContact = async (c: Context) => {
+export const updateContactById: Handler = async (c: Context) => {
+  const { id } = c.req.param();
   const body = await c.req.json();
-  const contact = await ContactService.updateContact(body);
+
+  const newId = Number(id);
+  const contact = await ContactService.updateContactById(newId, body);
   return successResponse(c, { contact }, 201, 'Update Contact successfully');
+};
+
+export const deleteContactById: Handler = async (c: Context) => {
+  const { id } = c.req.param();
+
+  const contact = await ContactService.deleteContactById(Number(id));
+  return successResponse(
+    c,
+    { id_delete: contact.id },
+    200,
+    'Contact deleted successfully'
+  );
 };

@@ -1,5 +1,10 @@
 import prisma from '@/config/client.ts';
-import type { ContactResponse, CreateContact } from '@/modules/emergency/types';
+import type {
+  ContactResponse,
+  CreateContact,
+  UpdateContact,
+  DeleteContactResponse,
+} from '@/modules/emergency/types';
 import { handlePrismaError, NotFoundError, ValidationError } from '@/errors';
 
 const creatContact = async (data: CreateContact): Promise<ContactResponse> => {
@@ -39,25 +44,24 @@ const findContactByUserId = async (
   }
 };
 
-const updateContact = async (data: ContactResponse) => {
+const updateContactById = async (
+  id: number,
+  data: UpdateContact
+): Promise<Partial<ContactResponse>> => {
   try {
     const existContact = await prisma.emergency_contacts.findUnique({
-      where: { id: data.id },
+      where: { id: id },
     });
 
     if (!existContact) {
-      throw new NotFoundError(`Contact with id ${data.id} not found`);
+      throw new NotFoundError(`Contact with id ${id} not found`);
     }
 
     return await prisma.emergency_contacts.update({
       where: {
-        id: data.id,
+        id: id,
       },
-      data: {
-        contact_name: data.contact_name ?? existContact.contact_name,
-        phone: data.phone ?? existContact.phone,
-        user_id: data.user_id ?? existContact.user_id,
-      },
+      data: data,
     });
   } catch (error) {
     if (error instanceof NotFoundError) {
@@ -67,4 +71,22 @@ const updateContact = async (data: ContactResponse) => {
   }
 };
 
-export { creatContact, findContactByUserId, updateContact };
+const deleteContactById = async (
+  id: number
+): Promise<DeleteContactResponse> => {
+  try {
+    const contact = await prisma.emergency_contacts.delete({
+      where: { id: id },
+    });
+    return { id: contact.id };
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  creatContact,
+  findContactByUserId,
+  updateContactById,
+  deleteContactById,
+};
