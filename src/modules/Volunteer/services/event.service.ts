@@ -10,6 +10,7 @@ import {
   ValidationError,
   ForbiddenError,
 } from '../../../errors';
+import { ROLES } from '@/constants';
 
 const getAll = async (
   query: PaginationOptions & { search?: string; department_id?: number }
@@ -123,13 +124,6 @@ const leaveEvent = async (eventId: number, userId: number) => {
 
 const getParticipants = async (eventId: number, requesterId: number) => {
   const event = await getById(eventId);
-
-  if (event.created_by_user_id !== requesterId) {
-    throw new ForbiddenError(
-      'You do not have permission to view participants.'
-    );
-  }
-
   return await EventModel.findParticipantsByEventId(eventId);
 };
 
