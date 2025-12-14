@@ -16,17 +16,37 @@ export const findReportByStatus: Handler = async (c: Context) => {
   const page = Number(_page);
   const limit = Number(_limit);
 
-  const { report, totalPage } = await ReportService.findReportByStatus(
+  const { report, totalCount } = await ReportService.findReportByStatus(
     statusParam as ReportStatus,
     page,
     limit
   );
   c.header('Access-Control-Expose-Headers', 'x-total-count');
-  c.header('x-total-count', totalPage.toString());
+  c.header('x-total-count', totalCount.toString());
   return successResponse(
     c,
     { report },
     201,
     'Find report by status successfully'
+  );
+};
+
+export const updateReportById = async (c: Context) => {
+  const { id } = c.req.param();
+  const data = await c.req.json();
+
+  const report = await ReportService.updateReportById(Number(id), data);
+  return successResponse(c, { report }, 200, 'Report updated successfully');
+};
+
+export const deleteReportById = async (c: Context) => {
+  const { id } = c.req.param();
+
+  const report = await ReportService.deleteReportById(Number(id));
+  return successResponse(
+    c,
+    { id_delete: report.id },
+    200,
+    'Report deleted successfully'
   );
 };

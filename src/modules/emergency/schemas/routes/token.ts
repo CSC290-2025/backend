@@ -11,7 +11,7 @@ const createTokenFcmRoute = createPostRoute({
 });
 
 const findTokenByUserIdRoute = createGetRoute({
-  path: '/emergency/token/{user_id}',
+  path: '/emergency/tokens/{user_id}',
   summary: 'Get token by userId',
   params: z.object({
     user_id: z.string(),

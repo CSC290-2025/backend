@@ -11,6 +11,14 @@ const setupReportRoutes = (app: OpenAPIHono) => {
     RouteSchemas.Report.findReportByStatusRoute,
     ReportController.findReportByStatus
   );
+  app.openapi(
+    RouteSchemas.Report.updateReportByIdRoute,
+    ReportController.updateReportById
+  );
+  app.openapi(
+    RouteSchemas.Report.deleteReportByIdRoute,
+    ReportController.deleteReportById
+  );
 };
 
 export { setupReportRoutes };
