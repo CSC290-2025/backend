@@ -67,7 +67,7 @@ const create = async (data: CreateEventInput) => {
         if (found) {
           addressId = found.id;
         } else {
-          const add = await tx.addresses.create({
+          const created = await tx.addresses.create({
             data: {
               address_line: data.address.address_line ?? null,
               province: data.address.province ?? null,
@@ -76,39 +76,37 @@ const create = async (data: CreateEventInput) => {
               postal_code: data.address.postal_code ?? null,
             },
           });
-          addressId = add.id;
+          addressId = created.id;
         }
       }
 
-      const organizationId = data.organization_id ?? data.host_user_id;
+      let organizationId = data.organization_id ?? null;
 
-      if (!organizationId) {
-        throw new Error('host_user_id or organization_id is required');
+      if (!organizationId && data.organization) {
+        const foundOrg = await tx.event_organization.findFirst({
+          where: {
+            name: data.organization.name,
+            email: data.organization.email,
+            phone_number: data.organization.phone_number,
+          },
+        });
+
+        if (foundOrg) {
+          organizationId = foundOrg.id;
+        } else {
+          const createdOrg = await tx.event_organization.create({
+            data: {
+              name: data.organization.name,
+              email: data.organization.email,
+              phone_number: data.organization.phone_number,
+            },
+          });
+          organizationId = createdOrg.id;
+        }
       }
 
-      const existingOrg = await tx.event_organization.findUnique({
-        where: { id: organizationId },
-      });
-
-      if (!existingOrg) {
-        await tx.event_organization.create({
-          data: {
-            id: organizationId,
-            name: data.organization?.name ?? null,
-            email: data.organization?.email ?? null,
-            phone_number: data.organization?.phone_number ?? null,
-          },
-        });
-      } else if (data.organization) {
-        await tx.event_organization.update({
-          where: { id: organizationId },
-          data: {
-            name: data.organization.name ?? existingOrg.name,
-            email: data.organization.email ?? existingOrg.email,
-            phone_number:
-              data.organization.phone_number ?? existingOrg.phone_number,
-          },
-        });
+      if (!organizationId) {
+        throw new Error('organization or organization_id is required');
       }
 
       const event = await tx.events.create({
@@ -157,55 +155,79 @@ const update = async (id: number, data: UpdateEventInput) => {
         updateData.description = data.description;
       if (data.total_seats !== undefined)
         updateData.total_seats = data.total_seats;
-      if (data.host_user_id !== undefined)
-        updateData.host_user_id = data.host_user_id;
 
-      if (data.start_date) {
-        updateData.start_at = new Date(
-          `${data.start_date}T${data.start_time ?? '00:00'}`
-        );
-      }
-      if (data.end_date) {
-        updateData.end_at = new Date(
-          `${data.end_date}T${data.end_time ?? '00:00'}`
-        );
+      if (data.start_date && data.start_time) {
+        updateData.start_at = new Date(`${data.start_date}T${data.start_time}`);
       }
 
-      if (data.organization_id !== undefined)
-        updateData.organization_id = data.organization_id;
-      if (data.address_id !== undefined)
-        updateData.address_id = data.address_id;
+      if (data.end_date && data.end_time) {
+        updateData.end_at = new Date(`${data.end_date}T${data.end_time}`);
+      }
 
-      const event = await tx.events.update({
-        where: { id },
-        data: updateData,
-      });
+      let addressId = data.address_id ?? null;
 
-      if (data.event_tag_name !== undefined) {
-        await tx.event_tag.deleteMany({ where: { event_id: id } });
+      if (!addressId && data.address) {
+        const found = await tx.addresses.findFirst({
+          where: {
+            address_line: data.address.address_line ?? null,
+            province: data.address.province ?? null,
+            district: data.address.district ?? null,
+            subdistrict: data.address.subdistrict ?? null,
+            postal_code: data.address.postal_code ?? null,
+          },
+        });
 
-        if (data.event_tag_name) {
-          const uid = data.host_user_id || event.host_user_id;
-
-          if (!uid) throw new Error('host_user_id required for event tag');
-
-          const tag = await tx.event_tag_name.upsert({
-            where: { id: uid },
-            create: { id: uid, name: data.event_tag_name },
-            update: { name: data.event_tag_name },
-          });
-
-          await tx.event_tag.create({
+        if (found) {
+          addressId = found.id;
+        } else {
+          const created = await tx.addresses.create({
             data: {
-              event_id: id,
-              event_tag_id: tag.id,
-              name: data.event_tag_name,
+              address_line: data.address.address_line ?? null,
+              province: data.address.province ?? null,
+              district: data.address.district ?? null,
+              subdistrict: data.address.subdistrict ?? null,
+              postal_code: data.address.postal_code ?? null,
             },
           });
+          addressId = created.id;
         }
       }
 
-      return event;
+      if (addressId !== null) updateData.address_id = addressId;
+
+      let organizationId = data.organization_id ?? null;
+
+      if (!organizationId && data.organization) {
+        const foundOrg = await tx.event_organization.findFirst({
+          where: {
+            name: data.organization.name,
+            email: data.organization.email,
+            phone_number: data.organization.phone_number,
+          },
+        });
+
+        if (foundOrg) {
+          organizationId = foundOrg.id;
+        } else {
+          const createdOrg = await tx.event_organization.create({
+            data: {
+              name: data.organization.name,
+              email: data.organization.email,
+              phone_number: data.organization.phone_number,
+            },
+          });
+          organizationId = createdOrg.id;
+        }
+      }
+
+      if (organizationId !== null) {
+        updateData.organization_id = organizationId;
+      }
+
+      return await tx.events.update({
+        where: { id },
+        data: updateData,
+      });
     });
   } catch (err) {
     handlePrismaError(err);
