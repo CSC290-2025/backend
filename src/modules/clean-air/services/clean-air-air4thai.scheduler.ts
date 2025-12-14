@@ -283,12 +283,6 @@ const handleCitizenAndEmergency = async (
     }
 
     const users = await addressService.getUsersByDistrict(record.district);
-    console.log(`[clean-air][citizen+emergency] District: ${record.district}`);
-    console.log(
-      `[clean-air][citizen+emergency] Found ${users.length} users:`,
-      users.map((u) => ({ id: u.id, username: u.username, email: u.email }))
-    );
-
     const userIds = users.map((u) => u.id).filter((id) => Number.isFinite(id));
 
     if (!userIds.length) {
