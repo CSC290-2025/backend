@@ -911,7 +911,6 @@ model users {
   emergency_contacts            emergency_contacts[]
   emergency_reports             emergency_reports[]
   event_bookmarks               event_bookmarks[]
-  event_organization            event_organization?
   event_tag_name                event_tag_name?
   events                        events[]
   favourite_district            favourite_district[]
@@ -989,6 +988,7 @@ model volunteer_events {
   status                        volunteer_event_status          @default(draft)
   created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
   updated_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  tag                           String?                         @db.VarChar(255)
   volunteer_event_participation volunteer_event_participation[]
   addresses                     addresses?                      @relation(fields: [address_id], references: [id], onUpdate: NoAction)
   users                         users?                          @relation(fields: [created_by_user_id], references: [id], onUpdate: NoAction)
@@ -1073,7 +1073,6 @@ model event_organization {
   name         String?  @db.VarChar(255)
   email        String?  @db.VarChar(255)
   phone_number String?  @db.VarChar(255)
-  users        users    @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   events       events[]
 }
 
@@ -1137,14 +1136,6 @@ model medicine_inventory {
   facilities     facilities? @relation(fields: [facility_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_facility_id")
 }
 
-model weather_rating {
-  id         Int        @id @default(autoincrement())
-  address_id Int?
-  date       DateTime?  @default(now()) @db.Timestamptz(6)
-  rating     Decimal?   @db.Decimal(3, 2)
-  addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
-}
-
 model staff {
   id          Int         @id @default(autoincrement())
   user_id     Int?
@@ -1153,6 +1144,14 @@ model staff {
   created_at  DateTime?   @default(now()) @db.Timestamptz(6)
   facilities  facilities? @relation(fields: [facility_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_staff_facility_id")
   users       users?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_staff_user_id")
+}
+
+model weather_rating {
+  id         Int        @id @default(autoincrement())
+  address_id Int?
+  date       DateTime?  @default(now()) @db.Timestamptz(6)
+  rating     Decimal?   @db.Decimal(3, 2)
+  addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
 }
 
 enum air_quality_category {
