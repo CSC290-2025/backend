@@ -34,7 +34,6 @@ let sampleJob: ScheduledTask | null = null;
 let flushJob: ScheduledTask | null = null;
 
 const POOR_AIR_QUALITY_CATEGORIES: ReadonlySet<AirQualityCategory> = new Set([
-  'GOOD',
   'UNHEALTHY_FOR_SENSITIVE',
   'UNHEALTHY',
   'VERY_UNHEALTHY',
@@ -64,6 +63,15 @@ prepareDistrictarray();
 const isSchedulerDisabled =
   process.env.G05_DISABLE_AIR4THAI_SCHEDULER === 'true' ||
   process.env.NODE_ENV === 'test';
+
+const VOLUNTEER_ADMIN_USER_ID =
+  Number(process.env.G05_VOLUNTEER_ADMIN_USERID) || 1;
+
+if (!process.env.G05_VOLUNTEER_ADMIN_USERID) {
+  console.warn(
+    '[clean-air] G05_VOLUNTEER_ADMIN_USERID not set, using default: 1'
+  );
+}
 
 const addDataToArray = (snapshot: Air4ThaiDistrictAirQuality[]) => {
   snapshot.forEach((record) => {
@@ -246,7 +254,8 @@ const handleVolunteerAlert = async (record: Air4ThaiDistrictAirQuality) => {
       image_url:
         'https://res.cloudinary.com/dcpgrfpaf/image/upload/v1733988154/Untitled_design_mfbbac.png',
       total_seats: 50,
-      created_by_user_id: 1,
+      created_by_user_id: VOLUNTEER_ADMIN_USER_ID,
+      tag: 'Environment',
     };
 
     await EventService.create(eventData);
@@ -274,6 +283,12 @@ const handleCitizenAndEmergency = async (
     }
 
     const users = await addressService.getUsersByDistrict(record.district);
+    console.log(`[clean-air][citizen+emergency] District: ${record.district}`);
+    console.log(
+      `[clean-air][citizen+emergency] Found ${users.length} users:`,
+      users.map((u) => ({ id: u.id, username: u.username, email: u.email }))
+    );
+
     const userIds = users.map((u) => u.id).filter((id) => Number.isFinite(id));
 
     if (!userIds.length) {
