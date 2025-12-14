@@ -296,21 +296,19 @@ const handleCitizenAndEmergency = async (
       },
     };
 
-    const allTokens = await FcmModel.getAllFcmToken();
-    const userTokens = allTokens.filter(
-      (t) => t.user_id && userIds.includes(t.user_id)
-    );
-
-    for (const tokenRecord of userTokens) {
-      if (tokenRecord.tokens) {
+    for (const userId of userIds) {
+      const tokenRecord = await FcmModel.getFcmTokenByUserId(userId);
+      if (tokenRecord && tokenRecord.tokens) {
         try {
           await FcmService.sendNotificationToToken(tokenRecord.tokens, payload);
         } catch (err) {
           console.error(
-            `[clean-air] Failed to send notification to token`,
+            `[clean-air] Failed to send notification to user ${userId}`,
             err
           );
         }
+      } else {
+        console.log(`[clean-air] No FCM token for user ${userId}`);
       }
     }
 

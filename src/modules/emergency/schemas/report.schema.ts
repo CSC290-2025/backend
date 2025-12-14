@@ -1,7 +1,4 @@
-import {
-  isReportStatus,
-  isReportId,
-} from '@/modules/emergency/schemas/branded.schema.ts';
+import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
 
 export const ReportStatusEnum = z
@@ -43,17 +40,25 @@ const ReportResponseSchema = z.object({
     .enum(['traffic', 'accident', 'disaster'])
     .optional()
     .nullable(),
-  created_at: z.string(),
-  updated_at: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
 const PaginatedReportSchema = z.object({
   report: z.array(ReportResponseSchema),
-  totalPage: z.number(),
+  totalCount: z.number(),
 });
 
 const FindReportResponseSchema = z.object({
   report: z.array(ReportResponseSchema),
+});
+
+const UpdateReportByIdSchema = ReportResponseSchema.omit({
+  id: true,
+}).partial();
+
+const ReportDeleteResponseSchema = z.object({
+  id: z.number().int(),
 });
 
 export {
@@ -61,4 +66,6 @@ export {
   ReportResponseSchema,
   PaginatedReportSchema,
   FindReportResponseSchema,
+  UpdateReportByIdSchema,
+  ReportDeleteResponseSchema,
 };

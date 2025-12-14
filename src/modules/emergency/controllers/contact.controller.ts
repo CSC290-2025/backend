@@ -1,7 +1,6 @@
-import type { Context } from 'hono';
+import type { Context, Handler } from 'hono';
 import { ContactService } from '@/modules/emergency/services';
 import { successResponse } from '@/utils/response.ts';
-import type { ContactResponse } from '@/modules/emergency/types';
 
 export const createContact = async (c: Context) => {
   const body = await c.req.json();
@@ -9,9 +8,9 @@ export const createContact = async (c: Context) => {
   return successResponse(c, { contact }, 201, 'Create Contact successfully');
 };
 
-export const findContactByUserId = async (c: Context) => {
-  const { userId } = await c.req.param();
-  const newUserId = Number(userId);
+export const findContactByUserId: Handler = async (c: Context) => {
+  const { user_id } = await c.req.param();
+  const newUserId = Number(user_id);
 
   const contact = await ContactService.findContactByUserId(newUserId);
   return successResponse(
