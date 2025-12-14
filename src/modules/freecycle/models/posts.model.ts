@@ -24,6 +24,16 @@ const findPostById = async (id: number): Promise<FreecyclePost | null> => {
   try {
     const post = await prisma.freecycle_posts.findUnique({
       where: { id },
+      include: {
+        users: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
     });
     if (!post) return null;
     return {

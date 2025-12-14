@@ -6,7 +6,6 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 import { authMiddleware } from '@/middlewares';
-// import { AuthMiddleware } from '@/middlewares';
 
 const FreecyclePostsSchema = z.object({
   id: z.number(),
