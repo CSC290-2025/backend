@@ -22,7 +22,10 @@ const ApartmentSchema = z.object({
   electric_price: z.number().min(0).nullable(),
   water_price: z.number().min(0).nullable(),
   apartment_type: z.enum(['dormitory', 'apartment']).nullable(),
-  apartment_location: z.enum(['asoke', 'prachauthit', 'phathumwan']).nullable(),
+  apartment_location: z
+    .enum(['chomthong', 'thonburi', 'thungkhru', 'ratburana'])
+    .nullable(),
+  internet_price: z.coerce.number().min(0).nullable(),
   internet: z.enum(['free', 'not_free', 'none']).nullable(),
   address_id: z.int().nullable(),
 });
@@ -34,9 +37,15 @@ const createApartmentSchema = z.object({
   phone: z.string().min(10).max(10),
   description: z.string().nullable(),
   apartment_type: z.enum(['dormitory', 'apartment']),
-  apartment_location: z.enum(['asoke', 'prachauthit', 'phathumwan']),
+  apartment_location: z.enum([
+    'chomthong',
+    'thonburi',
+    'thungkhru',
+    'ratburana',
+  ]),
   electric_price: z.number().min(0),
   water_price: z.number().min(0),
+  internet_price: z.coerce.number().min(0),
   internet: z.enum(['free', 'not_free', 'none']),
   userId: z.int(),
   address: z.object({
@@ -53,9 +62,15 @@ const updateApartmentSchema = z.object({
   phone: z.string().min(10).max(10),
   description: z.string().nullable(),
   apartment_type: z.enum(['dormitory', 'apartment']),
-  apartment_location: z.enum(['asoke', 'prachauthit', 'phathumwan']),
+  apartment_location: z.enum([
+    'chomthong',
+    'thonburi',
+    'thungkhru',
+    'ratburana',
+  ]),
   electric_price: z.number().min(0),
   water_price: z.number().min(0),
+  internet_price: z.coerce.number().min(0),
   internet: z.enum(['free', 'not_free', 'none']),
   address: z
     .object({
@@ -132,6 +147,35 @@ const apartmentFilterRoute = createGetRoute({
   responseSchema: z.array(ApartmentSchema),
   tags: ['Apartment'],
 });
+const countAvailableRoomsRoute = createGetRoute({
+  path: '/apartments/{id}/available-rooms',
+  summary: 'Count available rooms in an apartment',
+  params: ApartmentIdParam,
+  responseSchema: z.object({ availableRooms: z.number().int().nonnegative() }),
+  tags: ['Apartment'],
+});
+
+const getApartmentsByUserRoute = createGetRoute({
+  path: '/apartments/user/{userId}',
+  summary: 'Get apartments by user ID',
+  params: z.object({
+    userId: z.coerce.number().int().positive(),
+  }),
+  responseSchema: z.array(ApartmentSchema),
+  tags: ['Apartment'],
+});
+
+const getRoomPriceRangeRoute = createGetRoute({
+  path: '/apartments/{id}/room-price-range',
+  summary: 'Get room price range for an apartment',
+  params: ApartmentIdParam,
+  responseSchema: z.object({
+    minPrice: z.number().nullable(),
+    maxPrice: z.number().nullable(),
+    roomCount: z.number().int().nonnegative(),
+  }),
+  tags: ['Apartment'],
+});
 
 export const ApartmentSchemas = {
   createApartmentSchema,
@@ -147,4 +191,7 @@ export const ApartmentSchemas = {
   getAllApartmentsRoute,
   ApartmentListSchema,
   apartmentFilterRoute,
+  getApartmentsByUserRoute,
+  countAvailableRoomsRoute,
+  getRoomPriceRangeRoute,
 };

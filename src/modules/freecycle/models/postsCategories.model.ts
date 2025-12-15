@@ -1,11 +1,6 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type {
-  PostCategory,
-  AddCategoryToPostData,
-  AddCategoriesToPostData,
-  CategoryWithName,
-} from '../types';
+import type { PostCategory, CategoryWithName } from '../types';
 
 const findCategoriesByPostId = async (
   postId: number

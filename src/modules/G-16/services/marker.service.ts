@@ -1,4 +1,3 @@
-import type { markerType } from '../types/markerType.types';
 import type {
   CreateMarkerInput,
   UpdateMarkerInput,
