@@ -19,6 +19,7 @@ import {
   setupUploadRoutes,
   setupBookingRoutes,
   setupAPTOwnerRoutes,
+  setupAPTLocationIQRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -148,6 +149,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUploadRoutes(app);
   setupBookingRoutes(app);
   setupAPTOwnerRoutes(app);
+  setupAPTLocationIQRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
