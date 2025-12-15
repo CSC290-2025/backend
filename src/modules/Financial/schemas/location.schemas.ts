@@ -60,7 +60,7 @@ const getNearbyPlacesRoute = createGetRoute({
   summary: 'Get nearby places using latitude, longitude, and radius',
   query: NearbyPlacesQuerySchema,
   responseSchema: NearbyPlacesResponseSchema,
-  tags: ['Nearby'],
+  tags: ['LocationIQ'],
   middleware: [authMiddleware],
   operationId: 'GetNearbyPlaces',
 });
