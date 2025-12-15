@@ -7,6 +7,14 @@ const setupAPTLocationIQRoutes = (app: OpenAPIHono) => {
     LocationIQSchemas.getAPTCoordRoute,
     locationIQController.getCoords
   );
+  app.openapi(
+    LocationIQSchemas.getNearbyPlacesRoute,
+    locationIQController.getNearbyPlacesFilteredController
+  );
+  app.openapi(
+    LocationIQSchemas.getDistanceRoute,
+    locationIQController.getDistanceController
+  );
 };
 
 export { setupAPTLocationIQRoutes };

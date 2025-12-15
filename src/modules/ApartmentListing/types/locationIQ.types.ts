@@ -1,21 +1,18 @@
-// import type { z } from 'zod';
-// import type { LocationIQSchemas } from '../schemas';
+import type { z } from 'zod';
+import type { LocationIQSchemas } from '../schemas';
 
-// type GeocodeRequestData = z.infer<
-//   typeof LocationIQSchemas.GeocodeRequestData
-// >;
-// type GeocodeUpdateData = z.infer<
-//   typeof LocationIQSchemas.GeocodeUpdateData
-// >;
-// type LocationIQGeocodeResult = z.infer<
-//   typeof LocationIQSchemas.LocationIQGeocodeResult
-// >;
-// type GeocodedAddress = z.infer<
-//   typeof LocationIQSchemas.GeocodedAddress
-// >;
-// export type {
-//   GeocodeRequestData,
-//   GeocodeUpdateData,
-//   LocationIQGeocodeResult,
-//   GeocodedAddress,
-// };
+type PlaceType = z.infer<typeof LocationIQSchemas.PlaceSchema>;
+type PlaceListType = z.infer<typeof LocationIQSchemas.PlaceListSchema>;
+type latLongType = z.infer<typeof LocationIQSchemas.latLongSchema>;
+type NearbyPlacesQueryType = z.infer<
+  typeof LocationIQSchemas.NearbyPlacesQuerySchema
+>;
+type getDistanceType = z.infer<typeof LocationIQSchemas.getDistanceSchema>;
+
+export type {
+  PlaceType,
+  latLongType,
+  PlaceListType,
+  NearbyPlacesQueryType,
+  getDistanceType,
+};
