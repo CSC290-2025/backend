@@ -95,6 +95,7 @@ import {
   detectRoutes,
   markerRoutes,
   distanceRoutes,
+  markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
 // Volunteer
@@ -114,6 +115,7 @@ import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
 } from '@/modules/weather/routes';
+import { MarkerType } from '@/modules/G-16/schema';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
@@ -214,6 +216,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
   app.route('/api', distanceRoutes);
+  app.route('/api', markerTypeRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

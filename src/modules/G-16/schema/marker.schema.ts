@@ -6,7 +6,7 @@ import * as z from 'zod';
 //   createDeleteRoute,
 // } from "@/utils/openapi-helpers";
 
-export const LocationSchema = z.object({
+export const LocationMarkerSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
 });
@@ -14,7 +14,7 @@ export const LocationSchema = z.object({
 export const CreateMarkerSchema = z.object({
   description: z.string().optional().nullable(),
   marker_type_id: z.number().int().positive().optional().nullable(),
-  location: LocationSchema.optional().nullable(),
+  location: LocationMarkerSchema.optional().nullable(),
 });
 
 export const UpdateMarkerSchema = z.object({
@@ -47,8 +47,6 @@ export const MarkerQuerySchema = z.object({
     .optional(),
   limit: z.string().transform(Number).default(100).optional(),
   offset: z.string().transform(Number).default(0).optional(),
-  //   limit: z.coerce.number().int().min(1).optional().default(100),
-  //   offset: z.coerce.number().int().min(0).optional().default(0),
   sortBy: z
     .enum(['created_at', 'updated_at', 'id'])
     .default('created_at')
