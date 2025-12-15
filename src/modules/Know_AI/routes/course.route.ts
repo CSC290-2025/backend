@@ -33,5 +33,6 @@ export const setupCourseRoutes = (app: OpenAPIHono) => {
 
   //Admin
   app.openapi(CourseSchema.getPendingCourse, CourseController.getPendingCourse);
+  app.openapi(CourseSchema.getApproveCourse, CourseController.getApproveCourse);
   app.openapi(CourseSchema.changeApprovePost, CourseController.changeApprove);
 };

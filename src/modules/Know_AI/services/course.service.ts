@@ -127,6 +127,7 @@ const deleteCourse = async (id: number) => {
 
 //Admin
 const getPendingCourse = async () => CourseModel.getPendingCourse();
+const getApproveCourse = async () => CourseModel.getApproveCourse();
 const changeApprove = async (id: number) => {
   return await CourseModel.changeApprove(id);
 };
@@ -141,5 +142,6 @@ export {
   updateOnsiteSessions,
   deleteCourse,
   getPendingCourse,
+  getApproveCourse,
   changeApprove,
 };

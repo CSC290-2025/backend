@@ -84,6 +84,16 @@ const getPendingCourse = async () => {
   }
 };
 
+const getApproveCourse = async () => {
+  try {
+    return await prisma.courses.findMany({
+      where: { course_status: 'approve' },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const changeApprove = async (id: number) => {
   try {
     return await prisma.courses.update({
@@ -103,5 +113,6 @@ export {
   updateCourse,
   deleteCourse,
   getPendingCourse,
+  getApproveCourse,
   changeApprove,
 };
