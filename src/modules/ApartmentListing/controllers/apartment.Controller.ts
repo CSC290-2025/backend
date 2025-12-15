@@ -44,3 +44,15 @@ export async function countAvailableRooms(c: Context) {
   const count = await apartmentService.countAvailableRooms(id);
   return successResponse(c, count, 200);
 }
+
+export async function getApartmentbyUser(c: Context) {
+  const userId = Number(c.req.param('userId'));
+  const apartments = await apartmentService.getApartmentsByUser(userId);
+  return successResponse(c, apartments, 200);
+}
+
+export async function getRoomPriceRange(c: Context) {
+  const apartmentId = Number(c.req.param('id'));
+  const range = await apartmentService.roomPriceRangeService(apartmentId);
+  return successResponse(c, range, 200);
+}

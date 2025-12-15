@@ -9,7 +9,6 @@ const createCourse = async (data: CreateCourse) => {
     return await prisma.courses.create({ data: validatedData as any });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -20,7 +19,6 @@ const getAllCourse = async () => {
     });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -34,7 +32,6 @@ const getCourse = async (id: number) => {
     return course;
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -46,21 +43,25 @@ const getCourseByType = async (type: string) => {
     });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
-const updateCourse = async (id: number, data: Partial<CreateCourse>) => {
+const updateCourse = async (
+  id: number,
+  data: Partial<CreateCourse>,
+  tx?: any
+) => {
   try {
-    const validatedData = CourseSchema.updateCourse.parse(data);
-    return await prisma.courses.update({
+    const { course_videos, onsite_sessions, ...courseData } = data;
+    const validatedData = CourseSchema.updateCourse.parse(courseData);
+
+    const prismaClient = tx || prisma;
+    return await prismaClient.courses.update({
       where: { id },
       data: validatedData as any,
-      select: { id: true },
     });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 
@@ -69,7 +70,6 @@ const deleteCourse = async (id: number) => {
     return await prisma.courses.delete({ where: { id } });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 

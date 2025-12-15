@@ -7,7 +7,7 @@ import type {
 } from '@/modules/emergency/types/fcm.type.ts';
 
 export const sendAllNotificationService = async (
-  notification: Notification
+  data: Notification
 ): Promise<NotificationResponse> => {
   try {
     const tokens = await FcmModel.getAllFcmToken();
@@ -19,7 +19,7 @@ export const sendAllNotificationService = async (
     if (registrationTokens.length === 0) {
       throw new ValidationError('No valid token');
     }
-
+    const notification = data.notification;
     const message = {
       notification: {
         title: notification.title || 'Notification Title',

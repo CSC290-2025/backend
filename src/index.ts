@@ -9,10 +9,12 @@ import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
+import 'dotenv/config';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
 
+// CORS middleware - allow requests from frontend
 app.use(
   cors({
     origin: (origin) => {

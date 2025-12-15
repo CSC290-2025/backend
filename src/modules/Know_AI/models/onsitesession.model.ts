@@ -17,6 +17,39 @@ const formatOnSiteSession = (result: onsite_sessions): OnsiteSession => {
   };
 };
 
+const createOnsiteSession = async (
+  data: CreateOnsiteSession,
+  tx?: any
+): Promise<OnsiteSession> => {
+  try {
+    const prismaClient = tx || prisma;
+    const result = await prismaClient.onsite_sessions.create({ data });
+    return formatOnSiteSession(result);
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const createMultipleOnsiteSessions = async (
+  sessions: CreateOnsiteSession[],
+  tx?: any
+): Promise<OnsiteSession[]> => {
+  try {
+    const prismaClient = tx || prisma;
+    const results = await Promise.all(
+      sessions.map(async (session) => {
+        const result = await prismaClient.onsite_sessions.create({
+          data: session,
+        });
+        return formatOnSiteSession(result);
+      })
+    );
+    return results;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 const getAllOnsiteSessions = async (): Promise<OnsiteSession[]> => {
   try {
     const data = await prisma.onsite_sessions.findMany({
@@ -39,34 +72,6 @@ const getOnsiteSessionById = async (id: number): Promise<OnsiteSession> => {
   }
 };
 
-const createOnsiteSession = async (
-  data: CreateOnsiteSession
-): Promise<OnsiteSession> => {
-  try {
-    const result = await prisma.onsite_sessions.create({ data });
-    return formatOnSiteSession(result);
-  } catch (error) {
-    handlePrismaError(error);
-  }
-};
-
-const createMultipleOnsiteSessions = async (
-  sessions: CreateOnsiteSession[]
-): Promise<OnsiteSession[]> => {
-  try {
-    const results = await Promise.all(
-      sessions.map(async (session) => {
-        const result = await prisma.onsite_sessions.create({ data: session });
-        return formatOnSiteSession(result);
-      })
-    );
-    return results;
-  } catch (error) {
-    handlePrismaError(error);
-    throw error;
-  }
-};
-
 const deleteOnsiteSession = async (id: number): Promise<OnsiteSession> => {
   try {
     const result = await prisma.onsite_sessions.delete({ where: { id } });
@@ -77,15 +82,16 @@ const deleteOnsiteSession = async (id: number): Promise<OnsiteSession> => {
 };
 
 const deleteOnsiteSessionsByCourseId = async (
-  courseId: number
+  courseId: number,
+  tx?: any
 ): Promise<{ count: number }> => {
   try {
-    return await prisma.onsite_sessions.deleteMany({
+    const prismaClient = tx || prisma;
+    return await prismaClient.onsite_sessions.deleteMany({
       where: { course_id: courseId },
     });
   } catch (error) {
     handlePrismaError(error);
-    throw error;
   }
 };
 

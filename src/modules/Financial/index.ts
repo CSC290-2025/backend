@@ -17,6 +17,7 @@ export {
   MetroCardService,
   InsuranceCardService,
   ScbService,
+  TransactionService,
 } from './services';
 
 // Export schemas for OpenAPI routes
@@ -25,6 +26,7 @@ export {
   MetroCardSchemas,
   InsuranceCardSchemas,
   ScbSchemas,
+  TransactionSchemas,
 } from './schemas';
 
 // Export OpenAPI routes for main app
@@ -33,4 +35,5 @@ export {
   setupScbRoutes,
   setupMetroCardRoutes,
   setupInsuranceCardRoutes,
+  setupTransactionRoutes,
 } from './routes';
