@@ -1,7 +1,12 @@
 import type { Context } from 'hono';
 import { OpenMeteoService, OpenMeteoScheduler } from '../services';
 import { successResponse } from '@/utils/response';
-import type { ExternalWeatherQuery, ImportDailyBody } from '../types';
+import type {
+  ExternalWeatherQuery,
+  ImportDailyBody,
+  RainDailyQuery,
+  RainHourlyQuery,
+} from '../types';
 import {
   enableWeatherAutoImport,
   disableWeatherAutoImport,
@@ -28,6 +33,22 @@ const getOpenMeteoHourly = async (c: Context) => {
 const getOpenMeteoDaily = async (c: Context) => {
   const data = await OpenMeteoService.getDailyFromOpenMeteo(
     c.req.query() as unknown as ExternalWeatherQuery
+  );
+  return successResponse(c, data);
+};
+
+// Retrieve rain-focused daily metrics for the selected date window.
+const getOpenMeteoRainDaily = async (c: Context) => {
+  const data = await OpenMeteoService.getRainDailyWindow(
+    c.req.query() as unknown as RainDailyQuery
+  );
+  return successResponse(c, data);
+};
+
+// Retrieve rain-focused hourly metrics for a single day.
+const getOpenMeteoRainHourly = async (c: Context) => {
+  const data = await OpenMeteoService.getRainHourlyByDate(
+    c.req.query() as unknown as RainHourlyQuery
   );
   return successResponse(c, data);
 };
@@ -81,6 +102,8 @@ export {
   getOpenMeteoCurrent,
   getOpenMeteoHourly,
   getOpenMeteoDaily,
+  getOpenMeteoRainDaily,
+  getOpenMeteoRainHourly,
   importDailyOpenMeteo,
   importDailyOpenMeteoAll,
   startWeatherAutoImport,
