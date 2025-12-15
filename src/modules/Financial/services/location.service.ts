@@ -29,8 +29,8 @@ const getNearbyPlaces = async (
     .map((place) => ({
       name: place.name || null,
       type: place.type,
-      lat: parseFloat(place.lat.toFixed(5)),
-      lon: parseFloat(place.lon.toFixed(5)),
+      lat: place.lat,
+      lon: place.lon,
       distance: place.distance || null,
     }))
     .sort((a, b) => (a.distance || 0) - (b.distance || 0));
