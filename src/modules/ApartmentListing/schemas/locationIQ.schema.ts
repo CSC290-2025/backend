@@ -16,13 +16,30 @@ const PlaceSchema = z.object({
   lon: z.string(),
   display_name: z.string(),
   class: z.string(),
-  type: z.string(),
-  importance: z.number(),
+  type: z.string().optional(),
+  importance: z.number().optional(),
   icon: z.string().url().optional().nullable(),
 });
 
 const PlaceListSchema = z.array(PlaceSchema);
 
+const nearbySchema = z.object({
+  place_id: z.string(),
+  licence: z.string(),
+  osm_type: z.enum(['node', 'way', 'relation', 'unknown']).or(z.string()),
+  osm_id: z.string(),
+  boundingbox: z.tuple([z.string(), z.string(), z.string(), z.string()]),
+  lat: z.string(),
+  lon: z.string(),
+  display_name: z.string(),
+  class: z.string(),
+  type: z.string().optional(),
+  importance: z.number().optional(),
+  icon: z.string().url().optional().nullable(),
+  distance: z.number().int(),
+});
+
+const nearbySchemaList = z.array(nearbySchema);
 // Schema for lat/long coordinates
 const latLongSchema = z.object({
   lat: z.coerce.number(),
@@ -71,7 +88,7 @@ const getNearbyPlacesRoute = createGetRoute({
   summary:
     'Get nearby places by lat and lon, excluding hospitals, banks, atms, and pharmacies',
   query: NearbyPlacesQuerySchema,
-  responseSchema: PlaceListSchema,
+  responseSchema: nearbySchemaList,
   tags: ['LocationIQ'],
   middleware: [authMiddleware],
 });
@@ -95,4 +112,6 @@ export const LocationIQSchemas = {
   NearbyPlacesQuerySchema,
   getDistanceSchema,
   getDistanceRoute,
+  nearbySchema,
+  nearbySchemaList,
 };

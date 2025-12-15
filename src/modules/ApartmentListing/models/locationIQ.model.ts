@@ -31,7 +31,7 @@ const getNearbyPlacesFiltered = async (
   lat: number,
   lon: number,
   radius: number,
-  limit?: number,
+  limit: number = 4,
   tag?: string
 ): Promise<PlaceListType> => {
   const accessToken = process.env.G09_LOCATIONIQ_API_KEY;
@@ -55,7 +55,7 @@ const getNearbyPlacesFiltered = async (
   }
 
   const data = await response.json();
-  return LocationIQSchemas.PlaceListSchema.parse(data);
+  return LocationIQSchemas.nearbySchemaList.parse(data);
 };
 
 const getDistance = async (
