@@ -20,7 +20,7 @@ const getNearbyPlaces = async (
   );
 
   if (!places || places.length === 0) {
-    throw new NotFoundError('No places found within the specified radius');
+    throw new NotFoundError('No places found within the specified radius ');
   }
 
   return places
