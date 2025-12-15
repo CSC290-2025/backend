@@ -17,14 +17,19 @@ const getNearbyPlaces = async (
   if (!accessToken)
     throw new ValidationError('LocationIQ access token not configured');
 
-  let url = `https://us1.locationiq.com/v1/nearby?lat=${lat}&lon=${lon}&key=${accessToken}&radius=${radius}`;
-  if (limit) url += `&limit=${limit}`;
-  if (tag) url += `&tag=${tag}`;
-
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: { accept: 'application/json' },
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lon: String(lon),
+    key: accessToken,
+    radius: String(radius),
   });
+  if (limit) params.set('limit', String(limit));
+  if (tag) params.set('tag', tag);
+
+  const response = await fetch(
+    `https://us1.locationiq.com/v1/nearby?${params}`,
+    { method: 'GET', headers: { accept: 'application/json' } }
+  );
 
   if (response.status === 404) {
     throw new NotFoundError('No places found nearby');
