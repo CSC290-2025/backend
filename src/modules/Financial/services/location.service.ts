@@ -3,13 +3,11 @@ import { LocationModel } from '../models';
 import { LocationSchemas } from '../schemas';
 import type { z } from 'zod';
 
-type NearbyPlacesResponse = z.infer<
-  typeof LocationSchemas.NearbyPlacesResponseSchema
->;
+type WrappedPlace = z.infer<typeof LocationSchemas.WrappedPlaceSchema>;
 
 const getNearbyPlaces = async (
   rawQuery: Record<string, string>
-): Promise<NearbyPlacesResponse> => {
+): Promise<WrappedPlace[]> => {
   const { lat, lon, radius, tag, limit } =
     LocationSchemas.NearbyPlacesQuerySchema.parse(rawQuery);
 
@@ -25,7 +23,7 @@ const getNearbyPlaces = async (
     throw new NotFoundError('No places found within the specified radius');
   }
 
-  const data = places
+  return places
     .map((place) => ({
       name: place.name || null,
       type: place.type,
@@ -34,12 +32,6 @@ const getNearbyPlaces = async (
       distance: place.distance || null,
     }))
     .sort((a, b) => (a.distance || 0) - (b.distance || 0));
-
-  return {
-    success: true,
-    data,
-    timestamp: new Date().toISOString(),
-  };
 };
 
 export { getNearbyPlaces };

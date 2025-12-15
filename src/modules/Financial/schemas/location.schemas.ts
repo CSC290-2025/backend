@@ -43,9 +43,7 @@ const WrappedPlaceSchema = z.object({
 });
 
 const NearbyPlacesResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.array(WrappedPlaceSchema),
-  timestamp: z.string(),
+  places: z.array(WrappedPlaceSchema),
 });
 
 const NearbyPlacesQuerySchema = z.object({
