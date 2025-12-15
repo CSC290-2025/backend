@@ -8,7 +8,8 @@ const getNearbyPlaces = async (c: Context) => {
     lat: Number(query.lat),
     lon: Number(query.lon),
     radius: Number(query.radius || 1000),
-    tag: query.tag || 'bank',
+    tag: query.tag,
+    limit: Number(query.limit || 10),
   });
 
   return c.json(response, 200);

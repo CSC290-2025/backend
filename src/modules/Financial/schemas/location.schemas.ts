@@ -49,10 +49,11 @@ const NearbyPlacesResponseSchema = z.object({
 });
 
 const NearbyPlacesQuerySchema = z.object({
-  lat: z.coerce.number().min(-90).max(90).default(13.6512),
-  lon: z.coerce.number().min(-180).max(180).default(100.4946),
+  lat: z.coerce.number().min(-90).max(90).default(13.65098),
+  lon: z.coerce.number().min(-180).max(180).default(100.49644),
   radius: z.coerce.number().int().min(1).max(30000).default(1000),
-  tag: z.string().optional().default('bank'),
+  tag: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(10).optional(),
 });
 
 const getNearbyPlacesRoute = createGetRoute({

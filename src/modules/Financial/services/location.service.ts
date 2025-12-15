@@ -6,9 +6,6 @@ import type { z } from 'zod';
 type NearbyPlacesQuery = z.infer<
   typeof LocationSchemas.NearbyPlacesQuerySchema
 >;
-type LocationIQResponse = z.infer<
-  typeof LocationSchemas.LocationIQResponseSchema
->;
 type NearbyPlacesResponse = z.infer<
   typeof LocationSchemas.NearbyPlacesResponseSchema
 >;
@@ -16,9 +13,15 @@ type NearbyPlacesResponse = z.infer<
 const getNearbyPlaces = async (
   query: NearbyPlacesQuery
 ): Promise<NearbyPlacesResponse> => {
-  const { lat, lon, radius, tag } = query;
+  const { lat, lon, radius, tag, limit } = query;
 
-  const places = await LocationModel.getNearbyPlaces(lat, lon, radius, tag);
+  const places = await LocationModel.getNearbyPlaces(
+    lat,
+    lon,
+    radius,
+    limit,
+    tag
+  );
 
   if (!places || places.length === 0) {
     throw new NotFoundError('No places found within the specified radius');
@@ -28,8 +31,8 @@ const getNearbyPlaces = async (
     .map((place) => ({
       name: place.name || null,
       type: place.type,
-      lat: place.lat,
-      lon: place.lon,
+      lat: parseFloat(place.lat.toFixed(5)),
+      lon: parseFloat(place.lon.toFixed(5)),
       distance: place.distance || null,
     }))
     .sort((a, b) => (a.distance || 0) - (b.distance || 0));

@@ -1,4 +1,4 @@
-import { handlePrismaError } from '@/errors';
+import { NotFoundError } from '@/errors';
 import { LocationSchemas } from '../schemas';
 import type { z } from 'zod';
 
@@ -10,32 +10,31 @@ const getNearbyPlaces = async (
   lat: number,
   lon: number,
   radius: number,
-  tag: string
+  limit?: number,
+  tag?: string
 ): Promise<LocationIQResponse> => {
-  try {
-    const accessToken = process.env.G11_LOCATIONIQ_ACCESS_TOKEN;
+  const accessToken = process.env.G11_LOCATIONIQ_ACCESS_TOKEN;
+  if (!accessToken) throw new Error('LocationIQ access token not configured');
 
-    if (!accessToken) {
-      throw new Error('LocationIQ access token is not configured');
-    }
+  let url = `https://us1.locationiq.com/v1/nearby?lat=${lat}&lon=${lon}&key=${accessToken}&radius=${radius}`;
+  if (limit) url += `&limit=${limit}`;
+  if (tag) url += `&tag=${tag}`;
 
-    const url = `https://us1.locationiq.com/v1/nearby?lat=${lat}&lon=${lon}&key=${accessToken}&radius=${radius}&tag=${tag}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { accept: 'application/json' },
-    });
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { accept: 'application/json' },
+  });
 
-    if (!response.ok) {
-      throw new Error(
-        `LocationIQ API error: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const data = await response.json();
-    return LocationSchemas.LocationIQResponseSchema.parse(data);
-  } catch (error) {
-    handlePrismaError(error);
+  if (response.status === 404) {
+    throw new NotFoundError('No places found nearby');
   }
+
+  if (!response.ok) {
+    throw new Error(`LocationIQ error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return LocationSchemas.LocationIQResponseSchema.parse(data);
 };
 
 export { getNearbyPlaces };
