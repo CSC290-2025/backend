@@ -1,4 +1,4 @@
-import { NotFoundError } from '@/errors';
+import { NotFoundError, ValidationError } from '@/errors';
 import { LocationSchemas } from '../schemas';
 import type { z } from 'zod';
 
@@ -14,7 +14,8 @@ const getNearbyPlaces = async (
   tag?: string
 ): Promise<LocationIQResponse> => {
   const accessToken = process.env.G11_LOCATIONIQ_ACCESS_TOKEN;
-  if (!accessToken) throw new Error('LocationIQ access token not configured');
+  if (!accessToken)
+    throw new ValidationError('LocationIQ access token not configured');
 
   let url = `https://us1.locationiq.com/v1/nearby?lat=${lat}&lon=${lon}&key=${accessToken}&radius=${radius}`;
   if (limit) url += `&limit=${limit}`;
