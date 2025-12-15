@@ -35,13 +35,13 @@ const AddressSchema = z.object({
   postal_code: z.string().optional(),
 });
 
-// ✅ updated using z.iso.date() + z.iso.time()
 const CreateEventSchema = z.object({
   host_user_id: z.number().int().positive(),
 
   title: z.string().min(1),
   description: z.string().optional(),
   total_seats: z.number().int().min(0).optional(),
+  image_url: z.string().optional(),
 
   start_date: z.iso.date(),
   start_time: z.iso.time(),
@@ -141,16 +141,14 @@ const deleteEventRoute = createDeleteRoute({
   params: IdParam,
   tags: ['Events'],
 });
-
-const dayEventCountRoute = createGetRoute({
-  path: '/events/day-count',
-  summary: 'Day event count',
+const getEventByDayRoute = createGetRoute({
+  path: '/events/by-day',
+  summary: 'Get events in a specific day',
   query: z.object({
-    from: z.iso.date(),
-    to: z.iso.date(),
+    date: z.coerce.date(),
   }),
   responseSchema: z.object({
-    data: z.array(DayEventCountItem),
+    data: z.array(EventSchema),
   }),
   tags: ['Events'],
 });
@@ -168,5 +166,5 @@ export const EventSchemas = {
   createEventRoute,
   updateEventRoute,
   deleteEventRoute,
-  dayEventCountRoute,
+  getEventByDayRoute,
 };

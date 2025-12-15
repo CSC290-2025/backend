@@ -8,9 +8,6 @@ const setupEventRoutes = (app: OpenAPIHono) => {
   // List all events (public)
   app.openapi(EventSchemas.listEventsRoute, EventController.listEvents);
 
-  // Get a single event by ID (public)
-  app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
-
   // Create a new event (admin only)
   app.openapi(EventSchemas.createEventRoute, EventController.createEvent);
 
@@ -21,10 +18,10 @@ const setupEventRoutes = (app: OpenAPIHono) => {
   app.openapi(EventSchemas.deleteEventRoute, EventController.deleteEvent);
 
   // Get daily event count (analytics or calendar view)
-  app.openapi(
-    EventSchemas.dayEventCountRoute,
-    EventController.getDayEventCount
-  );
+  app.openapi(EventSchemas.getEventByDayRoute, EventController.getEventByDay);
+
+  // Get a single event by ID (public)
+  app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
 };
 
 export { setupEventRoutes };

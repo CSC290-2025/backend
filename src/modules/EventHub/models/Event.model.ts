@@ -242,19 +242,19 @@ const remove = async (id: number) => {
     handlePrismaError(err);
   }
 };
-
-const countByDay = async (from: string, to: string) => {
+const getEventByDay = async (from: Date, to: Date) => {
   try {
-    const rows = await prisma.$queryRaw<Array<{ date: string; count: bigint }>>`
-      SELECT DATE(start_at) AS date,
-             COUNT(*)::bigint AS count
-      FROM events
-      WHERE start_at BETWEEN ${new Date(from)} AND ${new Date(to)}
-      GROUP BY DATE(start_at)
-      ORDER BY date
-    `;
-
-    return rows.map((x) => ({ date: x.date, count: Number(x.count) }));
+    return await prisma.events.findMany({
+      where: {
+        start_at: {
+          gte: from,
+          lte: to,
+        },
+      },
+      orderBy: {
+        start_at: 'asc',
+      },
+    });
   } catch (err) {
     handlePrismaError(err);
   }
@@ -266,5 +266,5 @@ export const EventModel = {
   create,
   update,
   remove,
-  countByDay,
+  getEventByDay,
 };
