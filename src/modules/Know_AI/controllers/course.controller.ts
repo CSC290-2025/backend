@@ -79,6 +79,11 @@ const getPendingCourse = async (c: Context) => {
   return successResponse(c, { courses });
 };
 
+const getApproveCourse = async (c: Context) => {
+  const courses = await CourseService.getApproveCourse();
+  return successResponse(c, { courses });
+};
+
 const changeApprove = async (c: Context) => {
   const id = Number(c.req.param('id'));
   const course = await CourseService.changeApprove(id);
@@ -95,5 +100,6 @@ export {
   updateOnsiteSessions,
   deleteCourse,
   getPendingCourse,
+  getApproveCourse,
   changeApprove,
 };

@@ -177,6 +177,13 @@ const getPendingCourse = createGetRoute({
   tags: ['Know-AI', 'Course'],
 });
 
+const getApproveCourse = createGetRoute({
+  path: '/getApproveCourse',
+  summary: 'Get approve course',
+  responseSchema: course.array(),
+  tags: ['Know-AI', 'Course'],
+});
+
 const changeApprovePost = createPutRoute({
   path: '/courseApprove/{id}',
   summary: 'Approve course',
@@ -209,5 +216,6 @@ export {
   deleteCourseRoute,
   courseStatus,
   getPendingCourse,
+  getApproveCourse,
   changeApprovePost,
 };
