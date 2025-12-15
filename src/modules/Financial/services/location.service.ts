@@ -1,19 +1,17 @@
 import { NotFoundError } from '@/errors';
 import { LocationModel } from '../models';
-import type { LocationSchemas } from '../schemas';
+import { LocationSchemas } from '../schemas';
 import type { z } from 'zod';
 
-type NearbyPlacesQuery = z.infer<
-  typeof LocationSchemas.NearbyPlacesQuerySchema
->;
 type NearbyPlacesResponse = z.infer<
   typeof LocationSchemas.NearbyPlacesResponseSchema
 >;
 
 const getNearbyPlaces = async (
-  query: NearbyPlacesQuery
+  rawQuery: Record<string, string>
 ): Promise<NearbyPlacesResponse> => {
-  const { lat, lon, radius, tag, limit } = query;
+  const { lat, lon, radius, tag, limit } =
+    LocationSchemas.NearbyPlacesQuerySchema.parse(rawQuery);
 
   const places = await LocationModel.getNearbyPlaces(
     lat,
