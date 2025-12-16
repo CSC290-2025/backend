@@ -4,6 +4,7 @@ import { findUserByEmail } from '../models/auth.model';
 import { v4 as uuidv4 } from 'uuid';
 import { findResetToken } from '../models/reset.model';
 import { UnauthorizedError } from '@/errors';
+import config from '@/config/env';
 import type {
   PasswordResetRequest,
   PasswordResetResponse,
@@ -23,9 +24,12 @@ export const requestPasswordReset = async (
   const expiresAt = new Date(Date.now() + 3600000); // 1 hour
 
   await saveResetToken(userId, tokenString, expiresAt);
+  const extend = `/reset-password?token=${tokenString}`;
+  const baseURL = config.isProduction
+    ? 'https://smartcity.sit.kmutt.ac.th'
+    : 'http://localhost:5173';
 
-  const link = `http://localhost:3000/reset-password?token=${tokenString}`;
-
+  const link = `${baseURL}${extend}`;
   await resend.emails.send({
     from: 'Integrated Project I <noreply@integrated.ttwrpz.xyz>',
     to: data.email,
