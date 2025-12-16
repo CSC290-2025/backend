@@ -1,9 +1,5 @@
 import { authMiddleware } from '@/middlewares';
-import {
-  createGetRoute,
-  createPostRoute,
-  createPutRoute,
-} from '@/utils/openapi-helpers';
+import { createGetRoute, createPutRoute } from '@/utils/openapi-helpers';
 import { z } from 'zod';
 // Base Schema for the Place object
 const PlaceSchema = z.object({

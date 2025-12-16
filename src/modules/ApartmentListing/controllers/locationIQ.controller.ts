@@ -5,7 +5,7 @@ import { locationIQModel } from '../models';
 export async function getCoords(c: Context) {
   const q = String(c.req.query('q'));
   const coords = await locationIQModel.LatLongConverter(q);
-  return successResponse(c, coords);
+  return successResponse(c, coords, 200);
 }
 
 export async function getNearbyPlacesFilteredController(c: Context) {
@@ -22,7 +22,7 @@ export async function getNearbyPlacesFilteredController(c: Context) {
     limit,
     tag
   );
-  return successResponse(c, places);
+  return successResponse(c, places, 200);
 }
 
 export async function getDistanceController(c: Context) {
@@ -32,5 +32,5 @@ export async function getDistanceController(c: Context) {
   const lon2 = Number(c.req.query('lon2'));
 
   const distance = await locationIQModel.getDistance(lat1, lon1, lat2, lon2);
-  return successResponse(c, { distance });
+  return successResponse(c, { distance }, 200);
 }
