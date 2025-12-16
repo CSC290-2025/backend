@@ -49,14 +49,14 @@ export const checkBookmarkStatus = async (c: Context) => {
 
   return successResponse(c, { bookmarked });
 };
-export const getBookmarkedUsersController = async (c: Context) => {
+export const getBookmarkedUsers = async (c: Context) => {
   const eventId = Number(c.req.param('event_id'));
 
   if (Number.isNaN(eventId)) {
     throw new Error('Invalid event ID');
   }
 
-  const users = await getBookmarkedUsers(eventId);
+  const users = await BookmarkService.getBookmarkedUsers(eventId);
 
   return successResponse(c, { data: users });
 };

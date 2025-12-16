@@ -31,7 +31,7 @@ const setupBookmarkRoutes = (app: OpenAPIHono) => {
 
   app.openapi(
     BookmarkSchemas.getBookmarkedUsersRoute,
-    BookmarkController.getBookmarkedUsersController
+    BookmarkController.getBookmarkedUsers
   );
 };
 
