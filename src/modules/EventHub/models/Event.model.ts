@@ -114,6 +114,7 @@ const create = async (data: CreateEventInput) => {
           title: data.title,
           description: data.description ?? null,
           total_seats: data.total_seats ?? 0,
+          image_url: data.image_url ?? null,
           start_at,
           end_at,
           host_user_id: data.host_user_id,
@@ -155,7 +156,7 @@ const update = async (id: number, data: UpdateEventInput) => {
         updateData.description = data.description;
       if (data.total_seats !== undefined)
         updateData.total_seats = data.total_seats;
-
+      if (data.image_url !== undefined) updateData.imageurl = data.image_url;
       if (data.start_date && data.start_time) {
         updateData.start_at = new Date(`${data.start_date}T${data.start_time}`);
       }
@@ -248,7 +249,7 @@ const getEventByDay = async (from: Date, to: Date) => {
       where: {
         start_at: {
           gte: from,
-          lte: to,
+          lt: to,
         },
       },
       orderBy: {
@@ -259,7 +260,6 @@ const getEventByDay = async (from: Date, to: Date) => {
     handlePrismaError(err);
   }
 };
-
 export const EventModel = {
   findById,
   list,

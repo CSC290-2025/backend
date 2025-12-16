@@ -5,22 +5,6 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-
-const EventSchema = z.object({
-  id: z.number().int(),
-  host_user_id: z.number().int().nullable(),
-  organization_id: z.number().int().nullable(),
-  image_url: z.string().nullable(),
-  title: z.string(),
-  description: z.string().nullable(),
-  total_seats: z.number().int().default(0),
-  start_at: z.coerce.date(),
-  end_at: z.coerce.date(),
-  address_id: z.number().int().nullable(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
-});
-
 const OrganizationSchema = z.object({
   name: z.string(),
   email: z.string().email(),
@@ -33,6 +17,26 @@ const AddressSchema = z.object({
   district: z.string().optional(),
   subdistrict: z.string().optional(),
   postal_code: z.string().optional(),
+});
+const EventSchema = z.object({
+  id: z.number().int(),
+  host_user_id: z.number().int().nullable(),
+  organization_id: z.number().int().nullable(),
+  address_id: z.number().int().nullable(),
+
+  image_url: z.string().nullable(),
+  title: z.string(),
+  description: z.string().nullable(),
+  total_seats: z.number().int().default(0),
+
+  start_at: z.coerce.date(),
+  end_at: z.coerce.date(),
+
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+
+  organization: OrganizationSchema.nullable().optional(),
+  address: AddressSchema.nullable().optional(),
 });
 
 const CreateEventSchema = z.object({
@@ -64,7 +68,7 @@ const UpdateEventSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
   total_seats: z.number().int().min(0).optional(),
-
+  image_url: z.string().optional(),
   start_date: z.iso.date().optional(),
   start_time: z.iso.time().optional(),
 

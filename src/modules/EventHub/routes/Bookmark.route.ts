@@ -28,6 +28,11 @@ const setupBookmarkRoutes = (app: OpenAPIHono) => {
     BookmarkSchemas.checkBookmarkStatusRoute,
     BookmarkController.checkBookmarkStatus
   );
+
+  app.openapi(
+    BookmarkSchemas.getBookmarkedUsersRoute,
+    BookmarkController.getBookmarkedUsersController
+  );
 };
 
 export { setupBookmarkRoutes };

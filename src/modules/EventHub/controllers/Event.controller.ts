@@ -59,15 +59,12 @@ export const getEventByDay = async (c: Context) => {
     throw new Error('Date parameter is required');
   }
 
-  const date = new Date(dateParam);
+  const from = new Date(dateParam);
 
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
+  const to = new Date(from);
+  to.setDate(to.getDate() + 1);
 
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
+  const data = await EventService.getEventByDay(from, to);
 
-  const data = await EventService.getEventByDay(startOfDay, endOfDay);
-
-  return successResponse(c, { data });
+  return successResponse(c, { data: data });
 };
