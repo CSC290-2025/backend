@@ -192,10 +192,6 @@ const transferToHealthCare = async (
       trx
     );
 
-    // 4. Create card transaction record for the insurance card that was charged
-    // Note: Creating card_transaction directly here as there is no dedicated Model method for it yet
-    // and it is consistent with MetroCardService implementation.
-    console.log('do');
     const cardTransaction = await trx.card_transactions.create({
       data: {
         card_id: card.id,
