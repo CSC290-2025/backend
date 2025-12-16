@@ -13,16 +13,15 @@ import { handlePrismaError, ValidationError } from '@/errors';
 //       throw new ValidationError('marker_type_id must be between 1 and 6');
 //     }
 
-//     // 1. แปลง location (lat, lng) ให้เป็น GeoJSON String
 //     let locationGeoJSON = null;
 //     if (data.location) {
 //       locationGeoJSON = JSON.stringify({
 //         type: 'Point',
-//         coordinates: [data.location.lng, data.location.lat], // PostGIS ใช้ [lng, lat]
+//         coordinates: [data.location.lng, data.location.lat],
 //       });
 //     }
 
-//     const description = data.description || null; // ใช้ค่าที่ส่งมา หรือ null ถ้าไม่ส่งมา
+//     const description = data.description || null;
 
 //     const resultRaw = await prisma.$queryRaw<{ id: number }[]>`
 //       INSERT INTO marker (marker_type_id, location, description, updated_at)
@@ -30,7 +29,6 @@ import { handlePrismaError, ValidationError } from '@/errors';
 //         ${data.marker_type_id},
 //         ST_GeomFromGeoJSON(${locationGeoJSON}),
 //         ${description},
-//         NOW() // 🟢 FIX: NOW() ควรอยู่ตำแหน่งที่ 4 เพื่อกำหนด updated_at
 //       )
 //       RETURNING id
 //     `;
@@ -51,7 +49,6 @@ import { handlePrismaError, ValidationError } from '@/errors';
 
 //     return marker as unknown as MarkerTypeResponse;
 //   } catch (error) {
-//     console.error("🔴 RAW DB ERROR:", error);
 //     handlePrismaError(error);
 //   }
 // }
@@ -123,7 +120,6 @@ export const createMarkerType = async (
       updated_at: result.updated_at,
     } as unknown as MarkerTypeResponse;
   } catch (error) {
-    console.error('🔴 RAW DB ERROR:', error);
     handlePrismaError(error);
   }
 };
