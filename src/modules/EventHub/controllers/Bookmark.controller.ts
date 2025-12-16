@@ -2,18 +2,19 @@ import type { Context } from 'hono';
 import { successResponse } from '@/utils/response';
 import * as BookmarkService from '../services/Bookmark.services';
 
-const listBookmarks = async (c: Context) => {
-  const page = Number(c.req.query('page') || '1');
-  const limit = Number(c.req.query('limit') || '10');
+export const listBookmarks = async (c: Context) => {
+  const page = Number(c.req.query('page') || 1);
+  const limit = Number(c.req.query('limit') || 10);
 
   const user = c.get('user') as { id: number };
   const userId = user.id;
 
   const result = await BookmarkService.listBookmarks(userId, page, limit);
+
   return successResponse(c, result);
 };
 
-const createBookmark = async (c: Context) => {
+export const createBookmark = async (c: Context) => {
   const user = c.get('user') as { id: number };
   const userId = user.id;
 
@@ -27,24 +28,24 @@ const createBookmark = async (c: Context) => {
   return successResponse(c, bookmark, 201, 'Event bookmarked successfully');
 };
 
-const deleteBookmark = async (c: Context) => {
+export const deleteBookmark = async (c: Context) => {
   const user = c.get('user') as { id: number };
   const userId = user.id;
 
   const eventId = Number(c.req.param('event_id'));
 
   await BookmarkService.deleteBookmark(userId, eventId);
-  return successResponse(c, { success: true });
+
+  return successResponse(c, { success: true }, 200, 'Bookmark removed');
 };
 
-const checkBookmarkStatus = async (c: Context) => {
+export const checkBookmarkStatus = async (c: Context) => {
   const user = c.get('user') as { id: number };
   const userId = user.id;
 
   const eventId = Number(c.req.param('event_id'));
 
   const bookmarked = await BookmarkService.checkBookmarkStatus(userId, eventId);
+
   return successResponse(c, { bookmarked });
 };
-
-export { listBookmarks, createBookmark, deleteBookmark, checkBookmarkStatus };

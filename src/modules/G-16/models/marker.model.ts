@@ -20,11 +20,10 @@ export const createMarker = async (
   data: CreateMarkerInput
 ): Promise<MarkerResponse> => {
   try {
-
     if (data.location) {
       //  normalize location to GeoJSON
       const loc: any = data.location;
-  
+
       let geoJson: any;
       if (loc.type && loc.coordinates) {
         // case that frontend send geojson
@@ -38,7 +37,7 @@ export const createMarker = async (
       } else {
         throw new Error('Invalid location format');
       }
-  
+
       const result = await prisma.$queryRaw<marker[]>`
         INSERT INTO marker (marker_type_id, description, location)
         VALUES (
@@ -51,15 +50,15 @@ export const createMarker = async (
         )
         RETURNING *
       `;
-  
+
       const createdMarker = result[0];
-  
+
       return (await prisma.marker.findUnique({
         where: { id: createdMarker.id },
         include: { marker_type: true },
       })) as MarkerResponse;
     }
-  
+
     // location is null
     return (await prisma.marker.create({
       data: {
@@ -133,23 +132,22 @@ export const updateMarker = async (
 export const getMarkerById = async (
   id: string
 ): Promise<MarkerResponse | null> => {
-  try{
+  try {
     const numericId = parseInt(id, 10);
-  
+
     if (isNaN(numericId)) {
       throw new ValidationError('Invalid marker ID');
     }
-  
+
     return (await prisma.marker.findUnique({
       where: { id: numericId },
       include: {
         marker_type: true,
       },
     })) as MarkerResponse | null;
-  } catch(error) {
+  } catch (error) {
     handlePrismaError(error);
   }
-
 };
 
 // GET all marker
@@ -180,16 +178,15 @@ export const getAllMarkers = async (options?: {
   take?: number;
 }): Promise<MarkerResponse[]> => {
   try {
-
     //option.skip have value? if not == 0
     const skip = options?.skip ?? 0;
-  
+
     //option.take have value? if not == 100
     const take = options?.take ?? 100;
-  
+
     //if dont hav markerTypeId then == null
     const markerTypeId = options?.marker_type_id ?? null;
-  
+
     //use prisma.$queryRaw to write sql
     const rows = await prisma.$queryRaw<any[]>`
       SELECT 
@@ -216,13 +213,13 @@ export const getAllMarkers = async (options?: {
       OFFSET ${skip}
       LIMIT ${take}
     `;
-  
+
     const markers = rows.map((row) => ({
       ...row,
       // ST_AsGeoJSON to string -> parse to object { type, coordinates }
       location: row.location ? JSON.parse(row.location) : null,
     }));
-  
+
     return markers as MarkerResponse[];
   } catch {
     handlePrismaError(error);
@@ -279,7 +276,7 @@ export const getMarkersWithinBounds = async (
           AND ST_Y(m.location::geometry) BETWEEN ${bounds.south} AND ${bounds.north}
         ORDER BY m.created_at DESC
       `;
-  
+
     return markers as MarkerResponse[];
   } catch {
     handlePrismaError(error);

@@ -1,23 +1,22 @@
-//เกี่ยวกับ database
 import type { Context } from 'hono';
 import * as WeatherService from '../services/weather.service';
 import { WeatherSchemas } from '../schemas';
 import { successResponse } from '@/utils/response';
 
-// ดึงข้อมูล weather ทั้งหมดจากฐานข้อมูล (ล่าสุดมาก่อน),// Fetch all weather data from the database (most recent first)
+// Return every weather record ordered from most recent to oldest.
 const listWeather = async (c: Context) => {
   const data = await WeatherService.listWeather();
   return successResponse(c, { data });
 };
 
-// ดึงข้อมูล weather ที่ถูกสร้างในวันที่ระบุ ,// Fetch weather data created on the specified date
+// Return every weather record created on the provided YYYY-MM-DD date.
 const getWeatherByDate = async (c: Context) => {
   const { date } = WeatherSchemas.WeatherDateParam.parse(c.req.param());
   const data = await WeatherService.getWeatherByDate(date);
   return successResponse(c, { data });
 };
 
-// ดึงข้อมูล weather ตามช่วงวันจาก query `from` และ `to` ,// Fetch weather data by date range from `from` and `to` query
+// Return weather records between the `from` and `to` query bounds (inclusive).
 const listWeatherByDateRange = async (c: Context) => {
   const { from, to } = WeatherSchemas.WeatherDateRangeQuery.parse(
     c.req.query()
@@ -26,7 +25,7 @@ const listWeatherByDateRange = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-// ดึงข้อมูล weather ของ location เฉพาะจาก path param, // Fetch weather data for a specific location from path param
+// Return weather records for the specified location path parameter.
 const getWeatherByLocation = async (c: Context) => {
   const { location_id } = WeatherSchemas.WeatherLocationParam.parse(
     c.req.param()
@@ -35,7 +34,7 @@ const getWeatherByLocation = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-// ลบข้อมูล weather ของวันที่ระบุ พร้อมบอกจำนวนแถวที่ถูกลบ, // Delete weather data for the specified date and report the number of rows deleted
+// Delete all weather records on the provided date and report the count removed.
 const deleteWeatherByDate = async (c: Context) => {
   const { date } = WeatherSchemas.WeatherDateParam.parse(c.req.param());
   const result = await WeatherService.deleteWeatherByDate(date);
@@ -47,7 +46,7 @@ const deleteWeatherByDate = async (c: Context) => {
   );
 };
 
-// ลบข้อมูล weather ทั้งหมดในตาราง, // Delete all weather data in the table
+// Clear the entire weather_data table and report the number of rows deleted.
 const deleteAllWeather = async (c: Context) => {
   const result = await WeatherService.deleteAllWeather();
   return successResponse(

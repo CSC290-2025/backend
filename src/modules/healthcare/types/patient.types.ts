@@ -5,7 +5,9 @@ type Patient = z.infer<typeof PatientSchemas.PatientSchema>;
 type CreatePatientData = z.infer<typeof PatientSchemas.CreatePatientSchema>;
 type UpdatePatientData = z.infer<typeof PatientSchemas.UpdatePatientSchema>;
 type PatientFilterOptions = z.infer<typeof PatientSchemas.PatientFilterSchema>;
-type PaginationOptions = z.infer<typeof PatientSchemas.PaginationSchema>;
+type PatientPaginationOptions = z.infer<
+  typeof PatientSchemas.PatientPaginationSchema
+>;
 type PaginatedPatients = z.infer<typeof PatientSchemas.PaginatedPatientsSchema>;
 
 export type {
@@ -13,6 +15,6 @@ export type {
   CreatePatientData,
   UpdatePatientData,
   PatientFilterOptions,
-  PaginationOptions,
+  PatientPaginationOptions,
   PaginatedPatients,
 };

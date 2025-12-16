@@ -1,8 +1,10 @@
-export { PatientSchemas } from './patient.schemas';
-export { BedSchemas } from './bed.schemas';
-export { FacilitySchemas } from './facility.schemas';
-export { AppointmentSchemas } from './appointment.schemas';
-export { PrescriptionSchemas } from './prescription.schemas';
-export { AmbulanceSchemas } from './ambulance.schemas';
-export { EmergencyCallSchemas } from './emergency_call.schemas';
-export { PaymentSchemas } from './payment.schemas';
+export * from './patient.schemas';
+export * from './bed.schemas';
+export * from './facility.schemas';
+export * from './appointment.schemas';
+export * from './prescription.schemas';
+export * from './ambulance.schemas';
+export * from './emergency_call.schemas';
+export * from './payment.schemas';
+export * from './doctors.schemas';
+export * from './medicine_inventory.schemas';
