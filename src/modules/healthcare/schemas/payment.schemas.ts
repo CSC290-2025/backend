@@ -62,24 +62,10 @@ const UpdatePaymentSchema = z.object({
   serviceId: z.number().int().nullable().optional(),
   amount: z.number().nonnegative('Amount must be zero or positive').optional(),
   currency: z.string().length(3, 'Currency must be a 3-letter code').optional(),
-  paymentMethod: z
-    .string()
-    .max(50, 'Payment method must be at most 50 characters')
-    .nullable()
-    .optional(),
-  insuranceCoverage: z
-    .number()
-    .nonnegative('Insurance coverage must be zero or positive')
-    .optional(),
-  patientCopay: z
-    .number()
-    .nonnegative('Patient copay must be zero or positive')
-    .optional(),
-  status: z
-    .string()
-    .max(50, 'Status must be at most 50 characters')
-    .nullable()
-    .optional(),
+  paymentMethod: z.string().max(50).nullable().optional(),
+  insuranceCoverage: z.number().nullable().optional(),
+  patientCopay: z.number().nullable().optional(),
+  status: z.string().max(50).nullable().optional(),
   paymentDate: z.coerce.date().nullable().optional(),
 });
 
@@ -91,6 +77,7 @@ const PaymentFilterSchema = z.object({
   paymentMethod: z.string().optional(),
   minAmount: z.coerce.number().optional(),
   maxAmount: z.coerce.number().optional(),
+  search: z.string().optional(),
 });
 
 const PaymentPaginationSchema = z.object({

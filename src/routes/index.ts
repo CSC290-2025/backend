@@ -78,6 +78,8 @@ import {
   setupAmbulanceRoutes,
   setupEmergencyCallRoutes,
   setupPaymentRoutes,
+  setupDoctorsRoutes,
+  setupMedicineInventoryRoutes,
 } from '@/modules/healthcare/routes';
 
 // Know AI
@@ -113,6 +115,7 @@ import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
 // Public Transportation
 import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+import { transactionRoute } from '@/modules/public-transportation/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
@@ -124,6 +127,7 @@ import { setupBinRoutes } from '@/modules/waste-management/routes';
 import {
   setupWeatherRoutes,
   setupOpenMeteoRoutes,
+  setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 
 export const setupRoutes = (app: OpenAPIHono) => {
@@ -168,11 +172,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWalletRoutes(app);
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
-  //
-  // ============================================
-  // Normal Hono Routes (not in Swagger docs)
-  // ============================================
-  // app.route('/products', productRoutes);
   setupScbRoutes(app);
 
   //Healthcare
@@ -184,6 +183,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupAmbulanceRoutes(app);
   setupEmergencyCallRoutes(app);
   setupPaymentRoutes(app);
+  setupDoctorsRoutes(app);
+  setupMedicineInventoryRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
@@ -216,6 +217,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Weather
   setupOpenMeteoRoutes(app);
+  setupWeatherRatingRoutes(app);
   setupWeatherRoutes(app);
 
   // Volunteer
@@ -241,4 +243,5 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Public Transportation
   app.route('/api', routeStopsRoutes);
+  app.route('/api', transactionRoute);
 };
