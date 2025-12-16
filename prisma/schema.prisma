@@ -98,6 +98,7 @@ model apartment_booking {
   room_type      String?         @db.VarChar(255)
   apartment_id   Int?
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  apartment      apartment?      @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_apartment_id")
   room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
 
@@ -105,6 +106,8 @@ model apartment_owner {
   id           Int @id @default(autoincrement())
   user_id      Int
   apartment_id Int
+  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model apartment_picture {
@@ -112,6 +115,7 @@ model apartment_picture {
   name         String? @db.VarChar(255)
   file_path    String
   apartment_id Int
+  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model appointments {
@@ -646,7 +650,8 @@ model rating {
   comment      String?
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
   apartment_id Int?
-  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  apartment    apartment? @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users        users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model receiver_requests {
@@ -716,6 +721,7 @@ model room {
   price_end         Float?
   apartment_id      Int?
   apartment_booking apartment_booking[]
+  apartment         apartment?          @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model route_stops {
