@@ -1,12 +1,8 @@
 import prisma from '@/config/client';
-import { handlePrismaError, NotFoundError } from '@/errors';
+import { NotFoundError, handlePrismaError } from '@/errors';
 import type { Bookmark, CreateBookmarkInput } from '../types';
 
-const listByUser = async (
-  userId: number,
-  page: number,
-  limit: number
-): Promise<{ items: Bookmark[]; total: number }> => {
+const listByUser = async (userId: number, page: number, limit: number) => {
   try {
     const skip = (page - 1) * limit;
 
@@ -15,9 +11,7 @@ const listByUser = async (
         where: { user_id: userId },
         take: limit,
         skip,
-        orderBy: {
-          created_at: 'desc',
-        },
+        orderBy: { created_at: 'desc' },
       }),
       prisma.event_bookmarks.count({
         where: { user_id: userId },
@@ -25,36 +19,25 @@ const listByUser = async (
     ]);
 
     return { items, total };
-  } catch (error) {
-    console.error('Error in listByUser:', error);
-    handlePrismaError(error);
+  } catch (err) {
+    handlePrismaError(err);
   }
 };
 
-const findByUserAndEvent = async (
-  userId: number,
-  eventId: number
-): Promise<Bookmark | null> => {
+const findByUserAndEvent = async (userId: number, eventId: number) => {
   try {
     return await prisma.event_bookmarks.findUnique({
       where: {
-        user_id_event_id: {
-          user_id: userId,
-          event_id: eventId,
-        },
+        user_id_event_id: { user_id: userId, event_id: eventId },
       },
     });
-  } catch (error) {
-    console.error('Error in findByUserAndEvent:', error);
-    handlePrismaError(error);
+  } catch (err) {
+    handlePrismaError(err);
     return null;
   }
 };
 
-const create = async (
-  userId: number,
-  data: CreateBookmarkInput
-): Promise<Bookmark> => {
+const create = async (userId: number, data: CreateBookmarkInput) => {
   try {
     return await prisma.event_bookmarks.create({
       data: {
@@ -62,33 +45,28 @@ const create = async (
         event_id: data.event_id,
       },
     });
-  } catch (error) {
-    console.error('Error in create:', error);
-    handlePrismaError(error);
+  } catch (err) {
+    handlePrismaError(err);
   }
 };
 
-const remove = async (userId: number, eventId: number): Promise<boolean> => {
+const remove = async (userId: number, eventId: number) => {
   try {
-    const deletedRecord = await prisma.event_bookmarks.deleteMany({
-      where: {
-        user_id: userId,
-        event_id: eventId,
-      },
+    const x = await prisma.event_bookmarks.deleteMany({
+      where: { user_id: userId, event_id: eventId },
     });
 
-    if (deletedRecord.count === 0) {
-      throw new NotFoundError('Bookmark not found');
-    }
+    if (x.count === 0) throw new NotFoundError('Bookmark not found');
 
     return true;
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      throw error;
-    }
-    console.error('Error in remove:', error);
-    handlePrismaError(error);
+  } catch (err) {
+    handlePrismaError(err);
   }
 };
 
-export { listByUser, findByUserAndEvent, create, remove };
+export const BookmarkModel = {
+  listByUser,
+  findByUserAndEvent,
+  create,
+  remove,
+};
