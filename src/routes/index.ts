@@ -59,6 +59,7 @@ import {
   setupMetroCardRoutes,
   setupTransactionRoutes,
   setupInsuranceCardRoutes,
+  setupLocationRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -175,6 +176,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
   setupScbRoutes(app);
+  setupLocationRoutes(app);
 
   //Healthcare
   setupPatientRoutes(app);
