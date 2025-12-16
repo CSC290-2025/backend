@@ -105,7 +105,6 @@ export const createMarkerType = async (data: CreateMarkerTypeInput): Promise<Mar
     const markerTypeData = {
         id: markerType.id,
         marker_type_icon: markerType.marker_type_icon,
-        marker_type_color: markerType.marker_type_color,
         created_at: markerType.created_at,
         updated_at: markerType.updated_at,
     };
@@ -143,7 +142,6 @@ export const getMarkerTypeById =async (id: number) : Promise<MarkerTypeResponse 
           select: {
             id: true,
             marker_type_icon: true,
-            marker_type_color: true,
           },
         },
       },
@@ -163,7 +161,6 @@ export const getAllMarkerTypes = async (query?: MarkerQuery): Promise<MarkerType
           select: {
             id: true,
             marker_type_icon: true,
-            marker_type_color: true,
           },
         },
       },
@@ -214,7 +211,6 @@ export const getMarkerTypesByType = async (
           select: {
             id: true,
             marker_type_icon: true,
-            marker_type_color: true,
           },
         },
       },
@@ -225,7 +221,10 @@ export const getMarkerTypesByType = async (
 
     return markers as unknown as MarkerTypeResponse[];
   } catch (error) {
-    handlePrismaError(error);
+  //   if (error instanceof ValidationError) {
+  //     throw error; 
+  // }
+  handlePrismaError(error);
   }
 };
 
@@ -289,7 +288,6 @@ export const updateMarkerType = async (
           select: {
             id: true,
             marker_type_icon: true,
-            marker_type_color: true,
           },
         },
       },
@@ -363,7 +361,6 @@ export const getMarkerTypesInBounds = async (bounds: {
         m.updated_at,
         ST_AsGeoJSON(m.location) as location,
         mt.marker_type_icon,
-        mt.marker_type_color
       FROM marker m
       LEFT JOIN marker_type mt ON m.marker_type_id = mt.id
       WHERE ST_Within(
@@ -383,7 +380,6 @@ export const getMarkerTypesInBounds = async (bounds: {
       marker_type: {
         id: marker.marker_type_id,
         marker_type_icon: marker.marker_type_icon,
-        marker_type_color: marker.marker_type_color,
       },
     })) as unknown as MarkerTypeResponse[];
   } catch (error) {

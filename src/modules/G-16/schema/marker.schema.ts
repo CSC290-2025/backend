@@ -32,7 +32,6 @@ export const MarkerResponseSchema = z.object({
     .object({
       id: z.number().int(),
       marker_type_icon: z.string().nullable(),
-      marker_type_color: z.string().nullable(),
     })
     .nullable(),
   created_at: z.coerce.date(),

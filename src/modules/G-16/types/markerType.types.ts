@@ -28,7 +28,6 @@ export interface MarkerRow {
   updated_at: Date;
   marker_type_id_ref: number | null;
   marker_type_icon: string | null;
-  marker_type_color: string | null;
 }
 
 type MarkerTypeQuery = z.infer<typeof MarkerTypeQuerySchema>
