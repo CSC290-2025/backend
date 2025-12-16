@@ -1,10 +1,9 @@
-//เกี่ยวกับ open-meteo (api นอก) , About open-meteo (external api)
 import type { Context } from 'hono';
 import { OpenMeteoService, OpenMeteoScheduler } from '../services';
 import { successResponse } from '@/utils/response';
 import type { ExternalWeatherQuery, ImportDailyBody } from '../types';
 
-// proxy คำขอ current weather ไปยัง Open-Meteo, Proxy current weather requests to Open-Meteo
+// Forward the `/current` endpoint to Open-Meteo and relay the structured DTO.
 const getOpenMeteoCurrent = async (c: Context) => {
   const data = await OpenMeteoService.getCurrentFromOpenMeteo(
     c.req.query() as unknown as ExternalWeatherQuery
@@ -12,7 +11,7 @@ const getOpenMeteoCurrent = async (c: Context) => {
   return successResponse(c, data);
 };
 
-// ดึงข้อมูลพยากรณ์รายชั่วโมงตาม query ที่ client ส่งมา ,// Retrieve hourly forecast data based on client-sent queries.
+// Retrieve hourly forecast data for the requested district.
 const getOpenMeteoHourly = async (c: Context) => {
   const data = await OpenMeteoService.getHourlyFromOpenMeteo(
     c.req.query() as unknown as ExternalWeatherQuery
@@ -20,7 +19,7 @@ const getOpenMeteoHourly = async (c: Context) => {
   return successResponse(c, data);
 };
 
-// ดึงข้อมูลพยากรณ์รายวันจาก Open-Meteo ,// Retrieve daily forecast data from Open-Meteo
+// Retrieve daily forecast data for the requested district.
 const getOpenMeteoDaily = async (c: Context) => {
   const data = await OpenMeteoService.getDailyFromOpenMeteo(
     c.req.query() as unknown as ExternalWeatherQuery
@@ -28,7 +27,7 @@ const getOpenMeteoDaily = async (c: Context) => {
   return successResponse(c, data);
 };
 
-// import ข้อมูลรายวันของเมื่อวานสำหรับ location เดียว,// Import yesterday's daily data for a single location
+// Import yesterday's aggregates for a single district and persist them.
 const importDailyOpenMeteo = async (c: Context) => {
   const body = await c.req.json();
   const result = await OpenMeteoScheduler.importYesterdayToDatabase(
@@ -37,7 +36,7 @@ const importDailyOpenMeteo = async (c: Context) => {
   return successResponse(c, result, 201, `Imported daily for ${result.date}`);
 };
 
-// import ข้อมูลเมื่อวานให้ทุก location ที่มีในระบบ,// Import yesterday's data for all locations in the system
+// Import yesterday's aggregates for every configured district.
 const importDailyOpenMeteoAll = async (c: Context) => {
   const result = await OpenMeteoScheduler.importAllLocationsYesterday();
   return successResponse(

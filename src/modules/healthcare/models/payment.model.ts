@@ -32,12 +32,12 @@ type PaymentRecord = Prisma.paymentsGetPayload<{
 
 const mapPayment = (record: PaymentRecord): Payment => ({
   id: record.id,
-  patientId: record.patient_id,
+  patientId: record.patient_id ?? 0,
   facilityId: record.facility_id ?? null,
   serviceType: record.service_type ?? null,
   serviceId: record.service_id ?? null,
   amount: Number(record.amount),
-  currency: record.currency,
+  currency: record.currency ?? 'THB',
   paymentMethod: record.payment_method ?? null,
   insuranceCoverage: Number(record.insurance_coverage),
   patientCopay: Number(record.patient_copay),

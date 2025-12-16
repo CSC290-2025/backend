@@ -8,16 +8,28 @@ const setupInsuranceCardRoutes = (app: OpenAPIHono) => {
     InsuranceCardController.createCard
   );
   app.openapi(
-    InsuranceCardSchemas.getUserInsuranceCardRoute,
-    InsuranceCardController.getUserCard
+    InsuranceCardSchemas.getMeInsuranceCardsRoute,
+    InsuranceCardController.getMyCards
   );
   app.openapi(
     InsuranceCardSchemas.getInsuranceCardRoute,
-    InsuranceCardController.getCard
+    InsuranceCardController.getInsuranceCard
   );
   app.openapi(
     InsuranceCardSchemas.topUpInsuranceCardRoute,
     InsuranceCardController.topUpCard
+  );
+  app.openapi(
+    InsuranceCardSchemas.getUserInsuranceCardsRoute,
+    InsuranceCardController.getUserInsuranceCards
+  );
+  app.openapi(
+    InsuranceCardSchemas.updateInsuranceCardRoute,
+    InsuranceCardController.updateInsuranceCard
+  );
+  app.openapi(
+    InsuranceCardSchemas.deleteMyInsuranceCardRoute,
+    InsuranceCardController.deleteMyInsuranceCard
   );
 };
 

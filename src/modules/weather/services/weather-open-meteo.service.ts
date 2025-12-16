@@ -8,7 +8,7 @@ import type {
 import { ValidationError } from '@/errors';
 import { getDistrictByLocationId } from '../utils/bangkok-districts';
 
-// แปลง weather code ของ WMO ให้เป็น string ที่อ่านง่าย , // Convert WMO weather code to human-readable string
+// Map numeric WMO weather codes to concise, human-readable labels.
 const wmoToCondition = (code: number): string => {
   if (code === 0) return 'Sunny';
   if ([1, 2, 3].includes(code)) return 'Partly Cloudy';
@@ -20,14 +20,14 @@ const wmoToCondition = (code: number): string => {
   return 'Cloudy';
 };
 
-// หาคำย่อทิศลม (N/NE/..) , // Get compass direction abbreviation (N/NE/..)
+// Convert wind-bearing degrees into one of eight compass abbreviations.
 const compass8 = (deg?: number | null) => {
   if (deg == null) return 'N';
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   return dirs[Math.round(deg / 45) % 8];
 };
 
-// รับเวลาท้องถิ่นจาก Open-Meteo แล้วแปลงเป็น ISO เวลามาตรฐาน UTC, // Convert local time from Open-Meteo to standard UTC ISO time
+// Convert the provider's local timestamp into a UTC ISO string.
 const toUtcIso = (localYYYYmmddHHmm: string, offsetSeconds: number): string => {
   const [date, hm] = localYYYYmmddHHmm.split('T');
   const [y, m, d] = date.split('-').map(Number);
@@ -37,7 +37,7 @@ const toUtcIso = (localYYYYmmddHHmm: string, offsetSeconds: number): string => {
   return new Date(utc).toISOString();
 };
 
-// สร้าง DTO รูปแบบที่ backend ใช้จากข้อมูล Open-Meteo ชุดใหญ่ , // Create DTO in the format used by the backend from full Open-Meteo data
+// Normalize the full Open-Meteo payload into the DTO consumed by our API.
 const mapFullToDTO = (
   raw: ExternalRawFull,
   city: string,
@@ -80,7 +80,7 @@ const mapFullToDTO = (
   });
 };
 
-// ดึงเฉพาะ current weather (ใช้กับ endpoint /weather/external/current) , // Fetch only current weather (used with endpoint /weather/external/current)
+// Fetch the full Open-Meteo payload and return only the current snapshot.
 const getCurrentFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
   const district = getDistrictByLocationId(q.location_id);
@@ -104,7 +104,7 @@ const getCurrentFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   });
 };
 
-// ดึงเฉพาะ hourly forecast แล้ว map เป็น schema ของเรา , // Fetch only hourly forecast and map to our schema
+// Fetch the full Open-Meteo payload and return only the hourly forecast.
 const getHourlyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
   const district = getDistrictByLocationId(q.location_id);
@@ -128,7 +128,7 @@ const getHourlyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   });
 };
 
-// ดึงเฉพาะ daily forecast แล้ว map เป็น schema ของเรา , // Fetch only daily forecast and map to our schema
+// Fetch the full Open-Meteo payload and return only the daily forecast.
 const getDailyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   const q = WeatherOpenMeteoSchemas.ExternalWeatherQuerySchema.parse(query);
   const district = getDistrictByLocationId(q.location_id);

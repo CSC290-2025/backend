@@ -6,16 +6,8 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
-// Enums
-const BinTypeEnum = z.enum(['RECYCLABLE', 'GENERAL', 'HAZARDOUS', 'ORGANIC']);
-const BinStatusEnum = z.enum([
-  'NORMAL',
-  'OVERFLOW',
-  'NEEDS_COLLECTION',
-  'MAINTENANCE',
-]);
+const BinTypeEnum = z.enum(['RECYCLABLE', 'GENERAL', 'HAZARDOUS']);
 
-// Request Schemas
 const CreateBinRequestSchema = z.object({
   bin_name: z.string().min(1, 'Bin name is required'),
   bin_type: BinTypeEnum,
@@ -23,7 +15,6 @@ const CreateBinRequestSchema = z.object({
   longitude: z.number().min(-180).max(180),
   address: z.string().optional(),
   capacity_kg: z.number().positive().optional(),
-  status: BinStatusEnum.optional(),
 });
 
 const UpdateBinRequestSchema = z.object({
@@ -33,23 +24,16 @@ const UpdateBinRequestSchema = z.object({
   longitude: z.number().min(-180).max(180).optional(),
   address: z.string().optional(),
   capacity_kg: z.number().positive().optional(),
-  status: BinStatusEnum.optional(),
-});
-
-const UpdateBinStatusRequestSchema = z.object({
-  status: BinStatusEnum,
 });
 
 const RecordCollectionRequestSchema = z.object({
   collected_weight: z.number().positive().optional(),
 });
 
-// Params Schemas
 const BinIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-// Response Schemas
 const BinSchema = z.object({
   id: z.number(),
   bin_name: z.string(),
@@ -58,7 +42,6 @@ const BinSchema = z.object({
   longitude: z.number(),
   address: z.string().nullable(),
   capacity_kg: z.number().nullable(),
-  status: BinStatusEnum,
   last_collected_at: z.string(),
   total_collected_weight: z.number(),
   created_at: z.string(),
@@ -66,7 +49,8 @@ const BinSchema = z.object({
 });
 
 const BinWithDistanceSchema = BinSchema.extend({
-  distance_km: z.number(),
+  numericDistance: z.number(),
+  distance: z.string(),
 });
 
 const BinsResponseSchema = z.object({
@@ -92,19 +76,9 @@ const BinStatsResponseSchema = z.object({
         }),
       })
     ),
-    byStatus: z.array(
-      z.object({
-        status: BinStatusEnum,
-        _count: z.object({
-          id: z.number(),
-        }),
-      })
-    ),
-    overflowBins: z.number(),
   }),
 });
 
-// OpenAPI Route Definitions
 const getAllBinsRoute = createGetRoute({
   path: '/bins',
   summary: 'Get all bins with optional filters',
@@ -128,15 +102,6 @@ const createBinRoute = createPostRoute({
   tags: ['Bins'],
 });
 
-const updateBinRoute = createPutRoute({
-  path: '/bins/{id}',
-  summary: 'Update bin information',
-  requestSchema: UpdateBinRequestSchema,
-  responseSchema: BinResponseSchema,
-  params: BinIdParamSchema,
-  tags: ['Bins'],
-});
-
 const deleteBinRoute = createDeleteRoute({
   path: '/bins/{id}',
   summary: 'Delete a bin',
@@ -144,27 +109,16 @@ const deleteBinRoute = createDeleteRoute({
   tags: ['Bins'],
 });
 
-const updateBinStatusRoute = createPutRoute({
-  path: '/bins/{id}/status',
-  summary: 'Update bin status',
-  requestSchema: UpdateBinStatusRequestSchema,
-  responseSchema: BinResponseSchema,
-  params: BinIdParamSchema,
-  tags: ['Bins'],
-});
-
-const recordCollectionRoute = createPostRoute({
-  path: '/bins/{id}/collect',
-  summary: 'Record a collection event for a bin',
-  requestSchema: RecordCollectionRequestSchema,
-  responseSchema: BinResponseSchema,
-  params: BinIdParamSchema,
-  tags: ['Bins'],
-});
-
 const getNearestBinsRoute = createGetRoute({
   path: '/bins/nearest',
   summary: 'Find nearest bins to a location',
+  responseSchema: NearestBinsResponseSchema,
+  tags: ['Bins', 'Location'],
+});
+
+const getNearbyBinsRoute = createGetRoute({
+  path: '/bins/nearby',
+  summary: 'Find nearby bins with filters',
   responseSchema: NearestBinsResponseSchema,
   tags: ['Bins', 'Location'],
 });
@@ -177,32 +131,21 @@ const getBinStatsRoute = createGetRoute({
 });
 
 export const BinSchemas = {
-  // Request Schemas
   CreateBinRequestSchema,
   UpdateBinRequestSchema,
-  UpdateBinStatusRequestSchema,
   RecordCollectionRequestSchema,
-
-  // Response Schemas
   BinSchema,
   BinWithDistanceSchema,
   BinsResponseSchema,
   BinResponseSchema,
   NearestBinsResponseSchema,
   BinStatsResponseSchema,
-
-  // Enum Schemas
   BinTypeEnum,
-  BinStatusEnum,
-
-  // Route Definitions
   getAllBinsRoute,
   getBinByIdRoute,
   createBinRoute,
-  updateBinRoute,
   deleteBinRoute,
-  updateBinStatusRoute,
-  recordCollectionRoute,
   getNearestBinsRoute,
+  getNearbyBinsRoute,
   getBinStatsRoute,
 };

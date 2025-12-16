@@ -3,3 +3,4 @@ export * from './room.types';
 export * from './booking.types';
 export * from './rating.types';
 export * from './address.types';
+export * from './owner.types';

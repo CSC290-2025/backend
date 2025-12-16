@@ -6,11 +6,26 @@ export { prescriptionRoutes } from './prescription.routes';
 export { ambulanceRoutes } from './ambulance.routes';
 export { emergencyCallRoutes } from './emergency_call.routes';
 export { paymentRoutes } from './payment.routes';
-export { setupPatientRoutes } from './patient.openapi.routes';
-export { setupBedRoutes } from './bed.openapi.routes';
-export { setupFacilityRoutes } from './facility.openapi.routes';
-export { setupAppointmentRoutes } from './appointment.openapi.routes';
-export { setupPrescriptionRoutes } from './prescription.openapi.routes';
-export { setupAmbulanceRoutes } from './ambulance.openapi.routes';
-export { setupEmergencyCallRoutes } from './emergency_call.openapi.routes';
-export { setupPaymentRoutes } from './payment.openapi.routes';
+import { setupPatientRoutes } from './patient.openapi.routes';
+import { setupBedRoutes } from './bed.openapi.routes';
+import { setupFacilityRoutes } from './facility.openapi.routes';
+import { setupAppointmentRoutes } from './appointment.openapi.routes';
+import { setupPrescriptionRoutes } from './prescription.openapi.routes';
+import { setupAmbulanceRoutes } from './ambulance.openapi.routes';
+import { setupEmergencyCallRoutes } from './emergency_call.openapi.routes';
+import { setupPaymentRoutes } from './payment.openapi.routes';
+import { setupDoctorsRoutes } from './doctors.openapi.routes';
+import { setupMedicineInventoryRoutes } from './medicine_inventory.openapi.routes';
+
+export {
+  setupPatientRoutes,
+  setupBedRoutes,
+  setupFacilityRoutes,
+  setupAppointmentRoutes,
+  setupPrescriptionRoutes,
+  setupAmbulanceRoutes,
+  setupEmergencyCallRoutes,
+  setupPaymentRoutes,
+  setupDoctorsRoutes,
+  setupMedicineInventoryRoutes,
+};
