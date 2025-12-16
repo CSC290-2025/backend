@@ -1,4 +1,4 @@
-import { NotFoundError, ValidationError } from '@/errors';
+import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { InsuranceCardModel, WalletModel } from '../models';
 import type { InsuranceCard } from '../types';
 import prisma from '@/config/client';
@@ -133,6 +133,93 @@ const updateInsuranceCard = async (
   return await InsuranceCardModel.updateCard(id, data);
 };
 
+const transferToHealthCare = async (
+  cardNumber: string,
+  amount: number
+): Promise<{ card: InsuranceCard; cardTransactionId: number }> => {
+  if (amount <= 0) {
+    throw new ValidationError('Amount must be positive');
+  }
+
+  const formattedCardNumber = formatInsuranceCardNumber(cardNumber);
+
+  const card =
+    await InsuranceCardModel.findCardByCardNumber(formattedCardNumber);
+
+  if (!card) {
+    throw new NotFoundError('Insurance card not found');
+  }
+
+  if (card.status === 'suspended')
+    throw new ForbiddenError('This card is suspended');
+
+  if (card.balance < amount) {
+    throw new ValidationError('Insufficient insurance card balance');
+  }
+
+  const healthcareWallet =
+    await WalletModel.findWalletByOrganizationType('Healthcare');
+  if (!healthcareWallet) {
+    throw new NotFoundError('Healthcare wallet not found');
+  }
+
+  return await prisma.$transaction(async (trx) => {
+    // 1. Decrement insurance card balance
+    const updatedCard = await InsuranceCardModel.updateCardBalance(
+      card.id,
+      amount,
+      'decrement',
+      trx
+    );
+
+    // 2. Increment healthcare wallet balance
+    await WalletModel.WalletBalanceTopup(
+      healthcareWallet.id,
+      amount,
+      'increment',
+      trx
+    );
+
+    // 3. Record a transaction for the organization receiving the funds
+    const walletTransactionId = await WalletModel.createTransaction(
+      {
+        wallet_id: healthcareWallet.id,
+        transaction_type: 'transfer_in',
+        amount: amount,
+        target_service: 'healthcare',
+        description: `Transfer from insurance card ${card.card_number}`,
+      },
+      trx
+    );
+
+    // 4. Create card transaction record for the insurance card that was charged
+    // Note: Creating card_transaction directly here as there is no dedicated Model method for it yet
+    // and it is consistent with MetroCardService implementation.
+    console.log('do');
+    const cardTransaction = await trx.card_transactions.create({
+      data: {
+        card_id: card.id,
+        card_type: 'insurance',
+        transaction_type: 'charge',
+        reference: String(walletTransactionId),
+        amount: amount,
+        description: `Transfer to healthcare from insurance card ${card.card_number}`,
+      },
+    });
+
+    return {
+      card: {
+        ...updatedCard,
+        user_id: updatedCard.user_id!,
+        card_number: updatedCard.card_number!,
+        balance: Number(updatedCard.balance || 0),
+        status: updatedCard.status as 'active' | 'suspended',
+      },
+      cardTransactionId: cardTransaction.id,
+    };
+  });
+};
+
 const deleteCardById = async (id: number): Promise<void> => {
   const card = await InsuranceCardModel.findCardById(id);
   if (!card) throw new NotFoundError('Insurance card not found');
@@ -147,5 +234,6 @@ export {
   createCard,
   topUpFromWallet,
   updateInsuranceCard,
+  transferToHealthCare,
   deleteCardById,
 };
