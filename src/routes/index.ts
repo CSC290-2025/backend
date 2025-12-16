@@ -121,7 +121,6 @@ import {
   setupOpenMeteoRoutes,
   setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
-import { MarkerType } from '@/modules/G-16/schema';
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*

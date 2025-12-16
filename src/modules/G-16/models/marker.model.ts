@@ -199,7 +199,6 @@ export const getAllMarkers = async (options?: {
         json_build_object(
           'id', mt.id,
           'marker_type_icon', mt.marker_type_icon,
-          'marker_type_color', mt.marker_type_color,
           'created_at', mt.created_at,
           'updated_at', mt.updated_at
         ) AS marker_type
@@ -265,7 +264,6 @@ export const getMarkersWithinBounds = async (
           json_build_object(
             'id', mt.id,
             'marker_type_icon', mt.marker_type_icon,
-            'marker_type_color', mt.marker_type_color,
             'created_at', mt.created_at,
             'updated_at', mt.updated_at
           ) as marker_type
