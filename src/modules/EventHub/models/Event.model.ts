@@ -260,6 +260,55 @@ const getEventByDay = async (from: Date, to: Date) => {
     handlePrismaError(err);
   }
 };
+
+const listPastBookmarkedEvents = async (
+  userId: number,
+  page: number,
+  limit: number
+) => {
+  try {
+    const skip = (page - 1) * limit;
+    const now = new Date();
+
+    const [items, total] = await Promise.all([
+      prisma.events.findMany({
+        where: {
+          end_at: {
+            lt: now,
+          },
+
+          event_bookmarks: {
+            some: {
+              user_id: userId,
+            },
+          },
+        },
+        take: limit,
+        skip,
+        orderBy: {
+          end_at: 'desc',
+        },
+      }),
+      prisma.events.count({
+        where: {
+          end_at: {
+            lt: now,
+          },
+          event_bookmarks: {
+            some: {
+              user_id: userId,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return { items, total };
+  } catch (err) {
+    handlePrismaError(err);
+    return { items: [], total: 0 };
+  }
+};
 export const EventModel = {
   findById,
   list,
@@ -267,4 +316,5 @@ export const EventModel = {
   update,
   remove,
   getEventByDay,
+  listPastBookmarkedEvents,
 };

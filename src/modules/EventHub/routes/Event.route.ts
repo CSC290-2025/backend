@@ -2,6 +2,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { EventSchemas } from '../schemas';
 import { EventController } from '../controllers';
 import { adminMiddleware } from '@/middlewares/admin'; // Importing adminMiddleware
+import { authMiddleware } from '@/middlewares/auth';
 
 const setupEventRoutes = (app: OpenAPIHono) => {
   // Event Routes
@@ -32,7 +33,12 @@ const setupEventRoutes = (app: OpenAPIHono) => {
     adminMiddleware, // Applying adminMiddleware
     EventController.deleteEvent
   );
-
+  // List past bookmarked events (auth required)
+  app.openapi(
+    EventSchemas.listPastBookmarkedEventsRoute,
+    authMiddleware,
+    EventController.listPastBookmarkedEvents
+  );
   // Get a single event by ID (public)
   app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
 };

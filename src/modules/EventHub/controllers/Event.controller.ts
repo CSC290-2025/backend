@@ -68,3 +68,18 @@ export const getEventByDay = async (c: Context) => {
 
   return successResponse(c, { data: data });
 };
+export const listPastBookmarkedEvents = async (c: Context) => {
+  const page = Number(c.req.query('page') || 1);
+  const limit = Number(c.req.query('limit') || 10);
+
+  const user = c.get('user') as { id: number };
+  const userId = user.id;
+
+  const result = await EventService.listPastBookmarkedEvents(
+    userId,
+    page,
+    limit
+  );
+
+  return successResponse(c, result);
+};

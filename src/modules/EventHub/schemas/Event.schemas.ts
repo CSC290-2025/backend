@@ -92,7 +92,10 @@ const EventListQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
-
+const Pagination = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 const ListEventsResponse = z.object({
   items: z.array(EventSchema),
   page: z.number().int(),
@@ -156,6 +159,13 @@ const getEventByDayRoute = createGetRoute({
   }),
   tags: ['Events'],
 });
+const listPastBookmarkedEventsRoute = createGetRoute({
+  path: '/events/bookmarked-history',
+  summary: 'List events that have ended and are bookmarked by the user.',
+  query: Pagination,
+  responseSchema: ListEventsResponse,
+  tags: ['Events'],
+});
 
 export const EventSchemas = {
   EventSchema,
@@ -171,4 +181,5 @@ export const EventSchemas = {
   updateEventRoute,
   deleteEventRoute,
   getEventByDayRoute,
+  listPastBookmarkedEventsRoute,
 };
