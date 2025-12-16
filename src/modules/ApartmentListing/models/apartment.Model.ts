@@ -243,16 +243,14 @@ export async function updateApartment(data: updateApartmentData, id: number) {
     );
 
     if (address && result.address_id) {
-      insertLatLong(
+      await insertLatLong(
         result.address_id,
         address.address_line || '',
         address.province || '',
         address.district || '',
         address.subdistrict || '',
         address.postal_code || ''
-      ).catch((error) => {
-        console.error('Failed to update lat/long:', error);
-      });
+      );
     }
 
     return transformApartmentData(result);
