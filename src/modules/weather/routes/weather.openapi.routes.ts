@@ -2,27 +2,31 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { WeatherSchemas } from '../schemas';
 import * as WeatherController from '../controllers/weather.controller';
 
+// Register every weather DB route with OpenAPI metadata.
 const setupWeatherRoutes = (app: OpenAPIHono) => {
   app.openapi(
     WeatherSchemas.listWeatherDataRoute,
     WeatherController.listWeather
   );
 
-  app.openapi(WeatherSchemas.getWeatherDataRoute, WeatherController.getWeather);
-
   app.openapi(
-    WeatherSchemas.createWeatherDataRoute,
-    WeatherController.createWeather
+    WeatherSchemas.getWeatherDataRoute,
+    WeatherController.getWeatherByDate
   );
 
   app.openapi(
-    WeatherSchemas.updateWeatherDataRoute,
-    WeatherController.updateWeather
+    WeatherSchemas.getWeatherByLocationRoute,
+    WeatherController.getWeatherByLocation
+  );
+
+  app.openapi(
+    WeatherSchemas.listWeatherByRangeRoute,
+    WeatherController.listWeatherByDateRange
   );
 
   app.openapi(
     WeatherSchemas.deleteWeatherDataRoute,
-    WeatherController.deleteWeather
+    WeatherController.deleteWeatherByDate
   );
 
   app.openapi(

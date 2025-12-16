@@ -4,6 +4,7 @@ import type {
   createBookingData,
   updateBookingData,
 } from '../types/booking.types';
+import type { Prisma } from '@/generated/prisma';
 
 //for user to see all bookings
 export async function getAllBookingsForUser(userId: number) {
@@ -26,6 +27,7 @@ export async function getAllBookingsForUser(userId: number) {
     return bookings.map((booking) => ({
       id: booking.id,
       user_id: booking.user_id,
+      apartment_id: booking.apartment_id,
       room_id: booking.room_id,
       guest_name: booking.guest_name,
       guest_phone: booking.guest_phone,
@@ -66,6 +68,7 @@ export async function getBookingsByApartmentId(apartmentId: number) {
       id: booking.id,
       user_id: booking.user_id,
       room_id: booking.room_id,
+      apartment_id: booking.apartment_id,
       guest_name: booking.guest_name,
       guest_phone: booking.guest_phone,
       guest_email: booking.guest_email,
@@ -104,6 +107,7 @@ export async function getBookingById(id: number) {
       id: booking.id,
       user_id: booking.user_id,
       room_id: booking.room_id,
+      apartment_id: booking.apartment_id,
       guest_name: booking.guest_name,
       guest_phone: booking.guest_phone,
       guest_email: booking.guest_email,
@@ -164,6 +168,7 @@ export async function getBookingsByRoomId(roomId: number) {
       id: booking.id,
       user_id: booking.user_id,
       room_id: booking.room_id,
+      apartment_id: booking.apartment_id,
       guest_name: booking.guest_name,
       guest_phone: booking.guest_phone,
       guest_email: booking.guest_email,
@@ -201,6 +206,7 @@ export async function createBooking(data: createBookingData) {
       id: newBooking.id,
       user_id: newBooking.user_id,
       room_id: newBooking.room_id,
+      apartment_id: newBooking.apartment_id,
       guest_name: newBooking.guest_name,
       guest_phone: newBooking.guest_phone,
       guest_email: newBooking.guest_email,
@@ -216,22 +222,32 @@ export async function createBooking(data: createBookingData) {
   }
 }
 
-export async function updateBooking(id: number, data: updateBookingData) {
+export async function updateBooking(
+  id: number,
+  data: updateBookingData,
+  tx?: Prisma.TransactionClient
+) {
   try {
-    const updatedBooking = await prisma.apartment_booking.update({
-      where: {
-        id,
-      },
-      data: {
-        ...data,
-        check_in: data.check_in ? new Date(data.check_in) : null,
-      },
-    });
+    const updateData = {
+      ...data,
+      check_in: data.check_in ? new Date(data.check_in) : null,
+    };
+    // Use transaction client
+    const updatedBooking = tx
+      ? await tx.apartment_booking.update({
+          where: { id },
+          data: updateData,
+        })
+      : await prisma.apartment_booking.update({
+          where: { id },
+          data: updateData,
+        });
 
     return {
       id: updatedBooking.id,
       user_id: updatedBooking.user_id,
       room_id: updatedBooking.room_id,
+      apartment_id: updatedBooking.apartment_id,
       guest_name: updatedBooking.guest_name,
       guest_phone: updatedBooking.guest_phone,
       guest_email: updatedBooking.guest_email,

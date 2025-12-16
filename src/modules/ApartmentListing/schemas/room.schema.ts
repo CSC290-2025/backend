@@ -34,10 +34,10 @@ const createRoomSchema = z
   .superRefine((data, ctx) => {
     // For creation both price_start and price_end are required, so we can
     // safely validate the relationship here.
-    if (data.price_start >= data.price_end) {
+    if (data.price_start > data.price_end) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'price_start must be less than price_end',
+        message: 'price_start must be less than or equal to price_end',
         path: ['price_start'],
       });
     }
@@ -60,11 +60,11 @@ const updateRoomSchema = z
     if (
       data.price_start !== undefined &&
       data.price_end !== undefined &&
-      data.price_start >= data.price_end
+      data.price_start > data.price_end
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'price_start must be less than price_end',
+        message: 'price_start must be less than or equal to price_end',
         path: ['price_start'],
       });
     }

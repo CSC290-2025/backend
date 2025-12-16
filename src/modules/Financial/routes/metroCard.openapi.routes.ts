@@ -6,7 +6,11 @@ const setupMetroCardRoutes = (app: OpenAPIHono) => {
   // MetroCard routes
   app.openapi(
     MetroCardSchemas.createMetroCardRoute,
-    MetroCardController.createMetroCard
+    MetroCardController.createMyMetroCard
+  );
+  app.openapi(
+    MetroCardSchemas.getMeMetroCardsRoute,
+    MetroCardController.getMyMetroCards
   );
   app.openapi(
     MetroCardSchemas.getMetroCardRoute,
@@ -26,7 +30,11 @@ const setupMetroCardRoutes = (app: OpenAPIHono) => {
   );
   app.openapi(
     MetroCardSchemas.deleteMetroCardRoute,
-    MetroCardController.deleteMetroCard
+    MetroCardController.deleteMyMetroCard
+  );
+  app.openapi(
+    MetroCardSchemas.transferToTransportationRoute,
+    MetroCardController.transferToTransportation
   );
 };
 

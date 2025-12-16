@@ -1,13 +1,8 @@
+// schema สำหรับ validate payload/params ของ weather module และใช้ gen OpenAPI
 import { z } from 'zod';
-import {
-  createGetRoute,
-  createPostRoute,
-  createPutRoute,
-  createDeleteRoute,
-} from '@/utils/openapi-helpers';
+import { createGetRoute, createDeleteRoute } from '@/utils/openapi-helpers';
 
-const decimalField = z.coerce.number().nullable().optional();
-
+// รูปแบบข้อมูล weather_data ที่ดึงจากฐาน
 const WeatherDataSchema = z.object({
   id: z.number().int(),
   location_id: z.number().int().nullable(),
@@ -22,38 +17,17 @@ const WeatherDataSchema = z.object({
   addresses: z.any().nullable().optional(),
 });
 
-const CreateWeatherDataSchema = z.object({
-  location_id: z.number().int().nullable().optional(),
-  temperature: decimalField,
-  feel_temperature: decimalField,
-  humidity: decimalField,
-  wind_speed: decimalField,
-  wind_direction: z.string().max(50).nullable().optional(),
-  rainfall_probability: decimalField,
+// ใช้กับ path param /weather/{date}
+const WeatherDateParam = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
 });
 
-const UpdateWeatherDataSchema = z.object({
-  location_id: z.number().int().nullable().optional(),
-  temperature: decimalField,
-  feel_temperature: decimalField,
-  humidity: decimalField,
-  wind_speed: decimalField,
-  wind_direction: z.string().max(50).nullable().optional(),
-  rainfall_probability: decimalField,
-});
-
-const WeatherIdParam = z.object({
-  id: z.string(),
-});
-
+// response มาตรฐานของ list endpoints
 const WeatherDataListSchema = z.object({
   data: z.array(WeatherDataSchema),
 });
 
-const WeatherLocationParam = z.object({
-  location_id: z.string(),
-});
-
+// route meta สำหรับ GET /weather
 const listWeatherDataRoute = createGetRoute({
   path: '/weather',
   summary: 'List weather data',
@@ -61,38 +35,40 @@ const listWeatherDataRoute = createGetRoute({
   tags: ['Weather'],
 });
 
+// ใช้ validate path param location_id
+const WeatherLocationParam = z.object({
+  location_id: z
+    .string()
+    .regex(/^\d+$/, 'location_id must be a positive integer'),
+});
+
+// route meta สำหรับ GET /weather/location/{location_id}
+const getWeatherByLocationRoute = createGetRoute({
+  path: '/weather/location/{location_id}',
+  summary: 'List weather data for a specific location id (16-19)',
+  params: WeatherLocationParam,
+  responseSchema: WeatherDataListSchema,
+  tags: ['Weather'],
+});
+
+// route meta สำหรับ GET /weather/{date}
 const getWeatherDataRoute = createGetRoute({
-  path: '/weather/{id}',
-  summary: 'Get weather data by ID',
-  responseSchema: WeatherDataSchema,
-  params: WeatherIdParam,
+  path: '/weather/{date}',
+  summary: 'Get weather data for a specific date (YYYY-MM-DD)',
+  responseSchema: WeatherDataListSchema,
+  params: WeatherDateParam,
   tags: ['Weather'],
 });
 
-const createWeatherDataRoute = createPostRoute({
-  path: '/weather',
-  summary: 'Create weather data',
-  requestSchema: CreateWeatherDataSchema,
-  responseSchema: WeatherDataSchema,
-  tags: ['Weather'],
-});
-
-const updateWeatherDataRoute = createPutRoute({
-  path: '/weather/{id}',
-  summary: 'Update weather data',
-  params: WeatherIdParam,
-  requestSchema: UpdateWeatherDataSchema,
-  responseSchema: WeatherDataSchema,
-  tags: ['Weather'],
-});
-
+// route meta สำหรับ DELETE /weather/{date}
 const deleteWeatherDataRoute = createDeleteRoute({
-  path: '/weather/{id}',
-  summary: 'Delete weather data by ID',
-  params: WeatherIdParam,
+  path: '/weather/{date}',
+  summary: 'Delete weather data for a specific date (YYYY-MM-DD)',
+  params: WeatherDateParam,
   tags: ['Weather'],
 });
 
+// route meta สำหรับ DELETE /weather
 const deleteAllWeatherDataRoute = createDeleteRoute({
   path: '/weather',
   summary: 'Delete all weather data from database',
@@ -100,17 +76,32 @@ const deleteAllWeatherDataRoute = createDeleteRoute({
   tags: ['Weather'],
 });
 
+// schema query สำหรับช่วงวันที่
+const WeatherDateRangeQuery = z.object({
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+});
+
+// route meta สำหรับ GET /weather/range
+const listWeatherByRangeRoute = createGetRoute({
+  path: '/weather/range',
+  summary:
+    'List weather data between two dates (inclusive), query params `from` and `to` in YYYY-MM-DD',
+  query: WeatherDateRangeQuery,
+  responseSchema: WeatherDataListSchema,
+  tags: ['Weather'],
+});
+
 export const WeatherSchemas = {
   WeatherDataSchema,
-  CreateWeatherDataSchema,
-  UpdateWeatherDataSchema,
   WeatherDataListSchema,
-  WeatherIdParam,
+  WeatherDateParam,
+  WeatherDateRangeQuery,
   WeatherLocationParam,
   listWeatherDataRoute,
   getWeatherDataRoute,
-  createWeatherDataRoute,
-  updateWeatherDataRoute,
+  getWeatherByLocationRoute,
   deleteWeatherDataRoute,
   deleteAllWeatherDataRoute,
+  listWeatherByRangeRoute,
 };

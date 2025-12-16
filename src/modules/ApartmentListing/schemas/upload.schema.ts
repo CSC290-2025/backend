@@ -11,6 +11,12 @@ const uploadDataSchema = z.object({
   url: z.string(),
   apartmentId: z.number(),
 });
+const pictureData = z.object({
+  id: z.coerce.number(),
+  name: z.string(),
+  file_path: z.string(),
+  apartment_id: z.number(),
+});
 // OpenAPI route
 
 const getPictureById = createGetRoute({
@@ -29,7 +35,7 @@ const getPicturesByApartmentId = createGetRoute({
   params: z.object({
     apartmentId: z.coerce.number().openapi({}),
   }),
-  responseSchema: z.array(uploadDataSchema),
+  responseSchema: z.array(pictureData),
   tags: ['upload'],
 });
 
@@ -51,7 +57,7 @@ const uploadFileRoute = createPostRoute({
 });
 
 const deleteFileRoute = createDeleteRoute({
-  path: '/upload/{fileId}',
+  path: '/upload/delete/{fileId}',
   summary: 'Delete a file',
   params: z.object({
     fileId: z.string().openapi({}),

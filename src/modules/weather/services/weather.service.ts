@@ -1,32 +1,41 @@
 import { WeatherModel } from '../models';
-import type {
-  WeatherData,
-  CreateWeatherData,
-  UpdateWeatherData,
-} from '../types';
+import type { WeatherData } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
 
-const toNumberId = (id: string): number => {
-  const num = Number(id);
-  if (Number.isNaN(num)) {
-    throw new ValidationError('Invalid weather id');
+// Ensure a date string follows the strict YYYY-MM-DD format.
+const validateDateFormat = (date: string): void => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new ValidationError('Invalid date format. Use YYYY-MM-DD');
   }
-  return num;
 };
 
-const getWeatherById = async (id: string): Promise<WeatherData> => {
-  const numId = toNumberId(id);
-  const weather = await WeatherModel.findById(numId);
-  if (!weather) {
-    throw new NotFoundError('Weather data not found');
-  }
-  return weather;
+// Fetch all weather records created on the provided date.
+const getWeatherByDate = async (date: string): Promise<WeatherData[]> => {
+  validateDateFormat(date);
+  return await WeatherModel.findByDate(date);
 };
 
+// Fetch weather records across an inclusive date range after validation.
+const listWeatherByDateRange = async (
+  fromDate: string,
+  toDate: string
+): Promise<WeatherData[]> => {
+  validateDateFormat(fromDate);
+  validateDateFormat(toDate);
+
+  if (fromDate > toDate) {
+    throw new ValidationError('fromDate must be before or equal to toDate');
+  }
+
+  return await WeatherModel.findByDateRange(fromDate, toDate);
+};
+
+// Fetch every weather record ordered by creation date.
 const listWeather = async (): Promise<WeatherData[]> => {
   return await WeatherModel.findAll();
 };
 
+// Fetch weather records filtered by a numeric location id.
 const listWeatherByLocation = async (
   locationId: string | number
 ): Promise<WeatherData[]> => {
@@ -38,49 +47,29 @@ const listWeatherByLocation = async (
   return await WeatherModel.findByLocationId(numLoc);
 };
 
-const createWeather = async (data: CreateWeatherData): Promise<WeatherData> => {
-  if (data.location_id == null) {
-    throw new ValidationError('location_id is required');
+// Delete weather records on a specific date and error if nothing was removed.
+const deleteWeatherByDate = async (
+  date: string
+): Promise<{ deleted: number }> => {
+  validateDateFormat(date);
+  const count = await WeatherModel.deleteByDate(date);
+  if (count === 0) {
+    throw new NotFoundError('No weather data found for the given date');
   }
-  return await WeatherModel.create(data);
+  return { deleted: count };
 };
 
-const updateWeather = async (
-  id: string,
-  data: UpdateWeatherData
-): Promise<WeatherData> => {
-  const numId = toNumberId(id);
-
-  const existing = await WeatherModel.findById(numId);
-  if (!existing) {
-    throw new NotFoundError('Weather data not found');
-  }
-
-  return await WeatherModel.update(numId, data);
-};
-
-const deleteWeather = async (id: string): Promise<void> => {
-  const numId = toNumberId(id);
-
-  const existing = await WeatherModel.findById(numId);
-  if (!existing) {
-    throw new NotFoundError('Weather data not found');
-  }
-
-  await WeatherModel.deleteById(numId);
-};
-
+// Delete every row in weather_data and return the number of rows removed.
 const deleteAllWeather = async (): Promise<{ deleted: number }> => {
   const count = await WeatherModel.deleteAll();
   return { deleted: count };
 };
 
 export {
-  getWeatherById,
+  getWeatherByDate,
+  listWeatherByDateRange,
   listWeather,
   listWeatherByLocation,
-  createWeather,
-  updateWeather,
-  deleteWeather,
+  deleteWeatherByDate,
   deleteAllWeather,
 };

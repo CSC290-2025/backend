@@ -1,5 +1,12 @@
-import { ValidationError } from '@/errors';
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+  handlePrismaError,
+} from '@/errors';
 import { CleanAirConfigurationError, CleanAirProviderError } from '../error';
+import { GoogleGenAI } from '@google/genai';
+import prisma from '@/config/client';
 
 import type {
   CleanAirService as CleanAirServiceContract,
@@ -569,7 +576,7 @@ async function getHealthTips(district: string): Promise<string[]> {
     throw new CleanAirConfigurationError('GEMINI_MODEL is not configured');
   }
 
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  const ai = new GoogleGenAI({ apiKey: apiKey });
 
   try {
     const detail = await getDistrictDetail(district);
@@ -592,18 +599,30 @@ async function getHealthTips(district: string): Promise<string[]> {
       `Return only the three bullet tips with no introductory or closing sentences.`,
     ].join('\n');
 
-    const requestBody = { contents: [{ parts: [{ text: prompt }] }] };
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: prompt,
     });
 
-    const raw = await response.text();
+    let raw: string;
+    try {
+      if (response && typeof (response as any).text === 'function') {
+        raw = await (response as any).text();
+      } else {
+        raw = String(
+          (response as any)?.text ?? (response as any)?.output ?? ''
+        );
+      }
+    } catch (e) {
+      raw = '';
+    }
 
-    if (!response.ok) {
+    const ok = Boolean((response as any)?.ok ?? true);
+    const status = (response as any)?.status ?? 'unknown';
+
+    if (!ok) {
       throw new CleanAirConfigurationError(
-        `Gemini request failed (${response.status}): ${raw}`
+        `Gemini request failed (${status}): ${raw}`
       );
     }
 
@@ -661,11 +680,141 @@ async function getHealthTips(district: string): Promise<string[]> {
   }
 }
 
+function ensureUserId(userId: number) {
+  if (!Number.isFinite(userId) || userId <= 0) {
+    throw new ValidationError('User id is required');
+  }
+}
+
+async function getFavoriteDistricts(
+  userId: number
+): Promise<DistrictAirQuality[]> {
+  ensureUserId(userId);
+
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
+  if (!baseUrl) {
+    throw new CleanAirConfigurationError(
+      'OPEN_METEO_BASE_URL is not configured'
+    );
+  }
+
+  let favorites: { district: string }[] = [];
+  try {
+    favorites = await prisma.favourite_district.findMany({
+      where: { user_id: userId },
+      select: { district: true },
+      orderBy: { district: 'asc' },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+
+  if (!favorites.length) return [];
+
+  const districts = favorites.map((f) => resolveDistrictInfo(f.district));
+
+  return await Promise.all(
+    districts.map(async (districtInfo) => {
+      const current = await fetchCurrentAirQuality(
+        baseUrl,
+        districtInfo.lat,
+        districtInfo.lng
+      );
+      const pm25Value = makeSafeNumber(current?.pm2_5);
+      const aqi = calculateAQI(pm25Value);
+
+      return {
+        province: 'Bangkok',
+        district: districtInfo.name,
+        aqi,
+        pm25: pm25Value,
+        category: getAirCategory(aqi),
+        measured_at: makeTimestamp(current?.time),
+      };
+    })
+  );
+}
+
+async function addFavoriteDistrict(
+  userId: number,
+  district: string
+): Promise<DistrictAirQuality> {
+  ensureUserId(userId);
+  if (!district) throw new ValidationError('District parameter is required');
+
+  const districtInfo = resolveDistrictInfo(district);
+
+  try {
+    const existing = await prisma.favourite_district.findFirst({
+      where: { user_id: userId, district: districtInfo.name },
+    });
+    if (existing)
+      throw new ConflictError('District already added to favorites');
+  } catch (error) {
+    if (error instanceof ConflictError) throw error;
+    handlePrismaError(error);
+  }
+
+  try {
+    await prisma.favourite_district.create({
+      data: { user_id: userId, district: districtInfo.name },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+
+  const baseUrl = process.env.G05_OPEN_METEO_BASE_URL;
+  if (!baseUrl) {
+    throw new CleanAirConfigurationError(
+      'OPEN_METEO_BASE_URL is not configured'
+    );
+  }
+
+  const current = await fetchCurrentAirQuality(
+    baseUrl,
+    districtInfo.lat,
+    districtInfo.lng
+  );
+  const pm25Value = makeSafeNumber(current?.pm2_5);
+  const aqi = calculateAQI(pm25Value);
+
+  return {
+    province: 'Bangkok',
+    district: districtInfo.name,
+    aqi,
+    pm25: pm25Value,
+    category: getAirCategory(aqi),
+    measured_at: makeTimestamp(current?.time),
+  };
+}
+
+async function removeFavoriteDistrict(userId: number, district: string) {
+  ensureUserId(userId);
+  if (!district) throw new ValidationError('District parameter is required');
+
+  const districtInfo = resolveDistrictInfo(district);
+
+  try {
+    const deleted = await prisma.favourite_district.deleteMany({
+      where: { user_id: userId, district: districtInfo.name },
+    });
+    if (deleted.count === 0) {
+      throw new NotFoundError('Favorite not found for this user and district');
+    }
+  } catch (error) {
+    if (error instanceof NotFoundError) throw error;
+    handlePrismaError(error);
+  }
+}
+
 export {
+  addFavoriteDistrict,
+  getFavoriteDistricts,
   getDistricts,
   getDistrictDetail,
   getDistrictHistory,
   getDistrictSummary,
   getHealthTips,
+  removeFavoriteDistrict,
   searchDistricts,
 };

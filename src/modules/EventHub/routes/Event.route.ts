@@ -12,6 +12,19 @@ const setupEventRoutes = (app: OpenAPIHono) => {
   app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
 
   // Create a new event (admin only)
+  app.openapi(EventSchemas.createEventRoute, async (c) => {
+    return EventController.createEvent(c);
+  });
+
+  // Update existing event (admin only)
+  app.openapi(EventSchemas.updateEventRoute, async (c) => {
+    return EventController.updateEvent(c);
+  });
+
+  // Delete event (admin only)
+  app.openapi(EventSchemas.deleteEventRoute, async (c) => {
+    return EventController.deleteEvent(c);
+  });
   app.openapi(EventSchemas.createEventRoute, EventController.createEvent);
 
   // Update existing event (admin only)

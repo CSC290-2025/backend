@@ -6,9 +6,9 @@ async function main() {
   // Create test users
   const testUser = await prisma.users.create({
     data: {
-      username: 'testuser',
-      email: 'test@example.com',
-      phone: '1234567890',
+      username: 'pp12',
+      email: 'pp@ex1.com',
+      phone: '12345167670',
       password_hash:
         '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
     },
@@ -16,9 +16,9 @@ async function main() {
 
   const developer = await prisma.users.create({
     data: {
-      username: 'developer',
-      email: 'dev@example.com',
-      phone: '0987654321',
+      username: 'ddpp',
+      email: 'de1ev@example.com',
+      phone: '093487654321',
       password_hash:
         '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
     },

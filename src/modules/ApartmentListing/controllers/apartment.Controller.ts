@@ -14,8 +14,12 @@ export async function getApartmentByID(c: Context) {
 }
 
 export async function createApartment(c: Context) {
+  const user = c.get('user');
   const data = await c.req.json();
-  const apartment = await apartmentService.createApartment(data);
+  const apartment = await apartmentService.createApartment({
+    ...data,
+    userId: user.userId,
+  });
   return successResponse(c, apartment, 201, 'Apartment created successfully');
 }
 export async function updateApartment(c: Context) {
@@ -43,4 +47,16 @@ export async function countAvailableRooms(c: Context) {
   const id = Number(c.req.param('id'));
   const count = await apartmentService.countAvailableRooms(id);
   return successResponse(c, count, 200);
+}
+
+export async function getApartmentbyUser(c: Context) {
+  const user = c.get('user');
+  const apartments = await apartmentService.getApartmentsByUser(user.userId);
+  return successResponse(c, apartments, 200);
+}
+
+export async function getRoomPriceRange(c: Context) {
+  const apartmentId = Number(c.req.param('id'));
+  const range = await apartmentService.roomPriceRangeService(apartmentId);
+  return successResponse(c, range, 200);
 }

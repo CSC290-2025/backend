@@ -3,8 +3,10 @@ import { WeatherOpenMeteoSchemas } from '../schemas';
 import type { ExternalRawDailyOnly, ImportDailyBody } from '../types';
 import { ValidationError } from '@/errors';
 import { WeatherModel } from '../models';
+import { getDistrictByLocationId, bangkokDistricts } from '../utils';
 import prisma from '@/config/client';
 
+// Extract yesterday's values from the Open-Meteo response and normalize them.
 const pickYesterdayPayload = (
   raw: ExternalRawDailyOnly,
   location_id: number | null,
@@ -18,8 +20,8 @@ const pickYesterdayPayload = (
   const dd = String(localY.getUTCDate()).padStart(2, '0');
   const target = `${yyyy}-${mm}-${dd}`;
 
-  const idx = raw.daily.time.findIndex((d) => d === target);
-  const use = idx >= 0 ? idx : 0;
+  const idx = raw.daily.time.indexOf(target);
+  const use = Math.max(idx, 0);
 
   const tmax = raw.daily.temperature_2m_max[use];
   const tmin = raw.daily.temperature_2m_min[use];
@@ -35,43 +37,89 @@ const pickYesterdayPayload = (
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const wd = degDom == null ? null : dirs[Math.round(degDom / 45) % 8];
 
+  let dailyHumidity: number | null = null;
+  const hourly = raw.hourly;
+  if (hourly?.time?.length && hourly?.relative_humidity_2m?.length) {
+    const values: number[] = [];
+    for (let i = 0; i < hourly.time.length; i += 1) {
+      if (!hourly.time[i].startsWith(target)) {
+        continue;
+      }
+      const value = hourly.relative_humidity_2m[i];
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        values.push(value);
+      }
+    }
+    if (values.length) {
+      dailyHumidity = values.reduce((sum, val) => sum + val, 0) / values.length;
+    }
+  }
+
+  // Round numeric values to two decimal places when they exist.
+  const round2 = (value: number | null | undefined) =>
+    value == null ? null : Math.round(value * 100) / 100;
+
   return {
     date: raw.daily.time[use],
     payload: {
       location_id: location_id ?? null,
-      temperature: avg(tmax ?? null, tmin ?? null),
-      feel_temperature: avg(appMax, appMin),
-      humidity: null,
-      wind_speed: wsMax,
+      temperature: round2(avg(tmax ?? null, tmin ?? null)),
+      feel_temperature: round2(avg(appMax, appMin)),
+      humidity: round2(dailyHumidity),
+      wind_speed: round2(wsMax ?? null),
       wind_direction: wd,
       rainfall_probability: pMax ?? null,
     },
   };
 };
 
+// Validate input, fetch yesterday's data for one district, and persist it.
 const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   const b = WeatherOpenMeteoSchemas.ImportDailyBodySchema.parse(body);
-  if (!Number.isFinite(b.lat) || !Number.isFinite(b.lon)) {
-    throw new ValidationError('Invalid coordinates');
+  const district = getDistrictByLocationId(b.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${b.location_id}. Valid IDs are 1-4`
+    );
   }
-  // Use canonical Open-Meteo timezone for historical daily fetches
   const json = await OpenMeteoClient.getDailyPastOne(
-    b.lat,
-    b.lon,
+    district.lat,
+    district.lng,
     OPEN_METEO_TIMEZONE
   );
   const raw = WeatherOpenMeteoSchemas.ExternalRawDailyOnlySchema.parse(json);
 
-  // verify that provided location_id references an existing address; if not, treat as null
-  let locId: number | null = b.location_id ?? null;
-  if (locId != null) {
-    const addr = await prisma.addresses.findUnique({ where: { id: locId } });
-    if (!addr) locId = null;
+  const resolvedAddressId = district.address_id ?? b.location_id ?? null;
+  if (resolvedAddressId == null) {
+    throw new ValidationError(
+      `No address mapping for location_id ${b.location_id}`
+    );
   }
 
-  const { date, payload } = pickYesterdayPayload(raw, locId);
+  const address = await prisma.addresses.findUnique({
+    where: { id: resolvedAddressId },
+  });
+  if (!address) {
+    throw new ValidationError(
+      `Address id ${resolvedAddressId} not found in database`
+    );
+  }
 
-  const created = await WeatherModel.create(payload);
+  const { date, payload } = pickYesterdayPayload(raw, address.id);
+
+  console.info(
+    'Importing yesterday payload to DB for location_id=',
+    address.id,
+    'payload=',
+    payload
+  );
+  let created;
+  try {
+    created = await WeatherModel.create(payload);
+  } catch (err) {
+    console.error('Failed to create weather_data in scheduler:', err);
+    throw err;
+  }
 
   return {
     created: !!created,
@@ -80,4 +128,40 @@ const importYesterdayToDatabase = async (body: ImportDailyBody) => {
   };
 };
 
-export { importYesterdayToDatabase };
+// Iterate through every configured district and import yesterday's data.
+const importAllLocationsYesterday = async () => {
+  const results: Array<{
+    location_id: number;
+    success: boolean;
+    date?: string;
+    saved?: ReturnType<typeof pickYesterdayPayload>['payload'];
+    error?: string;
+  }> = [];
+
+  for (const district of bangkokDistricts) {
+    try {
+      const result = await importYesterdayToDatabase({
+        location_id: district.location_id,
+      });
+      results.push({
+        location_id: district.location_id,
+        success: true,
+        date: result.date,
+        saved: result.saved,
+      });
+    } catch (error) {
+      results.push({
+        location_id: district.location_id,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  return {
+    processed: results.length,
+    results,
+  };
+};
+
+export { importYesterdayToDatabase, importAllLocationsYesterday };

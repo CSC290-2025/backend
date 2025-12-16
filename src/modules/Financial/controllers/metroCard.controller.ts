@@ -1,18 +1,25 @@
+import { NotFoundError, UnauthorizedError } from '@/errors';
 import { successResponse } from '@/utils/response';
 import { MetroCardService } from '../services';
-import { WalletModel } from '../models';
-import { NotFoundError } from '@/errors';
 import type { Context } from 'hono';
 
 const getMetroCard = async (c: Context) => {
+  const user = c.get('user');
   const metroCardId = Number(c.req.param('metroCardId'));
+  const card = await MetroCardService.getMetroCardById(metroCardId);
+  if (card === null) {
+    throw new NotFoundError('Metro Card not found');
+  }
+  if (card.user_id !== user.userId) {
+    throw new UnauthorizedError('You do not own this metro card');
+  }
   const metroCards = await MetroCardService.getMetroCardById(metroCardId);
   return successResponse(c, metroCards);
 };
 
-const createMetroCard = async (c: Context) => {
-  const body = await c.req.json();
-  const metroCard = await MetroCardService.createMetroCard(body.user_id);
+const createMyMetroCard = async (c: Context) => {
+  const user = c.get('user');
+  const metroCard = await MetroCardService.createMetroCard(user.userId);
   return successResponse(
     c,
     { metroCard },
@@ -40,42 +47,53 @@ const updateMetroCard = async (c: Context) => {
 };
 
 const topUpBalance = async (c: Context) => {
-  const metroCardId = Number(c.req.param('metroCardId'));
-
   const body = await c.req.json();
-
-  const existingMetroCard =
-    await MetroCardService.getMetroCardById(metroCardId);
-  const wallet = await WalletModel.findWalletByUserId(
-    existingMetroCard.user_id
-  );
-  if (!wallet) throw new NotFoundError('Wallet for metro card owner not found');
-  const walletId = wallet.id;
-
-  const updatedMetroCard = await MetroCardService.topUpBalance(
-    metroCardId,
-    walletId,
+  const result = await MetroCardService.topUpBalance(
+    body.cardNumber,
+    body.walletId,
     body.amount
   );
-  return successResponse(
-    c,
-    { metroCard: updatedMetroCard },
-    200,
-    'Balance topped up successfully'
-  );
+  return successResponse(c, result, 200, 'Balance topped up successfully');
 };
 
-const deleteMetroCard = async (c: Context) => {
+const deleteMyMetroCard = async (c: Context) => {
+  const user = c.get('user');
   const metroCardId = Number(c.req.param('metroCardId'));
+  const card = await MetroCardService.getMetroCardById(metroCardId);
+  if (card.user_id !== user.userId) {
+    throw new UnauthorizedError('You do not own this metro card');
+  }
   await MetroCardService.deleteMetroCardById(metroCardId);
   return successResponse(c, null, 200, 'Metro card deleted successfully');
 };
 
+const transferToTransportation = async (c: Context) => {
+  const body = await c.req.json();
+  const result = await MetroCardService.transferToTransportation(
+    body.cardNumber,
+    body.amount
+  );
+  return successResponse(
+    c,
+    result,
+    200,
+    'Balance transferred to transportation wallet successfully'
+  );
+};
+
+const getMyMetroCards = async (c: Context) => {
+  const user = c.get('user');
+  const metroCards = await MetroCardService.getUserMetroCards(user.userId);
+  return successResponse(c, { metroCards });
+};
+
 export {
   getMetroCard,
-  createMetroCard,
+  createMyMetroCard,
   getUserMetroCards,
   updateMetroCard,
   topUpBalance,
-  deleteMetroCard,
+  deleteMyMetroCard,
+  transferToTransportation,
+  getMyMetroCards,
 };
