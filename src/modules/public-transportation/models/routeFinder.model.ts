@@ -205,13 +205,31 @@ export const getRoutes = async (
   }
 };
 export const getTransitLinesOnly = async (
-  origLat: string,
-  origLng: string,
-  destLat: string,
-  destLng: string
+  origLat: string | null,
+  origLng: string | null,
+  destLat: string | null,
+  destLng: string | null,
+  originText: string | null = null,
+  destinationText: string | null = null
 ): Promise<string[]> => {
-  const finalOrigin = `${origLat},${origLng}`;
-  const finalDestination = `${destLat},${destLng}`;
+  let finalOrigin: string;
+  let finalDestination: string;
+
+  if (originText) {
+    finalOrigin = originText;
+  } else if (origLat && origLng) {
+    finalOrigin = `${origLat},${origLng}`;
+  } else {
+    return [];
+  }
+
+  if (destinationText) {
+    finalDestination = destinationText;
+  } else if (destLat && destLng) {
+    finalDestination = `${destLat},${destLng}`;
+  } else {
+    return [];
+  }
 
   const encodedOrigin = encodeURIComponent(finalOrigin);
   const encodedDestination = encodeURIComponent(finalDestination);
@@ -236,11 +254,14 @@ export const getTransitLinesOnly = async (
               const originalLineName = transit.line.name;
               const lineShortName = transit.line.short_name;
               const vehicleType = transit.line.vehicle.type;
+
               const mappedVehicleType = mapVehicleType(
                 vehicleType,
                 originalLineName
               );
+
               let displayLineName = originalLineName;
+
               if (
                 vehicleType === 'BUS' &&
                 lineShortName &&
@@ -248,6 +269,7 @@ export const getTransitLinesOnly = async (
               ) {
                 displayLineName = `${lineShortName}: ${originalLineName}`;
               }
+
               if (
                 !displayLineName.includes(mappedVehicleType) &&
                 mappedVehicleType !== originalLineName

@@ -70,12 +70,18 @@ export const getTransitLinesController = async (c: Context) => {
   const destLat = c.req.query('destLat');
   const destLng = c.req.query('destLng');
 
-  if (!origLat || !origLng || !destLat || !destLng) {
+  const originText = c.req.query('originText');
+  const destinationText = c.req.query('destinationText');
+
+  const hasLatLgnPair = origLat && origLng && destLat && destLng;
+  const hasTextPair = originText && destinationText;
+
+  if (!hasLatLgnPair && !hasTextPair) {
     return c.json(
       {
         success: false,
         message:
-          'Missing required parameters: Must provide origLat, origLng, destLat, and destLng.',
+          'Missing required parameters: Must provide either complete Lat/Lng pairs (origLat, origLng, destLat, destLng) OR complete Text pairs (originText, destinationText).',
       },
       400
     );
@@ -83,10 +89,12 @@ export const getTransitLinesController = async (c: Context) => {
 
   try {
     const transitLines = await getTransitLinesOnly(
-      origLat,
-      origLng,
-      destLat,
-      destLng
+      origLat || null,
+      origLng || null,
+      destLat || null,
+      destLng || null,
+      originText || null,
+      destinationText || null
     );
 
     return c.json({
