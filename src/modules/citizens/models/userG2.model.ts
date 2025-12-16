@@ -1,6 +1,7 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-
+import { uploadFile } from '@/utils/upload';
+import { NotFoundError } from '@/errors';
 import type {
   User,
   UserProfile,
@@ -471,6 +472,33 @@ const createUserRole = async (data: CreateUserRoleData) => {
     handlePrismaError(error);
   }
 };
+
+export async function updateUserProfilePicture(userId: number, file: File) {
+  try {
+    const existingProfile = await prisma.user_profiles.findUnique({
+      where: { user_id: userId },
+    });
+
+    if (!existingProfile) {
+      throw new NotFoundError('User profile not found');
+    }
+    const uploadResult = await uploadFile({ file }, 2);
+
+    const updatedProfile = await prisma.user_profiles.update({
+      where: { user_id: userId },
+      data: {
+        profile_picture: uploadResult.url,
+      },
+    });
+
+    return {
+      userId: updatedProfile.user_id,
+      profilePictureUrl: updatedProfile.profile_picture,
+    };
+  } catch (error) {
+    throw handlePrismaError(error);
+  }
+}
 
 export {
   findUserById,
