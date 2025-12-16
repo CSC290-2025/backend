@@ -60,10 +60,10 @@ const findMany = async (
           //status: true,
           created_at: true,
           updated_at: true,
-          //created_by_user_id: true,
+          created_by_user_id: true,
           department_id: true,
           tag: true,
-          //address_id: true,
+          address_id: true,
         },
       }),
       prisma.volunteer_events.count({
@@ -266,12 +266,12 @@ const findEventsByUserId = async (userId: number) => {
         //status: true,
         created_at: true,
         updated_at: true,
-        //created_by_user_id: true,
+        created_by_user_id: true,
         department_id: true,
-        //address_id: true,
+        address_id: true,
       },
       orderBy: {
-        start_at: 'asc', // Show upcoming events first
+        start_at: 'asc',
       },
     });
 
