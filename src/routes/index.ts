@@ -92,7 +92,7 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-import { setupReportsRoutes } from '@/modules/power-bi';
+// import { reportRoutes } from '@/modules/power-bi';
 
 // Support Map
 import {
@@ -101,15 +101,6 @@ import {
   distanceRoutes,
   markerTypeRoutes,
 } from '@/modules/G-16/routes';
-
-// Traffic
-import {
-  setupIntersectionRoutes,
-  setupLightRequestRoutes,
-  setupRoadRoutes,
-  setupTrafficEmergencyRoutes,
-  setupTrafficLightRoutes,
-} from '@/modules/traffic';
 
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
@@ -201,16 +192,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
-  // Power BI
-  setupReportsRoutes(app);
-
-  // Traffic
-  setupIntersectionRoutes(app);
-  setupTrafficLightRoutes(app);
-  setupLightRequestRoutes(app);
-  setupRoadRoutes(app);
-  setupTrafficEmergencyRoutes(app);
-
   // Waste
   setupWasteRoutes(app);
   setupBinRoutes(app);
@@ -237,11 +218,14 @@ export const setupRoutes = (app: OpenAPIHono) => {
   app.route('/emergency', contactRoutes());
   app.route('/emergency', fcmRoutes());
 
+  // Power BI
+  // app.route('/reports', reportRoutes);
+
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
   app.route('/api', distanceRoutes);
-  app.route('/api', markerTypeRoutes);
+  app.route('/api/marker-types', markerTypeRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

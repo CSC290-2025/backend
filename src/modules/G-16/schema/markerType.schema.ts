@@ -7,6 +7,7 @@ export const LocationMarkerTypeSchema = z.object({
 
 export const CreateMarkerTypeSchema = z.object({
   marker_type_id: z.string().transform(Number).optional(),
+  description: z.string().optional().nullable(),
   marker_type_icon: z.string().max(255).optional().nullable(),
   marker_type_color: z
     .string()

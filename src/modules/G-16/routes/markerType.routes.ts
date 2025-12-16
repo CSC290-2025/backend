@@ -1,22 +1,37 @@
-import { Hono } from 'hono';
-import { createMarkerType, getAllMarkerTypes, getMarkerTypeById, getMarkerTypeByTypes , getMarkerTypesByType, getMarkerTypesInBounds, updateMarkerType, deleteMarkerType} from "../controllers/markerType.controller";
+import { Hono, type Context } from 'hono';
+import {
+  createMarkerType,
+  getAllMarkerTypes,
+  getMarkerTypeById,
+  getMarkerTypeByTypes,
+  getMarkerTypesByType,
+  getMarkerTypesInBounds,
+  updateMarkerType,
+  deleteMarkerType,
+} from '../controllers/markerType.controller';
+import * as markerTypeController from '../controllers';
+import type { BlankEnv, BlankInput } from 'hono/types';
 const markerTypeRoutes = new Hono();
 
+// markerTypeRoutes.get('/type/:markerTypeId', getMarkerTypesByType);
+// markerTypeRoutes.post('/filter', getMarkerTypeByTypes);
+// markerTypeRoutes.post('/bounds', getMarkerTypesInBounds);
+
+// markerTypeRoutes.get('/', getAllMarkerTypes);
+// markerTypeRoutes.post('/', createMarkerType);
+// markerTypeRoutes.get('/:id', getMarkerTypeById);
+// markerTypeRoutes.put('/:id', updateMarkerType);
+// markerTypeRoutes.delete('/:id', deleteMarkerType);
+
 markerTypeRoutes.post('/', createMarkerType);
-markerTypeRoutes.get('/', getAllMarkerTypes);
-markerTypeRoutes.get('/:id', getMarkerTypeById);
-markerTypeRoutes.get('/type/:markerTypeId', getMarkerTypesByType);
-markerTypeRoutes.post('/filter', getMarkerTypeByTypes);
+markerTypeRoutes.get('/', getAllMarkerTypes); //
+markerTypeRoutes.post('/filter', getMarkerTypeByTypes); //
 markerTypeRoutes.post('/bounds', getMarkerTypesInBounds);
+
+markerTypeRoutes.get('/type/:markerTypeId', getMarkerTypesByType);
+
+markerTypeRoutes.get('/:id', getMarkerTypeById); //
 markerTypeRoutes.put('/:id', updateMarkerType);
 markerTypeRoutes.delete('/:id', deleteMarkerType);
 
-markerTypeRoutes.get('/health', (c) => { // FIX: Use 'c' (Context) for Hono
-    return c.json({                      // FIX: Use c.json() for Hono response
-      success: true, 
-      message: 'Server is running!',
-      timestamp: new Date().toISOString() // Better date format
-    });
-});
-export {markerTypeRoutes};
-
+export { markerTypeRoutes };

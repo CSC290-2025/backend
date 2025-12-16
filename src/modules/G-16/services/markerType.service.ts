@@ -7,19 +7,26 @@ import type {
   UpdateMarkerTypeInput,
 } from '../types';
 import prisma from '@/config/client.ts';
-import { createMarkerType as createMarkerTypeModel ,
-getMarkerTypeById as getMarkerTypeByIdModel,
-getAllMarkerTypes as getAllMarkerTypesModel,
-getMarkerTypesByType as getMarkersByTypesModel,
-deleteMarkerType as deleteMarkerTypeModel,
-updateMarkerType as updateMarkerTypeModel,
-getMarkerTypesInBounds as getMarkerTypesInBoundsModel
+import {
+  createMarkerType as createMarkerTypeModel,
+  getMarkerTypeById as getMarkerTypeByIdModel,
+  getAllMarkerTypes as getAllMarkerTypesModel,
+  getMarkerTypesByType as getMarkersByTypesModel,
+  deleteMarkerType as deleteMarkerTypeModel,
+  updateMarkerType as updateMarkerTypeModel,
+  getMarkerTypesInBounds as getMarkerTypesInBoundsModel,
 } from '../models/markerType.model';
 import { handlePrismaError, ValidationError } from '@/errors';
 
 export const createMarkerType = async (
   data: CreateMarkerTypeInput
 ): Promise<MarkerTypeResponse> => {
+  const markerType = await prisma.marker_type.findUnique({
+    where: { id: data.marker_type_id }, // ตรวจสอบ ID 9
+  });
+  if (!markerType) {
+    throw new ValidationError(`Marker type ${data.marker_type_id} not found`);
+  }
   return await createMarkerTypeModel(data);
 };
 
@@ -82,7 +89,9 @@ export const getMarkerTypesInBounds = async (bounds: {
   }
 
   if (bounds.minLat >= bounds.maxLat || bounds.minLng >= bounds.maxLng) {
-    throw new ValidationError('Min coordinates must be less than max coordinates');
+    throw new ValidationError(
+      'Min coordinates must be less than max coordinates'
+    );
   }
 
   // Validate markerTypeIds if provided
