@@ -7,6 +7,7 @@ import type {
 import type { Context } from 'hono';
 import { successResponse } from '@/utils/response';
 import { ValidationError, handlePrismaError } from '@/errors';
+import { MarkerTypeQuerySchema } from '../schema/markerType.schema';
 
 export const createMarkerType =async (c: Context) => {
     const validatedData = await c.req.json();
@@ -15,22 +16,26 @@ export const createMarkerType =async (c: Context) => {
 }
 
 export const getMarkerTypeById =async (c: Context) => {
-    const {marker_id} = c.req.param();
-    const markerIdNumber = Number(marker_id);
+    // console.log('')
+    const id = c.req.param('id');
+    const markerIdNumber = Number(id);
     const marker = await markerTypeService.getMarkerTypeById(markerIdNumber);
 
     return successResponse(c, {marker}, 201, 'Marker Id successfully')
 }
 
+
 export const getAllMarkerTypes =async (c: Context) => {
-    const validatedQuery = await c.req.json();
+    const query = c.req.query();
+    const validatedQuery = MarkerTypeQuerySchema.parse(query);
     const marker = await markerTypeService.getAllMarkerTypes(validatedQuery);
 
     return successResponse(c, {
-        marker: marker, // Changed variable name to 'markers' for clarity
+        marker: marker, 
         count: marker.length 
     }, 200, 'Marker types retrieved successfully'); 
 }
+
 
 export const getMarkerTypesByType =async (c :Context) => {
     const {markerType_id} = c.req.param();

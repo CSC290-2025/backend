@@ -20,6 +20,12 @@ import { handlePrismaError, ValidationError } from '@/errors';
 export const createMarkerType = async (
   data: CreateMarkerTypeInput
 ): Promise<MarkerTypeResponse> => {
+  const markerType = await prisma.marker_type.findUnique({
+    where: { id: data.marker_type_id }, // ตรวจสอบ ID 9
+});
+if (!markerType) {
+    throw new ValidationError(`Marker type ${data.marker_type_id} not found`);
+}
   return await createMarkerTypeModel(data);
 };
 

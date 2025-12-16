@@ -12,6 +12,8 @@ export * as PrescriptionModel from './models/prescription.model';
 export * as AmbulanceModel from './models/ambulance.model';
 export * as EmergencyCallModel from './models/emergency_call.model';
 export * as PaymentModel from './models/payment.model';
+export * as DoctorModel from './models/doctors.model';
+export * as MedicineInventoryModel from './models/medicine_inventory.model';
 
 // Export schemas for OpenAPI usage and validation
 export {
@@ -23,24 +25,20 @@ export {
   AmbulanceSchemas,
   EmergencyCallSchemas,
   PaymentSchemas,
+  DoctorSchemas,
+  MedicineInventorySchemas,
 } from './schemas';
 
-// Export routes (both normal Hono and OpenAPI variants)
+// Export routes (OpenAPI setup functions)
 export {
-  patientRoutes,
   setupPatientRoutes,
-  bedRoutes,
   setupBedRoutes,
-  facilityRoutes,
   setupFacilityRoutes,
-  appointmentRoutes,
   setupAppointmentRoutes,
-  prescriptionRoutes,
   setupPrescriptionRoutes,
-  ambulanceRoutes,
   setupAmbulanceRoutes,
-  emergencyCallRoutes,
   setupEmergencyCallRoutes,
-  paymentRoutes,
   setupPaymentRoutes,
+  setupDoctorsRoutes,
+  setupMedicineInventoryRoutes,
 } from './routes';

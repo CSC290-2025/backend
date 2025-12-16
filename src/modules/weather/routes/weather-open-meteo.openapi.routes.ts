@@ -2,6 +2,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { WeatherOpenMeteoSchemas } from '../schemas';
 import { OpenMeteoController } from '../controllers';
 
+// Register external Open-Meteo proxy and import endpoints with OpenAPI.
 const setupOpenMeteoRoutes = (app: OpenAPIHono) => {
   app.openapi(
     WeatherOpenMeteoSchemas.getExternalCurrentRoute,

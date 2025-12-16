@@ -6,49 +6,48 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
+// Helper schema for medicines list JSON
+const MedicineItemSchema = z
+  .object({
+    medicineId: z.number().optional(),
+    name: z.string(),
+    quantity: z.number(),
+    dosage: z.string().optional(),
+    // Add other fields as needed
+  })
+  .passthrough();
+
 const PrescriptionSchema = z.object({
   id: z.number().int(),
-  patientId: z.number().int(),
-  prescriberUserId: z.number().int(),
+  patientId: z.number().int().nullable(),
   facilityId: z.number().int().nullable(),
-  medicationName: z.string().max(255),
-  quantity: z.number().int().nonnegative(),
   status: z.string().max(50).nullable(),
   createdAt: z.date(),
+  medicinesList: z.any().nullable(),
+  totalAmount: z
+    .string()
+    .transform((val) => Number(val))
+    .nullable(),
 });
 
 const CreatePrescriptionSchema = z.object({
-  patientId: z.number().int(),
-  prescriberUserId: z.number().int(),
+  patientId: z.number().int().optional(),
   facilityId: z.number().int().optional(),
-  medicationName: z
-    .string()
-    .min(1, 'Medication name is required')
-    .max(255, 'Medication name must be at most 255 characters'),
-  quantity: z.number().int().nonnegative('Quantity cannot be negative'),
-  status: z.string().max(50, 'Status must be at most 50 characters').optional(),
+  status: z.string().max(50).optional(),
+  medicinesList: z.any().optional(),
+  totalAmount: z.number().optional(),
 });
 
 const UpdatePrescriptionSchema = z.object({
-  patientId: z.number().int().optional(),
-  prescriberUserId: z.number().int().optional(),
-  facilityId: z.number().int().optional(),
-  medicationName: z
-    .string()
-    .min(1, 'Medication name is required')
-    .max(255, 'Medication name must be at most 255 characters')
-    .optional(),
-  quantity: z
-    .number()
-    .int()
-    .nonnegative('Quantity cannot be negative')
-    .optional(),
-  status: z.string().max(50, 'Status must be at most 50 characters').optional(),
+  patientId: z.number().int().nullable().optional(),
+  facilityId: z.number().int().nullable().optional(),
+  status: z.string().max(50).nullable().optional(),
+  medicinesList: z.any().nullable().optional(),
+  totalAmount: z.number().nullable().optional(),
 });
 
 const PrescriptionFilterSchema = z.object({
   patientId: z.coerce.number().int().optional(),
-  prescriberUserId: z.coerce.number().int().optional(),
   facilityId: z.coerce.number().int().optional(),
   status: z.string().optional(),
   search: z.string().optional(),
@@ -57,7 +56,7 @@ const PrescriptionFilterSchema = z.object({
 const PrescriptionPaginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
-  sortBy: z.enum(['id', 'createdAt', 'medicationName']).default('createdAt'),
+  sortBy: z.enum(['id', 'createdAt', 'status']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 

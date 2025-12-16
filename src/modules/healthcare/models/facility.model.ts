@@ -31,6 +31,7 @@ const mapFacility = (facility: FacilityRecord): Facility => ({
   facilityType: facility.facility_type ?? null,
   addressId: facility.address_id ?? null,
   phone: facility.phone ?? null,
+  location: null,
   emergencyServices: facility.emergency_services ?? null,
   departmentId: facility.department_id ?? null,
   createdAt: facility.created_at,

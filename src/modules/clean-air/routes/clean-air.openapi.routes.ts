@@ -31,6 +31,18 @@ const setupCleanAirRoutes = (app: OpenAPIHono) => {
     CleanAirSchemas.getAir4ThaiDistrictsRoute,
     Air4ThaiController.getBangkokDistrictAQI
   );
+  app.openapi(
+    CleanAirSchemas.getFavouriteDistrictsRoute,
+    CleanAirController.getFavoriteDistricts
+  );
+  app.openapi(
+    CleanAirSchemas.addFavouriteDistrictRoute,
+    CleanAirController.addFavoriteDistrict
+  );
+  app.openapi(
+    CleanAirSchemas.removeFavouriteDistrictRoute,
+    CleanAirController.removeFavoriteDistrict
+  );
 };
 
 export { setupCleanAirRoutes };

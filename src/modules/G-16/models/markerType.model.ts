@@ -7,55 +7,127 @@ import type {
 import type { MarkerQuery } from '../types';
   import { handlePrismaError, ValidationError } from '@/errors';
 
-export const createMarkerType =async (data: CreateMarkerTypeInput): Promise<MarkerTypeResponse> => {
+// export const createMarkerType =async (data: CreateMarkerTypeInput): Promise<MarkerTypeResponse> => {
+//   try {
+//     if (!data.marker_type_id || data.marker_type_id < 1 || data.marker_type_id > 6) {
+//       throw new ValidationError('marker_type_id must be between 1 and 6');
+//     }
+
+//     // 1. แปลง location (lat, lng) ให้เป็น GeoJSON String
+//     let locationGeoJSON = null;
+//     if (data.location) {
+//       locationGeoJSON = JSON.stringify({
+//         type: 'Point',
+//         coordinates: [data.location.lng, data.location.lat], // PostGIS ใช้ [lng, lat]
+//       });
+//     }
+    
+//     const description = data.description || null; // ใช้ค่าที่ส่งมา หรือ null ถ้าไม่ส่งมา
+
+//     const resultRaw = await prisma.$queryRaw<{ id: number }[]>`
+//       INSERT INTO marker (marker_type_id, location, description, updated_at)
+//       VALUES (
+//         ${data.marker_type_id}, 
+//         ST_GeomFromGeoJSON(${locationGeoJSON}),
+//         ${description},
+//         NOW() // 🟢 FIX: NOW() ควรอยู่ตำแหน่งที่ 4 เพื่อกำหนด updated_at
+//       )
+//       RETURNING id
+//     `;
+
+//     const newId = resultRaw[0].id;
+//     const marker = await prisma.marker.findUnique({
+//       where: { id: newId },
+//       include: {
+//         marker_type: {
+//           select: {
+//             id: true,
+//             marker_type_icon: true,
+//             marker_type_color: true,
+//           },
+//         },
+//       },
+//     });
+
+//     return marker as unknown as MarkerTypeResponse;
+//   } catch (error) {
+//     console.error("🔴 RAW DB ERROR:", error);
+//     handlePrismaError(error);
+//   }
+// }
+
+export const createMarkerType = async (data: CreateMarkerTypeInput): Promise<MarkerTypeResponse> => {
+  
   try {
     if (!data.marker_type_id || data.marker_type_id < 1 || data.marker_type_id > 6) {
       throw new ValidationError('marker_type_id must be between 1 and 6');
     }
 
-    // 1. แปลง location (lat, lng) ให้เป็น GeoJSON String
-    let locationGeoJSON = null;
-    if (data.location) {
-      locationGeoJSON = JSON.stringify({
-        type: 'Point',
-        coordinates: [data.location.lng, data.location.lat], // PostGIS ใช้ [lng, lat]
-      });
-    }
-
-    const resultRaw = await prisma.$queryRaw<{ id: number }[]>`
-      INSERT INTO marker (marker_type_id, location, description, updated_at)
-      VALUES (
-        ${data.marker_type_id}, 
-        ST_GeomFromGeoJSON(${locationGeoJSON}),
-        NOW()
-      )
-      RETURNING id
-    `;
-
-    const newId = resultRaw[0].id;
-    const marker = await prisma.marker.findUnique({
-      where: { id: newId },
-      include: {
-        marker_type: {
-          select: {
-            id: true,
-            marker_type_icon: true,
-            marker_type_color: true,
-          },
-        },
-      },
+    const markerType = await prisma.marker_type.findUnique({
+      where: { id: data.marker_type_id },
     });
+  
+    if (!markerType) {
+      throw new ValidationError(`Marker type ${data.marker_type_id} not found`);
+    }
+  
+    let result;
 
-    // if (!marker) {
-    //    throw new Error("Failed to retrieve created marker");
-    // }
+    if (data.location) {
+        
+      const pointString = `POINT(${data.location.lng} ${data.location.lat})`; 
+      
+      [result] = await prisma.$queryRaw<any[]>`
+        INSERT INTO marker (marker_type_id, location, description, created_at, updated_at)
+        VALUES (
+          ${data.marker_type_id},
+          ST_GeomFromText(${pointString}, 4326), 
+          ${data.description || null},
+          NOW(), NOW()
+        )
+        RETURNING id, ST_Y(location::geometry) as lat, ST_X(location::geometry) as lng,
+                  description, marker_type_id, created_at, updated_at
+      `;
+  
+    } else {
+      [result] = await prisma.$queryRaw<any[]>`
+        INSERT INTO marker (marker_type_id, location, description, created_at, updated_at)
+        VALUES (
+          ${data.marker_type_id}, 
+          NULL, 
+          ${data.description || null}, 
+          NOW(), NOW()
+        )
+        RETURNING id, description, marker_type_id, created_at, updated_at
+      `;
+    }
+    
+    const markerTypeData = {
+        id: markerType.id,
+        marker_type_icon: markerType.marker_type_icon,
+        marker_type_color: markerType.marker_type_color,
+        created_at: markerType.created_at,
+        updated_at: markerType.updated_at,
+    };
 
-    return marker as unknown as MarkerTypeResponse;
-  } catch (error) {
+
+    return {
+        id: result.id,
+        lat: result.lat ? parseFloat(result.lat) : null,
+        lng: result.lng ? parseFloat(result.lng) : null,
+        description: result.description,
+        marker_type_id: result.marker_type_id,
+        marker_type: markerTypeData,
+        created_at: result.created_at,
+        updated_at: result.updated_at,
+    } as unknown as MarkerTypeResponse;
+
+
+  } catch (error) { 
+    console.error("🔴 RAW DB ERROR:", error);
     handlePrismaError(error);
   }
 }
-
 
 
 export const getMarkerTypeById =async (id: number) : Promise<MarkerTypeResponse | null> => {
