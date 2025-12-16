@@ -60,7 +60,7 @@ import {
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
-// Free Cycle
+//Free Cycle
 import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,

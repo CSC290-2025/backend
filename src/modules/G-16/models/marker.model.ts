@@ -48,7 +48,7 @@ export const createMarker = async (
             4326
           )
         )
-        RETURNING *
+        RETURNING id
       `;
 
       const createdMarker = result[0];

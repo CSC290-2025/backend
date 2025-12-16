@@ -6,7 +6,6 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
-// ====== Zod schemas (ของเดิมคุณ) ======
 export const LocationMarkerSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
@@ -58,8 +57,6 @@ export const MarkerIdParamSchema = z.object({
   id: z.string(),
 });
 
-// ====== OpenAPI route definitions (สำคัญ) ======
-// สมมติของจริง endpoint เป็น /api/markers (เพราะคุณมัก mount ด้วย /api)
 export const getAllMarkersRoute = createGetRoute({
   path: '/api/markers',
   summary: 'Get all markers',

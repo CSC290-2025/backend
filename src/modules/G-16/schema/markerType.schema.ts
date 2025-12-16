@@ -6,22 +6,28 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
-// ====== schemas เดิม ======
-export const LocationMarkerTypeSchema = z.object({
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-});
-
 export const CreateMarkerTypeSchema = z.object({
   marker_type_id: z.string().transform(Number).optional(),
   description: z.string().optional().nullable(),
   marker_type_icon: z.string().max(255).optional().nullable(),
-  location: LocationMarkerTypeSchema.optional().nullable(),
+  location: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const UpdateMarkerTypeSchema = z.object({
   marker_type_icon: z.string().max(255).optional().nullable(),
-  location: LocationMarkerTypeSchema.optional().nullable(),
+  location: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const MarkerTypeResponseSchema = z.object({
@@ -47,15 +53,9 @@ export const MarkerTypeQuerySchema = z.object({
 });
 
 export const MarkerTypeIdParamSchema = z.object({
-  id: z.string(),
+  id: z.string().transform(Number),
 });
 
-export const MarkerTypeIdParam2Schema = z.object({
-  markerTypeId: z.string(),
-});
-
-// ====== OpenAPI route definitions ======
-// สมมติ mount จริงเป็น /api/marker-types
 export const getAllMarkerTypesRoute = createGetRoute({
   path: '/api/marker-types',
   summary: 'Get all marker types',
@@ -102,14 +102,5 @@ export const deleteMarkerTypeRoute = createDeleteRoute({
   path: '/api/marker-types/{id}',
   summary: 'Delete marker type',
   params: MarkerTypeIdParamSchema,
-  tags: ['MarkerType'],
-});
-
-// (Optional) ถ้าคุณอยากให้ filter/bounds/type ขึ้นด้วย ต้องทำ route เพิ่มเองแบบนี้ด้วย
-export const getMarkerTypesByTypeRoute = createGetRoute({
-  path: '/api/marker-types/type/{markerTypeId}',
-  summary: 'Get marker types by type',
-  params: MarkerTypeIdParam2Schema,
-  responseSchema: z.any(),
   tags: ['MarkerType'],
 });

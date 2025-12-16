@@ -79,10 +79,8 @@ app.get('/doc', (c) => {
 
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
-// ✅ register routes (รวม OpenAPI routes ด้วย ถ้าคุณทำ setupRoutes ตามที่ผมให้)
 setupRoutes(app);
 
-// ✅ start scheduler
 startAir4ThaiAggregationJob();
 
 async function shutdown() {
