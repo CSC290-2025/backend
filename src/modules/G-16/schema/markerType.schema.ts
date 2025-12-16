@@ -1,5 +1,12 @@
 import * as z from 'zod';
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+  createDeleteRoute,
+} from '@/utils/openapi-helpers';
 
+// ====== schemas เดิม ======
 export const LocationMarkerTypeSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
@@ -37,4 +44,72 @@ export const MarkerTypeQuerySchema = z.object({
     .default('created_at')
     .optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
+});
+
+export const MarkerTypeIdParamSchema = z.object({
+  id: z.string(),
+});
+
+export const MarkerTypeIdParam2Schema = z.object({
+  markerTypeId: z.string(),
+});
+
+// ====== OpenAPI route definitions ======
+// สมมติ mount จริงเป็น /api/marker-types
+export const getAllMarkerTypesRoute = createGetRoute({
+  path: '/api/marker-types',
+  summary: 'Get all marker types',
+  query: MarkerTypeQuerySchema,
+  responseSchema: z.object({
+    marker: z.array(MarkerTypeResponseSchema),
+    count: z.number(),
+  }),
+  tags: ['MarkerType'],
+});
+
+export const getMarkerTypeByIdRoute = createGetRoute({
+  path: '/api/marker-types/{id}',
+  summary: 'Get marker type by id',
+  params: MarkerTypeIdParamSchema,
+  responseSchema: z.object({
+    marker: MarkerTypeResponseSchema.nullable(),
+  }),
+  tags: ['MarkerType'],
+});
+
+export const createMarkerTypeRoute = createPostRoute({
+  path: '/api/marker-types',
+  summary: 'Create marker type',
+  requestSchema: CreateMarkerTypeSchema,
+  responseSchema: z.object({
+    marker: MarkerTypeResponseSchema,
+  }),
+  tags: ['MarkerType'],
+});
+
+export const updateMarkerTypeRoute = createPutRoute({
+  path: '/api/marker-types/{id}',
+  summary: 'Update marker type',
+  params: MarkerTypeIdParamSchema,
+  requestSchema: UpdateMarkerTypeSchema,
+  responseSchema: z.object({
+    marker: MarkerTypeResponseSchema.nullable(),
+  }),
+  tags: ['MarkerType'],
+});
+
+export const deleteMarkerTypeRoute = createDeleteRoute({
+  path: '/api/marker-types/{id}',
+  summary: 'Delete marker type',
+  params: MarkerTypeIdParamSchema,
+  tags: ['MarkerType'],
+});
+
+// (Optional) ถ้าคุณอยากให้ filter/bounds/type ขึ้นด้วย ต้องทำ route เพิ่มเองแบบนี้ด้วย
+export const getMarkerTypesByTypeRoute = createGetRoute({
+  path: '/api/marker-types/type/{markerTypeId}',
+  summary: 'Get marker types by type',
+  params: MarkerTypeIdParam2Schema,
+  responseSchema: z.any(),
+  tags: ['MarkerType'],
 });

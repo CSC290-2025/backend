@@ -102,6 +102,9 @@ import {
   markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
+import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
+import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
@@ -196,6 +199,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupBinRoutes(app);
 
   // SupportMap
+  setupMarkerOpenApiRoutes(app);
+  setupMarkerTypeOpenApiRoutes(app);
 
   // SupportMap
 
