@@ -9,6 +9,7 @@ Choose ONE approach per module that you're comfortable with:
 
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
+import { setupResetRoutes } from '@/modules/Auth/routes';
 
 // Apartment
 import {
@@ -139,6 +140,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Auth
   setupAuthRoutes(app);
+  setupResetRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);

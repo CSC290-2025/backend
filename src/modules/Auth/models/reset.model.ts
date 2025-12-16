@@ -1,6 +1,6 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { Prisma } from '@prisma/client/scripts/default-index';
+import { hash } from 'bcryptjs';
 
 const saveResetToken = async (
   userId: number,
@@ -58,4 +58,23 @@ const revokeAllUserTokens = async (userId: number) => {
   } catch (error) {
     handlePrismaError(error);
   }
+};
+
+const changeUserPassword = async (userId: number, newPassword: string) => {
+  try {
+    return await prisma.users.update({
+      where: { id: userId },
+      data: { password_hash: newPassword },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  revokeAllUserTokens,
+  revokeResetToken,
+  findResetToken,
+  saveResetToken,
+  changeUserPassword,
 };
