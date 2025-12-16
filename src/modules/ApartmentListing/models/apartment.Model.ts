@@ -8,6 +8,7 @@ import type {
 } from '../types/apartment.types';
 import { ApartmentSchemas } from '../schemas';
 import type { apartment_location } from '@/generated/prisma';
+import { insertLatLong } from './locationIQ.model';
 
 // Helper function to transform apartment data from Prisma to expected format
 function transformApartmentData(
@@ -118,7 +119,7 @@ export async function createApartment(data: createApartmentData) {
   try {
     const { userId, address, ...apartmentData } = data;
 
-    const response = await prisma.$transaction(
+    const { apartment, addressId } = await prisma.$transaction(
       async (tx) => {
         // Create address first
         const createdAddress = await tx.addresses.create({
@@ -171,16 +172,26 @@ export async function createApartment(data: createApartmentData) {
           });
         }
 
-        return apartment;
+        return { apartment, addressId: createdAddress.id };
       },
       {
-        maxWait: 2000, // default: 2000
-        timeout: 5000, // default: 5000
-        isolationLevel: 'ReadCommitted', // optional, default: Serializable
+        maxWait: 5000, // Increased from 2000
+        timeout: 10000, // Increased from 5000
+        isolationLevel: 'ReadCommitted',
       }
     );
 
-    return transformApartmentData(response);
+    // Insert latitude and longitude AFTER transaction completes
+    await insertLatLong(
+      addressId,
+      address.address_line || '',
+      address.province || '',
+      address.district || '',
+      address.subdistrict || '',
+      address.postal_code || ''
+    );
+
+    return transformApartmentData(apartment);
   } catch (error) {
     console.error('Prisma Create Error:', error);
     throw handlePrismaError(error);
@@ -191,44 +202,45 @@ export async function updateApartment(data: updateApartmentData, id: number) {
   try {
     const { address, ...apartmentData } = data;
 
-    const response = await prisma.$transaction(
+    // Track address_id for lat/long update after transaction
+    let addressIdForLatLong: number | null = null;
+
+    await prisma.$transaction(
       async (tx) => {
         const updateData: Record<string, unknown> = { ...apartmentData };
 
-        // If address data is provided, update the address
+        // If address data is provided, handle address update/create
         if (address) {
-          // First get the apartment to find the address_id
-          const apartment = await tx.apartment.findUnique({
+          const currentApartment = await tx.apartment.findUnique({
             where: { id },
             select: { address_id: true },
           });
 
-          if (!apartment) {
+          if (!currentApartment) {
             throw new Error('Apartment not found');
           }
 
-          if (apartment.address_id) {
-            // Update existing address
+          if (currentApartment.address_id) {
             await tx.addresses.update({
-              where: { id: apartment.address_id },
+              where: { id: currentApartment.address_id },
               data: address,
             });
+            addressIdForLatLong = currentApartment.address_id;
           } else {
-            // Create new address if apartment doesn't have one
             const newAddress = await tx.addresses.create({
               data: address,
             });
+            addressIdForLatLong = newAddress.id;
             updateData.address_id = newAddress.id;
           }
         }
 
-        // Update the apartment
         const updatedApartment = await tx.apartment.update({
           where: { id },
           data: updateData,
-          include: {
-            addresses: true,
-            apartment_owner: true,
+          select: {
+            id: true,
+            address_id: true,
           },
         });
 
@@ -241,7 +253,27 @@ export async function updateApartment(data: updateApartmentData, id: number) {
       }
     );
 
-    return transformApartmentData(response);
+    if (address && addressIdForLatLong) {
+      await insertLatLong(
+        addressIdForLatLong,
+        address.address_line || '',
+        address.province || '',
+        address.district || '',
+        address.subdistrict || '',
+        address.postal_code || ''
+      );
+    }
+
+    // Fetch complete apartment data after all updates
+    const completeApartment = await prisma.apartment.findUnique({
+      where: { id },
+      include: {
+        addresses: true,
+        apartment_owner: true,
+      },
+    });
+
+    return transformApartmentData(completeApartment);
   } catch (error) {
     console.error('Update apartment error details:', error);
     throw handlePrismaError(error);
@@ -313,7 +345,7 @@ export async function deleteApartment(id: number) {
       },
       {
         maxWait: 5000,
-        timeout: 10000,
+        timeout: 1000,
         isolationLevel: 'ReadCommitted',
       }
     );

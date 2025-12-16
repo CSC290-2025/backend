@@ -1,6 +1,7 @@
 import { LocationIQSchemas } from '../schemas/index';
 import { NotFoundError, handlePrismaError } from '@/errors';
 import type { PlaceListType } from '../types';
+import prisma from '@/config/client';
 
 const LatLongConverter = async (q: string) => {
   try {
@@ -84,4 +85,30 @@ const getDistance = async (
   return distance;
 };
 
-export { getDistance, LatLongConverter, getNearbyPlacesFiltered };
+const insertLatLong = async (
+  addressId: number,
+  address_line: string,
+  province: string,
+  district: string,
+  subdistrict: string,
+  postal_code: string
+) => {
+  const country = 'Thailand';
+  const latLong = await LatLongConverter(
+    `${address_line}, ${province}, ${district}, ${subdistrict}, ${postal_code}, ${country}`
+  );
+  await prisma.addresses.update({
+    where: { id: addressId },
+    data: {
+      latitude: latLong.lat,
+      longitude: latLong.lon,
+    },
+  });
+  return latLong;
+};
+export {
+  insertLatLong,
+  getDistance,
+  LatLongConverter,
+  getNearbyPlacesFiltered,
+};
