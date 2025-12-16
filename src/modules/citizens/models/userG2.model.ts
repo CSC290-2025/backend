@@ -190,9 +190,19 @@ const updateUserPersonalData = async (
       data: {
         phone: data.phone,
         user_profiles: {
-          update: {
+          upsert: {
             where: { user_id },
-            data: {
+            update: {
+              id_card_number: data.id_card_number,
+              first_name: data.first_name,
+              middle_name: data.middle_name,
+              last_name: data.last_name,
+              ethnicity: data.ethnicity,
+              nationality: data.nationality,
+              religion: data.religion,
+              address_id: data.address_id,
+            },
+            create: {
               id_card_number: data.id_card_number,
               first_name: data.first_name,
               middle_name: data.middle_name,
@@ -217,7 +227,7 @@ const updateUserHealthData = async (
   data: UpdateUserHealth
 ) => {
   try {
-    const user = await prisma.user_profiles.upsert({
+    return await prisma.user_profiles.upsert({
       where: { user_id },
       update: {
         birth_date: data.birth_date,
@@ -239,9 +249,8 @@ const updateUserHealthData = async (
         gender: data.gender,
       },
     });
-    return user;
   } catch (error) {
-    handlePrismaError(error);
+    throw handlePrismaError(error);
   }
 };
 
@@ -250,24 +259,26 @@ const updateUserAccountData = async (
   data: UpdateUserAccount
 ) => {
   try {
-    const user = await prisma.users.update({
+    return await prisma.users.update({
       where: { id: user_id },
       data: {
         email: data.email,
         username: data.username,
         user_profiles: {
-          update: {
+          upsert: {
             where: { user_id },
-            data: {
+            update: {
+              profile_picture: data.profile_picture,
+            },
+            create: {
               profile_picture: data.profile_picture,
             },
           },
         },
       },
     });
-    return user;
   } catch (error) {
-    handlePrismaError(error);
+    throw handlePrismaError(error);
   }
 };
 
