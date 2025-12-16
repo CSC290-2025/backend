@@ -20,6 +20,16 @@ const setupOpenMeteoRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    WeatherOpenMeteoSchemas.getRainDailyRoute,
+    OpenMeteoController.getOpenMeteoRainDaily
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.getRainHourlyRoute,
+    OpenMeteoController.getOpenMeteoRainHourly
+  );
+
+  app.openapi(
     WeatherOpenMeteoSchemas.importDailyRoute,
     OpenMeteoController.importDailyOpenMeteo
   );
@@ -27,6 +37,21 @@ const setupOpenMeteoRoutes = (app: OpenAPIHono) => {
   app.openapi(
     WeatherOpenMeteoSchemas.importDailyAllRoute,
     OpenMeteoController.importDailyOpenMeteoAll
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.getWeatherAutoImportStatusRoute,
+    OpenMeteoController.getWeatherAutoImportStatus
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.startWeatherAutoImportRoute,
+    OpenMeteoController.startWeatherAutoImport
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.stopWeatherAutoImportRoute,
+    OpenMeteoController.stopWeatherAutoImport
   );
 };
 
