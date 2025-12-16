@@ -5,6 +5,8 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { requireRole, adminMiddleware, authMiddleware } from '@/middlewares';
+import { ROLES } from '@/constants/roles';
 
 const courseStatusEnum = z.enum(['pending', 'approve', 'not_approve']);
 const courseTypeEnum = z.enum(['online', 'onsite', 'online_and_onsite']);
@@ -164,6 +166,10 @@ const deleteCourseRoute = createDeleteRoute({
   summary: 'Delete course',
   params: courseId,
   tags: ['Know-AI', 'Course'],
+  middleware: [
+    authMiddleware,
+    requireRole(ROLES.KNOW_AI_ADMIN, 'Only Know AI Admin can change status'),
+  ],
 });
 
 //Admin
@@ -191,6 +197,10 @@ const changeApprovePost = createPutRoute({
   responseSchema: course,
   params: courseId,
   tags: ['Know-AI', 'Course'],
+  middleware: [
+    authMiddleware,
+    requireRole(ROLES.KNOW_AI_ADMIN, 'Only Know AI Admin can change status'),
+  ],
 });
 
 export {
