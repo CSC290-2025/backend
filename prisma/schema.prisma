@@ -1124,15 +1124,18 @@ model waste_event_statistics {
 }
 
 model waste_logs {
-  id            Int       @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   user_id       Int?
   waste_type_id Int?
-  log_date      DateTime? @db.Timestamptz(6)
-  weight_kg     Decimal?  @db.Decimal(10, 3)
+  log_date      DateTime?    @db.Timestamptz(6)
+  weight_kg     Decimal?     @db.Decimal(10, 3)
+  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
+  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
 
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
   @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
+
 
 model waste_types {
   id                     Int                      @id @default(autoincrement())
