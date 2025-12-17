@@ -7,6 +7,10 @@ const setupTokenRoutes = (app: OpenAPIHono) => {
     RouteSchemas.Token.createTokenFcmRoute,
     TokenController.storeTokenToDB
   );
+  app.openapi(
+    RouteSchemas.Token.findTokenByUserIdRoute,
+    TokenController.getTokenByUserId
+  );
 };
 
 export { setupTokenRoutes };

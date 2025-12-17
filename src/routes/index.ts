@@ -7,6 +7,8 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
+
+
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
 
@@ -39,13 +41,7 @@ import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
-} from '@/modules/emergency';
-
-import {
-  reportRoutes,
-  fcmRoutes,
-  tokenRoutes,
-  contactRoutes,
+  setupContactRoutes,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -133,6 +129,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Auth
   setupAuthRoutes(app);
 
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
+
   // Apartment
   setupAddressRoutes(app);
   setupApartmentRoutes(app);
@@ -155,6 +156,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
+  setupContactRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -213,10 +215,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  //Emergency
-  app.route('/emergency', reportRoutes());
-  app.route('/emergency', contactRoutes());
-  app.route('/emergency', fcmRoutes());
 
   // Power BI
   // app.route('/reports', reportRoutes);

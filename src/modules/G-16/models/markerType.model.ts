@@ -123,7 +123,6 @@ export const createMarkerType = async (data: CreateMarkerTypeInput): Promise<Mar
 
 
   } catch (error) { 
-    console.error("🔴 RAW DB ERROR:", error);
     handlePrismaError(error);
   }
 }
