@@ -23,6 +23,14 @@ const findRequestById = async (id: number): Promise<ReceiverRequest | null> => {
       where: { id },
       include: {
         freecycle_posts: true,
+        users: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            phone: true,
+          },
+        },
       },
     });
 
@@ -144,6 +152,24 @@ const findRequestByUser = async (
   }
 };
 
+const findRequestByPostAndReceiver = async (
+  postId: number,
+  receiverId: number
+): Promise<ReceiverRequest | null> => {
+  try {
+    const request = await prisma.receiver_requests.findFirst({
+      where: {
+        post_id: postId,
+        receiver_id: receiverId,
+      },
+    });
+    return request;
+  } catch (error) {
+    handlePrismaError(error);
+    return null;
+  }
+};
+
 export {
   findAllRequests,
   findRequestById,
@@ -153,4 +179,5 @@ export {
   deleteRequest,
   updateRequestStatus,
   findRequestByUser,
+  findRequestByPostAndReceiver,
 };
