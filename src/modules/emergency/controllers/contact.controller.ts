@@ -27,7 +27,7 @@ export const updateContactById: Handler = async (c: Context) => {
 
   const newId = Number(id);
   const contact = await ContactService.updateContactById(newId, body);
-  return successResponse(c, { contact }, 201, 'Update Contact successfully');
+  return successResponse(c, { contact }, 200, 'Update Contact successfully');
 };
 
 export const deleteContactById: Handler = async (c: Context) => {

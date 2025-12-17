@@ -2,8 +2,8 @@ import prisma from '@/config/client.ts';
 import type {
   ContactResponse,
   CreateContact,
-  UpdateContact,
   DeleteContactResponse,
+  UpdateContact,
 } from '@/modules/emergency/types';
 import { handlePrismaError, NotFoundError, ValidationError } from '@/errors';
 
