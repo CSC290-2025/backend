@@ -4,6 +4,8 @@ import type {
   CreateReport,
   PaginatedReport,
   ReportResponse,
+  ReportDeleteResponse,
+  UpdateReport,
 } from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 
@@ -11,17 +13,8 @@ const createReport = async (data: CreateReport): Promise<ReportResponse> => {
   try {
     const report = await prisma.emergency_reports.create({ data });
     return {
-      id: report.id,
-      image_url: report.image_url,
-      description: report.description,
-      ambulance_service: report.ambulance_service,
-      level: report.level,
+      ...report,
       status: (report.status ?? 'pending') as ReportStatus,
-      report_category: report.report_category ?? undefined,
-      created_at: report.created_at,
-      updated_at: report.updated_at,
-      title: report.title,
-      user_id: report.user_id,
     };
   } catch (error) {
     handlePrismaError(error);
@@ -41,6 +34,7 @@ const findReportByStatus = async (
     if (!page || !perPage || isNaN(page) || isNaN(perPage)) {
       throw new ValidationError('Page and perPage must be valid numbers');
     }
+
     const report = await prisma.emergency_reports.findMany({
       skip: (page - 1) * perPage,
       where: {
@@ -49,31 +43,51 @@ const findReportByStatus = async (
       take: perPage,
       orderBy: { created_at: 'desc' },
     });
-    const totalPage = await prisma.emergency_reports.count({
+
+    const totalCount = await prisma.emergency_reports.count({
       where: { status },
     });
-    const reportRes = report.map((r) => ({
-      id: r.id,
-      image_url: r.image_url,
-      description: r.description,
-      ambulance_service: r.ambulance_service,
-      level: r.level,
-      status: (r.status ?? 'pending') as ReportStatus,
-      report_category: r.report_category ?? undefined,
-      created_at: r.created_at,
-      updated_at: r.updated_at,
-      title: r.title,
-      user_id: r.user_id,
-      total: totalPage,
-    }));
 
     return {
-      report: reportRes,
-      totalPage: totalPage,
+      report: report.map((r) => ({
+        ...r,
+        status: (r.status ?? 'pending') as ReportStatus,
+        report_category: r.report_category ?? undefined,
+      })),
+      totalCount: totalCount,
     };
   } catch (error) {
     handlePrismaError(error);
   }
 };
 
-export { createReport, findReportByStatus };
+const updateReportById = async (
+  id: number,
+  data: UpdateReport
+): Promise<Partial<ReportResponse>> => {
+  try {
+    const report = await prisma.emergency_reports.update({
+      where: { id },
+      data: data,
+    });
+    return {
+      ...report,
+      status: (report.status ?? 'pending') as ReportStatus,
+    };
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const deleteReportById = async (id: number): Promise<ReportDeleteResponse> => {
+  try {
+    const report = await prisma.emergency_reports.delete({
+      where: { id },
+    });
+    return { id: report.id };
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export { createReport, findReportByStatus, updateReportById, deleteReportById };

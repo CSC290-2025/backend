@@ -337,6 +337,7 @@ model emergency_reports {
   title                  String
   contact_center_service Boolean?       @default(false)
   report_category        report_type?
+  location               Unsupported("geometry")?
   lat                    String?
   long                   String?
   alerts                 alerts[]
@@ -1136,19 +1137,6 @@ model waste_logs {
   @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
-model waste_logs_event {
-  id            Int          @id @default(autoincrement())
-  user_id       Int?
-  event_id      Int?
-  waste_type_id Int?
-  log_date      DateTime?    @default(now()) @db.Timestamptz(6)
-  weight_kg     Decimal?     @db.Decimal(10, 3)
-  events        events?      @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_id_fkey")
-  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
-  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_fkey")
-
-  @@index([event_id], map: "fki_event_id_fkey")
-}
 
 model waste_types {
   id                     Int                      @id @default(autoincrement())
@@ -1179,6 +1167,20 @@ model weather_rating {
   date       DateTime?  @default(now()) @db.Timestamptz(6)
   rating     Decimal?   @db.Decimal(3, 2)
   addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
+}
+
+model waste_logs_event {
+  id            Int          @id @default(autoincrement())
+  user_id       Int?
+  event_id      Int?
+  waste_type_id Int?
+  log_date      DateTime?    @default(now()) @db.Timestamptz(6)
+  weight_kg     Decimal?     @db.Decimal(10, 3)
+  events        events?      @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_id_fkey")
+  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
+  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_fkey")
+
+  @@index([event_id], map: "fki_event_id_fkey")
 }
 
 enum air_quality_category {

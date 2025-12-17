@@ -1,5 +1,8 @@
 onlyBuiltDependencies:
+  - '@firebase/util'
   - '@prisma/client'
   - '@prisma/engines'
   - esbuild
   - prisma
+  - protobufjs
+  - sharp
