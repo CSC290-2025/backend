@@ -167,14 +167,28 @@ const updateAccountInfo = async (c: Context) => {
   );
 };
 
-// const updatePassword = async (c: Context) => {
-//   const id = parseInt(c.req.param('id'));
-//   const body = await c.req.json();
+const updatePassword = async (c: Context) => {
+  const id = parseInt(c.req.param('id'));
+  const body = await c.req.json();
 
-//   await UserService.updatePassword(id, body);
+  if (!id) throw new ValidationError("Query parameter 'id' is required");
+  if (!body.currentPassword || !body.newPassword) {
+    throw new ValidationError('Current password and new password are required');
+  }
+  if (body.currentPassword === body.newPassword) {
+    throw new ValidationError(
+      'New password must be different from current password'
+    );
+  }
+  if (body.newPassword !== body.confirmNewPassword) {
+    throw new ValidationError(
+      'New password and confirm new password must match'
+    );
+  }
+  await UserService.updatePassword(id, body);
 
-//   return successResponse(c, null, 200, 'Password updated successfully');
-// };
+  return successResponse(c, null, 200, 'Password updated successfully');
+};
 
 const getUsersByRole = async (c: Context) => {
   const role = c.req.query('role');
@@ -275,7 +289,7 @@ export {
   updateEmergencyContact,
   deleteEmergencyContact,
   updateAccountInfo,
-  // updatePassword,
+  updatePassword,
   getUsersByRole,
   getUserProflie,
   updateUserPersonalData,
