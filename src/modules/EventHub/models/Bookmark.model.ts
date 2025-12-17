@@ -1,6 +1,6 @@
 import prisma from '@/config/client';
 import { NotFoundError, handlePrismaError } from '@/errors';
-import type { Bookmark, CreateBookmarkInput } from '../types';
+import type { Bookmark, CreateBookmarkInput, BookmarkedUser } from '../types';
 
 const listByUser = async (userId: number, page: number, limit: number) => {
   try {
@@ -36,8 +36,7 @@ const findByUserAndEvent = async (userId: number, eventId: number) => {
     return null;
   }
 };
-
-const create = async (userId: number, data: CreateBookmarkInput) => {
+const create = async (userId: number, data: { event_id: number }) => {
   try {
     return await prisma.event_bookmarks.create({
       data: {
@@ -47,20 +46,24 @@ const create = async (userId: number, data: CreateBookmarkInput) => {
     });
   } catch (err) {
     handlePrismaError(err);
+    throw err;
   }
 };
 
 const remove = async (userId: number, eventId: number) => {
   try {
     const x = await prisma.event_bookmarks.deleteMany({
-      where: { user_id: userId, event_id: eventId },
+      where: {
+        user_id: userId,
+        event_id: eventId,
+      },
     });
 
     if (x.count === 0) throw new NotFoundError('Bookmark not found');
-
     return true;
   } catch (err) {
     handlePrismaError(err);
+    throw err;
   }
 };
 const listUsersByEvent = async (

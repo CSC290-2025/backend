@@ -48,7 +48,6 @@ const createBookmarkRoute = createPostRoute({
     bookmark: EventBookmarkSchema,
   }),
   tags: ['Bookmarks'],
-  middleware: [authMiddleware],
 });
 
 const deleteBookmarkRoute = createDeleteRoute({
