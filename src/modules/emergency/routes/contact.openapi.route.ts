@@ -11,6 +11,14 @@ const setupContactRoutes = (app: OpenAPIHono) => {
     RouteSchemas.Contact.findContactByUserIdRoute,
     ContactController.findContactByUserId
   );
+  app.openapi(
+    RouteSchemas.Contact.updateContactByIdRoute,
+    ContactController.updateContactById
+  );
+  app.openapi(
+    RouteSchemas.Contact.deleteContactByIdRoute,
+    ContactController.deleteContactById
+  );
 };
 
 export { setupContactRoutes };

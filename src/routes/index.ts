@@ -60,6 +60,7 @@ import {
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
   setupReceiverRequestsRoutes,
+  setupUploadFreecycleRoutes,
 } from '@/modules/freecycle';
 
 //Healthcare
@@ -102,6 +103,7 @@ import {
   setupRoadRoutes,
   setupTrafficEmergencyRoutes,
   setupTrafficLightRoutes,
+  setupLightReportRoutes,
 } from '@/modules/traffic';
 
 // Volunteer
@@ -186,6 +188,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
   setupReceiverRequestsRoutes(app);
+  setupUploadFreecycleRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
@@ -200,6 +203,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Traffic
   setupIntersectionRoutes(app);
   setupTrafficLightRoutes(app);
+  setupLightReportRoutes(app);
   setupLightRequestRoutes(app);
   setupRoadRoutes(app);
   setupTrafficEmergencyRoutes(app);

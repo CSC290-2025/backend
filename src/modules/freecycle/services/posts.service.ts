@@ -102,6 +102,14 @@ const getPostsByUserId = async (userId: number): Promise<FreecyclePost[]> => {
   return await PostsModel.findPostByDonater(userId);
 };
 
+const getMyPosts = async (userId: number): Promise<FreecyclePost[]> => {
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+
+  return await PostsModel.findPostsByUserId(userId);
+};
+
 export {
   getAllPost,
   getPostById,
@@ -114,4 +122,5 @@ export {
   markAsNotGiven,
   getPostsByCategory,
   getPostsByUserId,
+  getMyPosts,
 };

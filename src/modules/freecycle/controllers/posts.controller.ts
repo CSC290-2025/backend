@@ -1,6 +1,9 @@
 import type { Context, Handler } from 'hono';
 import { PostsService } from '../services';
 import { successResponse } from '@/utils/response';
+import type { AuthTypes } from '@/modules/Auth';
+import type { JwtPayload } from '../../Auth/types/auth.types';
+import { NotFoundError } from '@/errors';
 
 const getAllPost = async (c: Context) => {
   const posts = await PostsService.getAllPost();
@@ -10,24 +13,31 @@ const getAllPost = async (c: Context) => {
 const getPostById = async (c: Context) => {
   const id = Number(c.req.param('id'));
   const post = await PostsService.getPostById(id);
+  if (!post) {
+    throw new NotFoundError('Post not found');
+  }
   return successResponse(c, { post });
 };
 
 const getPostByDonater: Handler = async (c: Context) => {
   console.log('Getting posts by donater');
   const user = c.get('user');
-  const userId = user?.id;
-  // if (!userId) {
-  //   return c.json({ error: 'Unauthorized: Missing user ID in context' }, 401);
-  // }
+
+  const userId = user?.userId;
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized: Missing user ID in context' }, 401);
+  }
   const posts = await PostsService.getPostByDonater(userId);
   return successResponse(c, { posts });
 };
 
 const createPost = async (c: Context) => {
   const body = await c.req.json();
-  const userIdFromToken = c.get('user')?.id;
-  const donaterId = userIdFromToken || body.donater_id || null;
+  // const userIdFromToken = c.get('user')?.id;
+  // const donaterId = userIdFromToken || body.donater_id || null;
+  const user = c.get('user');
+  const donaterId = user?.userId || body.donater_id || null;
   const post = await PostsService.createPost(body, donaterId);
   return successResponse(c, { post }, 201, 'Post created successfully');
 };
@@ -35,28 +45,36 @@ const createPost = async (c: Context) => {
 const updatePost = async (c: Context) => {
   const id = Number(c.req.param('id'));
   const body = await c.req.json();
-  const donaterId = c.get('user')?.id;
+  // const donaterId = c.get('user')?.id;
+  const user = c.get('user') as JwtPayload;
+  const donaterId = user?.userId;
   const post = await PostsService.updatePost(id, body, donaterId);
   return successResponse(c, { post }, 200, 'Post updated successfully');
 };
 
 const deletePost = async (c: Context) => {
   const id = Number(c.req.param('id'));
-  const donaterId = c.get('user')?.id;
+  // const donaterId = c.get('user')?.id;
+  const user = c.get('user') as JwtPayload;
+  const donaterId = user?.userId;
   await PostsService.deletePost(id, donaterId);
   return successResponse(c, null, 200, 'Post deleted successfully');
 };
 
 const markAsGiven = async (c: Context) => {
   const id = Number(c.req.param('id'));
-  const donaterId = c.get('user')?.id;
+  // const donaterId = c.get('user')?.id;
+  const user = c.get('user') as JwtPayload;
+  const donaterId = user?.userId;
   const post = await PostsService.markAsGiven(id, donaterId);
   return successResponse(c, { post }, 200, 'Post marked as given');
 };
 
 const markAsNotGiven = async (c: Context) => {
   const id = Number(c.req.param('id'));
-  const donaterId = c.get('user')?.id;
+  // const donaterId = c.get('user')?.id;
+  const user = c.get('user') as JwtPayload;
+  const donaterId = user?.userId;
   const post = await PostsService.markAsNotGiven(id, donaterId);
   return successResponse(c, { post }, 200, 'Post marked as not given');
 };
@@ -79,6 +97,13 @@ const getPostsByUserId = async (c: Context) => {
   return successResponse(c, { posts });
 };
 
+const getMyPosts = async (c: Context) => {
+  const payload = c.get('user') as JwtPayload;
+  const posts = await PostsService.getMyPosts(payload.userId);
+
+  return successResponse(c, posts, 200);
+};
+
 export {
   getAllPost,
   getPostById,
@@ -91,4 +116,5 @@ export {
   markAsNotGiven,
   getPostsByCategory,
   getPostsByUserId,
+  getMyPosts,
 };
