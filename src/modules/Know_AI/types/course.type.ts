@@ -1,6 +1,7 @@
 import type * as z from 'zod';
 import type { CourseSchema } from '../schemas';
 
+type addressSchema = z.infer<typeof CourseSchema.addressSchema>;
 type Course = z.infer<typeof CourseSchema.course>;
 type CourseId = z.infer<typeof CourseSchema.courseId>;
 type OnsiteSession = z.infer<typeof CourseSchema.onsiteSession>;
@@ -15,6 +16,7 @@ type courseTypeEnum = z.infer<typeof CourseSchema.courseTypeEnum>;
 type courseStatus = z.infer<typeof CourseSchema.courseStatus>;
 
 export type {
+  addressSchema,
   Course,
   CourseId,
   CreateCourse,
