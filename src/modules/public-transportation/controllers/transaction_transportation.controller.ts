@@ -7,16 +7,18 @@ const handleTap = async (c: Context) => {
     const body = await c.req.json();
     const { cardId, location, vehicleType } = body;
 
-    if (!cardId || !location || !vehicleType) {
+    const numericCardId = Number(cardId);
+
+    if (!numericCardId || isNaN(numericCardId) || !location || !vehicleType) {
       return errorResponse(
         c,
-        'Missing required fields: cardId, location, vehicleType',
+        'Missing required fields: cardId (number), location, vehicleType',
         400
       );
     }
 
     const result = await handleTapTransaction(
-      Number(cardId),
+      numericCardId,
       location,
       vehicleType.toUpperCase()
     );
@@ -26,14 +28,14 @@ const handleTap = async (c: Context) => {
         c,
         result,
         200,
-        `Tap IN successful. Max fare reserved: ${result.maxFareReserved} THB`
+        `Tap IN successful. Max fare reserved: ${(result as any).maxFareReserved} THB`
       );
     } else {
       return successResponse(
         c,
         result,
         200,
-        `Tap OUT successful. Charged: ${result.charged} THB`
+        `Tap OUT successful. Charged: ${(result as any).charged} THB`
       );
     }
   } catch (error: any) {
