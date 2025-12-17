@@ -1,5 +1,3 @@
-
-
 import * as z from 'zod';
 import {
   createGetRoute,
@@ -139,21 +137,26 @@ export const getMarkerTypeByTypesRoute = createPostRoute({
   tags: ['MarkerType'],
 });
 
-export const MarkerTypeBoundsBodySchema = z.object({
-  minLat: z.coerce.number().openapi({ example: 13.72 }), 
-  maxLat: z.coerce.number().openapi({ example: 13.75 }),
-  minLng: z.coerce.number().openapi({ example: 100.50 }),
-  maxLng: z.coerce.number().openapi({ example: 100.55 }),
-  markerTypeIds: z.array(z.coerce.number().int()).optional().openapi({ example: [1, 5] }),
-}).openapi({
-  example: {
-    minLat: 13.72,
-    maxLat: 13.75,
-    minLng: 100.50,
-    maxLng: 100.55,
-    markerTypeIds: [1, 2, 5]
-  }
-});
+export const MarkerTypeBoundsBodySchema = z
+  .object({
+    minLat: z.coerce.number().openapi({ example: 13.72 }),
+    maxLat: z.coerce.number().openapi({ example: 13.75 }),
+    minLng: z.coerce.number().openapi({ example: 100.5 }),
+    maxLng: z.coerce.number().openapi({ example: 100.55 }),
+    markerTypeIds: z
+      .array(z.coerce.number().int())
+      .optional()
+      .openapi({ example: [1, 5] }),
+  })
+  .openapi({
+    example: {
+      minLat: 13.72,
+      maxLat: 13.75,
+      minLng: 100.5,
+      maxLng: 100.55,
+      markerTypeIds: [1, 2, 5],
+    },
+  });
 
 export const getMarkerTypesInBoundsRoute = createPostRoute({
   path: '/api/marker-types/bounds',

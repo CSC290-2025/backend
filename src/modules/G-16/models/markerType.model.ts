@@ -343,7 +343,7 @@ export const getMarkerTypesInBounds = async (bounds: {
 
     let markerTypeFilter = '';
     if (markerTypeIds && markerTypeIds.length > 0) {
-      const ids = markerTypeIds.map(id => Number(id)).join(','); 
+      const ids = markerTypeIds.map((id) => Number(id)).join(',');
       markerTypeFilter = `AND m.marker_type_id IN (${ids})`;
     }
 
@@ -378,7 +378,6 @@ export const getMarkerTypesInBounds = async (bounds: {
         marker_type_icon: marker.marker_type_icon,
       },
     })) as unknown as MarkerTypeResponse[];
-
   } catch (error) {
     handlePrismaError(error);
   }

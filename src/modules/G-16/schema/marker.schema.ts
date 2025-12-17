@@ -1,6 +1,5 @@
 import * as z from 'zod';
 
-
 import {
   createGetRoute,
   createPostRoute,

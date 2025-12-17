@@ -7,8 +7,6 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
-
-
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
 
