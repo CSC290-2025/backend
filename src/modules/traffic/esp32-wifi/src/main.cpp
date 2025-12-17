@@ -29,8 +29,7 @@ TM1637Display display(TM1637_CLK, TM1637_DIO);
 String wifiSSID = "";
 String wifiPass = "";
 String teamId = "10";
-String junctionId = "Junction1";
-String lightDirection = "A";
+String trafficLightId = "10";
 float latitude = 13.647372;
 float longitude = 100.495536;
 
@@ -57,8 +56,9 @@ bool firebaseReady = false;
 bool configMode = false;
 
 // Current state from Firebase (updated via stream)
-String currentColor = "red";
+int currentColor = 1; // 1=red, 2=yellow, 3=green
 int remainingTime = 0;
+int currentStatus = 0; // 0=active, 1=broken, 2=fixing
 
 // --- Helper: sanitize non-ASCII characters ---
 String sanitizeASCII(const String &input)
@@ -169,7 +169,7 @@ const char *configPage = R"rawliteral(
     <div class="container">
         <div class="header">
             <h1>Traffic Light Config</h1>
-            <p>Team: %TEAM_ID% | Junction: %JUNCTION_ID% | Direction: %DIRECTION%</p>
+            <p>Team: %TEAM_ID% | Light ID: %LIGHT_ID%</p>
         </div>
         <div class="content">
             <form action="/save" method="POST">
@@ -186,12 +186,8 @@ const char *configPage = R"rawliteral(
                     <input type="text" name="team" value="%TEAM_ID%" required>
                 </div>
                 <div class="form-group">
-                    <label>Junction ID</label>
-                    <input type="text" name="junction" value="%JUNCTION_ID%" required>
-                </div>
-                <div class="form-group">
-                    <label>Light Direction (A/B/C/D)</label>
-                    <input type="text" name="direction" value="%DIRECTION%" required maxlength="1" pattern="[A-Da-d]">
+                    <label>Traffic Light ID</label>
+                    <input type="text" name="lightid" value="%LIGHT_ID%" required>
                 </div>
                 <div class="form-group">
                     <label>Latitude</label>
@@ -218,8 +214,7 @@ String processTemplate(const char *html)
   result.replace("%WIFI_SSID%", htmlEscape(wifiSSID));
   result.replace("%WIFI_PASS%", htmlEscape(wifiPass));
   result.replace("%TEAM_ID%", htmlEscape(teamId));
-  result.replace("%JUNCTION_ID%", htmlEscape(junctionId));
-  result.replace("%DIRECTION%", htmlEscape(lightDirection));
+  result.replace("%LIGHT_ID%", htmlEscape(trafficLightId));
   result.replace("%LAT%", String(latitude, 6));
   result.replace("%LNG%", String(longitude, 6));
   return result;
@@ -233,8 +228,7 @@ void loadConfiguration()
   wifiSSID = preferences.getString("ssid", "");
   wifiPass = preferences.getString("pass", "");
   teamId = preferences.getString("team", "10");
-  junctionId = preferences.getString("junction", "Junction1");
-  lightDirection = preferences.getString("direction", "A");
+  trafficLightId = preferences.getString("lightid", "10");
   latitude = preferences.getFloat("lat", 13.647372);
   longitude = preferences.getFloat("lng", 100.495536);
   preferences.end();
@@ -246,8 +240,7 @@ void saveConfiguration()
   preferences.putString("ssid", wifiSSID);
   preferences.putString("pass", wifiPass);
   preferences.putString("team", teamId);
-  preferences.putString("junction", junctionId);
-  preferences.putString("direction", lightDirection);
+  preferences.putString("lightid", trafficLightId);
   preferences.putFloat("lat", latitude);
   preferences.putFloat("lng", longitude);
   preferences.end();
@@ -263,7 +256,7 @@ void startConfigMode()
   delay(1000);
   WiFi.mode(WIFI_AP);
 
-  String apName = "TrafficLight-" + lightDirection + "-" + String((uint32_t)ESP.getEfuseMac(), HEX);
+  String apName = "TrafficLight-" + trafficLightId + "-" + String((uint32_t)ESP.getEfuseMac(), HEX);
   WiFi.softAP(apName.c_str(), "config123", 9);
   delay(1000);
 
@@ -282,9 +275,7 @@ void startConfigMode()
               wifiSSID = sanitizeASCII(server.arg("ssid"));
               wifiPass = server.arg("pass");
               teamId = server.arg("team");
-              junctionId = server.arg("junction");
-              lightDirection = server.arg("direction");
-              lightDirection.toUpperCase();
+              trafficLightId = server.arg("lightid");
               latitude = server.arg("lat").toFloat();
               longitude = server.arg("lng").toFloat();
 
@@ -314,50 +305,44 @@ void startConfigMode()
 
 // ================= TRAFFIC LIGHT CONTROL =================
 
-void setLight(String color)
+void setLight(int color)
 {
-  color.toLowerCase();
-
-  if (color == "green")
+  // color: 1=red, 2=yellow, 3=green
+  if (color == 3)
   {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(YELLOW_PIN, LOW);
     digitalWrite(GREEN_PIN, HIGH);
-    currentColor = "green";
+    currentColor = 3;
   }
-  else if (color == "yellow")
+  else if (color == 2)
   {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(YELLOW_PIN, HIGH);
     digitalWrite(GREEN_PIN, LOW);
-    currentColor = "yellow";
+    currentColor = 2;
   }
-  else if (color == "red")
+  else if (color == 1)
   {
     digitalWrite(RED_PIN, HIGH);
     digitalWrite(YELLOW_PIN, LOW);
     digitalWrite(GREEN_PIN, LOW);
-    currentColor = "red";
+    currentColor = 1;
   }
   else
   {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(YELLOW_PIN, LOW);
     digitalWrite(GREEN_PIN, LOW);
-    currentColor = "off";
+    currentColor = 0;
   }
 }
 
 // ================= FIREBASE FUNCTIONS =================
 
-String getJunctionPath()
-{
-  return "/teams/" + teamId + "/junctions/" + junctionId;
-}
-
 String getMyLightPath()
 {
-  return getJunctionPath() + "/lights/" + lightDirection;
+  return "/teams/" + teamId + "/traffic_lights/" + trafficLightId;
 }
 
 void updateMyStatus()
@@ -375,7 +360,6 @@ void updateMyStatus()
     return;
 
   // Send metadata and online status only
-  Database.set<String>(aClient, path + "/direction", lightDirection, aResult);
   Database.set<number_t>(aClient, path + "/lat", number_t(latitude, 6), aResult);
   Database.set<number_t>(aClient, path + "/lng", number_t(longitude, 6), aResult);
   Database.set<bool>(aClient, path + "/online", true, aResult);
@@ -413,21 +397,18 @@ void processStream(AsyncResult &aResult)
       // Handle specific field updates
       if (path.endsWith("/color"))
       {
-        String newColor = data;
-        newColor.replace("\"", "");
-        newColor.trim();
-        newColor.toLowerCase();
-
-        if ((newColor == "red" || newColor == "yellow" || newColor == "green") && newColor != currentColor)
+        int newColor = data.toInt();
+        if ((newColor >= 1 && newColor <= 3) && newColor != currentColor)
         {
           setLight(newColor);
-          Serial.println("► Light changed: " + newColor);
+          String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow" : "green";
+          Serial.println("► Light changed: " + colorName);
         }
       }
-      else if (path.endsWith("/remainingTime"))
+      else if (path.endsWith("/remaintime"))
       {
         int newTime = data.toInt();
-        if (newTime >= 0 && newTime <= 999 && newTime != remainingTime)
+        if (newTime >= 0 && newTime <= 9999 && newTime != remainingTime)
         {
           remainingTime = newTime;
           display.showNumberDec(remainingTime);
@@ -438,30 +419,44 @@ void processStream(AsyncResult &aResult)
           }
         }
       }
+      else if (path.endsWith("/status"))
+      {
+        int newStatus = data.toInt();
+        if (newStatus >= 0 && newStatus <= 2 && newStatus != currentStatus)
+        {
+          currentStatus = newStatus;
+          String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken" : "fixing";
+          Serial.println("► Status changed: " + statusName);
+        }
+      }
       // Handle initial full object (path is empty or "/")
       else if (path.length() == 0 || path == "/")
       {
-        // Parse JSON manually for color
+        // Parse JSON manually for color (now integer)
         int colorIdx = data.indexOf("\"color\"");
         if (colorIdx >= 0)
         {
           int colonIdx = data.indexOf(":", colorIdx);
-          int quoteStart = data.indexOf("\"", colonIdx);
-          int quoteEnd = data.indexOf("\"", quoteStart + 1);
-          if (quoteStart >= 0 && quoteEnd > quoteStart)
+          int commaIdx = data.indexOf(",", colonIdx);
+          int braceIdx = data.indexOf("}", colonIdx);
+          int endIdx = (commaIdx > 0 && commaIdx < braceIdx) ? commaIdx : braceIdx;
+
+          if (colonIdx >= 0 && endIdx > colonIdx)
           {
-            String newColor = data.substring(quoteStart + 1, quoteEnd);
-            newColor.toLowerCase();
-            if ((newColor == "red" || newColor == "yellow" || newColor == "green") && newColor != currentColor)
+            String colorStr = data.substring(colonIdx + 1, endIdx);
+            colorStr.trim();
+            int newColor = colorStr.toInt();
+            if ((newColor >= 1 && newColor <= 3) && newColor != currentColor)
             {
               setLight(newColor);
-              Serial.println("► Light: " + newColor);
+              String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow" : "green";
+              Serial.println("► Light: " + colorName);
             }
           }
         }
 
-        // Parse JSON manually for remainingTime
-        int timeIdx = data.indexOf("\"remainingTime\"");
+        // Parse JSON manually for remaintime
+        int timeIdx = data.indexOf("\"remaintime\"");
         if (timeIdx >= 0)
         {
           int colonIdx = data.indexOf(":", timeIdx);
@@ -474,11 +469,34 @@ void processStream(AsyncResult &aResult)
             String timeStr = data.substring(colonIdx + 1, endIdx);
             timeStr.trim();
             int newTime = timeStr.toInt();
-            if (newTime >= 0 && newTime <= 999 && newTime != remainingTime)
+            if (newTime >= 0 && newTime <= 9999 && newTime != remainingTime)
             {
               remainingTime = newTime;
               display.showNumberDec(remainingTime);
               Serial.println("► Time: " + String(remainingTime) + "s");
+            }
+          }
+        }
+
+        // Parse JSON manually for status
+        int statusIdx = data.indexOf("\"status\"");
+        if (statusIdx >= 0)
+        {
+          int colonIdx = data.indexOf(":", statusIdx);
+          int commaIdx = data.indexOf(",", colonIdx);
+          int braceIdx = data.indexOf("}", colonIdx);
+          int endIdx = (commaIdx > 0 && commaIdx < braceIdx) ? commaIdx : braceIdx;
+
+          if (colonIdx >= 0 && endIdx > colonIdx)
+          {
+            String statusStr = data.substring(colonIdx + 1, endIdx);
+            statusStr.trim();
+            int newStatus = statusStr.toInt();
+            if (newStatus >= 0 && newStatus <= 2 && newStatus != currentStatus)
+            {
+              currentStatus = newStatus;
+              String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken" : "fixing";
+              Serial.println("► Status: " + statusName);
             }
           }
         }
@@ -503,7 +521,7 @@ void setup()
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(CONFIG_BUTTON, INPUT_PULLUP);
 
-  setLight("off");
+  setLight(0); // Turn off all lights
 
   loadConfiguration();
 
@@ -514,8 +532,7 @@ void setup()
   }
 
   Serial.println("Team: " + teamId);
-  Serial.println("Junction: " + junctionId);
-  Serial.println("Direction: " + lightDirection);
+  Serial.println("Traffic Light ID: " + trafficLightId);
   Serial.println("Connecting to: " + sanitizeASCII(wifiSSID));
 
   String cleanSSID = sanitizeASCII(wifiSSID);
@@ -580,25 +597,31 @@ void setup()
     Serial.println("Fetching initial state...");
     String myPath = getMyLightPath();
 
-    String initialColor = Database.get<String>(aClient, myPath + "/color");
+    int initialColor = Database.get<int>(aClient, myPath + "/color");
     if (aClient.lastError().code() == 0)
     {
-      initialColor.replace("\"", "");
-      initialColor.trim();
-      initialColor.toLowerCase();
-      if (initialColor == "red" || initialColor == "yellow" || initialColor == "green")
+      if (initialColor >= 1 && initialColor <= 3)
       {
         setLight(initialColor);
-        Serial.println("Initial color: " + initialColor);
+        String colorName = (initialColor == 1) ? "red" : (initialColor == 2) ? "yellow" : "green";
+        Serial.println("Initial color: " + colorName);
       }
     }
 
-    int initialTime = Database.get<int>(aClient, myPath + "/remainingTime");
+    int initialTime = Database.get<int>(aClient, myPath + "/remaintime");
     if (aClient.lastError().code() == 0)
     {
       remainingTime = initialTime;
       display.showNumberDec(remainingTime);
       Serial.println("Initial time: " + String(remainingTime) + "s");
+    }
+
+    int initialStatus = Database.get<int>(aClient, myPath + "/status");
+    if (aClient.lastError().code() == 0)
+    {
+      currentStatus = initialStatus;
+      String statusName = (initialStatus == 0) ? "active" : (initialStatus == 1) ? "broken" : "fixing";
+      Serial.println("Initial status: " + statusName);
     }
 
     Serial.println("Ready! Listening for updates...");
@@ -611,7 +634,7 @@ void setup()
     Serial.println("\nFirebase init failed");
   }
 
-  Serial.println("\n=== System Ready - Direction " + lightDirection + " ===\n");
+  Serial.println("\n=== System Ready - Light ID " + trafficLightId + " ===\n");
 }
 
 // ================= MAIN LOOP =================
@@ -628,6 +651,51 @@ void loop()
   // CRITICAL: Process authentication and streaming in real-time
   app.loop();
   Database.loop();
+
+  // Handle broken/fixing status with blinking behavior
+  static unsigned long lastBlinkTime = 0;
+  static bool blinkState = false;
+
+  if (currentStatus == 1 || currentStatus == 2) // broken or fixing
+  {
+    // Blink every 500ms
+    if (millis() - lastBlinkTime > 500)
+    {
+      blinkState = !blinkState;
+
+      if (blinkState)
+      {
+        // Turn on red light and show 0000
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(YELLOW_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);
+        display.showNumberDec(0, true); // true = show leading zeros
+      }
+      else
+      {
+        // Turn off all lights and clear display
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(YELLOW_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);
+        display.clear();
+      }
+
+      lastBlinkTime = millis();
+    }
+  }
+  else if (currentStatus == 0) // active/normal
+  {
+    // Normal operation - display and lights are controlled by stream updates
+    // Reset blink state if we just transitioned from broken/fixing
+    static int previousStatus = 0;
+    if (previousStatus != currentStatus)
+    {
+      // Restore normal state
+      setLight(currentColor);
+      display.showNumberDec(remainingTime);
+      previousStatus = currentStatus;
+    }
+  }
 
   // Check config button (hold 3 seconds to restart)
   static unsigned long buttonPressTime = 0;

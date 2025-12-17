@@ -76,4 +76,29 @@ export const OpenMeteoClient = {
     });
     return fetchJson(`${API_BASE}/forecast?${params.toString()}`);
   },
+
+  async getRainWindow(
+    lat: number,
+    lon: number,
+    startDate: string,
+    endDate: string,
+    timezone = OPEN_METEO_TIMEZONE
+  ) {
+    const params = new URLSearchParams({
+      latitude: String(lat),
+      longitude: String(lon),
+      timezone,
+      start_date: startDate,
+      end_date: endDate,
+      daily: [
+        'weather_code',
+        'precipitation_hours',
+        'precipitation_sum',
+        'precipitation_probability_max',
+        'rain_sum',
+      ].join(','),
+      hourly: ['precipitation_probability', 'rain', 'weather_code'].join(','),
+    });
+    return fetchJson(`${API_BASE}/forecast?${params.toString()}`);
+  },
 };
