@@ -1,6 +1,10 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { addressSchema, CreateCourse } from '@/modules/Know_AI/types';
+import type {
+  addressSchema,
+  CreateCourse,
+  courseStatus,
+} from '@/modules/Know_AI/types';
 import { CourseSchema } from '../schemas';
 
 const createAddress = async (data: addressSchema) => {
@@ -91,6 +95,38 @@ const deleteCourse = async (id: number) => {
   }
 };
 
+//Admin
+const getPendingCourse = async () => {
+  try {
+    return await prisma.courses.findMany({
+      where: { course_status: 'pending' },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const getApproveCourse = async () => {
+  try {
+    return await prisma.courses.findMany({
+      where: { course_status: 'approve' },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const changeApprove = async (id: number) => {
+  try {
+    return await prisma.courses.update({
+      where: { id },
+      data: { course_status: 'approve' },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
 export {
   createAddress,
   createCourse,
@@ -99,4 +135,7 @@ export {
   getCourseByType,
   updateCourse,
   deleteCourse,
+  getPendingCourse,
+  getApproveCourse,
+  changeApprove,
 };

@@ -5,6 +5,8 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { requireRole, adminMiddleware, authMiddleware } from '@/middlewares';
+import { ROLES } from '@/constants/roles';
 
 const courseStatusEnum = z.enum(['pending', 'approve', 'not_approve']);
 const courseTypeEnum = z.enum(['online', 'onsite', 'online_and_onsite']);
@@ -195,6 +197,41 @@ const deleteCourseRoute = createDeleteRoute({
   summary: 'Delete course',
   params: courseId,
   tags: ['Know-AI', 'Course'],
+  middleware: [
+    authMiddleware,
+    requireRole(ROLES.KNOW_AI_ADMIN, 'Only Know AI Admin can change status'),
+  ],
+});
+
+//Admin
+const courseStatus = z.object({
+  course_status: courseStatusEnum,
+});
+const getPendingCourse = createGetRoute({
+  path: '/coursePending',
+  summary: 'Get pending course',
+  responseSchema: course.array(),
+  tags: ['Know-AI', 'Course'],
+});
+
+const getApproveCourse = createGetRoute({
+  path: '/getApproveCourse',
+  summary: 'Get approve course',
+  responseSchema: course.array(),
+  tags: ['Know-AI', 'Course'],
+});
+
+const changeApprovePost = createPutRoute({
+  path: '/courseApprove/{id}',
+  summary: 'Approve course',
+  requestSchema: z.optional(z.any()),
+  responseSchema: course,
+  params: courseId,
+  tags: ['Know-AI', 'Course'],
+  middleware: [
+    authMiddleware,
+    requireRole(ROLES.KNOW_AI_ADMIN, 'Only Know AI Admin can change status'),
+  ],
 });
 
 const deleteCourseVideoRoute = createDeleteRoute({
@@ -228,5 +265,9 @@ export {
   updateCourseVideosRoute,
   updateOnsiteSessionsRoute,
   deleteCourseRoute,
+  courseStatus,
+  getPendingCourse,
+  getApproveCourse,
+  changeApprovePost,
   deleteCourseVideoRoute,
 };

@@ -31,4 +31,9 @@ export const setupCourseRoutes = (app: OpenAPIHono) => {
     UploadSchema.deleteDataRoute,
     UploadController.deleteGeneralFileController
   );
+
+  //Admin
+  app.openapi(CourseSchema.getPendingCourse, CourseController.getPendingCourse);
+  app.openapi(CourseSchema.getApproveCourse, CourseController.getApproveCourse);
+  app.openapi(CourseSchema.changeApprovePost, CourseController.changeApprove);
 };
