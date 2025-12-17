@@ -1134,15 +1134,6 @@ model waste_logs {
   @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
-model waste_logs_event {
-  id            Int       @id @default(autoincrement())
-  user_id       Int?
-  event_id      Int?
-  waste_type_id Int?
-  log_date      DateTime? @default(now()) @db.Timestamptz(6)
-  weight_kg     Decimal?  @db.Decimal(10, 3)
-}
-
 model waste_types {
   id                     Int                      @id @default(autoincrement())
   type_name              String                   @db.VarChar(255)
