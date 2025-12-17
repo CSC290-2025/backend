@@ -1137,6 +1137,7 @@ model waste_logs {
   @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
+
 model waste_types {
   id                     Int                      @id @default(autoincrement())
   type_name              String                   @db.VarChar(255)
