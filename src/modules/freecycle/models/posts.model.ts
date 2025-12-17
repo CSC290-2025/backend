@@ -52,6 +52,9 @@ const findPostByDonater = async (
   try {
     const posts = await prisma.freecycle_posts.findMany({
       where: { donater_id: donaterId },
+      include: {
+        receiver_requests: true,
+      },
       orderBy: { created_at: 'desc' },
     });
     return posts.map((p) => ({
@@ -235,6 +238,9 @@ const findPostsByUserId = async (userId: number): Promise<FreecyclePost[]> => {
     const posts = await prisma.freecycle_posts.findMany({
       where: {
         donater_id: userId,
+      },
+      include: {
+        receiver_requests: true,
       },
       orderBy: {
         created_at: 'desc',
