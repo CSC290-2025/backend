@@ -10,10 +10,19 @@ const setupWasteRoutes = (app: OpenAPIHono) => {
   app.openapi(WasteSchemas.logWasteRoute, WasteController.logWaste);
 
   // Get monthly statistics
-  app.openapi(WasteSchemas.getStatsRoute, WasteController.getWasteStats);
+  app.openapi(
+    WasteSchemas.getStatsByUserRoute,
+    WasteController.getWasteStatsByUser
+  );
 
   // Get daily statistics
-  app.openapi(WasteSchemas.getDailyStatsRoute, WasteController.getDailyStats);
+  app.openapi(
+    WasteSchemas.getDailyStatsByUserRoute,
+    WasteController.getDailyStatsByUser
+  );
+
+  //Get daily log
+  app.openapi(WasteSchemas.getDailyLogRoute, WasteController.getDailyLogs);
 
   // Delete waste log
   app.openapi(WasteSchemas.deleteLogRoute, WasteController.deleteLogById);

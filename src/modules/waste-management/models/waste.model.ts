@@ -45,7 +45,7 @@ export class WasteModel {
     return wasteLog;
   }
 
-  static async getWasteStatsByMonth(
+  static async getWasteStatsByMonthByUser(
     startDate: Date,
     endDate: Date,
     user_id: number
@@ -96,6 +96,32 @@ export class WasteModel {
       },
       _count: {
         id: true,
+      },
+    });
+  }
+
+  static async getWasteLogsByDay(user_id: number, targetDate: Date) {
+    const dayStart = new Date(targetDate);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(targetDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    return await prisma.waste_logs.findMany({
+      where: {
+        log_date: {
+          gte: dayStart,
+          lte: dayEnd,
+        },
+        user_id: user_id,
+      },
+      include: {
+        waste_types: {
+          select: {
+            id: true,
+            type_name: true,
+          },
+        },
       },
     });
   }
