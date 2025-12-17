@@ -38,25 +38,30 @@ export const createMarker = async (
         throw new Error('Invalid location format');
       }
 
-      const result = await prisma.$queryRaw<marker[]>`
-        INSERT INTO marker (marker_type_id, description, location)
+      const result = await prisma.$queryRaw<any[]>`
+        INSERT INTO "marker" (marker_type_id, description, location, created_at, updated_at)
         VALUES (
-          ${data.marker_type_id}::int,
+          ${Number(data.marker_type_id)}::int,
           ${data.description}::text,
-          ST_SetSRID(
-            ST_GeomFromGeoJSON(${JSON.stringify(geoJson)}),
-            4326
-          )
+          ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(geoJson)}), 4326),
+          NOW(),
+          NOW()
         )
-        RETURNING id
+        RETURNING id;
       `;
 
-      const createdMarker = result[0];
+      const createdMarkerId = result[0]?.id;
+      if (!createdMarkerId) {
+        throw new Error('Failed to insert marker with location');
+      }
 
-      return (await prisma.marker.findUnique({
-        where: { id: createdMarker.id },
+      // 3. Fetch full data back
+      const newMarker = await prisma.marker.findUnique({
+        where: { id: createdMarkerId },
         include: { marker_type: true },
-      })) as MarkerResponse;
+      });
+
+      return newMarker as MarkerResponse;
     }
 
     // location is null
@@ -69,7 +74,7 @@ export const createMarker = async (
         marker_type: true,
       },
     })) as MarkerResponse;
-  } catch {
+  } catch (error){
     handlePrismaError(error);
   }
 };
@@ -83,7 +88,9 @@ export const updateMarker = async (
   if (isNaN(numericId)) {
     throw new ValidationError('Invalid marker ID');
   }
+
   try {
+    // 1. เช็กก่อนว่ามี ID นี้จริงไหม
     const exists = await prisma.marker.findUnique({
       where: { id: numericId },
     });
@@ -92,27 +99,46 @@ export const updateMarker = async (
       throw new Error(`Marker with ID ${numericId} not found`);
     }
 
-    if (data.location !== undefined) {
+    // 2. ถ้ามีการแก้ Location ต้องแปลงค่าก่อนลง DB (Raw SQL)
+    if (data.location) {
+      const loc: any = data.location;
+      let geoJson: any;
+
+      // แปลง { lat, lng } เป็น GeoJSON format
+      if (typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+        geoJson = {
+          type: 'Point',
+          coordinates: [loc.lng, loc.lat], // PostGIS ใช้ [lng, lat]
+        };
+      } else if (loc.type && loc.coordinates) {
+        geoJson = loc; // กรณีส่งมาเป็น GeoJSON อยู่แล้ว
+      } else {
+        // ถ้าส่งมาเป็น string มั่วๆ ให้ข้ามไปใช้ค่าเดิม หรือ throw error
+         throw new ValidationError('Invalid location format');
+      }
+
+      // แก้ SQL: เพิ่ม ::json และ ST_SetSRID(..., 4326)
       await prisma.$executeRaw`
           UPDATE marker
           SET 
-            marker_type_id = COALESCE(${data.marker_type_id}::int, marker_type_id),
+            marker_type_id = COALESCE(${data.marker_type_id ? Number(data.marker_type_id) : null}::int, marker_type_id),
             description = COALESCE(${data.description}::text, description),
-            location = ST_GeomFromGeoJSON(${JSON.stringify(data.location)}),
+            location = ST_SetSRID(ST_GeomFromGeoJSON(${JSON.stringify(geoJson)}::json), 4326),
             updated_at = NOW()
           WHERE id = ${numericId}
         `;
     } else {
+      // 3. ถ้าไม่ได้แก้ Location ใช้ Prisma ปกติ (Safe กว่า)
       await prisma.marker.update({
         where: { id: numericId },
         data: {
-          marker_type_id: data.marker_type_id,
+          marker_type_id: data.marker_type_id ? Number(data.marker_type_id) : undefined,
           description: data.description,
         },
       });
     }
 
-    // pull data with relation
+    // 4. ดึงข้อมูลล่าสุดส่งกลับ
     const result = await prisma.marker.findUnique({
       where: { id: numericId },
       include: { marker_type: true },

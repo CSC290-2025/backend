@@ -30,7 +30,7 @@ markerTypeRoutes.post('/bounds', getMarkerTypesInBounds);
 
 markerTypeRoutes.get('/type/:markerTypeId', getMarkerTypesByType);
 
-markerTypeRoutes.get('/:id', getMarkerTypeById); //
+markerTypeRoutes.get('/:id', getMarkerTypeById); 
 markerTypeRoutes.put('/:id', updateMarkerType);
 markerTypeRoutes.delete('/:id', deleteMarkerType);
 

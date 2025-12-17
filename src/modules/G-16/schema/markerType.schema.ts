@@ -1,3 +1,61 @@
+// import * as z from 'zod';
+// import {
+//   createGetRoute,
+//   createPostRoute,
+//   createPutRoute,
+//   createDeleteRoute,
+// } from '@/utils/openapi-helpers';
+
+// export const CreateMarkerTypeSchema = z.object({
+//   marker_type_id: z.string().transform(Number).optional(),
+//   description: z.string().optional().nullable(),
+//   marker_type_icon: z.string().max(255).optional().nullable(),
+//   location: z
+//     .object({
+//       lat: z.number().min(-90).max(90),
+//       lng: z.number().min(-180).max(180),
+//     })
+//     .optional()
+//     .nullable(),
+// });
+
+// export const UpdateMarkerTypeSchema = z.object({
+//   marker_type_icon: z.string().max(255).optional().nullable(),
+//   location: z
+//     .object({
+//       lat: z.number().min(-90).max(90),
+//       lng: z.number().min(-180).max(180),
+//     })
+//     .optional()
+//     .nullable(),
+// });
+
+// export const MarkerTypeResponseSchema = z.object({
+//   id: z.number().int(),
+//   marker_type_icon: z.string().nullable(),
+//   created_at: z.coerce.date(),
+//   updated_at: z.coerce.date(),
+// });
+
+// export const MarkerTypeQuerySchema = z.object({
+//   marker_type_id: z.string().transform(Number).optional(),
+//   marker_type_ids: z
+//     .string()
+//     .transform((val) => val.split(',').map(Number))
+//     .optional(),
+//   limit: z.string().transform(Number).default(100).optional(),
+//   offset: z.string().transform(Number).default(0).optional(),
+//   sortBy: z
+//     .enum(['created_at', 'updated_at', 'id'])
+//     .default('created_at')
+//     .optional(),
+//   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
+// });
+
+// export const MarkerTypeIdParamSchema = z.object({
+//   id: z.string().transform(Number),
+// });
+
 import * as z from 'zod';
 import {
   createGetRoute,
@@ -6,8 +64,10 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
+
 export const CreateMarkerTypeSchema = z.object({
-  marker_type_id: z.string().transform(Number).optional(),
+
+  marker_type_id: z.coerce.number().optional(), 
   description: z.string().optional().nullable(),
   marker_type_icon: z.string().max(255).optional().nullable(),
   location: z
@@ -38,13 +98,16 @@ export const MarkerTypeResponseSchema = z.object({
 });
 
 export const MarkerTypeQuerySchema = z.object({
-  marker_type_id: z.string().transform(Number).optional(),
+  marker_type_id: z.coerce.number().optional(), 
+  
   marker_type_ids: z
     .string()
     .transform((val) => val.split(',').map(Number))
-    .optional(),
-  limit: z.string().transform(Number).default(100).optional(),
-  offset: z.string().transform(Number).default(0).optional(),
+    .optional()
+    .openapi({ example: '1,2,3', type: 'string' }), 
+
+  limit: z.coerce.number().default(100).optional(), 
+  offset: z.coerce.number().default(0).optional(),  
   sortBy: z
     .enum(['created_at', 'updated_at', 'id'])
     .default('created_at')
@@ -52,8 +115,9 @@ export const MarkerTypeQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
 });
 
+
 export const MarkerTypeIdParamSchema = z.object({
-  id: z.string().transform(Number),
+  id: z.coerce.number(), 
 });
 
 export const getAllMarkerTypesRoute = createGetRoute({
