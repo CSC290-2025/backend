@@ -1,19 +1,32 @@
 import type { Context } from 'hono';
 import { EventService } from '../services';
 import { successResponse } from '../../../utils/response';
-import { EventIdParam, PaginationSchema } from '../schemas';
+import {
+  EventIdParam,
+  GetEventByIdQuerySchema,
+  PaginationSchema,
+} from '../schemas';
 import { z } from 'zod';
 
 const getAllEvents = async (c: Context) => {
   const query = PaginationSchema.parse(c.req.query());
+
   const result = await EventService.getAll(query);
   return successResponse(c, result);
 };
 
 const getEventById = async (c: Context) => {
   const params = EventIdParam.parse(c.req.param());
-  const event = await EventService.getById(params.id);
-  return successResponse(c, { event });
+  const user = c.get('user');
+  // Use the fixed schema for parsing the query.
+  // The .default(undefined) handles the missing keys safely.
+
+  const query = GetEventByIdQuerySchema.parse(c.req.query());
+
+  // Call the service with the potentially undefined userId
+  const result = await EventService.getById(params.id, user.userId);
+
+  return successResponse(c, result);
 };
 
 const createEvent = async (c: Context) => {
@@ -59,9 +72,11 @@ const GetParticipantsQuerySchema = z.object({
 const joinEvent = async (c: Context) => {
   try {
     const params = EventIdParam.parse(c.req.param());
+
     const eventId = params.id;
 
     const body = await c.req.json();
+
     const validatedBody = JoinBodySchema.parse(body);
     const userId = validatedBody.userId;
 
@@ -126,6 +141,7 @@ const GetMyEventsQuerySchema = z.object({
 const getMyEvents = async (c: Context) => {
   try {
     const query = GetMyEventsQuerySchema.parse(c.req.query());
+
     const events = await EventService.getMyEvents(query.userId);
     return successResponse(c, { events, count: events.length });
   } catch (err: any) {

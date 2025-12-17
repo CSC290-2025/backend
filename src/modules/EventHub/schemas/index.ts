@@ -1,2 +1,2 @@
-export * from './Bookmark.schemas';
-export * from './Event.schemas';
+export { BookmarkSchemas } from './Bookmark.schemas';
+export { EventSchemas } from './Event.schemas';

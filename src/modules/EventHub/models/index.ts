@@ -1,2 +1,2 @@
-export * as BookmarkModel from './Bookmark.model';
-export * as EventModel from './Event.model';
+export { BookmarkModel } from './Bookmark.model';
+export { EventModel } from './Event.model';

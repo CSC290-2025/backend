@@ -18,6 +18,7 @@ import {
   setupAddressRoutes,
   setupUploadRoutes,
   setupBookingRoutes,
+  setupAPTOwnerRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -38,13 +39,7 @@ import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
-} from '@/modules/emergency';
-
-import {
-  reportRoutes,
-  fcmRoutes,
-  tokenRoutes,
-  contactRoutes,
+  setupContactRoutes,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -77,6 +72,8 @@ import {
   setupAmbulanceRoutes,
   setupEmergencyCallRoutes,
   setupPaymentRoutes,
+  setupDoctorsRoutes,
+  setupMedicineInventoryRoutes,
 } from '@/modules/healthcare/routes';
 
 // Know AI
@@ -112,6 +109,7 @@ import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
 // Public Transportation
 import { routeStopsRoutes } from '@/modules/public-transportation/routes';
+import { transactionRoute } from '@/modules/public-transportation/routes';
 
 // Waste
 import { setupWasteRoutes } from '@/modules/waste-management/routes';
@@ -143,7 +141,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupRatingRoutes(app);
   setupUploadRoutes(app);
   setupBookingRoutes(app);
-
+  setupAPTOwnerRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
@@ -158,6 +156,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
+  setupContactRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -168,11 +167,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupWalletRoutes(app);
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
-  //
-  // ============================================
-  // Normal Hono Routes (not in Swagger docs)
-  // ============================================
-  // app.route('/products', productRoutes);
   setupScbRoutes(app);
 
   //Healthcare
@@ -184,6 +178,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupAmbulanceRoutes(app);
   setupEmergencyCallRoutes(app);
   setupPaymentRoutes(app);
+  setupDoctorsRoutes(app);
+  setupMedicineInventoryRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
@@ -227,10 +223,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  //Emergency
-  app.route('/emergency', reportRoutes());
-  app.route('/emergency', contactRoutes());
-  app.route('/emergency', fcmRoutes());
 
   // Support Map
   app.route('/api', detectRoutes);
@@ -242,4 +234,5 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Public Transportation
   app.route('/api', routeStopsRoutes);
+  app.route('/api', transactionRoute);
 };
