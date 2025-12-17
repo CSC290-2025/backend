@@ -1,10 +1,10 @@
 import * as z from 'zod';
-// import {
-//   createGetRoute,
-//   createPostRoute,
-//   createPutRoute,
-//   createDeleteRoute,
-// } from "@/utils/openapi-helpers";
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+  createDeleteRoute,
+} from '@/utils/openapi-helpers';
 
 export const LocationMarkerSchema = z.object({
   lat: z.number().min(-90).max(90),
@@ -53,10 +53,63 @@ export const MarkerQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
 });
 
-// Schema for bounding box query
+export const MarkerIdParamSchema = z.object({
+  id: z.string(),
+});
+
 export const BoundingBoxSchema = z.object({
   north: z.string().transform(Number),
   south: z.string().transform(Number),
   east: z.string().transform(Number),
   west: z.string().transform(Number),
+});
+
+export const getAllMarkersRoute = createGetRoute({
+  path: '/api/markers',
+  summary: 'Get all markers',
+  query: MarkerQuerySchema,
+  responseSchema: z.object({
+    markers: z.array(MarkerResponseSchema),
+    count: z.number(),
+    filters: z.any(),
+  }),
+  tags: ['Marker'],
+});
+
+export const getMarkerByIdRoute = createGetRoute({
+  path: '/api/markers/{id}',
+  summary: 'Get marker by id',
+  params: MarkerIdParamSchema,
+  responseSchema: z.object({
+    marker: MarkerResponseSchema,
+  }),
+  tags: ['Marker'],
+});
+
+export const createMarkerRoute = createPostRoute({
+  path: '/api/markers',
+  summary: 'Create marker',
+  requestSchema: CreateMarkerSchema,
+  responseSchema: z.object({
+    marker: MarkerResponseSchema,
+  }),
+  tags: ['Marker'],
+});
+
+export const updateMarkerRoute = createPutRoute({
+  path: '/api/markers/{id}',
+  summary: 'Update marker',
+  params: MarkerIdParamSchema,
+  requestSchema: UpdateMarkerSchema,
+  responseSchema: z.object({
+    marker: MarkerResponseSchema,
+  }),
+  tags: ['Marker'],
+});
+
+export const deleteMarkerRoute = createDeleteRoute({
+  path: '/api/markers/{id}',
+  summary: 'Delete marker',
+  params: MarkerIdParamSchema,
+  tags: ['Marker'],
 });

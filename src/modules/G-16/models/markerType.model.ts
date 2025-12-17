@@ -1,11 +1,11 @@
 import prisma from '@/config/client.ts';
 import type {
-    CreateMarkerTypeInput,
-    UpdateMarkerTypeInput,
-    MarkerTypeResponse,
-  } from '../types/markerType.types';
+  CreateMarkerTypeInput,
+  UpdateMarkerTypeInput,
+  MarkerTypeResponse,
+} from '../types/markerType.types';
 import type { MarkerQuery } from '../types';
-  import { handlePrismaError, ValidationError } from '@/errors';
+import { handlePrismaError, ValidationError } from '@/errors';
 
 // export const createMarkerType =async (data: CreateMarkerTypeInput): Promise<MarkerTypeResponse> => {
 //   try {
@@ -13,24 +13,22 @@ import type { MarkerQuery } from '../types';
 //       throw new ValidationError('marker_type_id must be between 1 and 6');
 //     }
 
-//     // 1. แปลง location (lat, lng) ให้เป็น GeoJSON String
 //     let locationGeoJSON = null;
 //     if (data.location) {
 //       locationGeoJSON = JSON.stringify({
 //         type: 'Point',
-//         coordinates: [data.location.lng, data.location.lat], // PostGIS ใช้ [lng, lat]
+//         coordinates: [data.location.lng, data.location.lat],
 //       });
 //     }
-    
-//     const description = data.description || null; // ใช้ค่าที่ส่งมา หรือ null ถ้าไม่ส่งมา
+
+//     const description = data.description || null;
 
 //     const resultRaw = await prisma.$queryRaw<{ id: number }[]>`
 //       INSERT INTO marker (marker_type_id, location, description, updated_at)
 //       VALUES (
-//         ${data.marker_type_id}, 
+//         ${data.marker_type_id},
 //         ST_GeomFromGeoJSON(${locationGeoJSON}),
 //         ${description},
-//         NOW() // 🟢 FIX: NOW() ควรอยู่ตำแหน่งที่ 4 เพื่อกำหนด updated_at
 //       )
 //       RETURNING id
 //     `;
@@ -51,32 +49,35 @@ import type { MarkerQuery } from '../types';
 
 //     return marker as unknown as MarkerTypeResponse;
 //   } catch (error) {
-//     console.error("🔴 RAW DB ERROR:", error);
 //     handlePrismaError(error);
 //   }
 // }
 
-export const createMarkerType = async (data: CreateMarkerTypeInput): Promise<MarkerTypeResponse> => {
-  
+export const createMarkerType = async (
+  data: CreateMarkerTypeInput
+): Promise<MarkerTypeResponse> => {
   try {
-    if (!data.marker_type_id || data.marker_type_id < 1 || data.marker_type_id > 6) {
+    if (
+      !data.marker_type_id ||
+      data.marker_type_id < 1 ||
+      data.marker_type_id > 6
+    ) {
       throw new ValidationError('marker_type_id must be between 1 and 6');
     }
 
     const markerType = await prisma.marker_type.findUnique({
       where: { id: data.marker_type_id },
     });
-  
+
     if (!markerType) {
       throw new ValidationError(`Marker type ${data.marker_type_id} not found`);
     }
-  
+
     let result;
 
     if (data.location) {
-        
-      const pointString = `POINT(${data.location.lng} ${data.location.lat})`; 
-      
+      const pointString = `POINT(${data.location.lng} ${data.location.lat})`;
+
       [result] = await prisma.$queryRaw<any[]>`
         INSERT INTO marker (marker_type_id, location, description, created_at, updated_at)
         VALUES (
@@ -88,7 +89,6 @@ export const createMarkerType = async (data: CreateMarkerTypeInput): Promise<Mar
         RETURNING id, ST_Y(location::geometry) as lat, ST_X(location::geometry) as lng,
                   description, marker_type_id, created_at, updated_at
       `;
-  
     } else {
       [result] = await prisma.$queryRaw<any[]>`
         INSERT INTO marker (marker_type_id, location, description, created_at, updated_at)
@@ -101,34 +101,32 @@ export const createMarkerType = async (data: CreateMarkerTypeInput): Promise<Mar
         RETURNING id, description, marker_type_id, created_at, updated_at
       `;
     }
-    
+
     const markerTypeData = {
-        id: markerType.id,
-        marker_type_icon: markerType.marker_type_icon,
-        created_at: markerType.created_at,
-        updated_at: markerType.updated_at,
+      id: markerType.id,
+      marker_type_icon: markerType.marker_type_icon,
+      created_at: markerType.created_at,
+      updated_at: markerType.updated_at,
     };
 
-
     return {
-        id: result.id,
-        lat: result.lat ? parseFloat(result.lat) : null,
-        lng: result.lng ? parseFloat(result.lng) : null,
-        description: result.description,
-        marker_type_id: result.marker_type_id,
-        marker_type: markerTypeData,
-        created_at: result.created_at,
-        updated_at: result.updated_at,
+      id: result.id,
+      lat: result.lat ? parseFloat(result.lat) : null,
+      lng: result.lng ? parseFloat(result.lng) : null,
+      description: result.description,
+      marker_type_id: result.marker_type_id,
+      marker_type: markerTypeData,
+      created_at: result.created_at,
+      updated_at: result.updated_at,
     } as unknown as MarkerTypeResponse;
-
-
-  } catch (error) { 
+  } catch (error) {
     handlePrismaError(error);
   }
-}
+};
 
-
-export const getMarkerTypeById =async (id: number) : Promise<MarkerTypeResponse | null> => {
+export const getMarkerTypeById = async (
+  id: number
+): Promise<MarkerTypeResponse | null> => {
   try {
     if (!Number.isInteger(id) || id < 1) {
       throw new ValidationError('Invalid marker ID');
@@ -150,9 +148,11 @@ export const getMarkerTypeById =async (id: number) : Promise<MarkerTypeResponse 
   } catch (error) {
     handlePrismaError(error);
   }
-}
+};
 
-export const getAllMarkerTypes = async (query?: MarkerQuery): Promise<MarkerTypeResponse[]> => {
+export const getAllMarkerTypes = async (
+  query?: MarkerQuery
+): Promise<MarkerTypeResponse[]> => {
   try {
     const prismaOptions: any = {
       include: {
@@ -183,27 +183,25 @@ export const getAllMarkerTypes = async (query?: MarkerQuery): Promise<MarkerType
   }
 };
 
-
-
 export const getMarkerTypesByType = async (
   markerTypeId: number[]
 ): Promise<MarkerTypeResponse[]> => {
   try {
     if (!markerTypeId || markerTypeId.length === 0) {
-      return []; 
+      return [];
     }
 
     for (const id of markerTypeId) {
-      if (id < 1 || id > 8) { 
+      if (id < 1 || id > 8) {
         throw new ValidationError('marker_type_id must be between 1 and 8');
       }
     }
 
     const markers = await prisma.marker.findMany({
       where: {
-        marker_type_id:{
+        marker_type_id: {
           in: markerTypeId,
-        } ,
+        },
       },
       include: {
         marker_type: {
@@ -220,10 +218,10 @@ export const getMarkerTypesByType = async (
 
     return markers as unknown as MarkerTypeResponse[];
   } catch (error) {
-  //   if (error instanceof ValidationError) {
-  //     throw error; 
-  // }
-  handlePrismaError(error);
+    //   if (error instanceof ValidationError) {
+    //     throw error;
+    // }
+    handlePrismaError(error);
   }
 };
 
@@ -258,7 +256,6 @@ export const updateMarkerType = async (
       updateFields.push(`location = ST_GeomFromGeoJSON($${values.length + 1})`);
       values.push(locationGeoJSON);
     }
-
 
     // Always update the timestamp
     updateFields.push('updated_at = NOW()');

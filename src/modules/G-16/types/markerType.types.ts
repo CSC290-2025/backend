@@ -23,14 +23,14 @@ export interface MarkerRow {
   id: number;
   marker_type_id: number | null;
   description: string | null;
-  location: any; 
+  location: any;
   created_at: Date;
   updated_at: Date;
   marker_type_id_ref: number | null;
   marker_type_icon: string | null;
 }
 
-type MarkerTypeQuery = z.infer<typeof MarkerTypeQuerySchema>
+type MarkerTypeQuery = z.infer<typeof MarkerTypeQuerySchema>;
 type CreateMarkerTypeInput = z.infer<typeof CreateMarkerTypeSchema>;
 type UpdateMarkerTypeInput = z.infer<typeof UpdateMarkerTypeSchema>;
 type MarkerTypeResponse = z.infer<typeof MarkerTypeResponseSchema>;
@@ -39,5 +39,5 @@ export type {
   CreateMarkerTypeInput,
   UpdateMarkerTypeInput,
   MarkerTypeResponse,
-  MarkerTypeQuery
+  MarkerTypeQuery,
 };

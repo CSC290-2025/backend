@@ -1,15 +1,15 @@
 import { serve } from '@hono/node-server';
-import config from '@/config/env';
-import { errorHandler } from '@/middlewares/error';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
-import { setupRoutes } from '@/routes';
 import { cors } from 'hono/cors';
+import 'dotenv/config';
 
+import config from '@/config/env';
 import prisma from '@/config/client';
+import { errorHandler } from '@/middlewares/error';
+import { setupRoutes } from '@/routes';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
-import 'dotenv/config';
 
 const app = new OpenAPIHono();
 app.onError(errorHandler);
@@ -45,9 +45,11 @@ app.get('/', (c) => {
     version: '1.0.0',
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    docs: `/swagger`,
+    docs: '/swagger',
   });
 });
+
+let serverInstance: ReturnType<typeof serve> | null = null;
 
 app.get('/doc', (c) => {
   let port = config.port;
@@ -78,9 +80,8 @@ app.get('/doc', (c) => {
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 setupRoutes(app);
-startAir4ThaiAggregationJob();
 
-let serverInstance: ReturnType<typeof serve> | null = null;
+startAir4ThaiAggregationJob();
 
 async function shutdown() {
   console.log('Shutting down server...');

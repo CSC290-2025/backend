@@ -56,7 +56,7 @@ import {
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
-// Free Cycle
+//Free Cycle
 import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,
@@ -98,6 +98,9 @@ import {
   markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
+import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
+import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
@@ -117,7 +120,6 @@ import {
   setupOpenMeteoRoutes,
   setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
-
 
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
@@ -199,6 +201,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupBinRoutes(app);
 
   // SupportMap
+  setupMarkerOpenApiRoutes(app);
+  setupMarkerTypeOpenApiRoutes(app);
 
   // SupportMap
 

@@ -1,20 +1,33 @@
 import * as z from 'zod';
-
-export const LocationMarkerTypeSchema = z.object({
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-});
+import {
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+  createDeleteRoute,
+} from '@/utils/openapi-helpers';
 
 export const CreateMarkerTypeSchema = z.object({
   marker_type_id: z.string().transform(Number).optional(),
   description: z.string().optional().nullable(),
   marker_type_icon: z.string().max(255).optional().nullable(),
-  location: LocationMarkerTypeSchema.optional().nullable(),
+  location: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const UpdateMarkerTypeSchema = z.object({
   marker_type_icon: z.string().max(255).optional().nullable(),
-  location: LocationMarkerTypeSchema.optional().nullable(),
+  location: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const MarkerTypeResponseSchema = z.object({
@@ -37,4 +50,57 @@ export const MarkerTypeQuerySchema = z.object({
     .default('created_at')
     .optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
+});
+
+export const MarkerTypeIdParamSchema = z.object({
+  id: z.string().transform(Number),
+});
+
+export const getAllMarkerTypesRoute = createGetRoute({
+  path: '/api/marker-types',
+  summary: 'Get all marker types',
+  query: MarkerTypeQuerySchema,
+  responseSchema: z.object({
+    marker: z.array(MarkerTypeResponseSchema),
+    count: z.number(),
+  }),
+  tags: ['MarkerType'],
+});
+
+export const getMarkerTypeByIdRoute = createGetRoute({
+  path: '/api/marker-types/{id}',
+  summary: 'Get marker type by id',
+  params: MarkerTypeIdParamSchema,
+  responseSchema: z.object({
+    marker: MarkerTypeResponseSchema.nullable(),
+  }),
+  tags: ['MarkerType'],
+});
+
+export const createMarkerTypeRoute = createPostRoute({
+  path: '/api/marker-types',
+  summary: 'Create marker type',
+  requestSchema: CreateMarkerTypeSchema,
+  responseSchema: z.object({
+    marker: MarkerTypeResponseSchema,
+  }),
+  tags: ['MarkerType'],
+});
+
+export const updateMarkerTypeRoute = createPutRoute({
+  path: '/api/marker-types/{id}',
+  summary: 'Update marker type',
+  params: MarkerTypeIdParamSchema,
+  requestSchema: UpdateMarkerTypeSchema,
+  responseSchema: z.object({
+    marker: MarkerTypeResponseSchema.nullable(),
+  }),
+  tags: ['MarkerType'],
+});
+
+export const deleteMarkerTypeRoute = createDeleteRoute({
+  path: '/api/marker-types/{id}',
+  summary: 'Delete marker type',
+  params: MarkerTypeIdParamSchema,
+  tags: ['MarkerType'],
 });
