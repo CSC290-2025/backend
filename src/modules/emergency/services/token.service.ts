@@ -1,10 +1,13 @@
 import { ValidationError } from '@/errors';
 import { FcmModel } from '@/modules/emergency/models';
-import type { CreateTokenFcm, FcmResponse } from '@/modules/emergency/types';
+import type {
+  CreateTokenFcm,
+  TokenFcmResponse,
+} from '@/modules/emergency/types/token.type.ts';
 
 export const storeTokenToDB = async (
   data: CreateTokenFcm
-): Promise<FcmResponse> => {
+): Promise<TokenFcmResponse> => {
   if (!data.tokens) {
     throw new ValidationError('Token is required');
   }
@@ -15,4 +18,13 @@ export const storeTokenToDB = async (
   }
 
   return await FcmModel.createFcmToken(data);
+};
+
+export const getTokenByUserId = async (
+  userId: number
+): Promise<TokenFcmResponse | null> => {
+  if (!userId) {
+    throw new ValidationError('UserId is required');
+  }
+  return await FcmModel.getFcmTokenByUserId(userId);
 };
