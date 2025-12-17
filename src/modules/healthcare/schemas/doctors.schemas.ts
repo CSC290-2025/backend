@@ -8,6 +8,7 @@ import {
 
 const DoctorSchema = z.object({
   id: z.number().int(),
+  doctorName: z.string().max(255).nullable(),
   specialization: z.string().max(100).nullable(),
   currentStatus: z.string().max(50).nullable(),
   consultationFee: z.number().nullable(),
@@ -17,6 +18,7 @@ const DoctorSchema = z.object({
 });
 
 const CreateDoctorSchema = z.object({
+  doctorName: z.string().max(255).optional(),
   specialization: z.string().max(100).optional(),
   currentStatus: z.string().max(50).optional(),
   consultationFee: z.number().optional(),
@@ -25,6 +27,7 @@ const CreateDoctorSchema = z.object({
 });
 
 const UpdateDoctorSchema = z.object({
+  doctorName: z.string().max(255).nullable().optional(),
   specialization: z.string().max(100).nullable().optional(),
   currentStatus: z.string().max(50).nullable().optional(),
   consultationFee: z.number().nullable().optional(),
