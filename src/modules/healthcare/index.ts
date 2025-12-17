@@ -31,6 +31,7 @@ export {
   MedicineInventorySchemas,
   DepartmentSchemas,
   AddressSchemas,
+  StaffSchemas,
 } from './schemas';
 
 // Export routes (OpenAPI setup functions)
@@ -47,4 +48,6 @@ export {
   setupMedicineInventoryRoutes,
   setupDepartmentRoutes,
   setupAddressRoutes,
+  setupHealthcareAuthRoutes,
+  setupStaffRoutes,
 } from './routes';

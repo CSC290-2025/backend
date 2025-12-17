@@ -10,3 +10,4 @@ export * from './doctors.schemas';
 export * from './medicine_inventory.schemas';
 export * from './department.schemas';
 export * from './address.schemas';
+export * from './staff.schemas';

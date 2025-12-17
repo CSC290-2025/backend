@@ -18,6 +18,8 @@ import { setupDoctorsRoutes } from './doctors.openapi.routes';
 import { setupMedicineInventoryRoutes } from './medicine_inventory.openapi.routes';
 import { setupDepartmentRoutes } from './department.openapi.routes';
 import { setupAddressRoutes } from './address.openapi.routes';
+import { setupAuthRoutes } from './auth.routes';
+import { setupStaffRoutes } from './staff.routes';
 
 export {
   setupPatientRoutes,
@@ -32,4 +34,6 @@ export {
   setupMedicineInventoryRoutes,
   setupDepartmentRoutes,
   setupAddressRoutes,
+  setupAuthRoutes as setupHealthcareAuthRoutes,
+  setupStaffRoutes,
 };
