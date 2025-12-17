@@ -90,4 +90,21 @@ const deleteReportById = async (id: number): Promise<ReportDeleteResponse> => {
   }
 };
 
-export { createReport, findReportByStatus, updateReportById, deleteReportById };
+const getReportById = async (id: number): Promise<ReportResponse | null> => {
+  try {
+    const report = await prisma.emergency_reports.findFirst({
+      where: { id },
+    });
+    return report;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  createReport,
+  findReportByStatus,
+  updateReportById,
+  deleteReportById,
+  getReportById,
+};

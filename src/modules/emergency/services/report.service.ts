@@ -1,5 +1,7 @@
-import { ReportModel } from '@/modules/emergency/models';
+import { ContactModel, ReportModel } from '@/modules/emergency/models';
 import type {
+  ContactResponse,
+  CreateContact,
   CreateReport,
   PaginatedReport,
   ReportDeleteResponse,
@@ -7,7 +9,7 @@ import type {
   UpdateReport,
 } from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
-import { ValidationError } from '@/errors';
+import { NotFoundError, ValidationError } from '@/errors';
 import { uploadFile } from '@/utils/upload.ts';
 import { base64ToBlobFromDataUrl } from '@/modules/emergency/utils';
 
@@ -60,4 +62,13 @@ export const deleteReportById = async (
   if (!id) throw new ValidationError('Id is required');
 
   return await ReportModel.deleteReportById(id);
+};
+
+export const findReportById = async (id: number): Promise<ReportResponse> => {
+  const report = await ReportModel.getReportById(id);
+
+  if (!report) {
+    throw new NotFoundError('Not Found this user id');
+  }
+  return report;
 };

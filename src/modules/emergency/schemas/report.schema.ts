@@ -56,6 +56,25 @@ const ReportDeleteResponseSchema = z.object({
   id: z.number().int(),
 });
 
+const ReportFindResponseByIdSchema = z.object({
+  id: z.number().int(),
+  user_id: z.number().int().nullable().optional(),
+  image_url: z.string().nullable(),
+  description: z.string().min(5).max(1000).nullable(),
+  lat: z.string().nullable(),
+  long: z.string().nullable(),
+  ambulance_service: z.boolean().nullable(),
+  contact_center_service: z.boolean().nullable().optional(),
+  level: z
+    .enum(['near_miss', 'minor', 'moderate', 'major', 'lethal'])
+    .nullable(),
+  title: z.string().min(1).optional(),
+  report_category: z
+    .enum(['traffic', 'accident', 'disaster'])
+    .optional()
+    .nullable(),
+});
+
 export {
   CreateReportSchema,
   ReportResponseSchema,
@@ -63,4 +82,5 @@ export {
   FindReportResponseSchema,
   UpdateReportByIdSchema,
   ReportDeleteResponseSchema,
+  ReportFindResponseByIdSchema,
 };
