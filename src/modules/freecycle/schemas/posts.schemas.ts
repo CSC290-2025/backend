@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-// import { AuthMiddleware } from '@/middlewares';
+import { authMiddleware } from '@/middlewares';
 
 const FreecyclePostsSchema = z.object({
   id: z.number(),
@@ -71,7 +71,7 @@ const getUserFreecyclePostsRoute = createGetRoute({
   summary: 'Get post by user',
   responseSchema: FreecyclePostsSchema,
   tags: ['Freecycle-Post'],
-  // middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const createFreecyclePostsRoute = createPostRoute({
@@ -150,6 +150,14 @@ const getPostsByUserIdRoute = createGetRoute({
   responseSchema: z.array(FreecyclePostsSchema),
   params: UserIdParam,
   tags: ['Freecycle-Post'],
+});
+
+export const getMyPostsRoute = createGetRoute({
+  path: '/posts/me',
+  summary: 'Get my posts',
+  responseSchema: z.array(FreecyclePostsSchema),
+  middleware: [authMiddleware],
+  tags: ['Freecycle-Posts'],
 });
 
 export const FreecyclePostsSchemas = {
