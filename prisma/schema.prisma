@@ -20,8 +20,6 @@ model addresses {
   location         Unsupported("geometry")?
   created_at       DateTime                 @default(now()) @db.Timestamptz(6)
   updated_at       DateTime                 @default(now()) @db.Timestamptz(6)
-  latitude         Decimal?                 @db.Decimal(8, 6)
-  longitude        Decimal?                 @db.Decimal(9, 6)
   air_quality      air_quality[]
   apartment        apartment[]
   emergency_calls  emergency_calls[]
@@ -82,11 +80,6 @@ model apartment {
   address_id         Int?
   internet_price     Decimal?            @db.Decimal(10, 2)
   addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
-  apartment_booking  apartment_booking[]
-  apartment_owner    apartment_owner[]
-  apartment_picture  apartment_picture[]
-  rating             rating[]
-  room               room[]
 }
 
 model apartment_booking {
@@ -103,24 +96,20 @@ model apartment_booking {
   room_type      String?         @db.VarChar(255)
   apartment_id   Int?
   users          users           @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  apartment      apartment?      @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_apartment_id")
   room           room?           @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_room_id")
 }
 
 model apartment_owner {
-  id           Int       @id @default(autoincrement())
+  id           Int @id @default(autoincrement())
   user_id      Int
   apartment_id Int
-  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model apartment_picture {
-  id           Int       @id @default(autoincrement())
-  name         String?   @db.VarChar(255)
+  id           Int     @id @default(autoincrement())
+  name         String? @db.VarChar(255)
   file_path    String
   apartment_id Int
-  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model appointments {
@@ -335,23 +324,22 @@ model emergency_contacts {
 }
 
 model emergency_reports {
-  id                     Int                      @id @default(autoincrement())
+  id                     Int            @id @default(autoincrement())
   user_id                Int?
-  image_url              String?                  @db.VarChar(1024)
+  image_url              String?        @db.VarChar(1024)
   description            String?
-  location               Unsupported("geometry")?
-  ambulance_service      Boolean?                 @default(false)
+  ambulance_service      Boolean?       @default(false)
   level                  report_level?
-  status                 report_status?           @default(pending)
-  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  status                 report_status? @default(pending)
+  created_at             DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime       @default(now()) @db.Timestamptz(6)
   title                  String
-  contact_center_service Boolean?                 @default(false)
+  contact_center_service Boolean?       @default(false)
   report_category        report_type?
+  lat                    String?
+  long                   String?
   alerts                 alerts[]
-  users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
-
-  @@index([location], map: "idx_emergency_reports_location", type: Gist)
+  users                  users?         @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
 model event_bookmarks {
@@ -381,10 +369,9 @@ model event_tag {
 }
 
 model event_tag_name {
-  id        Int         @id
+  id        Int         @id @default(autoincrement())
   name      String?     @db.VarChar(255)
   event_tag event_tag[]
-  users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model events {
@@ -583,9 +570,9 @@ model marker {
 model marker_type {
   id                Int      @id @default(autoincrement())
   marker_type_icon  String?  @db.VarChar(255)
-  marker_type_color String?  @db.VarChar(255)
   created_at        DateTime @default(now()) @db.Timestamptz(6)
   updated_at        DateTime @default(now()) @db.Timestamptz(6)
+  marker_type_color String?  @db.VarChar(255)
   marker            marker[]
 }
 
@@ -717,14 +704,13 @@ model questions {
 }
 
 model rating {
-  id           Int        @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   user_id      Int
   rating       Float?
   comment      String?
-  created_at   DateTime?  @default(now()) @db.Timestamptz(6)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
   apartment_id Int?
-  apartment    apartment? @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users        users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model receiver_requests {
@@ -794,7 +780,6 @@ model room {
   price_end         Float?
   apartment_id      Int?
   apartment_booking apartment_booking[]
-  apartment         apartment?          @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model route_stops {
@@ -975,7 +960,7 @@ model users {
   id                            Int                             @id @default(autoincrement())
   username                      String                          @unique @db.VarChar(50)
   email                         String                          @unique @db.VarChar(255)
-  phone                         String?                         @unique @db.VarChar(20)
+  phone                         String?                         @db.VarChar(20)
   password_hash                 String                          @db.VarChar(512)
   role_id                       Int?                            @default(1)
   created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
@@ -983,7 +968,6 @@ model users {
   last_login                    DateTime?                       @db.Timestamptz(6)
   alerts                        alerts[]
   apartment_booking             apartment_booking[]
-  apartment_owner               apartment_owner[]
   conversation_participants     conversation_participants[]
   courses                       courses[]
   digital_cards                 digital_cards[]
@@ -991,7 +975,6 @@ model users {
   emergency_contacts            emergency_contacts[]
   emergency_reports             emergency_reports[]
   event_bookmarks               event_bookmarks[]
-  event_tag_name                event_tag_name?
   events                        events[]
   favourite_district            favourite_district[]
   fcm_token                     fcm_token[]
@@ -1016,11 +999,9 @@ model users {
   users_departments             users_departments[]
   users_specialty               users_specialty[]
   vehicles                      vehicles[]
-  verification_token            verification_token[]
   volunteer_event_participation volunteer_event_participation[]
   volunteer_events              volunteer_events[]
   wallets                       wallets[]
-  waste_logs                    waste_logs[]
 
   @@index([email], map: "idx_users_email")
   @@index([phone], map: "idx_users_phone")
@@ -1059,7 +1040,6 @@ model verification_token {
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   expires_at DateTime? @db.Timestamptz(6)
   id         Int       @id(map: "id_primary_key") @default(autoincrement())
-  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_id_fkey")
 
   @@index([user_id], map: "fki_user_id_fkey")
 }
@@ -1140,13 +1120,11 @@ model waste_event_statistics {
 }
 
 model waste_logs {
-  id            Int          @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   user_id       Int?
   waste_type_id Int?
-  log_date      DateTime?    @db.Timestamptz(6)
-  weight_kg     Decimal?     @db.Decimal(10, 3)
-  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
-  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
+  log_date      DateTime? @db.Timestamptz(6)
+  weight_kg     Decimal?  @db.Decimal(10, 3)
 
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
 }
@@ -1156,7 +1134,6 @@ model waste_types {
   type_name              String                   @db.VarChar(255)
   typical_weight_kg      Decimal?                 @db.Decimal(10, 3)
   waste_event_statistics waste_event_statistics[]
-  waste_logs             waste_logs[]
 }
 
 model weather_data {
@@ -1179,6 +1156,15 @@ model weather_rating {
   date       DateTime?  @default(now()) @db.Timestamptz(6)
   rating     Decimal?   @db.Decimal(3, 2)
   addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
+}
+
+model waste_logs_event {
+  id            Int       @id @default(autoincrement())
+  user_id       Int?
+  event_id      Int?
+  waste_type_id Int?
+  log_date      DateTime? @default(now()) @db.Timestamptz(6)
+  weight_kg     Decimal?  @db.Decimal(10, 3)
 }
 
 enum air_quality_category {
