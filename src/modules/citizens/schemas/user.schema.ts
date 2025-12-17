@@ -100,6 +100,14 @@ const getUserinfoAndWallet = createGetRoute({
   // middleware: [authMiddleware, adminMiddleware],
 });
 
+const getUserAddress = createGetRoute({
+  path: '/user/address/{id}',
+  summary: 'Get user address data',
+  responseSchema: AddressSchema,
+  params: UserIdParam,
+  tags: ['User'],
+});
+
 const getUserProflie = createGetRoute({
   path: '/user/profile/{id}',
   summary: 'Get user data to show at user setting page',
@@ -135,7 +143,7 @@ const updateUserHealth = createPutRoute({
   responseSchema: UserSettingPageSchema,
   params: UserIdParam,
   tags: ['User'],
-  middleware: [authMiddleware, adminMiddleware],
+  middleware: [authMiddleware],
 });
 
 const updateUserAccount = createPutRoute({
@@ -219,16 +227,52 @@ const createUserRole = createPostRoute({
   tags: ['User'],
 });
 
+const ProfilePictureResponse = z.object({
+  userId: z.number(),
+  profilePictureUrl: z.string().nullable(),
+});
+
+const updateProfilePictureBase = createPutRoute({
+  path: '/user/profile/picture/{id}',
+  summary: 'Update user profile picture',
+  params: UserIdParam,
+  tags: ['User'],
+  requestSchema: z.object({}),
+  responseSchema: ProfilePictureResponse,
+});
+
+const updateProfilePicture = {
+  ...updateProfilePictureBase,
+  request: {
+    ...updateProfilePictureBase.request,
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: z.object({
+            file: z.instanceof(File).openapi({
+              type: 'string',
+              format: 'binary',
+              description: 'The image file to upload',
+            }),
+          }),
+        },
+      },
+    },
+  },
+};
+
 export const UserSchemas = {
   getUserinfoAndWallet,
   getUserProflie,
   updateUserPersonal,
   updateUserHealth,
   updateUserAccount,
+  getUserAddress,
   getUserRoles,
   createUserRole,
   getCurrentUserProfile,
   updateCurrentUserPersonal,
   updateCurrentUserHealth,
   updateCurrentUserAccount,
+  updateProfilePicture,
 };
