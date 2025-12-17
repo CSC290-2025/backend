@@ -62,6 +62,7 @@ const findUserByIdForUserSettingPage = async (user_id: number) => {
         id: user_id,
       },
       select: {
+        id: true,
         username: true,
         email: true,
         phone: true,
