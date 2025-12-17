@@ -31,7 +31,7 @@ const ReportResponseSchema = z.object({
   level: z
     .enum(['near_miss', 'minor', 'moderate', 'major', 'lethal'])
     .nullable(),
-  status: ReportStatusEnum,
+  status: ReportStatusEnum.nullable(),
   title: z.string().min(1).optional(),
   report_category: z
     .enum(['traffic', 'accident', 'disaster'])

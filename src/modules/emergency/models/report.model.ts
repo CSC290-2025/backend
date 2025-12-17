@@ -3,8 +3,8 @@ import { handlePrismaError, ValidationError } from '@/errors';
 import type {
   CreateReport,
   PaginatedReport,
-  ReportResponse,
   ReportDeleteResponse,
+  ReportResponse,
   UpdateReport,
 } from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
@@ -92,10 +92,9 @@ const deleteReportById = async (id: number): Promise<ReportDeleteResponse> => {
 
 const getReportById = async (id: number): Promise<ReportResponse | null> => {
   try {
-    const report = await prisma.emergency_reports.findFirst({
+    return await prisma.emergency_reports.findUnique({
       where: { id },
     });
-    return report;
   } catch (error) {
     handlePrismaError(error);
   }
