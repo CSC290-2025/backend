@@ -49,6 +49,7 @@ import { handlePrismaError, ValidationError } from '@/errors';
 
 //     return marker as unknown as MarkerTypeResponse;
 //   } catch (error) {
+//     console.error("🔴 RAW DB ERROR:", error);
 //     handlePrismaError(error);
 //   }
 // }
