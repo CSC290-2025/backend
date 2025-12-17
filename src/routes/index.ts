@@ -39,13 +39,7 @@ import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
-} from '@/modules/emergency';
-
-import {
-  reportRoutes,
-  fcmRoutes,
-  tokenRoutes,
-  contactRoutes,
+  setupContactRoutes,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -162,6 +156,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
+  setupContactRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -228,10 +223,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  //Emergency
-  app.route('/emergency', reportRoutes());
-  app.route('/emergency', contactRoutes());
-  app.route('/emergency', fcmRoutes());
 
   // Support Map
   app.route('/api', detectRoutes);
