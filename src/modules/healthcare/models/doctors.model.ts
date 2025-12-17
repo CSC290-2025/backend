@@ -16,7 +16,6 @@ const doctorSelect = {
   current_status: true,
   consultation_fee: true,
   facility_id: true,
-  department_id: true,
   created_at: true,
 } satisfies Prisma.doctorsSelect;
 
@@ -32,7 +31,8 @@ const mapDoctor = (record: DoctorRecord): Doctor => ({
     ? Number(record.consultation_fee)
     : null,
   facilityId: record.facility_id ?? null,
-  departmentId: record.department_id ?? null,
+  // doctors table has no department column; always null for now
+  departmentId: null,
   createdAt: record.created_at ?? new Date(),
 });
 
@@ -54,10 +54,6 @@ const buildWhereClause = (
 
   if (filters.facilityId !== undefined) {
     where.facility_id = filters.facilityId;
-  }
-
-  if (filters.departmentId !== undefined) {
-    where.department_id = filters.departmentId;
   }
 
   if (filters.search) {
@@ -154,8 +150,14 @@ const create = async (data: CreateDoctorData): Promise<Doctor> => {
         specialization: data.specialization ?? null,
         current_status: data.currentStatus ?? null,
         consultation_fee: data.consultationFee ?? null,
-        facility_id: data.facilityId ?? null,
-        department_id: data.departmentId ?? null,
+        // Set facility via relation so Prisma accepts the payload
+        ...(data.facilityId !== undefined
+          ? {
+              facilities: {
+                connect: { id: data.facilityId },
+              },
+            }
+          : {}),
       },
       select: doctorSelect,
     });
@@ -168,7 +170,7 @@ const create = async (data: CreateDoctorData): Promise<Doctor> => {
 
 const update = async (id: number, data: UpdateDoctorData): Promise<Doctor> => {
   try {
-    const updateData: Prisma.doctorsUncheckedUpdateInput = {};
+    const updateData: Prisma.doctorsUpdateInput = {};
 
     if (data.specialization !== undefined) {
       updateData.specialization = data.specialization;
@@ -183,11 +185,10 @@ const update = async (id: number, data: UpdateDoctorData): Promise<Doctor> => {
     }
 
     if (data.facilityId !== undefined) {
-      updateData.facility_id = data.facilityId;
-    }
-
-    if (data.departmentId !== undefined) {
-      updateData.department_id = data.departmentId;
+      updateData.facilities =
+        data.facilityId === null
+          ? { disconnect: true }
+          : { connect: { id: data.facilityId } };
     }
 
     const record = await prisma.doctors.update({
