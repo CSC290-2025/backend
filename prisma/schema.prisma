@@ -1116,7 +1116,6 @@ model waste_event_statistics {
   id                      Int                @id @default(autoincrement())
   event_id                Int?
   waste_type_id           Int?
-  collection_date         DateTime?          @db.Timestamptz(6)
   total_collection_weight Decimal?           @db.Decimal(12, 3)
   user_id                 Int?
   power_bi_reports        power_bi_reports[]
