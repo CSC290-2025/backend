@@ -33,6 +33,7 @@
     "dotenv": "^17.2.2",
     "firebase": "^12.4.0",
     "firebase-admin": "^13.5.0",
+    "generate": "^0.14.0",
     "hono": "^4.9.8",
     "mime": "^4.1.0",
     "multer": "^2.0.2",
