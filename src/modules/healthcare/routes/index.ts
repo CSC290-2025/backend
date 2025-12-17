@@ -20,6 +20,7 @@ import { setupDepartmentRoutes } from './department.openapi.routes';
 import { setupAddressRoutes } from './address.openapi.routes';
 import { setupAuthRoutes } from './auth.routes';
 import { setupStaffRoutes } from './staff.routes';
+import { setupEmergencyRoutes } from './emergency.routes';
 
 export {
   setupPatientRoutes,
@@ -36,4 +37,5 @@ export {
   setupAddressRoutes,
   setupAuthRoutes as setupHealthcareAuthRoutes,
   setupStaffRoutes,
+  setupEmergencyRoutes,
 };

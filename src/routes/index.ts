@@ -83,6 +83,7 @@ import {
   setupDepartmentRoutes,
   setupHealthcareAuthRoutes,
   setupStaffRoutes,
+  setupEmergencyRoutes,
 } from '@/modules/healthcare/routes';
 
 // Know AI
@@ -192,6 +193,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupAddressRoutes(app);
   setupHealthcareAuthRoutes(app);
   setupStaffRoutes(app);
+  setupEmergencyRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
