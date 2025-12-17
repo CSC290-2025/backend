@@ -52,57 +52,33 @@ const create = async (data: CreateEventInput) => {
 
     return await prisma.$transaction(async (tx) => {
       let addressId = data.address_id ?? null;
-
       if (!addressId && data.address) {
-        const found = await tx.addresses.findFirst({
-          where: {
-            address_line: data.address.address_line ?? null,
-            province: data.address.province ?? null,
-            district: data.address.district ?? null,
-            subdistrict: data.address.subdistrict ?? null,
-            postal_code: data.address.postal_code ?? null,
-          },
-        });
-
-        if (found) {
-          addressId = found.id;
-        } else {
-          const created = await tx.addresses.create({
-            data: {
-              address_line: data.address.address_line ?? null,
-              province: data.address.province ?? null,
-              district: data.address.district ?? null,
-              subdistrict: data.address.subdistrict ?? null,
-              postal_code: data.address.postal_code ?? null,
-            },
-          });
-          addressId = created.id;
-        }
+        const addressFields = {
+          address_line: data.address.address_line ?? null,
+          province: data.address.province ?? null,
+          district: data.address.district ?? null,
+          subdistrict: data.address.subdistrict ?? null,
+          postal_code: data.address.postal_code ?? null,
+        };
+        const found = await tx.addresses.findFirst({ where: addressFields });
+        addressId = found
+          ? found.id
+          : (await tx.addresses.create({ data: addressFields })).id;
       }
 
       let organizationId = data.organization_id ?? null;
-
       if (!organizationId && data.organization) {
+        const orgFields = {
+          name: data.organization.name,
+          email: data.organization.email,
+          phone_number: data.organization.phone_number,
+        };
         const foundOrg = await tx.event_organization.findFirst({
-          where: {
-            name: data.organization.name,
-            email: data.organization.email,
-            phone_number: data.organization.phone_number,
-          },
+          where: orgFields,
         });
-
-        if (foundOrg) {
-          organizationId = foundOrg.id;
-        } else {
-          const createdOrg = await tx.event_organization.create({
-            data: {
-              name: data.organization.name,
-              email: data.organization.email,
-              phone_number: data.organization.phone_number,
-            },
-          });
-          organizationId = createdOrg.id;
-        }
+        organizationId = foundOrg
+          ? foundOrg.id
+          : (await tx.event_organization.create({ data: orgFields })).id;
       }
 
       if (!organizationId) {
@@ -124,16 +100,30 @@ const create = async (data: CreateEventInput) => {
       });
 
       if (data.event_tag_name) {
-        const tag = await tx.event_tag_name.upsert({
+        let tagRecord = await tx.event_tag_name.findUnique({
           where: { id: data.host_user_id },
-          create: { id: data.host_user_id, name: data.event_tag_name },
-          update: { name: data.event_tag_name },
         });
+
+        if (!tagRecord) {
+          tagRecord = await tx.event_tag_name.create({
+            data: {
+              name: data.event_tag_name,
+              users: {
+                connect: { id: data.host_user_id },
+              },
+            },
+          });
+        } else {
+          tagRecord = await tx.event_tag_name.update({
+            where: { id: data.host_user_id },
+            data: { name: data.event_tag_name },
+          });
+        }
 
         await tx.event_tag.create({
           data: {
             event_id: event.id,
-            event_tag_id: tag.id,
+            event_tag_id: tagRecord.id,
             name: data.event_tag_name,
           },
         });
@@ -142,10 +132,10 @@ const create = async (data: CreateEventInput) => {
       return event;
     });
   } catch (err) {
+    console.error('PRISMA CREATE ERROR:', err);
     handlePrismaError(err);
   }
 };
-
 const update = async (id: number, data: UpdateEventInput) => {
   try {
     return await prisma.$transaction(async (tx) => {
@@ -156,7 +146,7 @@ const update = async (id: number, data: UpdateEventInput) => {
         updateData.description = data.description;
       if (data.total_seats !== undefined)
         updateData.total_seats = data.total_seats;
-      if (data.image_url !== undefined) updateData.imageurl = data.image_url;
+      if (data.image_url !== undefined) updateData.image_url = data.image_url;
       if (data.start_date && data.start_time) {
         updateData.start_at = new Date(`${data.start_date}T${data.start_time}`);
       }
@@ -224,7 +214,6 @@ const update = async (id: number, data: UpdateEventInput) => {
       if (organizationId !== null) {
         updateData.organization_id = organizationId;
       }
-
       return await tx.events.update({
         where: { id },
         data: updateData,
@@ -309,6 +298,34 @@ const listPastBookmarkedEvents = async (
     return { items: [], total: 0 };
   }
 };
+const listWasteEvents = async () => {
+  try {
+    return await prisma.events.findMany({
+      where: {
+        event_tag: {
+          name: {
+            equals: 'waste',
+            mode: 'insensitive',
+          },
+        },
+      },
+      include: {
+        event_organization: true,
+        addresses: true,
+        event_tag: {
+          include: {
+            event_tag_name: true,
+          },
+        },
+      },
+      orderBy: {
+        start_at: 'desc',
+      },
+    });
+  } catch (err) {
+    handlePrismaError(err);
+  }
+};
 export const EventModel = {
   findById,
   list,
@@ -317,4 +334,5 @@ export const EventModel = {
   remove,
   getEventByDay,
   listPastBookmarkedEvents,
+  listWasteEvents,
 };

@@ -52,21 +52,18 @@ export const deleteEvent = async (c: Context) => {
     'Event deleted successfully'
   );
 };
-export const getEventByDay = async (c: Context) => {
-  const dateParam = c.req.query('date');
+export const getEventByDay = async (c: any) => {
+  const { date } = c.req.valid('query') as { date: Date };
 
-  if (!dateParam) {
-    throw new Error('Date parameter is required');
-  }
-
-  const from = new Date(dateParam);
-
+  const from = new Date(date);
   const to = new Date(from);
   to.setDate(to.getDate() + 1);
 
+  // 1. Fetch the full objects from the service
   const data = await EventService.getEventByDay(from, to);
 
-  return successResponse(c, { data: data });
+  // 2. Return the raw array directly so fields like 'id' and 'start_at' exist
+  return successResponse(c, { data });
 };
 export const listPastBookmarkedEvents = async (c: Context) => {
   const page = Number(c.req.query('page') || 1);
@@ -82,4 +79,11 @@ export const listPastBookmarkedEvents = async (c: Context) => {
   );
 
   return successResponse(c, result);
+};
+export const listWasteEvents = async (c: Context) => {
+  const data = await EventService.listWasteEvents();
+
+  return successResponse(c, {
+    data,
+  });
 };

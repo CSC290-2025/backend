@@ -94,7 +94,11 @@ const logout = async (c: Context) => {
 const me = async (c: Context) => {
   const user = c.get('user') as AuthTypes.JwtPayload;
 
-  return successResponse(c, { authenticated: true, userId: user.userId }, 200);
+  return successResponse(
+    c,
+    { authenticated: true, userId: user.userId, role: user.role_name },
+    200
+  );
 };
 
 export { login, refreshToken, logout, me, register };

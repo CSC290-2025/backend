@@ -67,7 +67,9 @@ const listPastBookmarkedEvents = async (
 ) => {
   return await EventModel.listPastBookmarkedEvents(userId, page, limit);
 };
-
+const listWasteEvents = async () => {
+  return await EventModel.listWasteEvents();
+};
 export {
   getEventById,
   listEvents,
@@ -76,4 +78,5 @@ export {
   deleteEvent,
   getEventByDay,
   listPastBookmarkedEvents,
+  listWasteEvents,
 };
