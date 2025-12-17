@@ -7,11 +7,6 @@ import type {
   RainDailyQuery,
   RainHourlyQuery,
 } from '../types';
-import {
-  enableWeatherAutoImport,
-  disableWeatherAutoImport,
-  getWeatherAutoImportStatus as getWeatherAutoImportStatusState,
-} from '../services/weather-auto-import.scheduler';
 
 // Forward the `/current` endpoint to Open-Meteo and relay the structured DTO.
 const getOpenMeteoCurrent = async (c: Context) => {

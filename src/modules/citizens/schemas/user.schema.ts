@@ -30,6 +30,12 @@ const AddressSchema = z.object({
   postal_code: z.string().nullable(),
 });
 
+const UpdatePasswordSchema = z.object({
+  currentPassword: z.string().min(6),
+  newPassword: z.string().min(6),
+  confirmNewPassword: z.string().min(6),
+});
+
 const UserProfileSchema = z.object({
   id_card_number: z.string().nullable(),
   first_name: z.string().nullable(),
@@ -98,6 +104,15 @@ const getUserinfoAndWallet = createGetRoute({
   params: UserIdParam,
   tags: ['User'],
   // middleware: [authMiddleware, adminMiddleware],
+});
+
+const updatePassword = createPutRoute({
+  path: '/user/password/{id}',
+  summary: 'Update user password',
+  requestSchema: UpdatePasswordSchema,
+  responseSchema: z.object({}),
+  params: UserIdParam,
+  tags: ['User'],
 });
 
 const getUserProflie = createGetRoute({
@@ -231,4 +246,5 @@ export const UserSchemas = {
   updateCurrentUserPersonal,
   updateCurrentUserHealth,
   updateCurrentUserAccount,
+  updatePassword,
 };

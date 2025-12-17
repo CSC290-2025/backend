@@ -1,23 +1,40 @@
 import * as z from 'zod';
 
-const FcmResponseSchema = z.object({
-  id: z.number(),
-  user_id: z.number().int().nullable(),
-  tokens: z.string().nullable(),
-  created_at: z.coerce.date().nullable(),
-  updated_at: z.coerce.date().nullable(),
+const SendFcmResponseSchema = z.object({
+  message_id: z.string(),
 });
 
-const CreateTokenFcmSchema = z.object({
-  tokens: z.string(),
-  user_id: z.number().optional(),
+const FcmBatchResponseSchema = z.object({
+  successCount: z.number(),
+  failureCount: z.number(),
+  responses: z.array(
+    z.object({
+      success: z.boolean(),
+      messageId: z.string().optional(),
+      error: z
+        .object({
+          message: z.string(),
+        })
+        .optional(),
+    })
+  ),
 });
 
-const NotificationSchema = z.object({
+const CreateNotificationByTokenSchema = z.object({
+  token: z.string(),
   notification: z.object({
     title: z.string(),
     body: z.string(),
   }),
 });
 
-export { FcmResponseSchema, CreateTokenFcmSchema, NotificationSchema };
+const CreateNotificationSchema = CreateNotificationByTokenSchema.omit({
+  token: true,
+});
+
+export {
+  CreateNotificationSchema,
+  SendFcmResponseSchema,
+  FcmBatchResponseSchema,
+  CreateNotificationByTokenSchema,
+};
