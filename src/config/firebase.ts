@@ -8,4 +8,6 @@ admin.initializeApp({
 });
 
 const firebaseMessaging = admin.messaging();
-export { firebaseMessaging };
+const firebaseDatabase = admin.database();
+
+export { firebaseMessaging, firebaseDatabase };
