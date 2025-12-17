@@ -151,15 +151,17 @@ model beds {
 }
 
 model bin {
-  id         Int       @id @default(autoincrement())
-  bin_name   String?   @db.VarChar(255)
-  bin_type   bin_type?
-  latitude   Decimal?  @db.Decimal(10, 8)
-  longitude  Decimal?  @db.Decimal(11, 8)
-  address    String?
-  capacity   Decimal?  @db.Decimal(10, 2)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @db.Timestamptz(6)
+  id                 Int       @id @default(autoincrement())
+  bin_name           String?   @db.VarChar(255)
+  bin_type           bin_type?
+  latitude           Decimal?  @db.Decimal(10, 8)
+  longitude          Decimal?  @db.Decimal(11, 8)
+  address            String?
+  capacity           Decimal?  @db.Decimal(10, 2)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @db.Timestamptz(6)
+  created_by_user_id Int?
+  users              users?    @relation(fields: [created_by_user_id], references: [id], onUpdate: NoAction)
 }
 
 model card_transactions {
@@ -304,6 +306,7 @@ model doctors {
   consultation_fee Decimal?       @default(0) @db.Decimal(12, 2)
   created_at       DateTime?      @default(now()) @db.Timestamptz(6)
   facility_id      Int?
+  name             String?        @db.VarChar(255)
   appointments     appointments[]
   facilities       facilities?    @relation(fields: [facility_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_facility_id")
   users            users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_id")
@@ -339,7 +342,6 @@ model emergency_reports {
   user_id                Int?
   image_url              String?                  @db.VarChar(1024)
   description            String?
-  location               Unsupported("geometry")?
   ambulance_service      Boolean?                 @default(false)
   level                  report_level?
   status                 report_status?           @default(pending)
@@ -348,6 +350,9 @@ model emergency_reports {
   title                  String
   contact_center_service Boolean?                 @default(false)
   report_category        report_type?
+  location               Unsupported("geometry")?
+  lat                    String?
+  long                   String?
   alerts                 alerts[]
   users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
@@ -381,7 +386,7 @@ model event_tag {
 }
 
 model event_tag_name {
-  id        Int         @id
+  id        Int         @id @default(autoincrement())
   name      String?     @db.VarChar(255)
   event_tag event_tag[]
   users     users       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -408,6 +413,7 @@ model events {
   users                  users?                   @relation(fields: [host_user_id], references: [id], onUpdate: NoAction)
   event_organization     event_organization?      @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "organization_id")
   waste_event_statistics waste_event_statistics[]
+  waste_logs_event       waste_logs_event[]
 
   @@index([start_at], map: "idx_events_start_at")
 }
@@ -583,9 +589,9 @@ model marker {
 model marker_type {
   id                Int      @id @default(autoincrement())
   marker_type_icon  String?  @db.VarChar(255)
-  marker_type_color String?  @db.VarChar(255)
   created_at        DateTime @default(now()) @db.Timestamptz(6)
   updated_at        DateTime @default(now()) @db.Timestamptz(6)
+  marker_type_color String?  @db.VarChar(255)
   marker            marker[]
 }
 
@@ -975,7 +981,7 @@ model users {
   id                            Int                             @id @default(autoincrement())
   username                      String                          @unique @db.VarChar(50)
   email                         String                          @unique @db.VarChar(255)
-  phone                         String?                         @unique @db.VarChar(20)
+  phone                         String?                         @db.VarChar(20)
   password_hash                 String                          @db.VarChar(512)
   role_id                       Int?                            @default(1)
   created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
@@ -984,6 +990,7 @@ model users {
   alerts                        alerts[]
   apartment_booking             apartment_booking[]
   apartment_owner               apartment_owner[]
+  bin                           bin[]
   conversation_participants     conversation_participants[]
   courses                       courses[]
   digital_cards                 digital_cards[]
@@ -1021,6 +1028,7 @@ model users {
   volunteer_events              volunteer_events[]
   wallets                       wallets[]
   waste_logs                    waste_logs[]
+  waste_logs_event              waste_logs_event[]
 
   @@index([email], map: "idx_users_email")
   @@index([phone], map: "idx_users_phone")
@@ -1149,6 +1157,7 @@ model waste_logs {
   waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
 
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
+  @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
 model waste_types {
@@ -1157,6 +1166,7 @@ model waste_types {
   typical_weight_kg      Decimal?                 @db.Decimal(10, 3)
   waste_event_statistics waste_event_statistics[]
   waste_logs             waste_logs[]
+  waste_logs_event       waste_logs_event[]
 }
 
 model weather_data {
@@ -1179,6 +1189,20 @@ model weather_rating {
   date       DateTime?  @default(now()) @db.Timestamptz(6)
   rating     Decimal?   @db.Decimal(3, 2)
   addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
+}
+
+model waste_logs_event {
+  id            Int          @id @default(autoincrement())
+  user_id       Int?
+  event_id      Int?
+  waste_type_id Int?
+  log_date      DateTime?    @default(now()) @db.Timestamptz(6)
+  weight_kg     Decimal?     @db.Decimal(10, 3)
+  events        events?      @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_id_fkey")
+  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
+  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_fkey")
+
+  @@index([event_id], map: "fki_event_id_fkey")
 }
 
 enum air_quality_category {

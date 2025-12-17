@@ -1,7 +1,11 @@
 import prisma from '@/config/client';
 import { NotFoundError, handlePrismaError } from '@/errors';
-import type { Bookmark, CreateBookmarkInput, BookmarkedUser } from '../types';
-
+import type {
+  Bookmark,
+  CreateBookmarkInput,
+  BookmarkedUser,
+  Event,
+} from '../types';
 const listByUser = async (userId: number, page: number, limit: number) => {
   try {
     const skip = (page - 1) * limit;
@@ -9,6 +13,14 @@ const listByUser = async (userId: number, page: number, limit: number) => {
     const [items, total] = await Promise.all([
       prisma.event_bookmarks.findMany({
         where: { user_id: userId },
+        include: {
+          event: {
+            include: {
+              event_organization: true,
+              addresses: true,
+            },
+          },
+        },
         take: limit,
         skip,
         orderBy: { created_at: 'desc' },
@@ -21,6 +33,7 @@ const listByUser = async (userId: number, page: number, limit: number) => {
     return { items, total };
   } catch (err) {
     handlePrismaError(err);
+    return { items: [], total: 0 };
   }
 };
 
@@ -36,34 +49,31 @@ const findByUserAndEvent = async (userId: number, eventId: number) => {
     return null;
   }
 };
-const create = async (userId: number, data: { event_id: number }) => {
+const create = async (userId: number, eventId: number) => {
   try {
     return await prisma.event_bookmarks.create({
       data: {
         user_id: userId,
-        event_id: data.event_id,
+        event_id: eventId,
       },
     });
   } catch (err) {
     handlePrismaError(err);
-    throw err;
   }
 };
 
 const remove = async (userId: number, eventId: number) => {
   try {
-    const x = await prisma.event_bookmarks.deleteMany({
+    return await prisma.event_bookmarks.delete({
       where: {
-        user_id: userId,
-        event_id: eventId,
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
+        },
       },
     });
-
-    if (x.count === 0) throw new NotFoundError('Bookmark not found');
-    return true;
   } catch (err) {
     handlePrismaError(err);
-    throw err;
   }
 };
 const listUsersByEvent = async (
