@@ -1,3 +1,169 @@
+// import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// const genAI = new GoogleGenerativeAI(process.env.G01_KNOW_AI || '');
+
+// interface AIEvaluation {
+//   is_correct: boolean;
+//   confidence: number;
+//   feedback: string;
+//   suggestions: string;
+// }
+
+// const evaluateWithGemini = async (
+//   questionText: string,
+//   userAnswer: string
+// ): Promise<AIEvaluation> => {
+//   try {
+//     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+//     const prompt = `You are an expert prompt engineering instructor evaluating student responses in a prompt engineering course.
+
+// ================================================================================
+// QUESTION
+// ================================================================================
+// ${questionText}
+
+// ================================================================================
+// STUDENT ANSWER
+// ================================================================================
+// ${userAnswer}
+
+// ================================================================================
+// EVALUATION CRITERIA (Total: 100%)
+// ================================================================================
+
+// 1. CORRECTNESS (40%)
+//    - Concepts are accurate and demonstrate real understanding
+//    - No significant misconceptions or errors
+//    - Shows grasp of WHY techniques work, not just WHAT they are
+
+// 2. COMPLETENESS (30%)
+//    - All parts of the question are addressed
+//    - Key concepts covered with adequate depth
+//    - Includes examples when requested
+
+// 3. PRACTICAL APPLICATION (20%)
+//    - Can apply concepts to real scenarios
+//    - Examples are relevant and well-constructed
+//    - Shows hands-on understanding
+
+// 4. CLARITY (10%)
+//    - Well-organized and easy to follow
+//    - Clear language and logical flow
+
+// ================================================================================
+// SCORING GUIDELINES
+// ================================================================================
+
+// MARK AS CORRECT (is_correct: true) IF:
+// • Core concepts are accurate
+// • Addresses 75%+ of the question
+// • Minor errors don't reflect fundamental misunderstanding
+// • Shows practical understanding
+
+// MARK AS INCORRECT (is_correct: false) IF:
+// • Contains major conceptual errors
+// • Addresses less than 60% of the question
+// • Shows fundamental misunderstanding
+// • Provides harmful/incorrect advice
+
+// SCORE RANGES:
+// • 90-100: Excellent, comprehensive, insightful
+// • 75-89: Good, solid understanding with minor gaps
+// • 60-74: Adequate, basic understanding but missing key elements
+// • 40-59: Weak, significant gaps or errors
+// • 0-39: Very weak, major misunderstandings or blank
+
+// CONFIDENCE LEVELS:
+// • 90-100: Very clear evaluation
+// • 75-89: Clear with minor subjectivity
+// • 60-74: Some interpretation needed
+// • 40-59: Borderline or ambiguous
+// • 0-39: Difficult to evaluate
+
+// ================================================================================
+// SPECIAL CASES
+// ================================================================================
+
+// • BLANK/VERY SHORT (<20 chars): Mark incorrect (20-30 score), encourage trying
+// • PARTIALLY CORRECT: Acknowledge what's right first, then gaps (50-70 score)
+// • EXCELLENT: Give enthusiastic feedback (85-100 score)
+// • DIFFERENT BUT VALID APPROACH: Accept as correct, note alternative method
+// • CREATIVE/INSIGHTFUL: Reward with high score and positive feedback
+// • MISSING EXAMPLES (when asked): Significant deduction, explicitly request them
+// • HARMFUL ADVICE: Mark incorrect, explain ethical concerns
+
+// ================================================================================
+// FEEDBACK REQUIREMENTS
+// ================================================================================
+
+// Your feedback must be:
+// ✓ SPECIFIC - Reference actual content from the answer
+// ✓ BALANCED - Start with strengths, then address issues
+// ✓ EDUCATIONAL - Explain WHY something is right/wrong
+// ✓ CONSTRUCTIVE - Focus on learning and improvement
+// ✓ ENCOURAGING - Maintain positive tone even when correcting
+
+// ================================================================================
+// OUTPUT FORMAT
+// ================================================================================
+
+// Respond with ONLY valid JSON (no markdown, no extra text):
+
+// {
+//   "is_correct": boolean,
+//   "confidence": number (0-100),
+//   "score": number (0-100),
+//   "feedback": "3-5 sentences. Start positive, then address issues. Be specific.",
+//   "suggestions": "2-4 sentences with actionable advice. Can be short for scores >95.",
+//   "strengths": "2-3 specific strengths, or 'N/A' if very weak",
+//   "weaknesses": "2-3 specific gaps/issues, or 'N/A' if excellent",
+//   "key_concepts_identified": ["concept1", "concept2"],
+//   "missing_concepts": ["concept1", "concept2"]
+// }
+
+// Evaluate now. Output only JSON.`;
+
+//     const result = await model.generateContent(prompt);
+//     const response = await result.response;
+//     const text = response.text();
+
+//     // Remove markdown code blocks if present
+//     const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+//     const evaluation = JSON.parse(cleaned);
+
+//     // Validate response structure
+//     if (typeof evaluation.is_correct !== 'boolean') {
+//       throw new Error('Invalid evaluation format from AI');
+//     }
+
+//     return {
+//       is_correct: evaluation.is_correct,
+//       confidence: evaluation.confidence || 50,
+//       feedback: evaluation.feedback || 'Answer evaluated',
+//       suggestions: evaluation.suggestions || '',
+//     };
+//   } catch (error) {
+//     console.error('Gemini evaluation error:', error);
+//     return fallbackEvaluation(userAnswer);
+//   }
+// };
+
+// const fallbackEvaluation = (userAnswer: string): AIEvaluation => {
+//   const isLongEnough = userAnswer.trim().length > 20;
+//   const hasMultipleWords = userAnswer.trim().split(' ').length > 5;
+
+//   return {
+//     is_correct: isLongEnough && hasMultipleWords,
+//     confidence: 50,
+//     feedback: 'Answer auto-evaluated due to AI service unavailability.',
+//     suggestions: 'Please ensure your answer is detailed and clear.',
+//   };
+// };
+
+// export { evaluateWithGemini };
+// export type { AIEvaluation };
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.G01_KNOW_AI || '');
@@ -9,179 +175,159 @@ interface AIEvaluation {
   suggestions: string;
 }
 
+const getDifficultyLabel = (level: number): string => {
+  if (level === 1) return 'easy';
+  if (level === 2) return 'medium';
+  if (level === 3) return 'hard';
+  return 'medium';
+};
+
 const evaluateWithGemini = async (
   questionText: string,
-  userAnswer: string
+  userAnswer: string,
+  difficultyLevel: number = 2
 ): Promise<AIEvaluation> => {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const difficulty = getDifficultyLabel(difficultyLevel);
 
-    //     const prompt = `You are a strict evaluator for a prompt engineering course. Your ONLY task is to output valid JSON.
-
-    // QUESTION: ${questionText}
-    // STUDENT ANSWER: ${userAnswer}
-
-    // EVALUATION CRITERIA:
-    // 1. Does the answer demonstrate understanding of prompt engineering concepts?
-    // 2. Are key concepts correctly identified and explained?
-    // 3. Is the answer semantically aligned with what the question asks?
-    // 4. Does it show practical understanding, not just memorization?
-
-    // CRITICAL INSTRUCTIONS:
-    // - Output ONLY valid JSON - absolutely NO markdown formatting, NO code blocks, NO backticks, NO explanatory text
-    // - DO NOT wrap the JSON in \`\`\`json or \`\`\` tags
-    // - DO NOT add any text before or after the JSON object
-    // - Your entire response must be parseable by JSON.parse()
-
-    // OUTPUT FORMAT (copy this structure exactly):
-    // {"is_correct":boolean,"confidence":number,"feedback":"string","suggestions":"string"}
-
-    // FIELD REQUIREMENTS:
-    // - is_correct: true if answer demonstrates understanding, false otherwise
-    // - confidence: number from 0-100 indicating your certainty
-    // - feedback: 1-2 sentences explaining your evaluation (max 150 characters)
-    // - suggestions: specific improvements needed, or empty string if answer is excellent
-
-    // RESPOND NOW WITH ONLY THE JSON OBJECT:`;
-
-    const prompt = `You are an expert prompt engineering instructor with extensive experience in evaluating student understanding of AI prompt design, optimization, and best practices. Your role is to provide thorough, insightful, and constructive evaluation of student responses.
+    const prompt = `You are an expert prompt engineering instructor evaluating student responses in a prompt engineering course.
 
 ================================================================================
-CONTEXT AND BACKGROUND
-================================================================================
-You are evaluating responses in a prompt engineering course that covers:
-- Prompt structure and clarity
-- Context setting and role assignment
-- Instruction specificity and precision
-- Use of examples (zero-shot, few-shot, chain-of-thought)
-- Output formatting and constraints
-- Iterative prompt refinement
-- Common pitfalls and anti-patterns
-- Advanced techniques (persona design, delimiters, system prompts)
-
-================================================================================
-QUESTION BEING EVALUATED
+QUESTION
 ================================================================================
 ${questionText}
 
+DIFFICULTY LEVEL: ${difficulty}
+(Level ${difficultyLevel} of 3: 1=easy, 2=medium, 3=hard)
+
 ================================================================================
-STUDENT'S SUBMITTED ANSWER
+STUDENT ANSWER
 ================================================================================
 ${userAnswer}
 
 ================================================================================
-EVALUATION FRAMEWORK
+EVALUATION CRITERIA (Total: 100%)
 ================================================================================
 
-You must evaluate the student's answer across multiple dimensions:
+ADJUST YOUR EXPECTATIONS BASED ON DIFFICULTY:
 
-1. CONCEPTUAL ACCURACY (Weight: 35%)
-   - Does the answer demonstrate correct understanding of prompt engineering principles?
-   - Are the concepts explained accurately without misconceptions?
-   - Does the student understand WHY certain techniques work?
+• EASY (Level 1): Be very lenient
+  - Accept basic understanding (40%+ coverage = correct)
+  - Score 60+ for any reasonable attempt
+  - Focus on effort and basic grasp
 
-2. COMPLETENESS (Weight: 25%)
-   - Are all parts of the question adequately addressed?
-   - Are key concepts covered with sufficient depth?
-   - Is there important information missing that should be included?
+• MEDIUM (Level 2): Standard expectations
+  - Need decent understanding (60%+ coverage = correct)
+  - Score 55+ for partial understanding
+  - Balance between basics and depth
 
-3. PRACTICAL APPLICATION (Weight: 20%)
-   - Can the student apply concepts to real-world scenarios?
-   - Are examples provided relevant and well-constructed?
-   - Does the answer show ability to create effective prompts?
-
-4. CLARITY AND STRUCTURE (Weight: 10%)
-   - Is the answer well-organized and easy to follow?
-   - Is the language clear and precise?
-   - Are ideas presented logically?
-
-5. DEPTH OF UNDERSTANDING (Weight: 10%)
-   - Does the answer go beyond surface-level knowledge?
-   - Are nuances and edge cases considered?
-   - Does the student demonstrate critical thinking?
+• HARD (Level 3): Still be fair but expect more
+  - Need good understanding (70%+ coverage = correct)
+  - Score 50+ for showing real effort
+  - Reward depth and nuance, but don't be harsh
 
 ================================================================================
-EVALUATION GUIDELINES
+
+1. CORRECTNESS (40%)
+   - Concepts are accurate and demonstrate real understanding
+   - No significant misconceptions or errors
+   - Shows grasp of WHY techniques work, not just WHAT they are
+
+2. COMPLETENESS (30%)
+   - All parts of the question are addressed
+   - Key concepts covered with adequate depth
+   - Includes examples when requested
+
+3. PRACTICAL APPLICATION (20%)
+   - Can apply concepts to real scenarios
+   - Examples are relevant and well-constructed
+   - Shows hands-on understanding
+
+4. CLARITY (10%)
+   - Well-organized and easy to follow
+   - Clear language and logical flow
+
+================================================================================
+SCORING GUIDELINES
 ================================================================================
 
-CORRECTNESS CRITERIA:
-- Mark as CORRECT (is_correct: true) if:
-  * Core concepts are accurate and well-explained
-  * Answer addresses the question substantially (80%+ complete)
-  * Any errors are minor and don't reflect fundamental misunderstanding
-  * Practical application is demonstrated appropriately
+MARK AS CORRECT (is_correct: true) IF:
+• EASY: Shows any basic understanding (40%+ coverage)
+• MEDIUM: Core concepts mostly accurate (60%+ coverage)
+• HARD: Good grasp of concepts (70%+ coverage)
+• Shows genuine attempt to understand
+• No harmful advice
 
-- Mark as INCORRECT (is_correct: false) if:
-  * Contains significant conceptual errors or misconceptions
-  * Misses critical parts of the question (less than 60% addressed)
-  * Shows fundamental misunderstanding of prompt engineering principles
-  * Lacks practical applicability or provides harmful/incorrect advice
+MARK AS INCORRECT (is_correct: false) IF:
+• Contains fundamental misconceptions that could mislead others
+• Shows no real attempt or understanding
+• Provides harmful/dangerous advice
+• Completely off-topic or blank
 
-- PARTIAL CREDIT: Consider answers between 60-79% as borderline. Use your judgment based on the severity of gaps and the quality of what is present.
+SCORE RANGES (Adjust generosity by difficulty):
+• EASY: Start at 65 for basic attempts, 75+ for decent answers
+• MEDIUM: Start at 55 for basic attempts, 70+ for decent answers
+• HARD: Start at 50 for real attempts, 65+ for decent answers
 
-CONFIDENCE SCORING:
-- 90-100: Extremely clear case, no ambiguity in evaluation
-- 75-89: Strong confidence, minor ambiguity or subjective elements
-- 60-74: Moderate confidence, some interpretation required
-- 40-59: Low confidence, answer is ambiguous or borderline
-- 0-39: Very uncertain, answer is difficult to interpret
+GENERAL SCORING PHILOSOPHY:
+• Default to giving benefit of the doubt
+• Reward partial understanding generously
+• Focus on what's RIGHT before what's wrong
+• If answer shows ANY understanding, don't go below 50 (easy), 45 (medium), 40 (hard)
+• Reserve very low scores (<35) for blank or completely wrong answers
 
-FEEDBACK REQUIREMENTS:
+CONFIDENCE LEVELS:
+• 90-100: Very clear evaluation
+• 75-89: Clear with minor subjectivity
+• 60-74: Some interpretation needed
+• 40-59: Borderline or ambiguous
+• 0-39: Difficult to evaluate
+
+================================================================================
+SPECIAL CASES
+================================================================================
+
+• BLANK/VERY SHORT (<20 chars): Mark incorrect (25-35 score), encourage trying
+• PARTIALLY CORRECT: Focus on what's RIGHT first, gentle on gaps (60-75 score)
+• SHOWS EFFORT BUT INCOMPLETE: Be generous (55-70 score)
+• EXCELLENT: Give enthusiastic feedback (85-100 score)
+• DIFFERENT BUT VALID APPROACH: Accept as correct, celebrate creativity
+• CREATIVE/INSIGHTFUL: Reward generously with high score
+• MISSING EXAMPLES (when asked): Minor deduction only, still can pass
+• HARMFUL ADVICE: Mark incorrect, explain gently why it's problematic
+
+================================================================================
+FEEDBACK REQUIREMENTS
+================================================================================
+
 Your feedback must be:
-1. SPECIFIC: Point to exact elements of the answer (good or bad)
-2. EDUCATIONAL: Explain the reasoning behind your evaluation
-3. CONSTRUCTIVE: Focus on learning, not just criticism
-4. BALANCED: Acknowledge both strengths and weaknesses
-5. ACTIONABLE: Provide clear direction for improvement
+✓ POSITIVE-FIRST - Always start with what they did well
+✓ ENCOURAGING - Make students feel good about their effort
+✓ SPECIFIC - Reference actual content from the answer
+✓ GENTLE - Frame criticism as "opportunities to strengthen"
+✓ EDUCATIONAL - Explain WHY, don't just point out errors
+✓ GENEROUS - Give credit for partial understanding
 
 ================================================================================
-SPECIAL CONSIDERATIONS
+OUTPUT FORMAT
 ================================================================================
 
-- If the answer is BLANK or extremely short (less than 20 characters):
-  Mark as incorrect with low score, and provide encouraging feedback about attempting the question.
-
-- If the answer is PARTIALLY CORRECT:
-  Acknowledge what is correct first, then explain what's missing or incorrect.
-  Score proportionally (e.g., 50-70 for half-right answers).
-
-- If the answer is EXCELLENT:
-  Provide enthusiastic positive feedback and minimal suggestions (can be empty string).
-  Score 85-100 based on quality.
-
-- If the answer uses DIFFERENT TERMINOLOGY but shows understanding:
-  Accept it as correct and note the alternative approach in feedback.
-
-- If the answer is CREATIVE or shows DEEP INSIGHT beyond the expected:
-  Reward this with high scores and positive feedback.
-
-- If the question asks for EXAMPLES and none are provided:
-  Deduct points significantly and explicitly request examples in suggestions.
-
-- If the answer contains HARMFUL ADVICE (e.g., injection attacks, bypassing safety):
-  Mark as incorrect, explain why this is problematic, and guide toward ethical practices.
-
-================================================================================
-OUTPUT FORMAT REQUIREMENTS
-================================================================================
-
-CRITICAL: You must respond with ONLY a valid JSON object. No other text, no explanations outside the JSON, no markdown formatting, no code blocks, no preamble, no conclusion.
-
-The JSON object must have this EXACT structure:
+Respond with ONLY valid JSON (no markdown, no extra text):
 
 {
-  "is_correct": boolean value (true or false only),
-  "confidence": integer between 0 and 100,
-  "score": integer between 0 and 100,
-  "feedback": "A detailed string (3-5 sentences) explaining your evaluation. Start with what the student did well, then address any issues. Be specific and reference actual content from their answer. Maintain an encouraging but honest tone.",
-  "suggestions": "A detailed string (2-4 sentences) providing specific, actionable advice for improvement. If the answer is near-perfect (score > 95), this can be a short affirmation or empty string. Otherwise, provide concrete steps to enhance the answer.",
-  "strengths": "A string listing 2-3 specific strengths of the answer, or 'N/A' if the answer is very weak",
-  "weaknesses": "A string listing 2-3 specific weaknesses or gaps, or 'N/A' if the answer is excellent",
-  "key_concepts_identified": ["array", "of", "strings", "listing key prompt engineering concepts the student demonstrated understanding of"],
-  "missing_concepts": ["array", "of", "strings", "listing important concepts that should have been mentioned but weren't"]
+  "is_correct": boolean,
+  "confidence": number (0-100),
+  "score": number (0-100),
+  "feedback": "3-5 sentences. Start positive, then address issues. Be specific.",
+  "suggestions": "2-4 sentences with actionable advice. Can be short for scores >95.",
+  "strengths": "2-3 specific strengths, or 'N/A' if very weak",
+  "weaknesses": "2-3 specific gaps/issues, or 'N/A' if excellent",
+  "key_concepts_identified": ["concept1", "concept2"],
+  "missing_concepts": ["concept1", "concept2"]
 }
 
-Begin your evaluation now. Output only the JSON response.`;
+Evaluate now. Output only JSON.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -204,17 +350,24 @@ Begin your evaluation now. Output only the JSON response.`;
     };
   } catch (error) {
     console.error('Gemini evaluation error:', error);
-    return fallbackEvaluation(userAnswer);
+    return fallbackEvaluation(userAnswer, difficultyLevel);
   }
 };
 
-const fallbackEvaluation = (userAnswer: string): AIEvaluation => {
+const fallbackEvaluation = (
+  userAnswer: string,
+  difficultyLevel: number = 2
+): AIEvaluation => {
   const isLongEnough = userAnswer.trim().length > 20;
   const hasMultipleWords = userAnswer.trim().split(' ').length > 5;
 
+  let baseScore = 50;
+  if (difficultyLevel === 1) baseScore = 60; // easy
+  if (difficultyLevel === 3) baseScore = 45; // hard
+
   return {
     is_correct: isLongEnough && hasMultipleWords,
-    confidence: 50,
+    confidence: baseScore,
     feedback: 'Answer auto-evaluated due to AI service unavailability.',
     suggestions: 'Please ensure your answer is detailed and clear.',
   };
