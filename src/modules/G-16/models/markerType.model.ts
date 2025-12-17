@@ -328,7 +328,6 @@ export const getMarkerTypesInBounds = async (bounds: {
   try {
     const { minLat, maxLat, minLng, maxLng, markerTypeIds } = bounds;
 
-    // Create a polygon representing the bounding box
     const bboxPolygon = JSON.stringify({
       type: 'Polygon',
       coordinates: [
@@ -342,10 +341,9 @@ export const getMarkerTypesInBounds = async (bounds: {
       ],
     });
 
-    // Build the WHERE clause for marker types if provided
     let markerTypeFilter = '';
     if (markerTypeIds && markerTypeIds.length > 0) {
-      const ids = markerTypeIds.join(',');
+      const ids = markerTypeIds.map(id => Number(id)).join(','); 
       markerTypeFilter = `AND m.marker_type_id IN (${ids})`;
     }
 
@@ -357,16 +355,17 @@ export const getMarkerTypesInBounds = async (bounds: {
         m.created_at,
         m.updated_at,
         ST_AsGeoJSON(m.location) as location,
-        mt.marker_type_icon,
-      FROM marker m
-      LEFT JOIN marker_type mt ON m.marker_type_id = mt.id
+        mt.marker_type_icon 
+      FROM "marker" m
+      LEFT JOIN "marker_type" mt ON m.marker_type_id = mt.id
       WHERE ST_Within(
         m.location,
-        ST_GeomFromGeoJSON('${bboxPolygon}')
+        ST_SetSRID(ST_GeomFromGeoJSON('${bboxPolygon}'), 4326)
       )
       ${markerTypeFilter}
       ORDER BY m.updated_at DESC
     `);
+
     return markers.map((marker) => ({
       id: marker.id,
       marker_type_id: marker.marker_type_id,
@@ -379,6 +378,7 @@ export const getMarkerTypesInBounds = async (bounds: {
         marker_type_icon: marker.marker_type_icon,
       },
     })) as unknown as MarkerTypeResponse[];
+
   } catch (error) {
     handlePrismaError(error);
   }
