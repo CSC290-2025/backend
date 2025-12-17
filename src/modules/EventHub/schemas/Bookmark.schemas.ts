@@ -4,7 +4,7 @@ import {
   createPostRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-
+import { authMiddleware } from '@/middlewares';
 const EventBookmarkSchema = z.object({
   user_id: z.number().int(),
   event_id: z.number().int(),
@@ -37,6 +37,7 @@ const listBookmarksRoute = createGetRoute({
   query: Pagination,
   responseSchema: ListBookmarksResponse,
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const createBookmarkRoute = createPostRoute({
@@ -47,6 +48,7 @@ const createBookmarkRoute = createPostRoute({
     bookmark: EventBookmarkSchema,
   }),
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const deleteBookmarkRoute = createDeleteRoute({
@@ -54,6 +56,7 @@ const deleteBookmarkRoute = createDeleteRoute({
   summary: 'Delete bookmark',
   params: EventIdParam,
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const checkBookmarkStatusRoute = createGetRoute({
@@ -64,8 +67,25 @@ const checkBookmarkStatusRoute = createGetRoute({
     bookmarked: z.boolean(),
   }),
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
+});
+const BookmarkedUserSchema = z.object({
+  id: z.number().int().positive(),
+  email: z.string().email(),
+  full_name: z.string(),
 });
 
+const GetBookmarkedUsersResponse = z.object({
+  data: z.array(BookmarkedUserSchema),
+});
+
+const getBookmarkedUsersRoute = createGetRoute({
+  path: '/bookmarks/events/{event_id}/users', // New, clear endpoint
+  summary: 'Get all users who bookmarked a specific event',
+  params: EventIdParam,
+  responseSchema: GetBookmarkedUsersResponse,
+  tags: ['Bookmarks'],
+});
 export const BookmarkSchemas = {
   EventBookmarkSchema,
   CreateBookmarkSchema,
@@ -77,4 +97,6 @@ export const BookmarkSchemas = {
   createBookmarkRoute,
   deleteBookmarkRoute,
   checkBookmarkStatusRoute,
+  BookmarkedUserSchema,
+  getBookmarkedUsersRoute,
 };

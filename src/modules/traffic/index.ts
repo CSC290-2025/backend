@@ -21,6 +21,7 @@ export {
 export {
   setupIntersectionRoutes,
   setupLightRequestRoutes,
+  setupLightReportRoutes,
   setupRoadRoutes,
   setupTrafficEmergencyRoutes,
   setupTrafficLightRoutes,

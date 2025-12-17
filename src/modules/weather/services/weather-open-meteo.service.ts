@@ -4,6 +4,8 @@ import type {
   ExternalRawFull,
   ExternalWeatherDTO,
   ExternalWeatherQuery,
+  RainDailyQuery,
+  RainHourlyQuery,
 } from '../types';
 import { ValidationError } from '@/errors';
 import { getDistrictByLocationId } from '../utils/bangkok-districts';
@@ -18,6 +20,14 @@ const wmoToCondition = (code: number): string => {
   if ([71, 73, 75, 77, 85, 86].includes(code)) return 'Snow';
   if ([95, 96, 99].includes(code)) return 'Thunderstorm';
   return 'Cloudy';
+};
+
+// Provide a safe label when the provider omits or nulls the weather code.
+const conditionFromCode = (code?: number | null): string => {
+  if (typeof code === 'number') {
+    return wmoToCondition(code);
+  }
+  return 'Unknown';
 };
 
 // Convert wind-bearing degrees into one of eight compass abbreviations.
@@ -35,6 +45,22 @@ const toUtcIso = (localYYYYmmddHHmm: string, offsetSeconds: number): string => {
   const local = Date.UTC(y, m - 1, d, H, M);
   const utc = local - offsetSeconds * 1000;
   return new Date(utc).toISOString();
+};
+
+// Keep the requested horizon inside the 0-7 day window we support.
+const clampDaysAhead = (value?: number | null) => {
+  if (value == null) {
+    return 7;
+  }
+  return Math.min(Math.max(value, 0), 7);
+};
+
+// Return YYYY-MM-DD after adding N days (UTC math avoids timezone drift).
+const addDaysToDate = (date: string, days: number) => {
+  const [y, m, d] = date.split('-').map(Number);
+  const base = new Date(Date.UTC(y, m - 1, d));
+  base.setUTCDate(base.getUTCDate() + days);
+  return base.toISOString().slice(0, 10);
 };
 
 // Normalize the full Open-Meteo payload into the DTO consumed by our API.
@@ -152,8 +178,110 @@ const getDailyFromOpenMeteo = async (query: ExternalWeatherQuery) => {
   });
 };
 
+// Fetch precipitation-focused daily metrics for a location/date window.
+const getRainDailyWindow = async (query: RainDailyQuery) => {
+  const q = WeatherOpenMeteoSchemas.RainDailyQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+
+  const daysAhead = clampDaysAhead(q.days_ahead);
+  const startDate = q.date;
+  const endDate = addDaysToDate(startDate, daysAhead);
+
+  const json = await OpenMeteoClient.getRainWindow(
+    district.lat,
+    district.lng,
+    startDate,
+    endDate,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRainWindowSchema.parse(json);
+
+  const days = raw.daily.time.map((date, index) => ({
+    date,
+    condition: conditionFromCode(raw.daily.weather_code[index]),
+    precipitation_hours: raw.daily.precipitation_hours?.[index] ?? null,
+    precipitation_sum: raw.daily.precipitation_sum?.[index] ?? null,
+    precipitation_probability_max:
+      raw.daily.precipitation_probability_max?.[index] ?? null,
+    rain_sum: raw.daily.rain_sum?.[index] ?? null,
+  }));
+
+  return WeatherOpenMeteoSchemas.RainDailyResponseSchema.parse({
+    location: {
+      city: district.name,
+      country: 'Thailand',
+      latitude: raw.latitude,
+      longitude: raw.longitude,
+    },
+    range: {
+      start: startDate,
+      end: endDate,
+      days_ahead: daysAhead,
+    },
+    days,
+  });
+};
+
+// Fetch precipitation-focused hourly metrics for a single location day.
+const getRainHourlyByDate = async (query: RainHourlyQuery) => {
+  const q = WeatherOpenMeteoSchemas.RainHourlyQuerySchema.parse(query);
+  const district = getDistrictByLocationId(q.location_id);
+  if (!district) {
+    throw new ValidationError(
+      `Invalid location_id: ${q.location_id}. Valid IDs are 1-4`
+    );
+  }
+
+  const json = await OpenMeteoClient.getRainWindow(
+    district.lat,
+    district.lng,
+    q.date,
+    q.date,
+    OPEN_METEO_TIMEZONE
+  );
+  const raw = WeatherOpenMeteoSchemas.ExternalRainWindowSchema.parse(json);
+
+  const hourly = raw.hourly.time.reduce<
+    Array<{
+      time: string;
+      precipitation_probability: number | null;
+      rain: number | null;
+      condition: string;
+    }>
+  >((acc, time, index) => {
+    if (time.startsWith(q.date)) {
+      acc.push({
+        time,
+        precipitation_probability:
+          raw.hourly.precipitation_probability?.[index] ?? null,
+        rain: raw.hourly.rain?.[index] ?? null,
+        condition: conditionFromCode(raw.hourly.weather_code[index]),
+      });
+    }
+    return acc;
+  }, []);
+
+  return WeatherOpenMeteoSchemas.RainHourlyResponseSchema.parse({
+    location: {
+      city: district.name,
+      country: 'Thailand',
+      latitude: raw.latitude,
+      longitude: raw.longitude,
+    },
+    date: q.date,
+    hourly,
+  });
+};
+
 export {
   getCurrentFromOpenMeteo,
   getHourlyFromOpenMeteo,
   getDailyFromOpenMeteo,
+  getRainDailyWindow,
+  getRainHourlyByDate,
 };

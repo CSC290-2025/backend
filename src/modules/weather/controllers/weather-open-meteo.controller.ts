@@ -1,7 +1,12 @@
 import type { Context } from 'hono';
 import { OpenMeteoService, OpenMeteoScheduler } from '../services';
 import { successResponse } from '@/utils/response';
-import type { ExternalWeatherQuery, ImportDailyBody } from '../types';
+import type {
+  ExternalWeatherQuery,
+  ImportDailyBody,
+  RainDailyQuery,
+  RainHourlyQuery,
+} from '../types';
 
 // Forward the `/current` endpoint to Open-Meteo and relay the structured DTO.
 const getOpenMeteoCurrent = async (c: Context) => {
@@ -27,6 +32,22 @@ const getOpenMeteoDaily = async (c: Context) => {
   return successResponse(c, data);
 };
 
+// Retrieve rain-focused daily metrics for the selected date window.
+const getOpenMeteoRainDaily = async (c: Context) => {
+  const data = await OpenMeteoService.getRainDailyWindow(
+    c.req.query() as unknown as RainDailyQuery
+  );
+  return successResponse(c, data);
+};
+
+// Retrieve rain-focused hourly metrics for a single day.
+const getOpenMeteoRainHourly = async (c: Context) => {
+  const data = await OpenMeteoService.getRainHourlyByDate(
+    c.req.query() as unknown as RainHourlyQuery
+  );
+  return successResponse(c, data);
+};
+
 // Import yesterday's aggregates for a single district and persist them.
 const importDailyOpenMeteo = async (c: Context) => {
   const body = await c.req.json();
@@ -47,10 +68,40 @@ const importDailyOpenMeteoAll = async (c: Context) => {
   );
 };
 
+const startWeatherAutoImport = async (c: Context) => {
+  const status = enableWeatherAutoImport();
+  return successResponse(
+    c,
+    { data: status },
+    200,
+    'Daily auto-import enabled (runs at 00:05 Asia/Bangkok)'
+  );
+};
+
+const stopWeatherAutoImport = async (c: Context) => {
+  const status = disableWeatherAutoImport();
+  return successResponse(
+    c,
+    { data: status },
+    200,
+    'Daily auto-import disabled'
+  );
+};
+
+const getWeatherAutoImportStatus = async (c: Context) => {
+  const status = getWeatherAutoImportStatusState();
+  return successResponse(c, { data: status });
+};
+
 export {
   getOpenMeteoCurrent,
   getOpenMeteoHourly,
   getOpenMeteoDaily,
+  getOpenMeteoRainDaily,
+  getOpenMeteoRainHourly,
   importDailyOpenMeteo,
   importDailyOpenMeteoAll,
+  startWeatherAutoImport,
+  stopWeatherAutoImport,
+  getWeatherAutoImportStatus,
 };

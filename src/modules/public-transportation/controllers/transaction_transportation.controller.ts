@@ -1,5 +1,8 @@
 import { successResponse, errorResponse } from '@/utils/response';
-import { handleTapTransaction } from '../models/transaction_transportation.model';
+import {
+  getTransportationHistory,
+  handleTapTransaction,
+} from '../models/transaction_transportation.model';
 import type { Context } from 'hono';
 
 const handleTap = async (c: Context) => {
@@ -43,5 +46,41 @@ const handleTap = async (c: Context) => {
     return errorResponse(c, error.message, 400);
   }
 };
+const getHistory = async (c: Context) => {
+  try {
+    const cardIdQuery = c.req.query('cardId');
+    const limit = 6;
 
-export { handleTap };
+    // 💡 การแก้ไข: ใช้ parseInt() แทน Number() เพื่อบังคับให้เป็น Integer
+    const numericCardId = cardIdQuery ? parseInt(cardIdQuery, 10) : null;
+
+    if (!numericCardId || isNaN(numericCardId)) {
+      console.error(`Received invalid cardId query: ${cardIdQuery}`);
+      return errorResponse(
+        c,
+        'Missing or invalid cardId in query parameter. Cannot retrieve history.',
+        400
+      );
+    }
+
+    const history = await getTransportationHistory(numericCardId, limit);
+
+    // 💡 NEW LOG: ตรวจสอบความยาวของ Array ทันทีใน Controller
+    console.log(
+      `[Controller Debug] History Array Length received from Model: ${history.length}`
+    );
+
+    // 🛑 การแก้ไข Response: ยืนยันว่าส่ง Array ภายใต้ Key 'data'
+    return successResponse(
+      c,
+      { data: history }, // โครงสร้าง { data: Array }
+      200,
+      `Successfully retrieved ${history.length} transportation transactions.`
+    );
+  } catch (error: any) {
+    console.error('History retrieval failed:', error.message);
+    return errorResponse(c, error.message, 500);
+  }
+};
+
+export { handleTap, getHistory };

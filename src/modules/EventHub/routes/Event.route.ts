@@ -5,39 +5,31 @@ import { EventController } from '../controllers';
 const setupEventRoutes = (app: OpenAPIHono) => {
   // Event Routes
 
+  // Get all waste events
+  app.openapi(
+    EventSchemas.listWasteEventsRoute,
+    EventController.listWasteEvents
+  );
   // List all events (public)
   app.openapi(EventSchemas.listEventsRoute, EventController.listEvents);
 
-  // Get a single event by ID (public)
-  app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
+  // Get daily event count (analytics or calendar view)
+  app.openapi(EventSchemas.getEventByDayRoute, EventController.getEventByDay);
 
-  // Create a new event (admin only)
-  app.openapi(EventSchemas.createEventRoute, async (c) => {
-    return EventController.createEvent(c);
-  });
-
-  // Update existing event (admin only)
-  app.openapi(EventSchemas.updateEventRoute, async (c) => {
-    return EventController.updateEvent(c);
-  });
-
-  // Delete event (admin only)
-  app.openapi(EventSchemas.deleteEventRoute, async (c) => {
-    return EventController.deleteEvent(c);
-  });
+  // Create a new event (admin only - auth required)
   app.openapi(EventSchemas.createEventRoute, EventController.createEvent);
 
-  // Update existing event (admin only)
+  // Update existing event (admin only - auth required)
   app.openapi(EventSchemas.updateEventRoute, EventController.updateEvent);
 
-  // Delete event (admin only)
+  // Delete event (admin only - auth required)
   app.openapi(EventSchemas.deleteEventRoute, EventController.deleteEvent);
-
-  // Get daily event count (analytics or calendar view)
+  // List past bookmarked events (auth required)
   app.openapi(
-    EventSchemas.dayEventCountRoute,
-    EventController.getDayEventCount
+    EventSchemas.listPastBookmarkedEventsRoute,
+    EventController.listPastBookmarkedEvents
   );
+  // Get a single event by ID (public)
+  app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
 };
-
 export { setupEventRoutes };

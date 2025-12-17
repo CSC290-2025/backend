@@ -9,6 +9,8 @@ import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
+import { startConsecutiveRainAlertJob } from '@/modules/weather/services/weather-rain-alert.scheduler';
+import { enableWeatherAutoImport } from '@/modules/weather/services/weather-auto-import.scheduler';
 import 'dotenv/config';
 
 const app = new OpenAPIHono();
@@ -79,6 +81,8 @@ app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 setupRoutes(app);
 startAir4ThaiAggregationJob();
+startConsecutiveRainAlertJob();
+enableWeatherAutoImport();
 
 let serverInstance: ReturnType<typeof serve> | null = null;
 
