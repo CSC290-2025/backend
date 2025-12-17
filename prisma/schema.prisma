@@ -325,6 +325,7 @@ model emergency_reports {
   title                  String
   contact_center_service Boolean?       @default(false)
   report_category        report_type?
+  location               Unsupported("geometry")?
   lat                    String?
   long                   String?
   alerts                 alerts[]
@@ -1086,6 +1087,7 @@ model waste_logs {
   @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
+
 model waste_types {
   id                     Int                      @id @default(autoincrement())
   type_name              String                   @db.VarChar(255)
@@ -1327,33 +1329,4 @@ enum wallet_status {
 enum wallet_type {
   individual
   organization
-}
-
-enum blood_type {
-  A
-  B
-  AB
-  O
-}
-
-enum power_bi_report_type {
-  summary
-  trends
-}
-
-enum report_type {
-  traffic
-  accident
-  disaster
-}
-
-enum report_visibility {
-  citizens
-  admin
-}
-
-enum bin_type {
-  RECYCLABLE
-  GENERAL
-  HAZARDOUS
 }

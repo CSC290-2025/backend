@@ -70,6 +70,20 @@ const deleteMyInsuranceCard = async (c: Context) => {
   return successResponse(c, null, 200, 'Insurance card deleted successfully');
 };
 
+const transferToHealthCare = async (c: Context) => {
+  const body = await c.req.json();
+  const result = await InsuranceCardService.transferToHealthCare(
+    body.cardNumber,
+    body.amount
+  );
+  return successResponse(
+    c,
+    result,
+    200,
+    'Balance transferred to healthcare wallet successfully'
+  );
+};
+
 export {
   getInsuranceCard,
   getMyCards,
@@ -78,4 +92,5 @@ export {
   getUserInsuranceCards,
   updateInsuranceCard,
   deleteMyInsuranceCard,
+  transferToHealthCare,
 };
