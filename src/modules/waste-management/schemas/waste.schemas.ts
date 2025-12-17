@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { createPostRoute, createGetRoute } from '@/utils/openapi-helpers';
+import {
+  createPostRoute,
+  createGetRoute,
+  createDeleteRoute,
+} from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 
 const WasteLogRequestSchema = z.object({
   waste_type_name: z.string().min(1, 'Waste type name is required'),
@@ -19,9 +24,8 @@ const WasteTypesResponseSchema = z.object({
 const WasteLogResponseSchema = z.object({
   id: z.number(),
   waste_type_id: z.number(),
-  total_collection_weight: z.number(),
-  collection_date: z.string(),
-  event_id: z.number().nullable(),
+  weight_kg: z.number(),
+  log_date: z.string(),
   waste_types: z.object({
     type_name: z.string(),
   }),
@@ -50,7 +54,7 @@ const DailyStatsResponseSchema = z.object({
       z.object({
         waste_type: z.string().optional(),
         total_weight: z.number(),
-        log_id: z.number(),
+        entry_count: z.number(),
       })
     ),
   }),
@@ -68,6 +72,7 @@ const getDailyStatsRoute = createGetRoute({
   summary: 'Get daily waste statistics',
   responseSchema: DailyStatsResponseSchema,
   tags: ['Waste', 'Analytics'],
+  middleware: [authMiddleware],
 });
 
 const logWasteRoute = createPostRoute({
@@ -76,6 +81,7 @@ const logWasteRoute = createPostRoute({
   requestSchema: WasteLogRequestSchema,
   responseSchema: WasteLogResponseSchema,
   tags: ['Waste'],
+  middleware: [authMiddleware],
 });
 
 const getStatsRoute = createGetRoute({
@@ -83,6 +89,17 @@ const getStatsRoute = createGetRoute({
   summary: 'Get monthly waste statistics',
   responseSchema: MonthlyStatsResponseSchema,
   tags: ['Waste', 'Analytics'],
+  middleware: [authMiddleware],
+});
+
+const deleteLogRoute = createDeleteRoute({
+  path: '/waste/log/{id}',
+  summary: 'Delete a waste log entry',
+  params: z.object({
+    id: z.coerce.number().positive('ID must be a positive number'),
+  }),
+  tags: ['Waste'],
+  middleware: [authMiddleware],
 });
 
 export const WasteSchemas = {
@@ -96,4 +113,5 @@ export const WasteSchemas = {
   logWasteRoute,
   getStatsRoute,
   getDailyStatsRoute,
+  deleteLogRoute,
 };
