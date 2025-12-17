@@ -16,11 +16,20 @@ const GeoPointSchema = z.object({
     .describe('Coordinates in [longitude, latitude] order'),
 });
 
+const AddressSchema = z.object({
+  address_line: z.string().max(255),
+  province: z.string().max(255),
+  district: z.string().max(255),
+  subdistrict: z.string().max(255),
+  postal_code: z.string().max(20),
+});
+
 const FacilitySchema = z.object({
   id: z.number().int(),
   name: z.string().max(255),
   facilityType: z.string().max(100).nullable(),
   addressId: z.number().int().nullable(),
+  address: AddressSchema.partial().optional(),
   phone: z.string().max(20).nullable(),
   location: GeoPointSchema.nullable(),
   emergencyServices: z.boolean().nullable(),
@@ -32,6 +41,7 @@ const CreateFacilitySchema = z.object({
   name: z.string().min(1).max(255),
   facilityType: z.string().max(100).optional(),
   addressId: z.number().int().optional(),
+  address: AddressSchema.optional(),
   phone: z.string().max(20).optional(),
   location: GeoPointSchema.optional(),
   emergencyServices: z.boolean().optional(),
@@ -42,6 +52,7 @@ const UpdateFacilitySchema = z.object({
   name: z.string().min(1).max(255).optional(),
   facilityType: z.string().max(100).nullable().optional(),
   addressId: z.number().int().nullable().optional(),
+  address: AddressSchema.partial().optional(),
   phone: z.string().max(20).nullable().optional(),
   location: GeoPointSchema.nullable().optional(),
   emergencyServices: z.boolean().nullable().optional(),

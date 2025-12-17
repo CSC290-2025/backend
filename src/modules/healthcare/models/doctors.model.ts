@@ -15,6 +15,8 @@ const doctorSelect = {
   specialization: true,
   current_status: true,
   consultation_fee: true,
+  facility_id: true,
+  department_id: true,
   created_at: true,
 } satisfies Prisma.doctorsSelect;
 
@@ -29,6 +31,8 @@ const mapDoctor = (record: DoctorRecord): Doctor => ({
   consultationFee: record.consultation_fee
     ? Number(record.consultation_fee)
     : null,
+  facilityId: record.facility_id ?? null,
+  departmentId: record.department_id ?? null,
   createdAt: record.created_at ?? new Date(),
 });
 
@@ -46,6 +50,14 @@ const buildWhereClause = (
 
   if (filters.currentStatus) {
     where.current_status = filters.currentStatus;
+  }
+
+  if (filters.facilityId !== undefined) {
+    where.facility_id = filters.facilityId;
+  }
+
+  if (filters.departmentId !== undefined) {
+    where.department_id = filters.departmentId;
   }
 
   if (filters.search) {
@@ -142,6 +154,8 @@ const create = async (data: CreateDoctorData): Promise<Doctor> => {
         specialization: data.specialization ?? null,
         current_status: data.currentStatus ?? null,
         consultation_fee: data.consultationFee ?? null,
+        facility_id: data.facilityId ?? null,
+        department_id: data.departmentId ?? null,
       },
       select: doctorSelect,
     });
@@ -166,6 +180,14 @@ const update = async (id: number, data: UpdateDoctorData): Promise<Doctor> => {
 
     if (data.consultationFee !== undefined) {
       updateData.consultation_fee = data.consultationFee;
+    }
+
+    if (data.facilityId !== undefined) {
+      updateData.facility_id = data.facilityId;
+    }
+
+    if (data.departmentId !== undefined) {
+      updateData.department_id = data.departmentId;
     }
 
     const record = await prisma.doctors.update({
