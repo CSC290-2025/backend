@@ -1,7 +1,29 @@
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
-import type { CreateCourse, courseStatus } from '@/modules/Know_AI/types';
+import type {
+  addressSchema,
+  CreateCourse,
+  courseStatus,
+} from '@/modules/Know_AI/types';
 import { CourseSchema } from '../schemas';
+
+const createAddress = async (data: addressSchema) => {
+  try {
+    const validatedData = CourseSchema.addressSchema.parse(data);
+    const address = await prisma.addresses.create({
+      data: {
+        address_line: validatedData.address_line,
+        province: validatedData.province,
+        district: validatedData.district,
+        subdistrict: validatedData.subdistrict,
+        postal_code: validatedData.postal_code,
+      },
+    });
+    return address;
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
 
 const createCourse = async (data: CreateCourse) => {
   try {
@@ -106,6 +128,7 @@ const changeApprove = async (id: number) => {
 };
 
 export {
+  createAddress,
   createCourse,
   getAllCourse,
   getCourse,
