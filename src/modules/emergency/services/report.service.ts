@@ -2,7 +2,9 @@ import { ReportModel } from '@/modules/emergency/models';
 import type {
   CreateReport,
   PaginatedReport,
+  ReportDeleteResponse,
   ReportResponse,
+  UpdateReport,
 } from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { ValidationError } from '@/errors';
@@ -27,7 +29,7 @@ export const findReportByStatus = async (
   page: number,
   limit: number
 ): Promise<PaginatedReport> => {
-  const { report, totalPage } = await ReportModel.findReportByStatus(
+  const { report, totalCount } = await ReportModel.findReportByStatus(
     status,
     page,
     limit
@@ -38,6 +40,24 @@ export const findReportByStatus = async (
   }
   return {
     report: report,
-    totalPage,
+    totalCount,
   };
+};
+
+export const updateReportById = async (
+  id: number,
+  data: UpdateReport
+): Promise<Partial<ReportResponse>> => {
+  if (!id) throw new ValidationError('Id is required');
+  if (!data) throw new ValidationError('Data is required');
+
+  return await ReportModel.updateReportById(id, data);
+};
+
+export const deleteReportById = async (
+  id: number
+): Promise<ReportDeleteResponse> => {
+  if (!id) throw new ValidationError('Id is required');
+
+  return await ReportModel.deleteReportById(id);
 };
