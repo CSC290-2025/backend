@@ -15,6 +15,7 @@ import {
   getMarkersByTypes,
   getMarkersWithinBounds,
 } from '@/modules/G-16/models/marker.model';
+import { handlePrismaError } from '@/errors';
 
 export const getAllMarkers = async (
   filters?: MarkerQuery
@@ -51,8 +52,7 @@ export const addtheMarker = async (
   try {
     return await createMarkerModel(data);
   } catch (error) {
-    console.error('Error creating marker:', error);
-    throw new Error('Failed to create marker');
+    handlePrismaError(error);
   }
 };
 
@@ -95,8 +95,7 @@ export const getMarkersByBounds = async (
   try {
     return await getMarkersWithinBounds(bounds);
   } catch (error) {
-    console.error('Error fetching markers by bounds:', error);
-    throw new Error('Failed to fetch markers by bounds');
+    handlePrismaError(error);
   }
 };
 
