@@ -2,6 +2,12 @@ import type { Context } from 'hono';
 import { CourseService } from '../services';
 import { successResponse } from '@/utils/response';
 
+const createAddress = async (c: Context) => {
+  const body = await c.req.json();
+  const address = await CourseService.createAddress(body);
+  return successResponse(c, { address }, 201, 'Address created successfully');
+};
+
 const createCourse = async (c: Context) => {
   const body = await c.req.json();
   const report = await CourseService.createCourse(body);
@@ -91,6 +97,7 @@ const changeApprove = async (c: Context) => {
 };
 
 export {
+  createAddress,
   createCourse,
   getAllCourse,
   getCourse,
