@@ -1265,7 +1265,6 @@ model weather_rating {
   addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
 }
 
-<<<<<<< HEAD
 model staff {
   id          Int         @id @default(autoincrement())
   user_id     Int?
