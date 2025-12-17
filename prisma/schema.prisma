@@ -140,15 +140,17 @@ model beds {
 }
 
 model bin {
-  id         Int       @id @default(autoincrement())
-  bin_name   String?   @db.VarChar(255)
-  bin_type   bin_type?
-  latitude   Decimal?  @db.Decimal(10, 8)
-  longitude  Decimal?  @db.Decimal(11, 8)
-  address    String?
-  capacity   Decimal?  @db.Decimal(10, 2)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @db.Timestamptz(6)
+  id                 Int       @id @default(autoincrement())
+  bin_name           String?   @db.VarChar(255)
+  bin_type           bin_type?
+  latitude           Decimal?  @db.Decimal(10, 8)
+  longitude          Decimal?  @db.Decimal(11, 8)
+  address            String?
+  capacity           Decimal?  @db.Decimal(10, 2)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @db.Timestamptz(6)
+  created_by_user_id Int?
+  users              users?    @relation(fields: [created_by_user_id], references: [id], onUpdate: NoAction)
 }
 
 model card_transactions {
@@ -395,6 +397,7 @@ model events {
   users                  users?                   @relation(fields: [host_user_id], references: [id], onUpdate: NoAction)
   event_organization     event_organization?      @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "organization_id")
   waste_event_statistics waste_event_statistics[]
+  waste_logs_event       waste_logs_event[]
 
   @@index([start_at], map: "idx_events_start_at")
 }
@@ -968,6 +971,8 @@ model users {
   last_login                    DateTime?                       @db.Timestamptz(6)
   alerts                        alerts[]
   apartment_booking             apartment_booking[]
+  apartment_owner               apartment_owner[]
+  bin                           bin[]
   conversation_participants     conversation_participants[]
   courses                       courses[]
   digital_cards                 digital_cards[]
@@ -1002,6 +1007,8 @@ model users {
   volunteer_event_participation volunteer_event_participation[]
   volunteer_events              volunteer_events[]
   wallets                       wallets[]
+  waste_logs                    waste_logs[]
+  waste_logs_event              waste_logs_event[]
 
   @@index([email], map: "idx_users_email")
   @@index([phone], map: "idx_users_phone")
@@ -1134,6 +1141,8 @@ model waste_types {
   type_name              String                   @db.VarChar(255)
   typical_weight_kg      Decimal?                 @db.Decimal(10, 3)
   waste_event_statistics waste_event_statistics[]
+  waste_logs             waste_logs[]
+  waste_logs_event       waste_logs_event[]
 }
 
 model weather_data {
@@ -1159,12 +1168,15 @@ model weather_rating {
 }
 
 model waste_logs_event {
-  id            Int       @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   user_id       Int?
   event_id      Int?
   waste_type_id Int?
-  log_date      DateTime? @default(now()) @db.Timestamptz(6)
-  weight_kg     Decimal?  @db.Decimal(10, 3)
+  log_date      DateTime?    @default(now()) @db.Timestamptz(6)
+  weight_kg     Decimal?     @db.Decimal(10, 3)
+  events        events?      @relation(fields: [event_id], references: [id])
+  users         users?       @relation(fields: [user_id], references: [id])
+  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id])
 }
 
 enum air_quality_category {
