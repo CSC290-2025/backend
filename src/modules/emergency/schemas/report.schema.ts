@@ -40,8 +40,6 @@ const ReportResponseSchema = z.object({
     .enum(['traffic', 'accident', 'disaster'])
     .optional()
     .nullable(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
 
 const PaginatedReportSchema = z.object({

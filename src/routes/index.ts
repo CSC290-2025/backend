@@ -7,8 +7,6 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
-
-
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
 
@@ -56,12 +54,13 @@ import {
   setupInsuranceCardRoutes,
 } from '@/modules/Financial';
 
-//Free Cycle
+// Free Cycle
 import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
   setupReceiverRequestsRoutes,
+  setupUploadFreecycleRoutes,
 } from '@/modules/freecycle';
 
 //Healthcare
@@ -88,18 +87,24 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-// import { reportRoutes } from '@/modules/power-bi';
+import { setupReportsRoutes } from '@/modules/power-bi';
 
 // Support Map
 import {
   detectRoutes,
   markerRoutes,
   distanceRoutes,
-  markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
-import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
-import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+// Traffic
+import {
+  setupIntersectionRoutes,
+  setupLightRequestRoutes,
+  setupRoadRoutes,
+  setupTrafficEmergencyRoutes,
+  setupTrafficLightRoutes,
+  setupLightReportRoutes,
+} from '@/modules/traffic';
 
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
@@ -130,11 +135,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Auth
   setupAuthRoutes(app);
-
-  //Emergency
-  setupReportRoutes(app);
-  setupFcmRoutes(app);
-  setupTokenRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
@@ -188,6 +188,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
   setupReceiverRequestsRoutes(app);
+  setupUploadFreecycleRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
@@ -196,13 +197,20 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Power BI
+  setupReportsRoutes(app);
+
+  // Traffic
+  setupIntersectionRoutes(app);
+  setupTrafficLightRoutes(app);
+  setupLightReportRoutes(app);
+  setupLightRequestRoutes(app);
+  setupRoadRoutes(app);
+  setupTrafficEmergencyRoutes(app);
+
   // Waste
   setupWasteRoutes(app);
   setupBinRoutes(app);
-
-  // SupportMap
-  setupMarkerOpenApiRoutes(app);
-  setupMarkerTypeOpenApiRoutes(app);
 
   // SupportMap
 
@@ -220,14 +228,10 @@ export const setupRoutes = (app: OpenAPIHono) => {
   ============================================
   */
 
-  // Power BI
-  // app.route('/reports', reportRoutes);
-
   // Support Map
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
   app.route('/api', distanceRoutes);
-  app.route('/api/marker-types', markerTypeRoutes);
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

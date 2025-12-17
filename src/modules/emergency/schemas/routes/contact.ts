@@ -1,4 +1,9 @@
-import { createGetRoute, createPostRoute } from '@/utils/openapi-helpers.ts';
+import {
+  createDeleteRoute,
+  createGetRoute,
+  createPostRoute,
+  createPutRoute,
+} from '@/utils/openapi-helpers.ts';
 import { ContactSchemas } from '@/modules/emergency/schemas';
 import * as z from 'zod';
 
@@ -20,4 +25,28 @@ const findContactByUserIdRoute = createGetRoute({
   tags: ['Report'],
 });
 
-export { createContactRoute, findContactByUserIdRoute };
+const updateContactByIdRoute = createPutRoute({
+  path: 'emergency/contacts/{id}',
+  summary: 'Update contact by id',
+  params: z.object({
+    id: z.string(),
+  }),
+  requestSchema: ContactSchemas.UpdateContactSchema,
+  responseSchema: ContactSchemas.ContactResponseSchema,
+  tags: ['Report'],
+});
+
+const deleteContactByIdRoute = createDeleteRoute({
+  path: 'emergency/contacts/{id}',
+  summary: 'Delete contact by id',
+  params: z.object({
+    id: z.string(),
+  }),
+  tags: ['Report'],
+});
+export {
+  createContactRoute,
+  findContactByUserIdRoute,
+  updateContactByIdRoute,
+  deleteContactByIdRoute,
+};

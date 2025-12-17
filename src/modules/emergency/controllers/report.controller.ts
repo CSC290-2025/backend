@@ -31,15 +31,15 @@ export const findReportByStatus: Handler = async (c: Context) => {
   );
 };
 
-export const updateReportById = async (c: Context) => {
+export const updateReportById: Handler = async (c: Context) => {
   const { id } = c.req.param();
-  const data = await c.req.json();
+  const body = await c.req.json();
 
-  const report = await ReportService.updateReportById(Number(id), data);
+  const report = await ReportService.updateReportById(Number(id), body);
   return successResponse(c, { report }, 200, 'Report updated successfully');
 };
 
-export const deleteReportById = async (c: Context) => {
+export const deleteReportById: Handler = async (c: Context) => {
   const { id } = c.req.param();
 
   const report = await ReportService.deleteReportById(Number(id));
