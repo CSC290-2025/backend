@@ -109,6 +109,7 @@ import {
   setupRoadRoutes,
   setupTrafficEmergencyRoutes,
   setupTrafficLightRoutes,
+  setupLightReportRoutes,
 } from '@/modules/traffic';
 
 // Volunteer
@@ -207,6 +208,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Traffic
   setupIntersectionRoutes(app);
   setupTrafficLightRoutes(app);
+  setupLightReportRoutes(app);
   setupLightRequestRoutes(app);
   setupRoadRoutes(app);
   setupTrafficEmergencyRoutes(app);
