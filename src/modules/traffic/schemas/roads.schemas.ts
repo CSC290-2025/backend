@@ -123,6 +123,29 @@ const getRoadsByIntersectionRoute = createGetRoute({
   tags: ['Roads'],
 });
 
+// Detailed road response includes road + intersection details and other roads at those intersections
+const IntersectionDetailSchema = z.object({
+  id: z.number().int(),
+  // location is a GeoJSON point or null
+  location: z.any().nullable(),
+  otherRoads: z.array(RoadSchema),
+});
+
+const RoadDetailResponseSchema = z.object({
+  road: RoadSchema,
+  startIntersection: IntersectionDetailSchema.nullable(),
+  endIntersection: IntersectionDetailSchema.nullable(),
+});
+
+const getRoadDetailsRoute = createGetRoute({
+  path: '/roads/{id}/details',
+  summary:
+    'Get road details including start/end intersections and other roads there',
+  responseSchema: RoadDetailResponseSchema,
+  params: RoadIdParam,
+  tags: ['Roads'],
+});
+
 const getRoadStatsRoute = createGetRoute({
   path: '/roads/stats',
   summary: 'Get road statistics',
@@ -169,6 +192,7 @@ export const RoadSchemas = {
   listRoadsRoute,
   getRoadsByIntersectionRoute,
   getRoadStatsRoute,
+  getRoadDetailsRoute,
   adminCreateRoadRoute,
   adminUpdateRoadRoute,
   adminDeleteRoadRoute,

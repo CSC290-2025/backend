@@ -7,6 +7,10 @@ const setupFcmRoutes = (app: OpenAPIHono) => {
     RouteSchemas.Fcm.createFcmRoute,
     FcmController.sendAllNotification
   );
+  app.openapi(
+    RouteSchemas.Fcm.sendNotificationToToken,
+    FcmController.sendNotificationToToken
+  );
 };
 
 export { setupFcmRoutes };
