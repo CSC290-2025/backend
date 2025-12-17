@@ -34,7 +34,6 @@ const setAuthCookies = (
 const authMiddleware: MiddlewareHandler = async (c: Context, next) => {
   const accessToken = getCookie(c, ACCESS_TOKEN_COOKIE);
   const refreshToken = getCookie(c, REFRESH_TOKEN_COOKIE);
-  console.log(accessToken, ': TOKEN');
 
   if (!refreshToken) {
     throw new UnauthorizedError('Please login');
