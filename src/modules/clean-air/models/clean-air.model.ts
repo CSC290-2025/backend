@@ -108,7 +108,83 @@ export const createAirQualityRecord = async ({
   }
 };
 
+export const hasAlertSentToday = async (district: string): Promise<boolean> => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const existingAlert = await prisma.alerts.findFirst({
+      where: {
+        message: {
+          contains: `Air quality alert: ${district}`,
+        },
+        sent_at: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+    });
+
+    return !!existingAlert;
+  } catch (error) {
+    handlePrismaError(error);
+    return false;
+  }
+};
+
+export const createAirQualityAlerts = async (
+  district: string,
+  aqi: number,
+  category: string,
+  userIds: number[]
+): Promise<void> => {
+  try {
+    const message = `Air quality alert: ${district} - AQI ${aqi} (${category}). Stay safe and reduce exposure.`;
+
+    await prisma.alerts.createMany({
+      data: userIds.map((userId) => ({
+        user_id: userId,
+        message,
+        status: 'sent',
+      })),
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export const hasVolunteerEventRecently = async (
+  eventTitle: string,
+  days: number = 30
+): Promise<boolean> => {
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const existingEvent = await prisma.volunteer_events.findFirst({
+      where: {
+        title: eventTitle,
+        created_at: {
+          gte: cutoffDate,
+        },
+      },
+    });
+
+    return !!existingEvent;
+  } catch (error) {
+    handlePrismaError(error);
+    return false;
+  }
+};
+
 export const CleanAirModel = {
   ensureBangkokDistrictAddress,
   createAirQualityRecord,
+  hasAirQualityRecord,
+  hasAlertSentToday,
+  createAirQualityAlerts,
+  hasVolunteerEventRecently,
 };

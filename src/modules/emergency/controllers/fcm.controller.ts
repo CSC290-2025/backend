@@ -5,5 +5,11 @@ import { FcmService } from '@/modules/emergency/services';
 export const sendAllNotification = async (c: Context) => {
   const body = await c.req.json();
   const fcm = await FcmService.sendAllNotificationService(body);
-  return successResponse(c, { fcm }, 201, 'Create report successfully');
+  return successResponse(c, { fcm }, 201, 'Send all FCM successfully');
+};
+
+export const sendNotificationToToken = async (c: Context) => {
+  const { token, notification } = await c.req.json();
+  const fcm = await FcmService.sendNotificationToToken(token, { notification });
+  return successResponse(c, { fcm }, 201, 'Send FCM to token successfully');
 };

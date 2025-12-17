@@ -18,7 +18,7 @@ const listWeatherRatings = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-// Return grouped averages filtered by the validated query parameters.
+// Return grouped averages filtered by the validated Bangkok-date query parameters.
 const getAverageWeatherRatings = async (c: Context) => {
   const query = WeatherRatingSchemas.WeatherRatingAverageQuerySchema.parse(
     c.req.query()
@@ -27,7 +27,7 @@ const getAverageWeatherRatings = async (c: Context) => {
   return successResponse(c, { data });
 };
 
-// Delete all ratings on the provided date and report the number removed.
+// Delete all ratings on the provided Bangkok date and report the number removed.
 const deleteWeatherRatingsByDate = async (c: Context) => {
   const { date } = WeatherRatingSchemas.WeatherRatingDateParam.parse(
     c.req.param()

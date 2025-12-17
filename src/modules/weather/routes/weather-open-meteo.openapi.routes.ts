@@ -20,6 +20,16 @@ const setupOpenMeteoRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    WeatherOpenMeteoSchemas.getRainDailyRoute,
+    OpenMeteoController.getOpenMeteoRainDaily
+  );
+
+  app.openapi(
+    WeatherOpenMeteoSchemas.getRainHourlyRoute,
+    OpenMeteoController.getOpenMeteoRainHourly
+  );
+
+  app.openapi(
     WeatherOpenMeteoSchemas.importDailyRoute,
     OpenMeteoController.importDailyOpenMeteo
   );

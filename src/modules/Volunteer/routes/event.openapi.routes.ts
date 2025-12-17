@@ -14,6 +14,8 @@ import {
 } from '../schemas'; // Use relative path to schemas
 import type { PaginatedEvents } from '../types';
 import type { OpenAPIHono } from '@hono/zod-openapi';
+import { ROLES } from '@/constants/roles';
+import { adminMiddleware, requireRole } from '@/middlewares';
 import * as EventController from '../controllers';
 
 const PaginatedEventsSchemaForOpenAPI = z
@@ -41,6 +43,10 @@ export const createEventRoute = createPostRoute({
   requestSchema: EventSchema.partial(),
   responseSchema: z.array(EventSchema),
   tags: ['Volunteer'],
+  middleware: [
+    adminMiddleware,
+    requireRole(ROLES.ADMIN, ROLES.VOLUNTEER_COORDINATOR),
+  ],
 });
 
 export const getEventRoute = createGetRoute({
@@ -58,6 +64,10 @@ export const updateEventRoute = createPutRoute({
   responseSchema: z.array(EventSchema),
   params: EventIdParam,
   tags: ['Volunteer'],
+  middleware: [
+    adminMiddleware,
+    requireRole(ROLES.ADMIN, ROLES.VOLUNTEER_COORDINATOR),
+  ],
 });
 
 export const deleteEventRoute = createDeleteRoute({
@@ -65,6 +75,10 @@ export const deleteEventRoute = createDeleteRoute({
   summary: 'Delete a volunteer event',
   params: EventIdParam,
   tags: ['Volunteer'],
+  middleware: [
+    adminMiddleware,
+    requireRole(ROLES.ADMIN, ROLES.VOLUNTEER_COORDINATOR),
+  ],
 });
 
 export const setupVolunteerRoutes = (app: OpenAPIHono) => {
