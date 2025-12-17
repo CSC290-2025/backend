@@ -53,6 +53,8 @@ const topUpFromWallet = async (
     throw new NotFoundError('Insurance card not found');
   }
 
+  if (card.status === 'suspended')
+    throw new ForbiddenError('This card is suspended');
   // Get wallet
   const wallet = await WalletModel.findWalletById(walletId);
   if (!wallet) {
