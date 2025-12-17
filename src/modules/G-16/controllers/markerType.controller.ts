@@ -41,8 +41,8 @@ export const getAllMarkerTypes = async (c: Context) => {
 };
 
 export const getMarkerTypesByType = async (c: Context) => {
-  const { markerType_id } = c.req.param();
-  const markerTypeIdNumber = Number(markerType_id);
+  const { id } = c.req.param();
+  const markerTypeIdNumber = Number(id);
   if (isNaN(markerTypeIdNumber)) {
     throw new ValidationError('markerType_id must be a number.');
   }
@@ -123,7 +123,6 @@ export const getMarkerTypesInBounds = async (c: Context) => {
     );
   }
 
-  // Validate markerTypeIds (ถ้ามี)
   if (markerTypeIds !== undefined) {
     if (!Array.isArray(markerTypeIds)) {
       throw new ValidationError('markerTypeIds must be an array.');
