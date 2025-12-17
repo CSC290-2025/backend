@@ -342,6 +342,7 @@ model emergency_reports {
   user_id                Int?
   image_url              String?                  @db.VarChar(1024)
   description            String?
+  location               Unsupported("geometry")?
   ambulance_service      Boolean?                 @default(false)
   level                  report_level?
   status                 report_status?           @default(pending)
@@ -350,9 +351,6 @@ model emergency_reports {
   title                  String
   contact_center_service Boolean?                 @default(false)
   report_category        report_type?
-  location               Unsupported("geometry")?
-  lat                    String?
-  long                   String?
   alerts                 alerts[]
   users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
@@ -1157,7 +1155,6 @@ model waste_logs {
   waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
 
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
-  @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
 
