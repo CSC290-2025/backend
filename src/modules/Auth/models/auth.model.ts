@@ -141,16 +141,44 @@ const createUser = async (
     username: string;
     password_hash: string;
     phone?: string;
+    firstName: string;
+    lastName: string;
+    dob: Date;
+    gender: 'male' | 'female';
+    addressLine?: string;
+    subDistrict?: string;
+    district?: string;
+    province?: string;
+    postalCode?: string;
   },
   tx?: Prisma.TransactionClient // required to make the create user part of a transaction to make it atomic
 ) => {
   try {
+    console.log(data);
+
     return await (tx ?? prisma).users.create({
       data: {
         email: data.email,
         username: data.username,
         password_hash: data.password_hash,
         phone: data.phone,
+        user_profiles: {
+          create: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            birth_date: data.dob,
+            gender: data.gender,
+            addresses: {
+              create: {
+                address_line: data.addressLine,
+                subdistrict: data.subDistrict,
+                district: data.district,
+                province: data.province,
+                postal_code: data.postalCode,
+              },
+            },
+          },
+        },
       },
       select: {
         id: true,
@@ -175,6 +203,16 @@ const registerUser = async (data: {
   email: string;
   username: string;
   password_hash: string;
+  phone?: string;
+  firstName: string;
+  lastName: string;
+  dob: Date;
+  gender: 'male' | 'female';
+  addressLine?: string;
+  subDistrict?: string;
+  district?: string;
+  province?: string;
+  postalCode?: string;
 }) => {
   try {
     return await prisma.$transaction(async (tx) => {
