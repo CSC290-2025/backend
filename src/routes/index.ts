@@ -7,6 +7,8 @@ Choose ONE approach per module that you're comfortable with:
   2. Normal Hono Routes - Simple, no Swagger docs
 */
 
+
+
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
 
@@ -39,13 +41,7 @@ import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
-} from '@/modules/emergency';
-
-import {
-  reportRoutes,
-  fcmRoutes,
-  tokenRoutes,
-  contactRoutes,
+  setupContactRoutes,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -102,6 +98,9 @@ import {
   markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
+import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
+import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
 
@@ -122,7 +121,6 @@ import {
   setupWeatherRatingRoutes,
 } from '@/modules/weather/routes';
 
-
 export const setupRoutes = (app: OpenAPIHono) => {
   /*
   ============================================
@@ -132,6 +130,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Auth
   setupAuthRoutes(app);
+
+  //Emergency
+  setupReportRoutes(app);
+  setupFcmRoutes(app);
+  setupTokenRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
@@ -155,6 +158,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
+  setupContactRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -197,6 +201,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupBinRoutes(app);
 
   // SupportMap
+  setupMarkerOpenApiRoutes(app);
+  setupMarkerTypeOpenApiRoutes(app);
 
   // SupportMap
 
@@ -213,10 +219,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  //Emergency
-  app.route('/emergency', reportRoutes());
-  app.route('/emergency', contactRoutes());
-  app.route('/emergency', fcmRoutes());
 
   // Power BI
   // app.route('/reports', reportRoutes);

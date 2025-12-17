@@ -28,4 +28,12 @@ const UpdateContactSchema = z.object({
     .nullable(),
 });
 
-export { ContactResponseSchema, CreateContactSchema, UpdateContactSchema };
+const FindContactByUserIdSchema = z.object({
+  contact: z.array(CreateContactSchema),
+});
+export {
+  ContactResponseSchema,
+  CreateContactSchema,
+  UpdateContactSchema,
+  FindContactByUserIdSchema,
+};

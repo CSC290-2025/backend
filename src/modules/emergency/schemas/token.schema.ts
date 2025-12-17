@@ -7,7 +7,7 @@ const CreateTokenFcmSchema = z.object({
 
 const TokenFcmResponseSchema = z.object({
   id: z.number().int(),
-  user_id: z.number().optional(),
+  user_id: z.number().nullable(),
   tokens: z.string(),
   created_at: z.coerce.date().nullable(),
   updated_at: z.coerce.date().nullable(),
