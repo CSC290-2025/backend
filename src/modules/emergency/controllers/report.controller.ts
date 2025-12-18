@@ -50,3 +50,14 @@ export const deleteReportById: Handler = async (c: Context) => {
     'Report deleted successfully'
   );
 };
+
+export const findReportById: Handler = async (c: Context) => {
+  const { id } = c.req.param();
+  const report = await ReportService.findReportById(Number(id));
+  return successResponse(
+    c,
+    { report: report },
+    200,
+    'Find Report By Id successfully'
+  );
+};

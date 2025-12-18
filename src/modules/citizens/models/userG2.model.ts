@@ -76,6 +76,11 @@ const findUserByIdForUserSettingPage = async (user_id: number) => {
             card_number: true,
           },
         },
+        users_specialty: {
+          select: {
+            specialty_id: true,
+          },
+        },
         user_profiles: {
           select: {
             id_card_number: true,
