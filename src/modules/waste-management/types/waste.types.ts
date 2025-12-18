@@ -46,3 +46,11 @@ export interface DailyStats {
     entry_count: number;
   }[];
 }
+
+export interface DailyLog {
+  by_log: {
+    waste_type: string | undefined;
+    total_weight: number;
+    entry_count: number;
+  }[];
+}
