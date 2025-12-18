@@ -1,9 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import * as AuthController from '../controllers/auth.controller';
 import { AuthSchemas } from '../schemas/auth.schemas';
-import { jwt } from 'hono/jwt';
-
-const SECRET_KEY = process.env.JWT_SECRET || 'healthcare-secret-key-change-me';
+import { adminMiddleware, authMiddleware } from '@/middlewares';
 
 export const setupAuthRoutes = (app: OpenAPIHono) => {
   // Login Route
@@ -13,7 +11,11 @@ export const setupAuthRoutes = (app: OpenAPIHono) => {
   // We apply JWT middleware specifically to this route or group
   const protectedRoutes = new OpenAPIHono();
 
-  protectedRoutes.use('/api/healthcare/auth/*', jwt({ secret: SECRET_KEY }));
+  protectedRoutes.use(
+    '/api/healthcare/auth/*',
+    authMiddleware,
+    adminMiddleware
+  );
 
   protectedRoutes.openapi(AuthSchemas.addStaffRoute, AuthController.addStaff);
 

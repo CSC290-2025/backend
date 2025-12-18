@@ -41,11 +41,9 @@ const login = async (c: Context) => {
     });
     roleName = roleRecord?.role_name || '';
   }
-  const allowedRoles = [ROLES.ADMIN, ROLES.HEALTH_MANAGER].map((role) =>
-    role.toLowerCase()
-  );
+  const allowedRoles = [ROLES.HEALTH_MANAGER].map((role) => role.toLowerCase());
   if (!allowedRoles.includes(roleName.toLowerCase())) {
-    throw new UnauthorizedError('Access denied. Admin role required.');
+    throw new UnauthorizedError('Access denied. Health manager role required.');
   }
 
   // Generate Token
