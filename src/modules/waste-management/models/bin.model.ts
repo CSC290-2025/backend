@@ -74,6 +74,17 @@ export class BinModel {
     });
   }
 
+  static async findBinsByUserId(userId: number) {
+    return prisma.bin.findMany({
+      where: {
+        created_by_user_id: userId,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+
   static async findBinsInRadius(
     lat: number,
     lng: number,

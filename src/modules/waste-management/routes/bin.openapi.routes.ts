@@ -9,6 +9,11 @@ const setupBinRoutes = (app: OpenAPIHono) => {
 
   app.openapi(BinSchemas.getAllBinsRoute, BinController.getAllBins);
 
+  app.openapi(BinSchemas.getBinsByUserRoute, async (c) => {
+    await authMiddleware(c, async () => {});
+    return BinController.getBinsByUser(c);
+  });
+
   app.openapi(BinSchemas.createBinRoute, async (c) => {
     await optionalAuthMiddleware(c, async () => {});
     return BinController.createBin(c);
