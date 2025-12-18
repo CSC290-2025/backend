@@ -65,7 +65,23 @@ const checkBookmarkStatusRoute = createGetRoute({
   }),
   tags: ['Bookmarks'],
 });
+const BookmarkedUserSchema = z.object({
+  id: z.number().int().positive(),
+  email: z.string().email(),
+  full_name: z.string(),
+});
 
+const GetBookmarkedUsersResponse = z.object({
+  data: z.array(BookmarkedUserSchema),
+});
+
+const getBookmarkedUsersRoute = createGetRoute({
+  path: '/bookmarks/events/{event_id}/users', // New, clear endpoint
+  summary: 'Get all users who bookmarked a specific event',
+  params: EventIdParam,
+  responseSchema: GetBookmarkedUsersResponse,
+  tags: ['Bookmarks'],
+});
 export const BookmarkSchemas = {
   EventBookmarkSchema,
   CreateBookmarkSchema,
@@ -77,4 +93,6 @@ export const BookmarkSchemas = {
   createBookmarkRoute,
   deleteBookmarkRoute,
   checkBookmarkStatusRoute,
+  BookmarkedUserSchema,
+  getBookmarkedUsersRoute,
 };

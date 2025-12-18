@@ -4,7 +4,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-import { authMiddleware } from '@/middlewares';
+import { adminMiddleware, authMiddleware } from '@/middlewares';
 import { z } from 'zod';
 
 const MetroCardSchema = z.object({
@@ -82,7 +82,7 @@ const updateMetroCardRoute = createPutRoute({
   responseSchema: MetroCardSchema,
   params: MetroCardIdParam,
   tags: ['MetroCards'],
-  middleware: [authMiddleware],
+  middleware: [authMiddleware, adminMiddleware],
 });
 
 const topUpBalanceRoute = createPostRoute({

@@ -23,4 +23,15 @@ const checkBookmarkStatus = async (userId: number, eventId: number) => {
   return Boolean(exists);
 };
 
-export { listBookmarks, createBookmark, deleteBookmark, checkBookmarkStatus };
+const getBookmarkedUsers = async (eventId: number) => {
+  const users = await BookmarkModel.listUsersByEvent(eventId);
+  return users || [];
+};
+
+export {
+  listBookmarks,
+  createBookmark,
+  deleteBookmark,
+  checkBookmarkStatus,
+  getBookmarkedUsers,
+};

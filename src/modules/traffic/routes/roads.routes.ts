@@ -8,6 +8,7 @@ export const setupRoadRoutes = (app: OpenAPIHono) => {
     RoadSchemas.getRoadsByIntersectionRoute,
     RoadController.getRoadsByIntersection
   );
+  app.openapi(RoadSchemas.getRoadDetailsRoute, RoadController.getRoadDetails);
   app.openapi(RoadSchemas.getRoadStatsRoute, RoadController.getRoadStats);
 
   // User routes

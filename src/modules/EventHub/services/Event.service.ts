@@ -56,8 +56,8 @@ const deleteEvent = async (id: number) => {
   return deleted;
 };
 
-const getDayEventCount = async (from: string, to: string) => {
-  return await EventModel.countByDay(from, to);
+const getEventByDay = async (from: Date, to: Date) => {
+  return await EventModel.getEventByDay(from, to);
 };
 
 export {
@@ -66,5 +66,5 @@ export {
   createEvent,
   updateEvent,
   deleteEvent,
-  getDayEventCount,
+  getEventByDay,
 };

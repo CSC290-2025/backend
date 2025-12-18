@@ -5,6 +5,28 @@ import { MetroCardService, WalletService } from '@/modules/Financial';
 
 const GOOGLE_API_KEY = process.env.G16_VITE_GOOGLE_MAPS_API_KEY;
 
+// 💡 ฟังก์ชันใหม่: Reverse Geocoding เพื่อดึงชื่อสถานที่จากพิกัด
+async function reverseGeocode(lat: string, lng: string): Promise<string> {
+  const GEOCODE_URL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`;
+  try {
+    const response = await axios.get(GEOCODE_URL);
+    const data = response.data;
+
+    if (data.status === 'OK' && data.results.length > 0) {
+      // ใช้ formatted_address และตัดเอาส่วนแรก (ชื่อสถานที่หลัก)
+      return (
+        data.results[0].formatted_address.split(',')[0].trim() ||
+        'Location Found'
+      );
+    }
+    return `Coords: ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`;
+  } catch (error) {
+    console.error('Reverse Geocoding Failed:', error);
+    // 💡 คืนค่าที่ระบุ Error เพื่อไม่ให้ Promise.all ล้มเหลว
+    return 'Location Unknown (API Error)';
+  }
+}
+
 export const FARE_CONSTANTS = {
   MAX_FARES: {
     BTS: 59.0,
@@ -80,7 +102,11 @@ async function getStationCount(
   return 0;
 }
 
-function safelyParseLocation(locationData: any): { lat: string; lng: string } {
+function safelyParseLocation(locationData: any): {
+  lat: string;
+  lng: string;
+  name?: string;
+} {
   if (typeof locationData === 'string') {
     return JSON.parse(locationData);
   }
@@ -199,12 +225,16 @@ export const handleTapTransaction = async (
   locationData: any,
   vehicleType: string
 ) => {
-  const card = await MetroCardService.getMetroCardById(cardId);
+  // 💡 บังคับให้ cardId เป็น Number เพื่อให้แน่ใจว่าเข้ากันได้กับ DB
+  const numericCardId = Number(cardId);
+  if (isNaN(numericCardId)) throw new Error('Invalid Card ID provided.');
+
+  const card = await MetroCardService.getMetroCardById(numericCardId);
 
   const pendingTransaction =
     (await prisma.transportation_transactions.findFirst({
       where: {
-        card_id: cardId,
+        card_id: numericCardId,
         status: 'PENDING_IN',
       },
     })) as any;
@@ -254,7 +284,7 @@ export const handleTapTransaction = async (
     return prisma.$transaction(async (tx) => {
       const newTransaction = await tx.transportation_transactions.create({
         data: {
-          card_id: cardId,
+          card_id: numericCardId,
           status: 'PENDING_IN',
           tap_in_location: JSON.stringify(locationData),
           amount: maxFareDecimal,
@@ -267,5 +297,133 @@ export const handleTapTransaction = async (
         transactionId: newTransaction.id,
       };
     });
+  }
+};
+/**
+ * ดึงประวัติการทำธุรกรรมการขนส่งล่าสุดสำหรับบัตรที่กำหนด
+ * @param cardId ID ของ MetroCard
+ * @param limit จำนวนรายการที่ต้องการ (ค่าเริ่มต้นคือ 5)
+ * @returns Array ของรายการธุรกรรม
+ */
+export const getTransportationHistory = async (
+  cardId: number,
+  limit: number = 6
+) => {
+  // 💡 การแก้ไข: การแปลงเป็น Number ที่เข้มงวด
+  const numericCardId = Number(cardId);
+  if (isNaN(numericCardId)) {
+    console.warn(
+      `[History Query] ID is NaN/Invalid: ${cardId}. Returning empty array.`
+    );
+    return [];
+  }
+
+  // 💡 NEW LOG: ตรวจสอบค่า ID ที่ Model ได้รับก่อน Query
+  console.log(
+    `[History Query] Attempting to query DB for card_id: ${numericCardId} (Type: ${typeof numericCardId})`
+  );
+
+  try {
+    const history = await prisma.transportation_transactions.findMany({
+      where: {
+        card_id: numericCardId, // 💡 ใช้ค่าที่ถูกบังคับชนิดแล้ว
+        status: {
+          in: ['COMPLETED', 'PENDING_IN'],
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+      take: limit,
+      select: {
+        id: true,
+        status: true,
+        tap_in_location: true,
+        tap_out_location: true,
+        amount: true,
+        created_at: true,
+      },
+    });
+
+    // 💡 NEW LOG: ตรวจสอบผลลัพธ์ที่ได้จาก Prisma
+    console.log(
+      `[History Query] Prisma returned ${history.length} transactions.`
+    );
+
+    // ถ้าไม่มีข้อมูล ให้คืนค่าทันที
+    if (history.length === 0) {
+      return [];
+    }
+
+    // 💡 แก้ไข: ใช้ Promise.all เพื่อทำการ Reverse Geocoding พร้อมกัน
+    const historyWithNames = await Promise.all(
+      history.map(async (tx) => {
+        let type: 'IN' | 'OUT';
+        let locationName: string = 'Unknown Location';
+        let chargedAmount: number | undefined;
+
+        // 💡 ฟังก์ชันช่วยสำหรับการแปลง JSON อย่างปลอดภัย
+        const safeParse = (data: any) => {
+          if (!data || typeof data !== 'string') return null;
+          try {
+            return JSON.parse(data);
+          } catch (e) {
+            return null;
+          }
+        };
+
+        if (tx.status === 'COMPLETED') {
+          type = 'OUT';
+          chargedAmount = tx.amount?.toNumber();
+
+          const parsedLocation = safeParse(tx.tap_out_location);
+
+          if (parsedLocation && parsedLocation.lat && parsedLocation.lng) {
+            // ทำ Reverse Geocode ถ้ามีพิกัด
+            locationName = await reverseGeocode(
+              parsedLocation.lat,
+              parsedLocation.lng
+            );
+          } else if (parsedLocation?.name) {
+            // ใช้ชื่อที่ถูกบันทึกไว้ ถ้ามี
+            locationName = parsedLocation.name;
+          } else {
+            locationName = 'Destination Unknown';
+          }
+        } else {
+          // PENDING_IN (Tap In)
+          type = 'IN';
+          chargedAmount = undefined;
+
+          const parsedLocation = safeParse(tx.tap_in_location);
+
+          if (parsedLocation && parsedLocation.lat && parsedLocation.lng) {
+            // ทำ Reverse Geocode ถ้ามีพิกัด
+            locationName = await reverseGeocode(
+              parsedLocation.lat,
+              parsedLocation.lng
+            );
+          } else if (parsedLocation?.name) {
+            // ใช้ชื่อที่ถูกบันทึกไว้ ถ้ามี
+            locationName = parsedLocation.name;
+          } else {
+            locationName = 'Origin Unknown';
+          }
+        }
+
+        return {
+          id: tx.id,
+          type: type,
+          locationName: locationName,
+          timestamp: tx.created_at.toISOString(),
+          chargedAmount: chargedAmount,
+        };
+      })
+    );
+
+    return historyWithNames;
+  } catch (error) {
+    console.error('Error fetching transportation history:', error);
+    throw new Error('Failed to retrieve transportation history.');
   }
 };
