@@ -3,8 +3,8 @@ import { handlePrismaError, ValidationError } from '@/errors';
 import type {
   CreateReport,
   PaginatedReport,
-  ReportResponse,
   ReportDeleteResponse,
+  ReportResponse,
   UpdateReport,
 } from '@/modules/emergency/types';
 import type { ReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
@@ -90,4 +90,25 @@ const deleteReportById = async (id: number): Promise<ReportDeleteResponse> => {
   }
 };
 
-export { createReport, findReportByStatus, updateReportById, deleteReportById };
+const getReportById = async (id: number): Promise<ReportResponse | null> => {
+  try {
+    const report = await prisma.emergency_reports.findFirst({
+      where: { id: id },
+    });
+
+    if (!report) return null;
+
+    return report;
+  } catch (error) {
+    handlePrismaError(error);
+    return null;
+  }
+};
+
+export {
+  createReport,
+  findReportByStatus,
+  updateReportById,
+  deleteReportById,
+  getReportById,
+};

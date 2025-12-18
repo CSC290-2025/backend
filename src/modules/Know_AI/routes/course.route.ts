@@ -5,6 +5,7 @@ import { UploadSchema } from '@/modules/Know_AI/schemas';
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 export const setupCourseRoutes = (app: OpenAPIHono) => {
+  app.openapi(CourseSchema.createAddressRoute, CourseController.createAddress);
   app.openapi(CourseSchema.createCourseRoute, CourseController.createCourse);
   app.openapi(CourseSchema.getAllCourseRoute, CourseController.getAllCourse);
   app.openapi(CourseSchema.getCourseRoute, CourseController.getCourse);
@@ -30,4 +31,9 @@ export const setupCourseRoutes = (app: OpenAPIHono) => {
     UploadSchema.deleteDataRoute,
     UploadController.deleteGeneralFileController
   );
+
+  //Admin
+  app.openapi(CourseSchema.getPendingCourse, CourseController.getPendingCourse);
+  app.openapi(CourseSchema.getApproveCourse, CourseController.getApproveCourse);
+  app.openapi(CourseSchema.changeApprovePost, CourseController.changeApprove);
 };

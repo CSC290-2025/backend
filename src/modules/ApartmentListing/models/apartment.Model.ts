@@ -8,6 +8,7 @@ import type {
 } from '../types/apartment.types';
 import { ApartmentSchemas } from '../schemas';
 import type { apartment_location } from '@/generated/prisma';
+import { insertLatLong } from './locationIQ.model';
 
 // Helper function to transform apartment data from Prisma to expected format
 function transformApartmentData(
@@ -118,14 +119,13 @@ export async function createApartment(data: createApartmentData) {
   try {
     const { userId, address, ...apartmentData } = data;
 
-    const response = await prisma.$transaction(
+    const result = await prisma.$transaction(
       async (tx) => {
-        // Create address first
         const createdAddress = await tx.addresses.create({
           data: address,
         });
 
-        // Build create payload and ensure apartment_location matches Prisma enum type
+        // Build apartment data
         const createData: Record<string, unknown> = {
           ...apartmentData,
           addresses: {
@@ -139,7 +139,6 @@ export async function createApartment(data: createApartmentData) {
         };
 
         if (createData.apartment_location) {
-          // Cast to Prisma enum type
           createData.apartment_location =
             createData.apartment_location as apartment_location;
         }
@@ -153,7 +152,7 @@ export async function createApartment(data: createApartmentData) {
           },
         });
 
-        // Find and update user role
+        // Update user role
         const roleResult = await tx.roles.findFirst({
           where: {
             role_name: { contains: 'apartment', mode: 'insensitive' },
@@ -162,25 +161,30 @@ export async function createApartment(data: createApartmentData) {
 
         if (roleResult) {
           await tx.users.update({
-            where: {
-              id: userId,
-            },
-            data: {
-              role_id: roleResult.id,
-            },
+            where: { id: userId },
+            data: { role_id: roleResult.id },
           });
         }
 
-        return apartment;
+        return { apartment, addressId: createdAddress.id, address };
       },
       {
-        maxWait: 2000, // default: 2000
-        timeout: 5000, // default: 5000
-        isolationLevel: 'ReadCommitted', // optional, default: Serializable
+        maxWait: 10000,
+        timeout: 30000,
       }
     );
+    insertLatLong(
+      result.addressId,
+      result.address.address_line || '',
+      result.address.province || '',
+      result.address.district || '',
+      result.address.subdistrict || '',
+      result.address.postal_code || ''
+    ).catch((error) => {
+      console.error('Failed to insert lat/long:', error);
+    });
 
-    return transformApartmentData(response);
+    return transformApartmentData(result.apartment);
   } catch (error) {
     console.error('Prisma Create Error:', error);
     throw handlePrismaError(error);
@@ -190,39 +194,37 @@ export async function createApartment(data: createApartmentData) {
 export async function updateApartment(data: updateApartmentData, id: number) {
   try {
     const { address, ...apartmentData } = data;
+    let addressData: typeof address | undefined;
 
-    const response = await prisma.$transaction(
+    const result = await prisma.$transaction(
       async (tx) => {
         const updateData: Record<string, unknown> = { ...apartmentData };
 
-        // If address data is provided, update the address
         if (address) {
-          // First get the apartment to find the address_id
-          const apartment = await tx.apartment.findUnique({
+          const currentApartment = await tx.apartment.findUnique({
             where: { id },
             select: { address_id: true },
           });
 
-          if (!apartment) {
+          if (!currentApartment) {
             throw new Error('Apartment not found');
           }
 
-          if (apartment.address_id) {
-            // Update existing address
+          if (currentApartment.address_id) {
             await tx.addresses.update({
-              where: { id: apartment.address_id },
+              where: { id: currentApartment.address_id },
               data: address,
             });
+            addressData = address;
           } else {
-            // Create new address if apartment doesn't have one
             const newAddress = await tx.addresses.create({
               data: address,
             });
+            addressData = address;
             updateData.address_id = newAddress.id;
           }
         }
 
-        // Update the apartment
         const updatedApartment = await tx.apartment.update({
           where: { id },
           data: updateData,
@@ -235,13 +237,23 @@ export async function updateApartment(data: updateApartmentData, id: number) {
         return updatedApartment;
       },
       {
-        maxWait: 5000,
-        timeout: 10000,
-        isolationLevel: 'ReadCommitted',
+        maxWait: 10000,
+        timeout: 30000,
       }
     );
 
-    return transformApartmentData(response);
+    if (address && result.address_id) {
+      await insertLatLong(
+        result.address_id,
+        address.address_line || '',
+        address.province || '',
+        address.district || '',
+        address.subdistrict || '',
+        address.postal_code || ''
+      );
+    }
+
+    return transformApartmentData(result);
   } catch (error) {
     console.error('Update apartment error details:', error);
     throw handlePrismaError(error);
@@ -252,69 +264,90 @@ export async function deleteApartment(id: number) {
   try {
     await prisma.$transaction(
       async (tx) => {
-        // First, get the apartment to find its address_id
+        // Fetch apartment with only needed data
         const apartment = await tx.apartment.findUnique({
           where: { id },
-          select: { address_id: true, apartment_owner: true },
+          select: {
+            address_id: true,
+            apartment_owner: {
+              select: { user_id: true },
+              take: 1,
+            },
+          },
         });
 
-        // Delete apartment_owner records
-        await tx.apartment_owner.deleteMany({
-          where: { apartment_id: id },
-        });
+        if (!apartment) {
+          throw new Error('Apartment not found');
+        }
 
-        // Delete rooms
-        await tx.room.deleteMany({
-          where: { apartment_id: id },
-        });
+        const userId = apartment.apartment_owner?.[0]?.user_id;
 
-        // Delete apartment_picture records
+        // Step 1: Delete apartment_picture (no dependencies)
         await tx.apartment_picture.deleteMany({
           where: { apartment_id: id },
         });
 
-        // Delete the apartment
+        // Step 2: Delete apartment_booking (references room via fk_room_id)
+        await tx.apartment_booking.deleteMany({
+          where: { apartment_id: id },
+        });
+
+        // Step 3: Delete apartment_owner
+        await tx.apartment_owner.deleteMany({
+          where: { apartment_id: id },
+        });
+
+        // Step 4: Delete rooms (must be after apartment_booking)
+        await tx.room.deleteMany({
+          where: { apartment_id: id },
+        });
+
+        // Step 5: Delete apartment
         await tx.apartment.delete({
           where: { id },
         });
 
-        // Delete the address if it exists and is not used by other apartments
-        if (apartment?.address_id) {
-          const otherApartmentsUsingAddress = await tx.apartment.count({
+        // Step 6: Check and delete orphaned address
+        if (apartment.address_id) {
+          const addressInUse = await tx.apartment.findFirst({
             where: { address_id: apartment.address_id },
+            select: { id: true },
           });
-          // Only delete if no other apartments are using this address
-          if (otherApartmentsUsingAddress === 0) {
-            await tx.addresses.delete({
+
+          if (!addressInUse) {
+            await tx.addresses.deleteMany({
               where: { id: apartment.address_id },
             });
           }
         }
 
-        // Revert user role to default role if no more apartments owned
-        const apartmentCount = await tx.apartment_owner.count({
-          where: { user_id: apartment?.apartment_owner?.[0]?.user_id },
-        });
-        if (apartmentCount === 0) {
-          const defaultRole = await tx.roles.findFirst({
-            where: { role_name: { contains: 'citizen', mode: 'insensitive' } },
+        // Step 7: Revert user role if no apartments remain
+        if (userId) {
+          const remainingApartments = await tx.apartment_owner.findFirst({
+            where: { user_id: userId },
+            select: { apartment_id: true },
           });
-          if (defaultRole) {
-            await tx.users.update({
+
+          if (!remainingApartments) {
+            const defaultRole = await tx.roles.findFirst({
               where: {
-                id: apartment?.apartment_owner?.[0]?.user_id,
+                role_name: { contains: 'citizen', mode: 'insensitive' },
               },
-              data: {
-                role_id: defaultRole.id,
-              },
+              select: { id: true },
             });
+
+            if (defaultRole) {
+              await tx.users.updateMany({
+                where: { id: userId },
+                data: { role_id: defaultRole.id },
+              });
+            }
           }
         }
       },
       {
-        maxWait: 5000,
-        timeout: 10000,
-        isolationLevel: 'ReadCommitted',
+        maxWait: 10000,
+        timeout: 30000,
       }
     );
   } catch (error) {

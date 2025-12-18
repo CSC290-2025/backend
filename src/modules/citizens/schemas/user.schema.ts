@@ -6,6 +6,7 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 import { authMiddleware, adminMiddleware } from '@/middlewares';
+import { id } from 'zod/v4/locales';
 
 const UserinfoAndWalletSchema = z.object({
   id: z.number(),
@@ -23,6 +24,7 @@ const EmergencyContactSchema = z.object({
 });
 
 const AddressSchema = z.object({
+  id: z.number().nullable().optional(),
   address_line: z.string().nullable(),
   province: z.string().nullable(),
   district: z.string().nullable(),
@@ -48,6 +50,7 @@ const UserProfileSchema = z.object({
   height: z.number().nullable(),
   weight: z.number().nullable(),
   gender: z.string().nullable(),
+  specialty_id: z.number().nullable(),
   profile: z.string().nullable(),
   addresses: z.array(AddressSchema),
 });
@@ -56,6 +59,7 @@ const UserSettingPageSchema = z.object({
   username: z.string(),
   email: z.string().email(),
   phone: z.string().nullable(),
+  role_id: z.number().nullable(),
   insurance_cards: z.array(InsuranceCardSchema),
   user_profiles: z.array(UserProfileSchema),
   emergency_contacts: z.array(EmergencyContactSchema),
@@ -113,6 +117,7 @@ const getUserAddress = createGetRoute({
   params: UserIdParam,
   tags: ['User'],
 });
+
 const updatePassword = createPutRoute({
   path: '/user/password/{id}',
   summary: 'Update user password',

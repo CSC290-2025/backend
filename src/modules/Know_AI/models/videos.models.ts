@@ -51,9 +51,30 @@ const createMultipleCourseVideos = async (
   }
 };
 
-const deleteCourseVideo = async (id: number): Promise<CourseVideo> => {
+const updateCourseVideo = async (
+  id: number,
+  data: Partial<CreateCourseVideo>,
+  tx?: any
+): Promise<CourseVideo> => {
   try {
-    return await prisma.course_videos.delete({ where: { id } });
+    const prismaClient = tx || prisma;
+    return await prismaClient.course_videos.update({
+      where: { id },
+      data,
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+const deleteCourseVideo = async (
+  id: number,
+  tx?: any
+): Promise<CourseVideo> => {
+  // 🛠️ แก้ไขให้รับ tx
+  try {
+    const prismaClient = tx || prisma;
+    return await prismaClient.course_videos.delete({ where: { id } }); // 🛠️ ใช้ prismaClient
   } catch (error) {
     handlePrismaError(error);
   }
@@ -78,6 +99,7 @@ export {
   getCourseVideoById,
   createCourseVideo,
   createMultipleCourseVideos,
+  updateCourseVideo,
   deleteCourseVideo,
   deleteCourseVideosByCourseId,
 };
