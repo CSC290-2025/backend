@@ -103,6 +103,7 @@ import {
   detectRoutes,
   markerRoutes,
   distanceRoutes,
+  markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
 // Traffic
