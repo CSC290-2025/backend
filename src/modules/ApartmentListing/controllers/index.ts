@@ -5,3 +5,4 @@ export * as roomControllers from './room.Controller';
 export * as addressControllers from './address.Controller';
 export * as uploadController from './upload.controller';
 export * as ownerController from './owner.controller';
+export * as locationIQController from './locationIQ.controller';

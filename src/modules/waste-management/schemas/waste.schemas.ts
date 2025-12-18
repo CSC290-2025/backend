@@ -60,6 +60,18 @@ const DailyStatsResponseSchema = z.object({
   }),
 });
 
+const DailyLogResponseSchema = z.object({
+  stats: z.object({
+    by_log: z.array(
+      z.object({
+        log_id: z.number(),
+        waste_type: z.string().optional(),
+        weight: z.number(),
+      })
+    ),
+  }),
+});
+
 const getWasteTypesRoute = createGetRoute({
   path: '/waste-types',
   summary: 'Get all waste types',
@@ -67,10 +79,18 @@ const getWasteTypesRoute = createGetRoute({
   tags: ['Waste'],
 });
 
-const getDailyStatsRoute = createGetRoute({
+const getDailyStatsByUserRoute = createGetRoute({
   path: '/waste/stats/daily',
   summary: 'Get daily waste statistics',
   responseSchema: DailyStatsResponseSchema,
+  tags: ['Waste', 'Analytics'],
+  middleware: [authMiddleware],
+});
+
+const getDailyLogRoute = createGetRoute({
+  path: '/waste/logs/daily',
+  summary: 'Get daily waste log',
+  responseSchema: DailyLogResponseSchema,
   tags: ['Waste', 'Analytics'],
   middleware: [authMiddleware],
 });
@@ -84,7 +104,7 @@ const logWasteRoute = createPostRoute({
   middleware: [authMiddleware],
 });
 
-const getStatsRoute = createGetRoute({
+const getStatsByUserRoute = createGetRoute({
   path: '/waste/stats',
   summary: 'Get monthly waste statistics',
   responseSchema: MonthlyStatsResponseSchema,
@@ -109,9 +129,11 @@ export const WasteSchemas = {
   WasteLogResponseSchema,
   MonthlyStatsResponseSchema,
   DailyStatsResponseSchema,
+  DailyLogResponseSchema,
   getWasteTypesRoute,
   logWasteRoute,
-  getStatsRoute,
-  getDailyStatsRoute,
+  getStatsByUserRoute,
+  getDailyStatsByUserRoute,
+  getDailyLogRoute,
   deleteLogRoute,
 };

@@ -9,6 +9,9 @@ import { cors } from 'hono/cors';
 import prisma from '@/config/client';
 import { startBookingCleanupJob } from '@/modules/ApartmentListing/models/bookingCleanup.model';
 import { startAir4ThaiAggregationJob } from '@/modules/clean-air/services/clean-air-air4thai.scheduler';
+import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
+import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+import { setupSupportMapOpenApiRoutes } from '@/modules/G-16/routes/supportMap.openapi.routes';
 import { startConsecutiveRainAlertJob } from '@/modules/weather/services/weather-rain-alert.scheduler';
 import { enableWeatherAutoImport } from '@/modules/weather/services/weather-auto-import.scheduler';
 import 'dotenv/config';
@@ -80,6 +83,11 @@ app.get('/doc', (c) => {
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
 setupRoutes(app);
+
+setupMarkerOpenApiRoutes(app);
+setupMarkerTypeOpenApiRoutes(app);
+setupSupportMapOpenApiRoutes(app);
+
 startAir4ThaiAggregationJob();
 startConsecutiveRainAlertJob();
 enableWeatherAutoImport();

@@ -6,6 +6,10 @@ import {
 } from '@/utils/openapi-helpers.ts';
 import { ReportSchemas } from '@/modules/emergency/schemas';
 import * as z from 'zod';
+import {
+  ReportFindResponseByIdSchema,
+  ReportResponseSchema,
+} from '@/modules/emergency/schemas/report.schema.ts';
 
 const createReportRoute = createPostRoute({
   path: '/emergency/reports',
@@ -49,9 +53,20 @@ const updateReportByIdRoute = createPutRoute({
   tags: ['Report'],
 });
 
+const findReportByIdRoute = createGetRoute({
+  path: '/emergency/report/{id}',
+  summary: 'Find report by id',
+  params: z.object({
+    id: z.string(),
+  }),
+  responseSchema: ReportSchemas.ReportResponseSchema,
+  tags: ['Report'],
+});
+
 export {
   createReportRoute,
   findReportByStatusRoute,
   deleteReportByIdRoute,
   updateReportByIdRoute,
+  findReportByIdRoute,
 };

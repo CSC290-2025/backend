@@ -73,10 +73,10 @@ export const getTransitLinesController = async (c: Context) => {
   const originText = c.req.query('originText');
   const destinationText = c.req.query('destinationText');
 
-  const hasLatLgnPair = origLat && origLng && destLat && destLng;
+  const hasLatLngPair = origLat && origLng && destLat && destLng;
   const hasTextPair = originText && destinationText;
 
-  if (!hasLatLgnPair && !hasTextPair) {
+  if (!hasLatLngPair && !hasTextPair) {
     return c.json(
       {
         success: false,

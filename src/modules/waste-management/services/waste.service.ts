@@ -1,8 +1,6 @@
 import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { WasteModel } from '../models';
 import type { WasteLogInternal, WasteStats } from '../types';
-import type { Prisma } from '@/generated/prisma';
-import { date } from 'zod';
 
 export class WasteService {
   static async getWasteTypes() {
@@ -29,7 +27,7 @@ export class WasteService {
     };
   }
 
-  static async getMonthlyStats(
+  static async getMonthlyStatsByUser(
     user_id: number,
     month?: number,
     year?: number
@@ -41,7 +39,7 @@ export class WasteService {
     const startDate = new Date(targetYear, targetMonth - 1, 1);
     const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59);
 
-    const stats = (await WasteModel.getWasteStatsByMonth(
+    const stats = (await WasteModel.getWasteStatsByMonthByUser(
       startDate,
       endDate,
       user_id
@@ -122,6 +120,17 @@ export class WasteService {
       total_weight_kg: totalWeight,
       by_type: byType,
     };
+  }
+
+  static async getDailyLogs(user_id: number) {
+    const today = new Date();
+    const logs = await WasteModel.getWasteLogsByDay(user_id, today);
+
+    return logs.map((stat) => ({
+      waste_type: stat.waste_types?.type_name,
+      log_id: stat.id,
+      weight: stat.weight_kg,
+    }));
   }
 
   static async deleteLogById(id: number, user_id: number) {

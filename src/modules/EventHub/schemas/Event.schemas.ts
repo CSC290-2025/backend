@@ -5,6 +5,8 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { requireRole, adminMiddleware, authMiddleware } from '@/middlewares';
+import { ROLES } from '@/constants/roles';
 const OrganizationSchema = z.object({
   name: z.string(),
   email: z.string().email(),
@@ -92,7 +94,10 @@ const EventListQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
-
+const Pagination = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 const ListEventsResponse = z.object({
   items: z.array(EventSchema),
   page: z.number().int(),
@@ -128,6 +133,7 @@ const createEventRoute = createPostRoute({
   requestSchema: CreateEventSchema,
   responseSchema: z.object({ event: EventSchema }),
   tags: ['Events'],
+  middleware: [adminMiddleware],
 });
 
 const updateEventRoute = createPutRoute({
@@ -137,6 +143,12 @@ const updateEventRoute = createPutRoute({
   responseSchema: z.object({ event: EventSchema }),
   params: IdParam,
   tags: ['Events'],
+  middleware: [adminMiddleware],
+});
+const DayEventItem = z.object({
+  title: z.string(),
+  start_date: z.string(),
+  start_time: z.string(),
 });
 
 const deleteEventRoute = createDeleteRoute({
@@ -144,7 +156,9 @@ const deleteEventRoute = createDeleteRoute({
   summary: 'Delete event',
   params: IdParam,
   tags: ['Events'],
+  middleware: [adminMiddleware],
 });
+
 const getEventByDayRoute = createGetRoute({
   path: '/events/by-day',
   summary: 'Get events in a specific day',
@@ -152,6 +166,24 @@ const getEventByDayRoute = createGetRoute({
     date: z.coerce.date(),
   }),
   responseSchema: z.object({
+    data: z.array(EventSchema),
+  }),
+  tags: ['Events'],
+});
+const listPastBookmarkedEventsRoute = createGetRoute({
+  path: '/events/bookmarked-history',
+  summary: 'List events that have ended and are bookmarked by the user.',
+  query: Pagination,
+  responseSchema: ListEventsResponse,
+  tags: ['Events'],
+  middleware: [authMiddleware],
+});
+// Event.schemas.ts
+const listWasteEventsRoute = createGetRoute({
+  path: '/events/waste',
+  summary: 'List all waste management events',
+  responseSchema: z.object({
+    success: z.boolean(),
     data: z.array(EventSchema),
   }),
   tags: ['Events'],
@@ -171,4 +203,6 @@ export const EventSchemas = {
   updateEventRoute,
   deleteEventRoute,
   getEventByDayRoute,
+  listPastBookmarkedEventsRoute,
+  listWasteEventsRoute,
 };

@@ -9,6 +9,7 @@ Choose ONE approach per module that you're comfortable with:
 
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
+import { setupResetRoutes } from '@/modules/Auth/routes';
 
 // Apartment
 import {
@@ -19,6 +20,7 @@ import {
   setupUploadRoutes,
   setupBookingRoutes,
   setupAPTOwnerRoutes,
+  setupAPTLocationIQRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -41,6 +43,7 @@ import {
   setupFcmRoutes,
   setupTokenRoutes,
   setupContactRoutes,
+  reportRoute,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -53,6 +56,7 @@ import {
   setupMetroCardRoutes,
   setupTransactionRoutes,
   setupInsuranceCardRoutes,
+  setupLocationRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -76,6 +80,10 @@ import {
   setupPaymentRoutes,
   setupDoctorsRoutes,
   setupMedicineInventoryRoutes,
+  setupDepartmentRoutes,
+  setupHealthcareAuthRoutes,
+  setupStaffRoutes,
+  setupEmergencyRoutes,
 } from '@/modules/healthcare/routes';
 
 // Know AI
@@ -95,6 +103,7 @@ import {
   detectRoutes,
   markerRoutes,
   distanceRoutes,
+  markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
 // Traffic
@@ -136,6 +145,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Auth
   setupAuthRoutes(app);
+  setupResetRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
@@ -145,6 +155,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUploadRoutes(app);
   setupBookingRoutes(app);
   setupAPTOwnerRoutes(app);
+  setupAPTLocationIQRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
@@ -172,6 +183,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
   setupScbRoutes(app);
+  setupLocationRoutes(app);
 
   //Healthcare
   setupPatientRoutes(app);
@@ -184,6 +196,11 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupPaymentRoutes(app);
   setupDoctorsRoutes(app);
   setupMedicineInventoryRoutes(app);
+  setupDepartmentRoutes(app);
+  setupAddressRoutes(app);
+  setupHealthcareAuthRoutes(app);
+  setupStaffRoutes(app);
+  setupEmergencyRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
@@ -234,6 +251,8 @@ export const setupRoutes = (app: OpenAPIHono) => {
   app.route('/api', detectRoutes);
   app.route('/api', markerRoutes);
   app.route('/api', distanceRoutes);
+  app.route('/api/marker-types', markerTypeRoutes);
+  app.route('/emergency', reportRoute());
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);
