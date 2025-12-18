@@ -30,14 +30,12 @@ String wifiSSID = "";
 String wifiPass = "";
 String teamId = "10";
 String trafficLightId = "10";
-float latitude = 13.647372;
-float longitude = 100.495536;
 
 // Firebase Configuration
-#define API_KEY ""
-#define DATABASE_URL ""
-#define USER_EMAIL ""
-#define USER_PASSWORD ""
+#define API_KEY "AIzaSyCsJQMhxz-av8Dyl2l-jduR2zDJK1mv_rs"
+#define DATABASE_URL "https://sit-integrated-proj-2025-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define USER_EMAIL "arduino@smartcity.sit.kmutt.ac.th"
+#define USER_PASSWORD "board123"
 
 // Firebase objects
 WiFiClientSecure ssl_client;
@@ -59,6 +57,7 @@ bool configMode = false;
 int currentColor = 1; // 1=red, 2=yellow, 3=green
 int remainingTime = 0;
 int currentStatus = 0; // 0=active, 1=broken, 2=fixing
+int yellowDuration = 0; // yellow_duration from Firebase
 
 // --- Helper: sanitize non-ASCII characters ---
 String sanitizeASCII(const String &input)
@@ -189,14 +188,6 @@ const char *configPage = R"rawliteral(
                     <label>Traffic Light ID</label>
                     <input type="text" name="lightid" value="%LIGHT_ID%" required>
                 </div>
-                <div class="form-group">
-                    <label>Latitude</label>
-                    <input type="number" step="0.000001" name="lat" value="%LAT%" required>
-                </div>
-                <div class="form-group">
-                    <label>Longitude</label>
-                    <input type="number" step="0.000001" name="lng" value="%LNG%" required>
-                </div>
                 <button type="submit" class="btn-primary">Save & Restart</button>
             </form>
             <form action="/reset" method="POST">
@@ -215,8 +206,8 @@ String processTemplate(const char *html)
   result.replace("%WIFI_PASS%", htmlEscape(wifiPass));
   result.replace("%TEAM_ID%", htmlEscape(teamId));
   result.replace("%LIGHT_ID%", htmlEscape(trafficLightId));
-  result.replace("%LAT%", String(latitude, 6));
-  result.replace("%LNG%", String(longitude, 6));
+  result.replace("%LAT%", "");
+  result.replace("%LNG%", "");
   return result;
 }
 
@@ -229,8 +220,6 @@ void loadConfiguration()
   wifiPass = preferences.getString("pass", "");
   teamId = preferences.getString("team", "10");
   trafficLightId = preferences.getString("lightid", "10");
-  latitude = preferences.getFloat("lat", 13.647372);
-  longitude = preferences.getFloat("lng", 100.495536);
   preferences.end();
 }
 
@@ -241,8 +230,6 @@ void saveConfiguration()
   preferences.putString("pass", wifiPass);
   preferences.putString("team", teamId);
   preferences.putString("lightid", trafficLightId);
-  preferences.putFloat("lat", latitude);
-  preferences.putFloat("lng", longitude);
   preferences.end();
 }
 
@@ -276,8 +263,6 @@ void startConfigMode()
               wifiPass = server.arg("pass");
               teamId = server.arg("team");
               trafficLightId = server.arg("lightid");
-              latitude = server.arg("lat").toFloat();
-              longitude = server.arg("lng").toFloat();
 
               saveConfiguration();
 
@@ -359,9 +344,7 @@ void updateMyStatus()
   if (millis() - lastUpdate < 10000)
     return;
 
-  // Send metadata and online status only
-  Database.set<number_t>(aClient, path + "/lat", number_t(latitude, 6), aResult);
-  Database.set<number_t>(aClient, path + "/lng", number_t(longitude, 6), aResult);
+  // Send online status only
   Database.set<bool>(aClient, path + "/online", true, aResult);
 
   Serial.println("Heartbeat sent");
@@ -401,8 +384,12 @@ void processStream(AsyncResult &aResult)
         if ((newColor >= 1 && newColor <= 3) && newColor != currentColor)
         {
           setLight(newColor);
-          String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow" : "green";
+          String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow"
+                                                                       : "green";
           Serial.println("► Light changed: " + colorName);
+          // Update display time when color changes (especially when switching to green)
+          int displayTime = (newColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+          display.showNumberDec(displayTime);
         }
       }
       else if (path.endsWith("/remaintime"))
@@ -411,11 +398,28 @@ void processStream(AsyncResult &aResult)
         if (newTime >= 0 && newTime <= 9999 && newTime != remainingTime)
         {
           remainingTime = newTime;
-          display.showNumberDec(remainingTime);
+          // If color is green, subtract yellow_duration from remaintime for display
+          int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+          display.showNumberDec(displayTime);
           // Only log every 5 seconds or final countdown
           if (newTime % 5 == 0 || newTime <= 5)
           {
-            Serial.println("► Time: " + String(remainingTime) + "s");
+            Serial.println("► Time: " + String(remainingTime) + "s (display: " + String(displayTime) + "s)");
+          }
+        }
+      }
+      else if (path.endsWith("/yellow_duration"))
+      {
+        int newYellowDuration = data.toInt();
+        if (newYellowDuration >= 0 && newYellowDuration != yellowDuration)
+        {
+          yellowDuration = newYellowDuration;
+          Serial.println("► Yellow duration: " + String(yellowDuration) + "s");
+          // Update display if currently green
+          if (currentColor == 3)
+          {
+            int displayTime = max(0, remainingTime - yellowDuration);
+            display.showNumberDec(displayTime);
           }
         }
       }
@@ -425,7 +429,8 @@ void processStream(AsyncResult &aResult)
         if (newStatus >= 0 && newStatus <= 2 && newStatus != currentStatus)
         {
           currentStatus = newStatus;
-          String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken" : "fixing";
+          String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken"
+                                                                             : "fixing";
           Serial.println("► Status changed: " + statusName);
         }
       }
@@ -449,7 +454,8 @@ void processStream(AsyncResult &aResult)
             if ((newColor >= 1 && newColor <= 3) && newColor != currentColor)
             {
               setLight(newColor);
-              String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow" : "green";
+              String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow"
+                                                                           : "green";
               Serial.println("► Light: " + colorName);
             }
           }
@@ -472,8 +478,31 @@ void processStream(AsyncResult &aResult)
             if (newTime >= 0 && newTime <= 9999 && newTime != remainingTime)
             {
               remainingTime = newTime;
-              display.showNumberDec(remainingTime);
-              Serial.println("► Time: " + String(remainingTime) + "s");
+              int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+              display.showNumberDec(displayTime);
+              Serial.println("► Time: " + String(remainingTime) + "s (display: " + String(displayTime) + "s)");
+            }
+          }
+        }
+
+        // Parse JSON manually for yellow_duration
+        int yellowIdx = data.indexOf("\"yellow_duration\"");
+        if (yellowIdx >= 0)
+        {
+          int colonIdx = data.indexOf(":", yellowIdx);
+          int commaIdx = data.indexOf(",", colonIdx);
+          int braceIdx = data.indexOf("}", colonIdx);
+          int endIdx = (commaIdx > 0 && commaIdx < braceIdx) ? commaIdx : braceIdx;
+
+          if (colonIdx >= 0 && endIdx > colonIdx)
+          {
+            String yellowStr = data.substring(colonIdx + 1, endIdx);
+            yellowStr.trim();
+            int newYellowDuration = yellowStr.toInt();
+            if (newYellowDuration >= 0 && newYellowDuration != yellowDuration)
+            {
+              yellowDuration = newYellowDuration;
+              Serial.println("► Yellow duration: " + String(yellowDuration) + "s");
             }
           }
         }
@@ -495,7 +524,8 @@ void processStream(AsyncResult &aResult)
             if (newStatus >= 0 && newStatus <= 2 && newStatus != currentStatus)
             {
               currentStatus = newStatus;
-              String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken" : "fixing";
+              String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken"
+                                                                                 : "fixing";
               Serial.println("► Status: " + statusName);
             }
           }
@@ -603,24 +633,34 @@ void setup()
       if (initialColor >= 1 && initialColor <= 3)
       {
         setLight(initialColor);
-        String colorName = (initialColor == 1) ? "red" : (initialColor == 2) ? "yellow" : "green";
+        String colorName = (initialColor == 1) ? "red" : (initialColor == 2) ? "yellow"
+                                                                             : "green";
         Serial.println("Initial color: " + colorName);
       }
+    }
+
+    int initialYellowDuration = Database.get<int>(aClient, myPath + "/yellow_duration");
+    if (aClient.lastError().code() == 0)
+    {
+      yellowDuration = initialYellowDuration;
+      Serial.println("Initial yellow duration: " + String(yellowDuration) + "s");
     }
 
     int initialTime = Database.get<int>(aClient, myPath + "/remaintime");
     if (aClient.lastError().code() == 0)
     {
       remainingTime = initialTime;
-      display.showNumberDec(remainingTime);
-      Serial.println("Initial time: " + String(remainingTime) + "s");
+      int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+      display.showNumberDec(displayTime);
+      Serial.println("Initial time: " + String(remainingTime) + "s (display: " + String(displayTime) + "s)");
     }
 
     int initialStatus = Database.get<int>(aClient, myPath + "/status");
     if (aClient.lastError().code() == 0)
     {
       currentStatus = initialStatus;
-      String statusName = (initialStatus == 0) ? "active" : (initialStatus == 1) ? "broken" : "fixing";
+      String statusName = (initialStatus == 0) ? "active" : (initialStatus == 1) ? "broken"
+                                                                                 : "fixing";
       Serial.println("Initial status: " + statusName);
     }
 
@@ -692,7 +732,8 @@ void loop()
     {
       // Restore normal state
       setLight(currentColor);
-      display.showNumberDec(remainingTime);
+      int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+      display.showNumberDec(displayTime);
       previousStatus = currentStatus;
     }
   }
