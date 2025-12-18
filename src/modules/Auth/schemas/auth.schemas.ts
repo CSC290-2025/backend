@@ -8,9 +8,32 @@ export const LoginRequestSchema = z.object({
 });
 
 export const RegisterRequestSchema = z.object({
-  email: z.email(),
-  password: z.string().min(6),
-  username: z.string().min(3),
+  //users Table
+  email: z.email('Invalid email address').min(1, 'Email is required'),
+  password: z
+    .string()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters'),
+  username: z
+    .string()
+    .min(1, 'Username is required')
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Username can only contain letters, numbers, underscores, and hyphens'
+    ),
+
+  //userProfile table
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'),
+  dob: z.coerce.date(),
+  phone: z.string().optional(),
+  gender: z.enum(['male', 'female']),
+
+  addressLine: z.string().optional(),
+  subDistrict: z.string().optional(),
+  district: z.string().optional(),
+  province: z.string().optional(),
+  postalCode: z.string().optional(),
 });
 
 export const RefreshTokenRequestSchema = z.object({
