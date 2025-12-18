@@ -103,7 +103,11 @@ import {
   detectRoutes,
   markerRoutes,
   distanceRoutes,
+  markerTypeRoutes,
 } from '@/modules/G-16/routes';
+import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
+import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+import { setupSupportMapOpenApiRoutes } from '@/modules/G-16/routes/supportMap.openapi.routes';
 
 // Traffic
 import {
@@ -231,6 +235,9 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupBinRoutes(app);
 
   // SupportMap
+  setupMarkerOpenApiRoutes(app);
+  setupMarkerTypeOpenApiRoutes(app);
+  setupSupportMapOpenApiRoutes(app);
 
   // Weather
   setupOpenMeteoRoutes(app);

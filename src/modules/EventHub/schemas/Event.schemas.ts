@@ -133,7 +133,7 @@ const createEventRoute = createPostRoute({
   requestSchema: CreateEventSchema,
   responseSchema: z.object({ event: EventSchema }),
   tags: ['Events'],
-  middleware: [adminMiddleware],
+  middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
 });
 
 const updateEventRoute = createPutRoute({
@@ -143,7 +143,7 @@ const updateEventRoute = createPutRoute({
   responseSchema: z.object({ event: EventSchema }),
   params: IdParam,
   tags: ['Events'],
-  middleware: [adminMiddleware],
+  middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
 });
 const DayEventItem = z.object({
   title: z.string(),
@@ -156,7 +156,7 @@ const deleteEventRoute = createDeleteRoute({
   summary: 'Delete event',
   params: IdParam,
   tags: ['Events'],
-  middleware: [adminMiddleware],
+  middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
 });
 
 const getEventByDayRoute = createGetRoute({

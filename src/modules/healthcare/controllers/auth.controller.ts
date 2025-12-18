@@ -3,80 +3,55 @@ import { sign } from 'hono/jwt';
 import { successResponse, errorResponse } from '@/utils/response'; // Assuming errorResponse exists or I should use throw
 import { UnauthorizedError, NotFoundError, ConflictError } from '@/errors';
 import prisma from '@/config/client';
+import { ROLES } from '@/constants/roles';
 import { AuthSchemas } from '../schemas/auth.schemas';
 import bcrypt from 'bcryptjs';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'healthcare-secret-key-change-me';
 
-// Hardcoded Admin
-const HARDCODED_ADMIN = {
-  email: 'admin@healthcare.com',
-  password: 'admin123',
-  id: -1,
-  role: 'super_admin',
-};
-
 const login = async (c: Context) => {
   const payload = await c.req.json();
   const { email, password } = AuthSchemas.LoginRequestSchema.parse(payload);
 
-  let user = null;
-  let role = '';
+  // Check Database Users & Staff
+  // First find the user
+  const dbUser = await prisma.users.findFirst({
+    where: {
+      OR: [{ email: email }, { username: email }],
+    },
+    include: {
+      roles: true,
+    },
+  });
 
-  // 1. Check Hardcoded Admin
-  if (
-    email === HARDCODED_ADMIN.email &&
-    password === HARDCODED_ADMIN.password
-  ) {
-    user = {
-      id: HARDCODED_ADMIN.id,
-      email: HARDCODED_ADMIN.email,
-      username: 'Healthcare Admin',
-    };
-    role = HARDCODED_ADMIN.role;
-  } else {
-    // 2. Check Database Users & Staff
-    // First find the user
-    const dbUser = await prisma.users.findFirst({
-      where: {
-        OR: [{ email: email }, { username: email }],
-      },
+  if (!dbUser) {
+    throw new UnauthorizedError('Invalid credentials');
+  }
+
+  // Verify Password
+  const isValidPassword = await bcrypt.compare(password, dbUser.password_hash);
+  if (!isValidPassword) {
+    throw new UnauthorizedError('Invalid credentials');
+  }
+
+  let roleName = dbUser.roles?.role_name || '';
+  if (!roleName && dbUser.role_id) {
+    const roleRecord = await prisma.roles.findUnique({
+      where: { id: dbUser.role_id },
     });
-
-    if (!dbUser) {
-      throw new UnauthorizedError('Invalid credentials');
-    }
-
-    // Verify Password
-    const isValidPassword = await bcrypt.compare(
-      password,
-      dbUser.password_hash
-    );
-    if (!isValidPassword) {
-      throw new UnauthorizedError('Invalid credentials');
-    }
-
-    // Check if they are authorized 'staff'
-    const staffRecord = await prisma.staff.findFirst({
-      where: { user_id: dbUser.id },
-    });
-
-    if (!staffRecord) {
-      throw new UnauthorizedError(
-        'Access denied. Not a healthcare staff member.'
-      );
-    }
-
-    user = dbUser;
-    role = staffRecord.role || 'staff';
+    roleName = roleRecord?.role_name || '';
+  }
+  const allowedRoles = [ROLES.HEALTH_MANAGER].map((role) => role.toLowerCase());
+  if (!allowedRoles.includes(roleName.toLowerCase())) {
+    throw new UnauthorizedError('Access denied. Health manager role required.');
   }
 
   // Generate Token
   const token = await sign(
     {
-      id: user.id,
-      email: user.email,
-      role: role,
+      id: dbUser.id,
+      email: dbUser.email,
+      role: roleName,
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 1 day
     },
     SECRET_KEY
@@ -85,10 +60,10 @@ const login = async (c: Context) => {
   return successResponse(c, {
     token,
     user: {
-      id: user.id,
-      email: user.email,
-      role: role,
-      name: (user as any).username || (user as any).name, // handle hardcoded vs db user structure
+      id: dbUser.id,
+      email: dbUser.email,
+      role: roleName,
+      name: (dbUser as any).username || (dbUser as any).name,
     },
   });
 };

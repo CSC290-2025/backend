@@ -40,7 +40,8 @@ const transferBetweenUsers = async (c: Context) => {
   const result = await WalletService.transferFunds(
     body.from_user_id,
     body.to_user_id,
-    body.amount
+    body.amount,
+    body.isVol
   );
   return successResponse(c, result, 200, 'Transfer completed successfully');
 };

@@ -1,4 +1,5 @@
 import prisma from '@/config/client';
+import { handlePrismaError } from '@/errors';
 import type {
   Prisma,
   bin as BinLocation,
@@ -33,17 +34,22 @@ export class BinModel {
     });
   }
 
-  static async createBin(data: CreateBinRequest) {
-    return prisma.bin.create({
-      data: {
-        bin_name: data.bin_name,
-        bin_type: data.bin_type,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        address: data.address ?? null,
-        capacity: data.capacity_kg ?? null,
-      },
-    });
+  static async createBin(data: CreateBinRequest, userId: number | null) {
+    try {
+      return await prisma.bin.create({
+        data: {
+          bin_name: data.bin_name,
+          bin_type: data.bin_type,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          address: data.address ?? null,
+          capacity: data.capacity_kg ?? null,
+          created_by_user_id: userId ?? undefined,
+        },
+      });
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   static async updateBin(id: number, data: UpdateBinRequest) {
@@ -65,6 +71,17 @@ export class BinModel {
   static async deleteBin(id: number) {
     return prisma.bin.delete({
       where: { id },
+    });
+  }
+
+  static async findBinsByUserId(userId: number) {
+    return prisma.bin.findMany({
+      where: {
+        created_by_user_id: userId,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
     });
   }
 
