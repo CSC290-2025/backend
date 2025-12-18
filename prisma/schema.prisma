@@ -327,23 +327,23 @@ model emergency_contacts {
 }
 
 model emergency_reports {
-  id                     Int            @id @default(autoincrement())
+  id                     Int                      @id @default(autoincrement())
   user_id                Int?
-  image_url              String?        @db.VarChar(1024)
+  image_url              String?                  @db.VarChar(1024)
   description            String?
-  ambulance_service      Boolean?       @default(false)
+  ambulance_service      Boolean?                 @default(false)
   level                  report_level?
-  status                 report_status? @default(pending)
-  created_at             DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime       @default(now()) @db.Timestamptz(6)
+  status                 report_status?           @default(pending)
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
   title                  String
-  contact_center_service Boolean?       @default(false)
+  contact_center_service Boolean?                 @default(false)
   report_category        report_type?
   location               Unsupported("geometry")?
   lat                    String?
   long                   String?
   alerts                 alerts[]
-  users                  users?         @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
 model event_bookmarks {
@@ -1009,6 +1009,7 @@ model users {
   wallets                       wallets[]
   waste_logs                    waste_logs[]
   waste_logs_event              waste_logs_event[]
+  bins                          bin[]
 
   @@index([email], map: "idx_users_email")
   @@index([phone], map: "idx_users_phone")
@@ -1135,11 +1136,9 @@ model waste_logs {
   users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
   waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
 
-  @@index([waste_type_id], map: "fki_waste_type_fkey")
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
   @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
-
 
 model waste_types {
   id                     Int                      @id @default(autoincrement())
