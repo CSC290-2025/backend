@@ -2,9 +2,11 @@ import type {
   CreateContact,
   ContactResponse,
   UpdateContact,
+  ReportDeleteResponse,
+  DeleteContactResponse,
 } from '@/modules/emergency/types';
-import { ContactModel } from '@/modules/emergency/models';
-import { NotFoundError } from '@/errors';
+import { ContactModel, ReportModel } from '@/modules/emergency/models';
+import { NotFoundError, ValidationError } from '@/errors';
 
 export const findContactByUserId = async (
   userId: number
@@ -23,6 +25,17 @@ export const createContact = async (
   return await ContactModel.creatContact(data);
 };
 
-export const updateContact = async (data: ContactResponse) => {
-  return await ContactModel.updateContact(data);
+export const updateContactById = async (
+  id: number,
+  data: UpdateContact
+): Promise<Partial<ContactResponse>> => {
+  if (!id) throw new ValidationError('Id is required');
+  return await ContactModel.updateContactById(id, data);
+};
+
+export const deleteContactById = async (
+  id: number
+): Promise<DeleteContactResponse> => {
+  if (!id) throw new ValidationError('Id is required');
+  return await ContactModel.deleteContactById(id);
 };

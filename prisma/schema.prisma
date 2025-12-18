@@ -82,11 +82,11 @@ model apartment {
   address_id         Int?
   internet_price     Decimal?            @db.Decimal(10, 2)
   addresses          addresses?          @relation(fields: [address_id], references: [id], onUpdate: NoAction)
-  apartment_booking  apartment_booking[]
-  apartment_owner    apartment_owner[]
-  apartment_picture  apartment_picture[]
-  rating             rating[]
-  room               room[]
+  apartmentBookings  apartment_booking[]
+  apartmentOwners    apartment_owner[]
+  apartmentPictures  apartment_picture[]
+  ratings            rating[]
+  rooms              room[]
 }
 
 model apartment_booking {
@@ -355,8 +355,6 @@ model emergency_reports {
   long                   String?
   alerts                 alerts[]
   users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
-
-  @@index([location], map: "idx_emergency_reports_location", type: Gist)
 }
 
 model event_bookmarks {

@@ -1,6 +1,7 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { EventSchemas } from '../schemas';
 import { EventController } from '../controllers';
+import { adminMiddleware } from '@/middlewares/admin'; // Importing adminMiddleware
 
 const setupEventRoutes = (app: OpenAPIHono) => {
   // Event Routes
@@ -8,36 +9,32 @@ const setupEventRoutes = (app: OpenAPIHono) => {
   // List all events (public)
   app.openapi(EventSchemas.listEventsRoute, EventController.listEvents);
 
+  // Get daily event count (analytics or calendar view)
+  app.openapi(EventSchemas.getEventByDayRoute, EventController.getEventByDay);
+
+  // Create a new event (admin only - auth required)
+  app.openapi(
+    EventSchemas.createEventRoute,
+    adminMiddleware, // Applying adminMiddleware
+    EventController.createEvent
+  );
+
+  // Update existing event (admin only - auth required)
+  app.openapi(
+    EventSchemas.updateEventRoute,
+    adminMiddleware, // Applying adminMiddleware
+    EventController.updateEvent
+  );
+
+  // Delete event (admin only - auth required)
+  app.openapi(
+    EventSchemas.deleteEventRoute,
+    adminMiddleware, // Applying adminMiddleware
+    EventController.deleteEvent
+  );
+
   // Get a single event by ID (public)
   app.openapi(EventSchemas.getEventRoute, EventController.getEvent);
-
-  // Create a new event (admin only)
-  app.openapi(EventSchemas.createEventRoute, async (c) => {
-    return EventController.createEvent(c);
-  });
-
-  // Update existing event (admin only)
-  app.openapi(EventSchemas.updateEventRoute, async (c) => {
-    return EventController.updateEvent(c);
-  });
-
-  // Delete event (admin only)
-  app.openapi(EventSchemas.deleteEventRoute, async (c) => {
-    return EventController.deleteEvent(c);
-  });
-  app.openapi(EventSchemas.createEventRoute, EventController.createEvent);
-
-  // Update existing event (admin only)
-  app.openapi(EventSchemas.updateEventRoute, EventController.updateEvent);
-
-  // Delete event (admin only)
-  app.openapi(EventSchemas.deleteEventRoute, EventController.deleteEvent);
-
-  // Get daily event count (analytics or calendar view)
-  app.openapi(
-    EventSchemas.dayEventCountRoute,
-    EventController.getDayEventCount
-  );
 };
 
 export { setupEventRoutes };

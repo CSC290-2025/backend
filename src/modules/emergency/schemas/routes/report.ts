@@ -1,13 +1,57 @@
-import { createPostRoute } from '@/utils/openapi-helpers.ts';
+import {
+  createPostRoute,
+  createGetRoute,
+  createDeleteRoute,
+  createPutRoute,
+} from '@/utils/openapi-helpers.ts';
 import { ReportSchemas } from '@/modules/emergency/schemas';
-import { authMiddleware } from '@/middlewares';
+import * as z from 'zod';
 
 const createReportRoute = createPostRoute({
-  path: '/report',
+  path: '/emergency/reports',
   summary: 'Create new report',
   requestSchema: ReportSchemas.CreateReportSchema,
   responseSchema: ReportSchemas.ReportResponseSchema,
-  tags: [`report`],
+  tags: ['Report'],
 });
 
-export { createReportRoute };
+const findReportByStatusRoute = createGetRoute({
+  path: 'emergency/reports/{status}',
+  summary: 'Get report pagination by status',
+  params: z.object({
+    status: ReportSchemas.ReportStatusEnum,
+  }),
+  query: z.object({
+    _page: z.string().optional(),
+    _limit: z.string().optional(),
+  }),
+  responseSchema: ReportSchemas.FindReportResponseSchema,
+  tags: ['Report'],
+});
+
+const deleteReportByIdRoute = createDeleteRoute({
+  path: '/emergency/reports/{id}',
+  summary: 'Delete report by id',
+  params: z.object({
+    id: z.string(),
+  }),
+  tags: ['Report'],
+});
+
+const updateReportByIdRoute = createPutRoute({
+  path: '/emergency/reports/{id}',
+  summary: 'Update report by id',
+  params: z.object({
+    id: z.string(),
+  }),
+  requestSchema: ReportSchemas.UpdateReportByIdSchema,
+  responseSchema: ReportSchemas.ReportResponseSchema,
+  tags: ['Report'],
+});
+
+export {
+  createReportRoute,
+  findReportByStatusRoute,
+  deleteReportByIdRoute,
+  updateReportByIdRoute,
+};

@@ -5,7 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-// import { AuthMiddleware } from '@/middlewares';
+import { authMiddleware } from '@/middlewares';
 
 const RequestStatusEnum = z.enum(['pending', 'accepted', 'rejected']);
 
@@ -72,7 +72,7 @@ const createRequestRoute = createPostRoute({
   requestSchema: CreateReceiverRequestSchema,
   responseSchema: ReceiverRequestSchema,
   tags: ['Freecycle-ReceiverRequest'],
-  // middleware: [AuthMiddleware.isUser],
+  middleware: [authMiddleware],
 });
 
 const deleteRequestRoute = createDeleteRoute({

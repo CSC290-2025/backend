@@ -64,6 +64,12 @@ const getRoadStats = async (c: Context) => {
   return successResponse(c, { stats });
 };
 
+const getRoadDetails = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const details = await RoadService.getRoadDetails(id);
+  return successResponse(c, details);
+};
+
 export {
   getRoad,
   createRoad,
@@ -72,4 +78,5 @@ export {
   listRoads,
   getRoadsByIntersection,
   getRoadStats,
+  getRoadDetails,
 };
