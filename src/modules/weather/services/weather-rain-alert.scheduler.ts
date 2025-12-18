@@ -9,6 +9,7 @@ const DAYS_TO_CHECK = 4; // today + next 3 days
 const MIN_CONSECUTIVE_RAIN_DAYS = 3;
 const MIN_RAIN_MM = 1;
 const MIN_PROBABILITY = 60;
+const RISKY_CONDITIONS = new Set(['Rain', 'Snow', 'Thunderstorm']);
 
 let rainAlertJob: ScheduledTask | null = null;
 let rainAlertRunning = false;
@@ -43,7 +44,12 @@ type RainStreak = {
 const isRainyDay = (day: RainDay) => {
   const rainAmount = day.rain_sum ?? day.precipitation_sum ?? 0;
   const probability = day.precipitation_probability_max ?? 0;
-  return rainAmount >= MIN_RAIN_MM || probability >= MIN_PROBABILITY;
+
+  return (
+    rainAmount >= MIN_RAIN_MM ||
+    probability >= MIN_PROBABILITY ||
+    RISKY_CONDITIONS.has(day.condition)
+  );
 };
 
 // Scan the forecast window to find the first streak of consecutive rainy days.
