@@ -27,7 +27,8 @@ const createWallet = async (data: CreateWalletData): Promise<Wallet> => {
 const transferFunds = async (
   fromUserId: number,
   toUserId: number,
-  amount: number
+  amount: number,
+  isVol: boolean
 ): Promise<{ status: string; transactionId?: number }> => {
   if (amount <= 0) {
     throw new ValidationError('Transfer amount must be positive');
@@ -57,10 +58,21 @@ const transferFunds = async (
       'Recipient wallet is not active. Suspended wallets cannot receive funds.'
     );
   }
+
+  let detuctedAmount = amount;
+
+  if (isVol) {
+    const feePer = amount * 0.03;
+    detuctedAmount = amount - feePer;
+    const toAdmin = amount * feePer;
+
+    await WalletModel.atomicTransferFunds(fromWallet.id, 19, toAdmin);
+  }
+
   const result = await WalletModel.atomicTransferFunds(
     fromWallet.id,
     toWallet.id,
-    amount
+    detuctedAmount
   );
 
   // Return a transaction id (transfer_out) as the canonical id for tracking
