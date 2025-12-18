@@ -68,31 +68,6 @@ const importDailyOpenMeteoAll = async (c: Context) => {
   );
 };
 
-const startWeatherAutoImport = async (c: Context) => {
-  const status = enableWeatherAutoImport();
-  return successResponse(
-    c,
-    { data: status },
-    200,
-    'Daily auto-import enabled (runs at 00:05 Asia/Bangkok)'
-  );
-};
-
-const stopWeatherAutoImport = async (c: Context) => {
-  const status = disableWeatherAutoImport();
-  return successResponse(
-    c,
-    { data: status },
-    200,
-    'Daily auto-import disabled'
-  );
-};
-
-const getWeatherAutoImportStatus = async (c: Context) => {
-  const status = getWeatherAutoImportStatusState();
-  return successResponse(c, { data: status });
-};
-
 export {
   getOpenMeteoCurrent,
   getOpenMeteoHourly,
@@ -101,7 +76,4 @@ export {
   getOpenMeteoRainHourly,
   importDailyOpenMeteo,
   importDailyOpenMeteoAll,
-  startWeatherAutoImport,
-  stopWeatherAutoImport,
-  getWeatherAutoImportStatus,
 };

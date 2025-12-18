@@ -336,7 +336,4 @@ export const WeatherOpenMeteoSchemas = {
   getRainHourlyRoute,
   importDailyRoute,
   importDailyAllRoute,
-  getWeatherAutoImportStatusRoute,
-  startWeatherAutoImportRoute,
-  stopWeatherAutoImportRoute,
 };

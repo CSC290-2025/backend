@@ -38,21 +38,6 @@ const setupOpenMeteoRoutes = (app: OpenAPIHono) => {
     WeatherOpenMeteoSchemas.importDailyAllRoute,
     OpenMeteoController.importDailyOpenMeteoAll
   );
-
-  app.openapi(
-    WeatherOpenMeteoSchemas.getWeatherAutoImportStatusRoute,
-    OpenMeteoController.getWeatherAutoImportStatus
-  );
-
-  app.openapi(
-    WeatherOpenMeteoSchemas.startWeatherAutoImportRoute,
-    OpenMeteoController.startWeatherAutoImport
-  );
-
-  app.openapi(
-    WeatherOpenMeteoSchemas.stopWeatherAutoImportRoute,
-    OpenMeteoController.stopWeatherAutoImport
-  );
 };
 
 export { setupOpenMeteoRoutes };

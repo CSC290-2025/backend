@@ -1,8 +1,6 @@
 import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { WasteModel } from '../models';
 import type { WasteLogInternal, WasteStats } from '../types';
-import type { Prisma } from '@/generated/prisma';
-import { date } from 'zod';
 
 export class WasteService {
   static async getWasteTypes() {
