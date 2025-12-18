@@ -355,8 +355,6 @@ model emergency_reports {
   long                   String?
   alerts                 alerts[]
   users                  users?                   @relation(fields: [user_id], references: [id], onUpdate: NoAction)
-
-  @@index([location], map: "idx_emergency_reports_location", type: Gist)
 }
 
 model event_bookmarks {
