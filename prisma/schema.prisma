@@ -151,15 +151,17 @@ model beds {
 }
 
 model bin {
-  id         Int       @id @default(autoincrement())
-  bin_name   String?   @db.VarChar(255)
-  bin_type   bin_type?
-  latitude   Decimal?  @db.Decimal(10, 8)
-  longitude  Decimal?  @db.Decimal(11, 8)
-  address    String?
-  capacity   Decimal?  @db.Decimal(10, 2)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @db.Timestamptz(6)
+  id                 Int       @id @default(autoincrement())
+  bin_name           String?   @db.VarChar(255)
+  bin_type           bin_type?
+  latitude           Decimal?  @db.Decimal(10, 8)
+  longitude          Decimal?  @db.Decimal(11, 8)
+  address            String?
+  capacity           Decimal?  @db.Decimal(10, 2)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @db.Timestamptz(6)
+  created_by_user_id Int?
+  users              users?    @relation(fields: [created_by_user_id], references: [id], onUpdate: NoAction)
 }
 
 model card_transactions {
@@ -986,6 +988,7 @@ model users {
   alerts                        alerts[]
   apartment_booking             apartment_booking[]
   apartment_owner               apartment_owner[]
+  bin                           bin[]
   conversation_participants     conversation_participants[]
   courses                       courses[]
   digital_cards                 digital_cards[]
@@ -1150,9 +1153,23 @@ model waste_logs {
   users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
   waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
 
+  @@index([waste_type_id], map: "fki_waste_type_fkey")
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
 }
 
+model waste_logs_event {
+  id            Int          @id @default(autoincrement())
+  user_id       Int?
+  event_id      Int?
+  waste_type_id Int?
+  log_date      DateTime?    @default(now()) @db.Timestamptz(6)
+  weight_kg     Decimal?     @db.Decimal(10, 3)
+  events        events?      @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_id_fkey")
+  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
+  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_fkey")
+
+  @@index([event_id], map: "fki_event_id_fkey")
+}
 
 model waste_types {
   id                     Int                      @id @default(autoincrement())

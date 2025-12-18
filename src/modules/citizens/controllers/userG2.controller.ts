@@ -1,8 +1,8 @@
 import type { Context } from 'hono';
 import { UserService } from '../services/index';
 import { successResponse } from '@/utils/response';
-import { ValidationError } from '@/errors';
-
+import { ValidationError, InternalServerError, BaseError } from '@/errors';
+import * as userModel from '../models/userG2.model';
 const getUser = async (c: Context) => {
   const id = parseInt(c.req.param('id'));
   const user = await UserService.getUserById(id);
@@ -279,6 +279,34 @@ const updateCurrentUserAccount = async (c: Context) => {
   );
 };
 
+const updateProfilePicture = async (c: Context) => {
+  const id = parseInt(c.req.param('id'));
+
+  const body = await c.req.parseBody();
+  const file = body['file'];
+
+  if (!file || !(file instanceof File)) {
+    throw new ValidationError('No valid file provided.');
+  }
+
+  try {
+    const result = await userModel.updateUserProfilePicture(id, file);
+
+    return successResponse(
+      c,
+      result,
+      200,
+      'Profile picture updated successfully'
+    );
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw err;
+    }
+    console.error('PROFILE UPLOAD ERROR:', err);
+    throw new InternalServerError('Failed to update profile picture.');
+  }
+};
+
 export {
   getUser,
   updatePersonalInfo,
@@ -301,4 +329,5 @@ export {
   updateCurrentUserPersonal,
   updateCurrentUserHealth,
   updateCurrentUserAccount,
+  updateProfilePicture,
 };

@@ -30,6 +30,7 @@ import {
   setupRoleUserRoutes,
   setupUserRoutes,
   setupUserSpecialistRoutes,
+  setupUserG1Routes,
 } from '@/modules/citizens/routes';
 
 // Clean Air
@@ -53,6 +54,7 @@ import {
   setupMetroCardRoutes,
   setupTransactionRoutes,
   setupInsuranceCardRoutes,
+  setupLocationRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -155,6 +157,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUserG8Routes(app);
   setupRoleUserRoutes(app);
   setupUserRoutes(app);
+  setupUserG1Routes(app);
 
   //Emergency
   setupReportRoutes(app);
@@ -172,6 +175,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
   setupScbRoutes(app);
+  setupLocationRoutes(app);
 
   //Healthcare
   setupPatientRoutes(app);
