@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { BinService } from '../services';
 import type { BinType } from '../types/bin.types';
 import { successResponse } from '@/utils/response';
+import { UnauthorizedError } from '@/errors';
 
 const getAllBins = async (c: Context) => {
   const query = c.req.query();
@@ -29,13 +30,25 @@ const getBinById = async (c: Context) => {
 
 const createBin = async (c: Context) => {
   const body = await c.req.json();
-  const result = await BinService.createBin(body);
+  const user = c.get('user');
+
+  const userId = user?.userId ?? user?.id ?? null;
+
+  const result = await BinService.createBin(body, userId);
   return successResponse(c, result.data, 201, result.message);
 };
 
 const deleteBin = async (c: Context) => {
   const id = Number(c.req.param('id'));
-  const result = await BinService.deleteBin(id);
+  const user = c.get('user');
+
+  const userId = user?.userId ?? user?.id;
+
+  if (userId === undefined || userId === null) {
+    throw new UnauthorizedError('User ID not found in authentication context');
+  }
+
+  const result = await BinService.deleteBin(id, userId);
   return successResponse(c, null, 200, result.message);
 };
 

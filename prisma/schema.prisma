@@ -1152,7 +1152,7 @@ model waste_logs {
   log_date      DateTime?    @db.Timestamptz(6)
   weight_kg     Decimal?     @db.Decimal(10, 3)
   users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_id_fkey")
-  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_fkey")
+  waste_types   waste_types? @relation(fields: [waste_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "waste_type_id_fkey")
 
   @@index([waste_type_id], map: "fki_waste_type_fkey")
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
