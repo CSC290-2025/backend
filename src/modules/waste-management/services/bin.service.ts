@@ -1,4 +1,4 @@
-import { NotFoundError, ValidationError } from '@/errors';
+import { NotFoundError, ValidationError, ForbiddenError } from '@/errors';
 import { BinModel } from '../models';
 import type {
   BinType,
@@ -43,7 +43,7 @@ export class BinService {
     return bin;
   }
 
-  static async createBin(data: CreateBinRequest) {
+  static async createBin(data: CreateBinRequest, userId: number | null) {
     if (!data.bin_name || !data.bin_type) {
       throw new ValidationError('Bin name and type are required');
     }
@@ -59,7 +59,7 @@ export class BinService {
       throw new ValidationError('Valid latitude and longitude are required');
     }
 
-    const bin = await BinModel.createBin(data);
+    const bin = await BinModel.createBin(data, userId);
 
     return {
       message: `Bin "${data.bin_name}" created successfully`,
@@ -94,14 +94,34 @@ export class BinService {
     };
   }
 
-  static async deleteBin(id: number) {
+  static async deleteBin(id: number, userId: number) {
     if (!id || isNaN(id)) {
       throw new ValidationError('Valid bin ID is required');
+    }
+
+    if (userId === undefined || userId === null || isNaN(userId)) {
+      throw new ValidationError('Valid user ID is required');
     }
 
     const existingBin = await BinModel.findBinById(id);
     if (!existingBin) {
       throw new NotFoundError(`Bin with ID ${id} not found`);
+    }
+
+    const binCreatorId = existingBin.created_by_user_id
+      ? Number(existingBin.created_by_user_id)
+      : null;
+
+    if (binCreatorId === null) {
+      throw new ForbiddenError(
+        'This bin was created without authentication and cannot be deleted.'
+      );
+    }
+
+    if (binCreatorId !== Number(userId)) {
+      throw new ForbiddenError(
+        'You do not have permission to delete this bin. Only the creator can delete it.'
+      );
     }
 
     await BinModel.deleteBin(id);

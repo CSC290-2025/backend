@@ -94,7 +94,6 @@ export const getMarkerTypesInBounds = async (bounds: {
     );
   }
 
-  // Validate markerTypeIds if provided
   if (bounds.markerTypeIds && bounds.markerTypeIds.length > 0) {
     for (const id of bounds.markerTypeIds) {
       if (!Number.isInteger(id) || id < 1 || id > 8) {

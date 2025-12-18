@@ -8,6 +8,7 @@ import {
   createMarker,
   updateMarker,
   deleteMarker,
+  getMarkersByBounds,
 } from '../controllers/marker.controller';
 
 export const setupMarkerOpenApiRoutes = (app: OpenAPIHono) => {
@@ -31,4 +32,9 @@ export const setupMarkerOpenApiRoutes = (app: OpenAPIHono) => {
     Schemas.Marker.deleteMarkerRoute,
     deleteMarker as unknown as Handler
   );
+
+  // app.openapi(
+  //   Schemas.Marker.getMarkersByBoundsRoute,
+  //   getMarkersByBounds as unknown as Handler
+  // )
 };

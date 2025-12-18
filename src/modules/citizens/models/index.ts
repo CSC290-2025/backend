@@ -6,3 +6,4 @@ export * as SpecialtyModel from './specialty.model';
 export * as UserInfo from './userG2.model';
 export * as UserG8Model from './userG8.model';
 export * as AddressModel from './address.model';
+export * as UserG1Model from './userG1.model';

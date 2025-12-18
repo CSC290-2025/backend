@@ -2,6 +2,12 @@ import type { Context } from 'hono';
 import { CourseService } from '../services';
 import { successResponse } from '@/utils/response';
 
+const createAddress = async (c: Context) => {
+  const body = await c.req.json();
+  const address = await CourseService.createAddress(body);
+  return successResponse(c, { address }, 201, 'Address created successfully');
+};
+
 const createCourse = async (c: Context) => {
   const body = await c.req.json();
   const report = await CourseService.createCourse(body);
@@ -73,7 +79,25 @@ const deleteCourse = async (c: Context) => {
   );
 };
 
+//Admin
+const getPendingCourse = async (c: Context) => {
+  const courses = await CourseService.getPendingCourse();
+  return successResponse(c, { courses });
+};
+
+const getApproveCourse = async (c: Context) => {
+  const courses = await CourseService.getApproveCourse();
+  return successResponse(c, { courses });
+};
+
+const changeApprove = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+  const course = await CourseService.changeApprove(id);
+  return successResponse(c, { course }, 200, 'Course approved successfully');
+};
+
 export {
+  createAddress,
   createCourse,
   getAllCourse,
   getCourse,
@@ -82,4 +106,7 @@ export {
   updateCourseVideos,
   updateOnsiteSessions,
   deleteCourse,
+  getPendingCourse,
+  getApproveCourse,
+  changeApprove,
 };

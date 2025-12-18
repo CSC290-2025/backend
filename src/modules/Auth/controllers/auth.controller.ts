@@ -5,6 +5,7 @@ import { AuthService } from '../services';
 import type { AuthTypes } from '../types';
 import config from '@/config/env';
 import { UnauthorizedError, ConflictError } from '@/errors';
+import { RegisterRequestSchema } from '../schemas/auth.schemas';
 
 // now implemented in auth middleware
 // keeping it just in case of manual retrieval to /refresh endpoint
@@ -53,8 +54,8 @@ const register = async (c: Context) => {
   if (existingUser) {
     throw new ConflictError('You are already logged in. Please logout first');
   }
-
-  const body: AuthTypes.RegisterRequest = await c.req.json();
+  const rawBody = await c.req.json();
+  const body = await RegisterRequestSchema.parseAsync(rawBody);
   const tokens = await AuthService.register(body);
 
   setAuthCookies(c, tokens);

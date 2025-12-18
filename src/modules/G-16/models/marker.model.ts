@@ -74,7 +74,7 @@ export const createMarker = async (
         marker_type: true,
       },
     })) as MarkerResponse;
-  } catch (error){
+  } catch (error) {
     handlePrismaError(error);
   }
 };
@@ -114,7 +114,7 @@ export const updateMarker = async (
         geoJson = loc; // กรณีส่งมาเป็น GeoJSON อยู่แล้ว
       } else {
         // ถ้าส่งมาเป็น string มั่วๆ ให้ข้ามไปใช้ค่าเดิม หรือ throw error
-         throw new ValidationError('Invalid location format');
+        throw new ValidationError('Invalid location format');
       }
 
       // แก้ SQL: เพิ่ม ::json และ ST_SetSRID(..., 4326)
@@ -132,7 +132,9 @@ export const updateMarker = async (
       await prisma.marker.update({
         where: { id: numericId },
         data: {
-          marker_type_id: data.marker_type_id ? Number(data.marker_type_id) : undefined,
+          marker_type_id: data.marker_type_id
+            ? Number(data.marker_type_id)
+            : undefined,
           description: data.description,
         },
       });
