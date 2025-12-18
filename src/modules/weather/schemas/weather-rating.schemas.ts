@@ -4,10 +4,12 @@ import {
   createGetRoute,
   createPostRoute,
 } from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 
 const RatingTag = ['Weather Ratings'] as const;
 const DateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
+// DTO returned to clients for a single weather rating row.
 const WeatherRatingSchema = z.object({
   id: z.number().int(),
   location_id: z.number().int().nullable(),
@@ -16,14 +18,22 @@ const WeatherRatingSchema = z.object({
   district: z.string().nullable().optional(),
 });
 
+// Request body schema for submitting a rating.
 const WeatherRatingCreateSchema = z.object({
   location_id: z.coerce.number().int().positive(),
   rating: z.number().min(1).max(5),
 });
 
+// Optional filters when computing averages.
 const WeatherRatingAverageQuerySchema = z.object({
   date: z.string().regex(DateRegex, 'YYYY-MM-DD').optional(),
   location_id: z.coerce.number().int().positive().optional(),
+});
+
+// Query parameters to fetch the signed-in user's rating.
+const WeatherRatingUserQuerySchema = z.object({
+  location_id: z.coerce.number().int().positive(),
+  date: z.string().regex(DateRegex, 'YYYY-MM-DD').optional(),
 });
 
 const WeatherRatingAverageItemSchema = z.object({
@@ -52,6 +62,7 @@ const createWeatherRatingRoute = createPostRoute({
   requestSchema: WeatherRatingCreateSchema,
   responseSchema: WeatherRatingSchema,
   tags: [...RatingTag],
+  middleware: [authMiddleware],
 });
 
 const listWeatherRatingsRoute = createGetRoute({
@@ -68,6 +79,15 @@ const getAverageWeatherRatingsRoute = createGetRoute({
   query: WeatherRatingAverageQuerySchema,
   responseSchema: WeatherRatingAverageListSchema,
   tags: [...RatingTag],
+});
+
+const getUserWeatherRatingRoute = createGetRoute({
+  path: '/weather/ratings/me',
+  summary: 'Get the signed-in user rating for a Bangkok day/location',
+  query: WeatherRatingUserQuerySchema,
+  responseSchema: WeatherRatingSchema.nullable(),
+  tags: [...RatingTag],
+  middleware: [authMiddleware],
 });
 
 const deleteWeatherRatingsByDateRoute = createDeleteRoute({
@@ -90,9 +110,11 @@ export const WeatherRatingSchemas = {
   WeatherRatingAverageQuerySchema,
   WeatherRatingAverageItemSchema,
   WeatherRatingAverageListSchema,
+  WeatherRatingUserQuerySchema,
   WeatherRatingListSchema,
   WeatherRatingDateParam,
   listWeatherRatingsRoute,
+  getUserWeatherRatingRoute,
   createWeatherRatingRoute,
   getAverageWeatherRatingsRoute,
   deleteWeatherRatingsByDateRoute,
