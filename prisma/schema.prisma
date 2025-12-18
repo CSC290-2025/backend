@@ -1027,6 +1027,7 @@ model users {
   wallets                       wallets[]
   waste_logs                    waste_logs[]
   waste_logs_event              waste_logs_event[]
+  weather_rating                weather_rating[]
 
   @@index([email], map: "idx_users_email")
   @@index([phone], map: "idx_users_phone")
@@ -1200,7 +1201,11 @@ model weather_rating {
   address_id Int?
   date       DateTime?  @default(now()) @db.Timestamptz(6)
   rating     Decimal?   @db.Decimal(3, 2)
+  user_id    Int?
   addresses  addresses? @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_address_id")
+  users      users?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_id")
+
+  @@index([user_id], map: "fki_user")
 }
 
 enum air_quality_category {
