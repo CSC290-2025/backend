@@ -6,6 +6,7 @@ import type {
   WeatherRatingAverageItem,
   WeatherRatingAverageQuery,
   WeatherRatingCreateInput,
+  WeatherRatingUserQuery,
 } from '../types';
 import { NotFoundError, ValidationError } from '@/errors';
 import { getDistrictByAddressId, getDistrictByLocationId } from '../utils';
@@ -25,7 +26,7 @@ const formatDateOnly = (value: Date | string): string => {
   return dateInstance.toISOString().slice(0, 10);
 };
 
-// Translate an address id to the configured location id, if any mapping exists.
+// Translate an address id to the configured location id when a mapping exists.
 const mapAddressIdToLocationId = (addressId: number | null): number | null => {
   if (addressId == null) {
     return null;
@@ -34,7 +35,7 @@ const mapAddressIdToLocationId = (addressId: number | null): number | null => {
   return district?.location_id ?? addressId;
 };
 
-// Convert a Prisma record into the WeatherRating DTO, validating critical fields.
+// Convert a Prisma record into the WeatherRating DTO, validating required fields.
 const mapToWeatherRating = (record: WeatherRatingRecord): WeatherRating => {
   if (!record.date) {
     throw new ValidationError('Weather rating record does not have a date');
@@ -53,7 +54,7 @@ const mapToWeatherRating = (record: WeatherRatingRecord): WeatherRating => {
   };
 };
 
-// Resolve a public location id into a persisted address id, validating existence.
+// Resolve a public location id into a persisted address id and ensure it exists.
 const resolveAddressId = async (locationId: number): Promise<number> => {
   const district = getDistrictByLocationId(locationId);
   const addressId = district?.address_id ?? locationId;
@@ -70,16 +71,74 @@ const resolveAddressId = async (locationId: number): Promise<number> => {
   return address.id;
 };
 
-// Create a rating for the resolved location using the current Bangkok date.
+// Build Bangkok-local start/end timestamps for a given day (defaults to now) and return the midnight token.
+const getBangkokDayRange = (when: Date | string = new Date()) => {
+  const baseDate =
+    when instanceof Date ? when : new Date(`${when}T00:00:00+07:00`);
+
+  const bangkokNow = new Date(
+    baseDate.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })
+  );
+  bangkokNow.setHours(0, 0, 0, 0);
+  const start = new Date(bangkokNow);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+  return { start, end, dayToken: start };
+};
+
+// Create or update a rating for the resolved location using the current Bangkok day window.
 const createWeatherRating = async (
-  payload: WeatherRatingCreateInput
+  payload: WeatherRatingCreateInput,
+  userId: number
 ): Promise<WeatherRating> => {
   const addressId = await resolveAddressId(payload.location_id);
+  const { start, end, dayToken } = getBangkokDayRange();
+
+  // If the same user already rated this location today, update that rating instead of inserting a new row.
+  const existing = await prisma.weather_rating.findFirst({
+    where: {
+      address_id: addressId,
+      date: { gte: start, lt: end },
+      user_id: userId,
+    },
+  });
+
+  if (existing) {
+    const updated = await prisma.weather_rating.update({
+      where: { id: existing.id },
+      data: { rating: payload.rating, date: dayToken },
+      include: { addresses: { select: { district: true } } },
+    });
+    return mapToWeatherRating(updated as WeatherRatingRecord);
+  }
+
   const record = await WeatherRatingModel.create({
     address_id: addressId,
     rating: payload.rating,
+    user_id: userId,
+    date: dayToken,
   });
   return mapToWeatherRating(record);
+};
+
+// Look up the signed-in user's rating for a specific day/location (defaults to today).
+const getUserWeatherRating = async (
+  query: WeatherRatingUserQuery,
+  userId: number
+): Promise<WeatherRating | null> => {
+  const addressId = await resolveAddressId(query.location_id);
+  const { start, end } = getBangkokDayRange(query.date);
+
+  const record = await prisma.weather_rating.findFirst({
+    where: {
+      address_id: addressId,
+      user_id: userId,
+      date: { gte: start, lt: end },
+    },
+    include: { addresses: { select: { district: true } } },
+  });
+
+  return record ? mapToWeatherRating(record as WeatherRatingRecord) : null;
 };
 
 // List all ratings while skipping legacy rows that fail validation.
@@ -115,7 +174,7 @@ const getAverageWeatherRatings = async (
   }));
 };
 
-// Delete all ratings on a specific date and error if nothing was removed.
+// Delete all ratings on a specific date and throw if nothing was removed.
 const deleteWeatherRatingsByDate = async (
   date: string
 ): Promise<{ deleted: number }> => {
@@ -135,6 +194,7 @@ const deleteAllWeatherRatings = async (): Promise<{ deleted: number }> => {
 export {
   listWeatherRatings,
   createWeatherRating,
+  getUserWeatherRating,
   getAverageWeatherRatings,
   deleteWeatherRatingsByDate,
   deleteAllWeatherRatings,

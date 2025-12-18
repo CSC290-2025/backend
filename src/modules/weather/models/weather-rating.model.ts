@@ -52,12 +52,16 @@ const findAll = async (): Promise<WeatherRatingWithAddress[]> => {
 const create = async (data: {
   address_id: number;
   rating: number;
+  user_id: number;
+  date?: Date;
 }): Promise<WeatherRatingWithAddress> => {
   try {
     return await prisma.weather_rating.create({
       data: {
         address_id: data.address_id,
         rating: data.rating,
+        user_id: data.user_id,
+        date: data.date,
       },
       include: ratingInclude,
     });
@@ -67,7 +71,7 @@ const create = async (data: {
   }
 };
 
-// Delete ratings for the specified date value.
+// Delete ratings for the specified Bangkok date range.
 const deleteByDate = async (date: string): Promise<number> => {
   try {
     const { start, end } = getBangkokDayRange(date);

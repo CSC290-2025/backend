@@ -13,3 +13,6 @@ export type WeatherRatingAverageQuery = z.infer<
 export type WeatherRatingAverageItem = z.infer<
   typeof WeatherRatingSchemas.WeatherRatingAverageItemSchema
 >;
+export type WeatherRatingUserQuery = z.infer<
+  typeof WeatherRatingSchemas.WeatherRatingUserQuerySchema
+>;

@@ -15,6 +15,11 @@ const setupWeatherRatingRoutes = (app: OpenAPIHono) => {
   );
 
   app.openapi(
+    WeatherRatingSchemas.getUserWeatherRatingRoute,
+    WeatherRatingController.getUserWeatherRating
+  );
+
+  app.openapi(
     WeatherRatingSchemas.getAverageWeatherRatingsRoute,
     WeatherRatingController.getAverageWeatherRatings
   );
