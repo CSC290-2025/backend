@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 
 const exerciseSchema = z.object({
   id: z.coerce.number(),
@@ -68,6 +69,7 @@ const getExercise = createGetRoute({
   responseSchema: exerciseSchema,
   params: exerciseId,
   tags: ['Know-AI', 'Exercise'],
+  middleware: [authMiddleware],
 });
 
 const createSubmitAnswer = createPostRoute({
@@ -77,6 +79,7 @@ const createSubmitAnswer = createPostRoute({
   requestSchema: submitAnswer,
   responseSchema: submitAnswerResponse,
   tags: ['Know-AI', 'Exercise'],
+  middleware: [authMiddleware],
 });
 
 const getProgress = createGetRoute({
@@ -86,6 +89,7 @@ const getProgress = createGetRoute({
   query: progressQuery,
   responseSchema: progressResponse,
   tags: ['Know-AI', 'Exercise'],
+  middleware: [authMiddleware],
 });
 
 export {

@@ -4,11 +4,13 @@ import {
   createPostRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-
+import { authMiddleware } from '@/middlewares';
+import { EventSchemas } from './Event.schemas';
 const EventBookmarkSchema = z.object({
   user_id: z.number().int(),
   event_id: z.number().int(),
   created_at: z.coerce.date(),
+  event: EventSchemas.EventSchema.optional(),
 });
 
 const CreateBookmarkSchema = z.object({
@@ -37,6 +39,7 @@ const listBookmarksRoute = createGetRoute({
   query: Pagination,
   responseSchema: ListBookmarksResponse,
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const createBookmarkRoute = createPostRoute({
@@ -47,13 +50,15 @@ const createBookmarkRoute = createPostRoute({
     bookmark: EventBookmarkSchema,
   }),
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const deleteBookmarkRoute = createDeleteRoute({
-  path: '/bookmarks/{event_id}',
+  path: '/bookmarks/{eve    nt_id}',
   summary: 'Delete bookmark',
   params: EventIdParam,
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const checkBookmarkStatusRoute = createGetRoute({
@@ -64,6 +69,7 @@ const checkBookmarkStatusRoute = createGetRoute({
     bookmarked: z.boolean(),
   }),
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 const BookmarkedUserSchema = z.object({
   id: z.number().int().positive(),

@@ -16,6 +16,7 @@ export const ROLES = {
   TRAFFIC_MANAGER: 'Traffic Manager',
   EMERGENCY_MANAGER: 'Emergency Manager',
   HEALTH_MANAGER: 'Health Manager',
+  KNOW_AI_ADMIN: 'KnowAI Admin',
   WASTE_MANAGER: 'Waste Manager',
   VOLUNTEER_COORDINATOR: 'Volunteer Coordinator',
   EVENT_ORGANIZER: 'Event Organizer',

@@ -4,3 +4,4 @@ export * from './booking.types';
 export * from './rating.types';
 export * from './address.types';
 export * from './owner.types';
+export * from './locationIQ.types';
