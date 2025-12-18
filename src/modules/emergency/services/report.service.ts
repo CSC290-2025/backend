@@ -66,7 +66,6 @@ export const deleteReportById = async (
 
 export const findReportById = async (id: number): Promise<ReportResponse> => {
   const report = await ReportModel.getReportById(id);
-
   if (!report) {
     throw new NotFoundError('Not Found this user id');
   }

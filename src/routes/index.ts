@@ -40,6 +40,7 @@ import {
   setupFcmRoutes,
   setupTokenRoutes,
   setupContactRoutes,
+  reportRoute,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -226,6 +227,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   app.route('/api', markerRoutes);
   app.route('/api', distanceRoutes);
   app.route('/api/marker-types', markerTypeRoutes);
+  app.route('/emergency', reportRoute());
 
   // Volunteer
   app.route('/api/v1/volunteer/', eventRoutes);

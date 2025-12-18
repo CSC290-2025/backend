@@ -92,11 +92,16 @@ const deleteReportById = async (id: number): Promise<ReportDeleteResponse> => {
 
 const getReportById = async (id: number): Promise<ReportResponse | null> => {
   try {
-    return await prisma.emergency_reports.findUnique({
-      where: { id },
+    const report = await prisma.emergency_reports.findFirst({
+      where: { id: id },
     });
+
+    if (!report) return null;
+
+    return report;
   } catch (error) {
     handlePrismaError(error);
+    return null;
   }
 };
 

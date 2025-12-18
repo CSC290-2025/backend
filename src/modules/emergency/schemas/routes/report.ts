@@ -54,12 +54,12 @@ const updateReportByIdRoute = createPutRoute({
 });
 
 const findReportByIdRoute = createGetRoute({
-  path: '/emergency/reports/{id}',
+  path: '/emergency/report/{id}',
   summary: 'Find report by id',
   params: z.object({
     id: z.string(),
   }),
-  responseSchema: ReportSchemas.ReportFindResponseByIdSchema,
+  responseSchema: ReportSchemas.ReportResponseSchema,
   tags: ['Report'],
 });
 

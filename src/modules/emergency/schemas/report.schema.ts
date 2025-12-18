@@ -1,9 +1,7 @@
 import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
 
-export const ReportStatusEnum = z
-  .enum(['pending', 'resolved', 'verified'])
-  .refine(isReportStatus);
+export const ReportStatusEnum = z.enum(['pending', 'resolved', 'verified']);
 
 const CreateReportSchema = z.object({
   user_id: z.number().int().nullable().optional(),
@@ -31,7 +29,7 @@ const ReportResponseSchema = z.object({
   level: z
     .enum(['near_miss', 'minor', 'moderate', 'major', 'lethal'])
     .nullable(),
-  status: ReportStatusEnum.nullable(),
+  status: ReportStatusEnum,
   title: z.string().min(1).optional(),
   report_category: z
     .enum(['traffic', 'accident', 'disaster'])
