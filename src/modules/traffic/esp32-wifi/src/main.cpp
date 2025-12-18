@@ -1,4 +1,3 @@
-// Define what Firebase features to enable BEFORE including FirebaseClient.h
 #define ENABLE_USER_AUTH
 #define ENABLE_DATABASE
 
@@ -8,6 +7,7 @@
 #include <FirebaseClient.h>
 #include <WebServer.h>
 #include <Preferences.h>
+#include <LittleFS.h>
 #include "TM1637Display.h"
 
 // ================= PIN CONFIGURATION =================
@@ -30,14 +30,12 @@ String wifiSSID = "";
 String wifiPass = "";
 String teamId = "10";
 String trafficLightId = "10";
-float latitude = 13.647372;
-float longitude = 100.495536;
 
-// Firebase Configuration
-#define API_KEY ""
-#define DATABASE_URL ""
-#define USER_EMAIL ""
-#define USER_PASSWORD ""
+// Firebase Configuration (loaded from .env file)
+String API_KEY = "";
+String DATABASE_URL = "";
+String USER_EMAIL = "";
+String USER_PASSWORD = "";
 
 // Firebase objects
 WiFiClientSecure ssl_client;
@@ -47,18 +45,20 @@ AsyncClient aClient(ssl_client);
 WiFiClientSecure stream_ssl_client;
 AsyncClient streamClient(stream_ssl_client);
 
-UserAuth user_auth(API_KEY, USER_EMAIL, USER_PASSWORD, 3000);
+UserAuth *user_auth = nullptr;
 FirebaseApp app;
 RealtimeDatabase Database;
 AsyncResult aResult;
 
 bool firebaseReady = false;
 bool configMode = false;
+bool isOnline = true; // Track WiFi connection status
 
 // Current state from Firebase (updated via stream)
 int currentColor = 1; // 1=red, 2=yellow, 3=green
 int remainingTime = 0;
-int currentStatus = 0; // 0=active, 1=broken, 2=fixing
+int currentStatus = 0;  // 0=active, 1=broken, 2=fixing
+int yellowDuration = 0; // yellow_duration from Firebase
 
 // --- Helper: sanitize non-ASCII characters ---
 String sanitizeASCII(const String &input)
@@ -189,13 +189,23 @@ const char *configPage = R"rawliteral(
                     <label>Traffic Light ID</label>
                     <input type="text" name="lightid" value="%LIGHT_ID%" required>
                 </div>
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+                <h3 style="margin-bottom: 20px;">Firebase Configuration</h3>
                 <div class="form-group">
-                    <label>Latitude</label>
-                    <input type="number" step="0.000001" name="lat" value="%LAT%" required>
+                    <label>API Key</label>
+                    <input type="text" name="fb_key" value="%FB_KEY%" required>
                 </div>
                 <div class="form-group">
-                    <label>Longitude</label>
-                    <input type="number" step="0.000001" name="lng" value="%LNG%" required>
+                    <label>Database URL</label>
+                    <input type="text" name="fb_url" value="%FB_URL%" required>
+                </div>
+                <div class="form-group">
+                    <label>User Email</label>
+                    <input type="text" name="fb_email" value="%FB_EMAIL%" required>
+                </div>
+                <div class="form-group">
+                    <label>User Password</label>
+                    <input type="password" name="fb_pass" value="%FB_PASS%" required>
                 </div>
                 <button type="submit" class="btn-primary">Save & Restart</button>
             </form>
@@ -215,12 +225,94 @@ String processTemplate(const char *html)
   result.replace("%WIFI_PASS%", htmlEscape(wifiPass));
   result.replace("%TEAM_ID%", htmlEscape(teamId));
   result.replace("%LIGHT_ID%", htmlEscape(trafficLightId));
-  result.replace("%LAT%", String(latitude, 6));
-  result.replace("%LNG%", String(longitude, 6));
+  result.replace("%LAT%", "");
+  result.replace("%LNG%", "");
+  result.replace("%FB_KEY%", htmlEscape(API_KEY));
+  result.replace("%FB_URL%", htmlEscape(DATABASE_URL));
+  result.replace("%FB_EMAIL%", htmlEscape(USER_EMAIL));
+  result.replace("%FB_PASS%", htmlEscape(USER_PASSWORD));
   return result;
 }
 
 // ================= CONFIGURATION FUNCTIONS =================
+
+void loadFirebaseConfig()
+{
+  // Priority 1: Try to load from Preferences (saved via config mode)
+  preferences.begin("traffic-light", false);
+  API_KEY = preferences.getString("fb_key", "");
+  DATABASE_URL = preferences.getString("fb_url", "");
+  USER_EMAIL = preferences.getString("fb_email", "");
+  USER_PASSWORD = preferences.getString("fb_pass", "");
+  preferences.end();
+
+  bool loadedFromPreferences = (API_KEY.length() > 0 && DATABASE_URL.length() > 0 &&
+                                 USER_EMAIL.length() > 0 && USER_PASSWORD.length() > 0);
+
+  // Priority 2: Try to load from .env file if not in preferences
+  if (!loadedFromPreferences && LittleFS.begin(true))
+  {
+    File file = LittleFS.open("/.env", "r");
+    if (file)
+    {
+      Serial.println("Reading .env file...");
+      while (file.available())
+      {
+        String line = file.readStringUntil('\n');
+        line.trim();
+
+        // Skip empty lines and comments
+        if (line.length() == 0 || line.startsWith("#"))
+          continue;
+
+        int separatorIndex = line.indexOf('=');
+        if (separatorIndex == -1)
+          continue;
+
+        String key = line.substring(0, separatorIndex);
+        String value = line.substring(separatorIndex + 1);
+
+        key.trim();
+        value.trim();
+
+        // Remove quotes if present
+        if (value.startsWith("\"") && value.endsWith("\""))
+        {
+          value = value.substring(1, value.length() - 1);
+        }
+
+        // Assign values to configuration variables
+        if (key == "API_KEY")
+          API_KEY = value;
+        else if (key == "DATABASE_URL")
+          DATABASE_URL = value;
+        else if (key == "USER_EMAIL")
+          USER_EMAIL = value;
+        else if (key == "USER_PASSWORD")
+          USER_PASSWORD = value;
+      }
+
+      file.close();
+      loadedFromPreferences = (API_KEY.length() > 0 && DATABASE_URL.length() > 0 &&
+                               USER_EMAIL.length() > 0 && USER_PASSWORD.length() > 0);
+    }
+    LittleFS.end();
+  }
+
+  // Display config source
+  if (loadedFromPreferences)
+  {
+    Serial.println("Firebase config loaded successfully");
+    Serial.println("API_KEY: " + API_KEY.substring(0, min(10, (int)API_KEY.length())) + "...");
+    Serial.println("DATABASE_URL: " + DATABASE_URL);
+    Serial.println("USER_EMAIL: " + USER_EMAIL);
+  }
+  else
+  {
+    Serial.println("WARNING: No Firebase configuration found");
+    Serial.println("Please configure in config mode or upload .env file");
+  }
+}
 
 void loadConfiguration()
 {
@@ -229,8 +321,6 @@ void loadConfiguration()
   wifiPass = preferences.getString("pass", "");
   teamId = preferences.getString("team", "10");
   trafficLightId = preferences.getString("lightid", "10");
-  latitude = preferences.getFloat("lat", 13.647372);
-  longitude = preferences.getFloat("lng", 100.495536);
   preferences.end();
 }
 
@@ -241,8 +331,6 @@ void saveConfiguration()
   preferences.putString("pass", wifiPass);
   preferences.putString("team", teamId);
   preferences.putString("lightid", trafficLightId);
-  preferences.putFloat("lat", latitude);
-  preferences.putFloat("lng", longitude);
   preferences.end();
 }
 
@@ -250,6 +338,9 @@ void startConfigMode()
 {
   Serial.println("\n=== ENTERING CONFIG MODE ===");
   configMode = true;
+
+  // Load Firebase config so it shows in the form
+  loadFirebaseConfig();
 
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
@@ -276,10 +367,22 @@ void startConfigMode()
               wifiPass = server.arg("pass");
               teamId = server.arg("team");
               trafficLightId = server.arg("lightid");
-              latitude = server.arg("lat").toFloat();
-              longitude = server.arg("lng").toFloat();
+
+              // Save Firebase credentials
+              API_KEY = server.arg("fb_key");
+              DATABASE_URL = server.arg("fb_url");
+              USER_EMAIL = server.arg("fb_email");
+              USER_PASSWORD = server.arg("fb_pass");
 
               saveConfiguration();
+
+              // Save Firebase config to preferences
+              preferences.begin("traffic-light", false);
+              preferences.putString("fb_key", API_KEY);
+              preferences.putString("fb_url", DATABASE_URL);
+              preferences.putString("fb_email", USER_EMAIL);
+              preferences.putString("fb_pass", USER_PASSWORD);
+              preferences.end();
 
               server.send(200, "text/html; charset=utf-8",
                           "<html><body style='text-align:center;padding:50px;background:#2c3e50;color:white;'>"
@@ -359,9 +462,7 @@ void updateMyStatus()
   if (millis() - lastUpdate < 10000)
     return;
 
-  // Send metadata and online status only
-  Database.set<number_t>(aClient, path + "/lat", number_t(latitude, 6), aResult);
-  Database.set<number_t>(aClient, path + "/lng", number_t(longitude, 6), aResult);
+  // Send online status only
   Database.set<bool>(aClient, path + "/online", true, aResult);
 
   Serial.println("Heartbeat sent");
@@ -401,8 +502,12 @@ void processStream(AsyncResult &aResult)
         if ((newColor >= 1 && newColor <= 3) && newColor != currentColor)
         {
           setLight(newColor);
-          String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow" : "green";
+          String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow"
+                                                                       : "green";
           Serial.println("► Light changed: " + colorName);
+          // Update display time when color changes (especially when switching to green)
+          int displayTime = (newColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+          display.showNumberDec(displayTime);
         }
       }
       else if (path.endsWith("/remaintime"))
@@ -411,11 +516,28 @@ void processStream(AsyncResult &aResult)
         if (newTime >= 0 && newTime <= 9999 && newTime != remainingTime)
         {
           remainingTime = newTime;
-          display.showNumberDec(remainingTime);
+          // If color is green, subtract yellow_duration from remaintime for display
+          int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+          display.showNumberDec(displayTime);
           // Only log every 5 seconds or final countdown
           if (newTime % 5 == 0 || newTime <= 5)
           {
-            Serial.println("► Time: " + String(remainingTime) + "s");
+            Serial.println("► Time: " + String(remainingTime) + "s (display: " + String(displayTime) + "s)");
+          }
+        }
+      }
+      else if (path.endsWith("/yellow_duration"))
+      {
+        int newYellowDuration = data.toInt();
+        if (newYellowDuration >= 0 && newYellowDuration != yellowDuration)
+        {
+          yellowDuration = newYellowDuration;
+          Serial.println("► Yellow duration: " + String(yellowDuration) + "s");
+          // Update display if currently green
+          if (currentColor == 3)
+          {
+            int displayTime = max(0, remainingTime - yellowDuration);
+            display.showNumberDec(displayTime);
           }
         }
       }
@@ -425,7 +547,8 @@ void processStream(AsyncResult &aResult)
         if (newStatus >= 0 && newStatus <= 2 && newStatus != currentStatus)
         {
           currentStatus = newStatus;
-          String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken" : "fixing";
+          String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken"
+                                                                             : "fixing";
           Serial.println("► Status changed: " + statusName);
         }
       }
@@ -449,7 +572,8 @@ void processStream(AsyncResult &aResult)
             if ((newColor >= 1 && newColor <= 3) && newColor != currentColor)
             {
               setLight(newColor);
-              String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow" : "green";
+              String colorName = (newColor == 1) ? "red" : (newColor == 2) ? "yellow"
+                                                                           : "green";
               Serial.println("► Light: " + colorName);
             }
           }
@@ -472,8 +596,31 @@ void processStream(AsyncResult &aResult)
             if (newTime >= 0 && newTime <= 9999 && newTime != remainingTime)
             {
               remainingTime = newTime;
-              display.showNumberDec(remainingTime);
-              Serial.println("► Time: " + String(remainingTime) + "s");
+              int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+              display.showNumberDec(displayTime);
+              Serial.println("► Time: " + String(remainingTime) + "s (display: " + String(displayTime) + "s)");
+            }
+          }
+        }
+
+        // Parse JSON manually for yellow_duration
+        int yellowIdx = data.indexOf("\"yellow_duration\"");
+        if (yellowIdx >= 0)
+        {
+          int colonIdx = data.indexOf(":", yellowIdx);
+          int commaIdx = data.indexOf(",", colonIdx);
+          int braceIdx = data.indexOf("}", colonIdx);
+          int endIdx = (commaIdx > 0 && commaIdx < braceIdx) ? commaIdx : braceIdx;
+
+          if (colonIdx >= 0 && endIdx > colonIdx)
+          {
+            String yellowStr = data.substring(colonIdx + 1, endIdx);
+            yellowStr.trim();
+            int newYellowDuration = yellowStr.toInt();
+            if (newYellowDuration >= 0 && newYellowDuration != yellowDuration)
+            {
+              yellowDuration = newYellowDuration;
+              Serial.println("► Yellow duration: " + String(yellowDuration) + "s");
             }
           }
         }
@@ -495,7 +642,8 @@ void processStream(AsyncResult &aResult)
             if (newStatus >= 0 && newStatus <= 2 && newStatus != currentStatus)
             {
               currentStatus = newStatus;
-              String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken" : "fixing";
+              String statusName = (newStatus == 0) ? "active" : (newStatus == 1) ? "broken"
+                                                                                 : "fixing";
               Serial.println("► Status: " + statusName);
             }
           }
@@ -556,15 +704,21 @@ void setup()
 
   Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
 
+  // Load Firebase configuration from .env file (with fallback to defaults)
+  loadFirebaseConfig();
+
   Firebase.printf("Firebase Client v%s\n", FIREBASE_CLIENT_VERSION);
 
   ssl_client.setInsecure();
 
   Serial.println("Initializing Firebase...");
 
-  initializeApp(aClient, app, getAuth(user_auth));
+  // Initialize UserAuth with loaded credentials
+  user_auth = new UserAuth(API_KEY.c_str(), USER_EMAIL.c_str(), USER_PASSWORD.c_str(), 3000);
+
+  initializeApp(aClient, app, getAuth(*user_auth));
   app.getApp<RealtimeDatabase>(Database);
-  Database.url(DATABASE_URL);
+  Database.url(DATABASE_URL.c_str());
 
   attempts = 0;
   while (!app.ready() && attempts < 30)
@@ -603,24 +757,34 @@ void setup()
       if (initialColor >= 1 && initialColor <= 3)
       {
         setLight(initialColor);
-        String colorName = (initialColor == 1) ? "red" : (initialColor == 2) ? "yellow" : "green";
+        String colorName = (initialColor == 1) ? "red" : (initialColor == 2) ? "yellow"
+                                                                             : "green";
         Serial.println("Initial color: " + colorName);
       }
+    }
+
+    int initialYellowDuration = Database.get<int>(aClient, myPath + "/yellow_duration");
+    if (aClient.lastError().code() == 0)
+    {
+      yellowDuration = initialYellowDuration;
+      Serial.println("Initial yellow duration: " + String(yellowDuration) + "s");
     }
 
     int initialTime = Database.get<int>(aClient, myPath + "/remaintime");
     if (aClient.lastError().code() == 0)
     {
       remainingTime = initialTime;
-      display.showNumberDec(remainingTime);
-      Serial.println("Initial time: " + String(remainingTime) + "s");
+      int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+      display.showNumberDec(displayTime);
+      Serial.println("Initial time: " + String(remainingTime) + "s (display: " + String(displayTime) + "s)");
     }
 
     int initialStatus = Database.get<int>(aClient, myPath + "/status");
     if (aClient.lastError().code() == 0)
     {
       currentStatus = initialStatus;
-      String statusName = (initialStatus == 0) ? "active" : (initialStatus == 1) ? "broken" : "fixing";
+      String statusName = (initialStatus == 0) ? "active" : (initialStatus == 1) ? "broken"
+                                                                                 : "fixing";
       Serial.println("Initial status: " + statusName);
     }
 
@@ -648,15 +812,68 @@ void loop()
     return;
   }
 
-  // CRITICAL: Process authentication and streaming in real-time
-  app.loop();
-  Database.loop();
+  // Check WiFi connection status
+  static unsigned long lastWiFiCheck = 0;
+  if (millis() - lastWiFiCheck > 5000) // Check every 5 seconds
+  {
+    bool wasOnline = isOnline;
+    isOnline = (WiFi.status() == WL_CONNECTED);
 
-  // Handle broken/fixing status with blinking behavior
+    if (wasOnline && !isOnline)
+    {
+      Serial.println("WiFi disconnected! Entering offline mode...");
+    }
+    else if (!wasOnline && isOnline)
+    {
+      Serial.println("WiFi reconnected! Restoring normal operation...");
+      // Restore normal state
+      setLight(currentColor);
+      int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+      display.showNumberDec(displayTime);
+    }
+
+    lastWiFiCheck = millis();
+  }
+
+  // CRITICAL: Process authentication and streaming in real-time (only when online)
+  if (isOnline)
+  {
+    app.loop();
+    Database.loop();
+  }
+
+  // Handle offline status with blinking behavior (HIGHEST PRIORITY)
   static unsigned long lastBlinkTime = 0;
   static bool blinkState = false;
 
-  if (currentStatus == 1 || currentStatus == 2) // broken or fixing
+  if (!isOnline) // Offline - blink all lights
+  {
+    // Blink every 300ms (faster to indicate urgency)
+    if (millis() - lastBlinkTime > 300)
+    {
+      blinkState = !blinkState;
+
+      if (blinkState)
+      {
+        // Turn on all lights and show "----"
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(YELLOW_PIN, HIGH);
+        digitalWrite(GREEN_PIN, HIGH);
+        display.setSegments(new uint8_t[4]{0x40, 0x40, 0x40, 0x40}); // Show ----
+      }
+      else
+      {
+        // Turn off all lights and clear display
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(YELLOW_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);
+        display.clear();
+      }
+
+      lastBlinkTime = millis();
+    }
+  }
+  else if (currentStatus == 1 || currentStatus == 2) // broken or fixing
   {
     // Blink every 500ms
     if (millis() - lastBlinkTime > 500)
@@ -692,7 +909,8 @@ void loop()
     {
       // Restore normal state
       setLight(currentColor);
-      display.showNumberDec(remainingTime);
+      int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+      display.showNumberDec(displayTime);
       previousStatus = currentStatus;
     }
   }
