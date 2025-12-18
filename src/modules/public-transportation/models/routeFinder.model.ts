@@ -106,7 +106,6 @@ const extractRouteDetails = (route: any) => {
     duration: leg.duration,
     detailedSteps: detailedSteps,
     fare: formattedFare,
-    // 🟢 เพิ่ม Polyline เพื่อส่งกลับ Frontend
     overview_polyline: route.overview_polyline,
   };
 };
@@ -133,11 +132,6 @@ const findNearestTransitStop = async (
     return `${lat},${lng}`;
   }
 };
-
-/**
- * [แก้ไขแล้ว] ปรับปรุงตรรกะการกำหนด Origin/Destination และแก้ไข Missing Return Path
- * เพื่อป้องกันไม่ให้ฟังก์ชันคืนค่าเป็น undefined
- */
 export const getRoutes = async (
   origin: string | undefined,
   origLat: string | undefined,
@@ -208,5 +202,95 @@ export const getRoutes = async (
   } catch (error) {
     console.error('Error fetching route stops:', error);
     throw error;
+  }
+};
+export const getTransitLinesOnly = async (
+  origLat: string | null,
+  origLng: string | null,
+  destLat: string | null,
+  destLng: string | null,
+  originText: string | null = null,
+  destinationText: string | null = null
+): Promise<string[]> => {
+  let finalOrigin: string;
+  let finalDestination: string;
+
+  if (originText) {
+    finalOrigin = originText;
+  } else if (origLat && origLng) {
+    finalOrigin = `${origLat},${origLng}`;
+  } else {
+    return [];
+  }
+
+  if (destinationText) {
+    finalDestination = destinationText;
+  } else if (destLat && destLng) {
+    finalDestination = `${destLat},${destLng}`;
+  } else {
+    return [];
+  }
+
+  const encodedOrigin = encodeURIComponent(finalOrigin);
+  const encodedDestination = encodeURIComponent(finalDestination);
+
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+
+  const googleMapsUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodedOrigin}&destination=${encodedDestination}&mode=transit&alternatives=true&departure_time=${currentTimestamp}&key=${GOOGLE_API_KEY}`;
+
+  try {
+    const response = await fetch(googleMapsUrl);
+    const data = await response.json();
+
+    if (data.status === 'OK' && data.routes && data.routes.length > 0) {
+      const allRoutes = data.routes;
+      const lineSet: Set<string> = new Set();
+
+      allRoutes.forEach((route: any) => {
+        if (route.legs && route.legs.length > 0) {
+          route.legs[0].steps.forEach((step: any) => {
+            if (step.travel_mode === 'TRANSIT' && step.transit_details) {
+              const transit = step.transit_details;
+              const originalLineName = transit.line.name;
+              const lineShortName = transit.line.short_name;
+              const vehicleType = transit.line.vehicle.type;
+
+              const mappedVehicleType = mapVehicleType(
+                vehicleType,
+                originalLineName
+              );
+
+              let displayLineName = originalLineName;
+
+              if (
+                vehicleType === 'BUS' &&
+                lineShortName &&
+                lineShortName !== originalLineName
+              ) {
+                displayLineName = `${lineShortName}: ${originalLineName}`;
+              }
+
+              if (
+                !displayLineName.includes(mappedVehicleType) &&
+                mappedVehicleType !== originalLineName
+              ) {
+                displayLineName = `${displayLineName} (${mappedVehicleType})`;
+              }
+
+              if (displayLineName) {
+                lineSet.add(displayLineName);
+              }
+            }
+          });
+        }
+      });
+
+      return Array.from(lineSet).sort();
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching transit lines only:', error);
+    return [];
   }
 };

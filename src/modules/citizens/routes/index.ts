@@ -7,3 +7,4 @@ export { setupUserG8Routes } from './userg8.openapi.route';
 export { setupRoleUserRoutes } from './userRoleG11.openapi.routes';
 export { setupUserRoutes } from './user.openapi.route';
 export { setupUserSpecialistRoutes } from './specialistG6.openapi.route';
+export { setupUserG1Routes } from './userG1.openapi.route';

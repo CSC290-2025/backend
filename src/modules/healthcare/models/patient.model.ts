@@ -24,6 +24,7 @@ const appointmentHistorySelect = {
 
 const patientSelect = {
   id: true,
+  user_id: true,
   emergency_contact: true,
   date_of_birth: true,
   blood_type: true,
@@ -60,6 +61,7 @@ const mapAppointmentHistory = (
 
 const mapPatient = (patient: PatientRecord): Patient => ({
   id: patient.id,
+  userId: patient.user_id ?? null,
   emergencyContact: patient.emergency_contact ?? null,
   dateOfBirth: patient.date_of_birth ?? null,
   bloodType: patient.blood_type ?? null,
@@ -138,6 +140,7 @@ const create = async (data: CreatePatientData): Promise<Patient> => {
   try {
     const patient = await prisma.patients.create({
       data: {
+        user_id: data.userId ?? null,
         emergency_contact: data.emergencyContact ?? null,
         date_of_birth: data.dateOfBirth ?? null,
         blood_type: data.bloodType ?? null,
@@ -158,6 +161,10 @@ const update = async (
 ): Promise<Patient> => {
   try {
     const updateData: Prisma.patientsUncheckedUpdateInput = {};
+
+    if (data.userId !== undefined) {
+      updateData.user_id = data.userId;
+    }
 
     if (data.emergencyContact !== undefined) {
       updateData.emergency_contact = data.emergencyContact;

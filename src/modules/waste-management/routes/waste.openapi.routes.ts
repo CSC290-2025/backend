@@ -14,6 +14,9 @@ const setupWasteRoutes = (app: OpenAPIHono) => {
 
   // Get daily statistics
   app.openapi(WasteSchemas.getDailyStatsRoute, WasteController.getDailyStats);
+
+  // Delete waste log
+  app.openapi(WasteSchemas.deleteLogRoute, WasteController.deleteLogById);
 };
 
 export { setupWasteRoutes };

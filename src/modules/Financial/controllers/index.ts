@@ -3,3 +3,4 @@ export * as ScbController from './scb.controller';
 export * as MetroCardController from './metroCard.controller';
 export * as InsuranceCardController from './insurance-card.controller';
 export * as TransactionController from './transaction.controller';
+export * as LocationController from './location.controller';

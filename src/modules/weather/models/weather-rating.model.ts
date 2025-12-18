@@ -7,12 +7,23 @@ import type {
 } from '../types';
 
 const DATE_SLICE_LENGTH = 10;
+const BANGKOK_OFFSET = '+07:00';
+const BANGKOK_OFFSET_MS = 7 * 60 * 60 * 1000;
 
-// Normalize incoming date strings to midnight UTC Date objects.
-const toDateOnly = (value: string): Date => new Date(`${value}T00:00:00.000Z`);
-// Format stored Date objects back to YYYY-MM-DD strings.
-const formatDateOnly = (date: Date | null): string | null =>
-  date ? date.toISOString().slice(0, DATE_SLICE_LENGTH) : null;
+// Format stored Date objects back to YYYY-MM-DD strings using Bangkok local time.
+const formatBangkokDateOnly = (date: Date | null): string | null => {
+  if (!date) {
+    return null;
+  }
+  const shifted = new Date(date.getTime() + BANGKOK_OFFSET_MS);
+  return shifted.toISOString().slice(0, DATE_SLICE_LENGTH);
+};
+
+const getBangkokDayRange = (value: string) => {
+  const start = new Date(`${value}T00:00:00${BANGKOK_OFFSET}`);
+  const end = new Date(`${value}T23:59:59.999${BANGKOK_OFFSET}`);
+  return { start, end };
+};
 
 const ratingInclude = {
   addresses: {
@@ -40,14 +51,12 @@ const findAll = async (): Promise<WeatherRatingWithAddress[]> => {
 // Create a weather rating while forcing the stored date to midnight UTC.
 const create = async (data: {
   address_id: number;
-  date: string;
   rating: number;
 }): Promise<WeatherRatingWithAddress> => {
   try {
     return await prisma.weather_rating.create({
       data: {
         address_id: data.address_id,
-        date: toDateOnly(data.date),
         rating: data.rating,
       },
       include: ratingInclude,
@@ -61,8 +70,14 @@ const create = async (data: {
 // Delete ratings for the specified date value.
 const deleteByDate = async (date: string): Promise<number> => {
   try {
+    const { start, end } = getBangkokDayRange(date);
     const result = await prisma.weather_rating.deleteMany({
-      where: { date: toDateOnly(date) },
+      where: {
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
     });
     return result.count;
   } catch (error) {
@@ -90,7 +105,11 @@ const getAverageByDateAndLocation = async (
     const where: Prisma.weather_ratingWhereInput = {};
 
     if (query.date) {
-      where.date = toDateOnly(query.date);
+      const { start, end } = getBangkokDayRange(query.date);
+      where.date = {
+        gte: start,
+        lte: end,
+      };
     }
 
     if (query.location_id !== undefined) {
@@ -132,7 +151,7 @@ const getAverageByDateAndLocation = async (
     );
 
     return grouped.map((group) => ({
-      date: formatDateOnly(group.date),
+      date: formatBangkokDateOnly(group.date),
       location_id: group.address_id ?? null,
       district:
         group.address_id === null
