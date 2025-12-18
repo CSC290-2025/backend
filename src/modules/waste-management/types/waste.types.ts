@@ -9,12 +9,16 @@ export interface WasteLogRequest {
   weight: number;
 }
 
+export interface WasteLogInternal extends WasteLogRequest {
+  user_id: number;
+}
+
 export interface WasteLog {
   id: number;
+  user_id: number;
   waste_type_id: number | null;
-  total_collection_weight: number;
-  collection_date: Date | null;
-  event_id: number | null;
+  log_date: Date | null;
+  weight_kg: number;
 }
 
 export interface WasteStats {
@@ -39,6 +43,6 @@ export interface DailyStats {
   by_type: {
     waste_type: string | undefined;
     total_weight: number;
-    log_id: number;
+    entry_count: number;
   }[];
 }
