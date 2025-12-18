@@ -68,17 +68,31 @@ export async function detectHarm(c: Context) {
       confidence * 100
     )}%)`;
 
+    let targetId = 5; // default = 5;
+    // check category
+    const cat = category[0];
+
+    if (cat === 'trash') {
+      targetId = 7;
+    } else if (cat === 'health') {
+      targetId = 6; // Injured
+    } else if (cat === 'traffic') {
+      targetId = 2;
+    } else if (cat === 'harm') {
+      targetId = 5; // Danger
+    }
+
     try {
       marker = await addtheMarker({
         location: {
           lat: lat,
           lng: lng,
         },
-        marker_type_id: null,
+        marker_type_id: targetId,
         description: description,
       });
 
-      console.log('Auto-marker created success');
+      console.log('Auto-marker created success with Type ID:', targetId);
     } catch (e) {
       console.error('Failed to create marker automatically', e);
     }

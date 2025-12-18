@@ -5,6 +5,7 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
+import { authMiddleware } from '@/middlewares';
 
 const enrollmentOnsite = z.object({
   id: z.number(),
@@ -29,6 +30,7 @@ const getEnrollment = createGetRoute({
   responseSchema: enrollmentOnsite,
   params: enrollmentOnsiteId,
   tags: ['Know-AI', 'Enrollment'],
+  middleware: [authMiddleware],
 });
 
 const createEnrollmentRoute = createPostRoute({
@@ -37,6 +39,7 @@ const createEnrollmentRoute = createPostRoute({
   requestSchema: createEnrollmentOnsite,
   responseSchema: enrollmentOnsite,
   tags: ['Know-AI', 'Enrollment'],
+  middleware: [authMiddleware],
 });
 
 export {

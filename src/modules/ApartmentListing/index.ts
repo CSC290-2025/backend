@@ -10,3 +10,4 @@ export { setupAddressRoutes } from './routes/address.route';
 export { setupUploadRoutes } from './routes/upload.route';
 export { setupBookingRoutes } from './routes/booking.route';
 export { setupAPTOwnerRoutes } from './routes/owner.route';
+export { setupAPTLocationIQRoutes } from './routes/locationIQ.route';

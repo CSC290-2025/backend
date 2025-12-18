@@ -3,4 +3,5 @@ export {
   setupFcmRoutes,
   setupTokenRoutes,
   setupContactRoutes,
+  reportRoute,
 } from './routes';

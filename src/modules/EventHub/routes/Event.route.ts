@@ -1,6 +1,7 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { EventSchemas } from '../schemas';
 import { EventController } from '../controllers';
+import { adminMiddleware } from '@/middlewares/admin'; // Importing adminMiddleware
 
 const setupEventRoutes = (app: OpenAPIHono) => {
   // Event Routes
