@@ -1,3 +1,4 @@
+import type { Prisma } from '@/generated/prisma';
 import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { WeatherData } from '../types';
@@ -83,7 +84,12 @@ const findByDateRange = async (
 };
 
 // Insert a new weather_data row.
-const create = async (data: any): Promise<WeatherData> => {
+const create = async (
+  data: Omit<
+    Prisma.weather_dataUncheckedCreateInput,
+    'created_at' | 'updated_at'
+  >
+): Promise<WeatherData> => {
   try {
     const weather = await prisma.weather_data.create({
       data,

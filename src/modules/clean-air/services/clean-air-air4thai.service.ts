@@ -14,9 +14,9 @@ interface TargetDistrict {
 }
 
 const AIR4THAI_TARGET_DISTRICTS: TargetDistrict[] = [
-  { name: 'Thung Khru', keywords: ['thung khru', 'thung kru'] },
+  { name: 'Thung Kru', keywords: ['thung khru', 'thung kru'] },
   { name: 'Rat Burana', keywords: ['rat burana'] },
-  { name: 'Thon Buri', keywords: ['thon buri', 'thonburi'] },
+  { name: 'Thonburi', keywords: ['thon buri', 'thonburi'] },
   { name: 'Chom Thong', keywords: ['chom thong', 'chomthong', 'jomtong'] },
 ];
 

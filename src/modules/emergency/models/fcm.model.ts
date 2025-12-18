@@ -1,11 +1,11 @@
 import type {
   CreateTokenFcm,
-  FcmResponse,
-} from '@/modules/emergency/types/fcm.type';
+  TokenFcmResponse,
+} from '@/modules/emergency/types/token.type';
 import { handlePrismaError } from '@/errors';
 import prisma from '@/config/client.ts';
 
-const getAllFcmToken = async (): Promise<FcmResponse[]> => {
+const getAllFcmToken = async (): Promise<TokenFcmResponse[]> => {
   try {
     return await prisma.fcm_token.findMany({});
   } catch (error) {
@@ -13,7 +13,9 @@ const getAllFcmToken = async (): Promise<FcmResponse[]> => {
   }
 };
 
-const createFcmToken = async (data: CreateTokenFcm): Promise<FcmResponse> => {
+const createFcmToken = async (
+  data: CreateTokenFcm
+): Promise<TokenFcmResponse> => {
   try {
     return prisma.fcm_token.create({
       data,
@@ -36,4 +38,21 @@ const checkFcmTokenExist = async (token: string): Promise<boolean> => {
   }
 };
 
-export { getAllFcmToken, createFcmToken, checkFcmTokenExist };
+const getFcmTokenByUserId = async (
+  userId: number
+): Promise<TokenFcmResponse | null> => {
+  try {
+    return await prisma.fcm_token.findFirst({
+      where: { user_id: userId },
+    });
+  } catch (error) {
+    handlePrismaError(error);
+  }
+};
+
+export {
+  getAllFcmToken,
+  createFcmToken,
+  checkFcmTokenExist,
+  getFcmTokenByUserId,
+};
