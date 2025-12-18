@@ -36,4 +36,5 @@ export {
   setupMetroCardRoutes,
   setupInsuranceCardRoutes,
   setupTransactionRoutes,
+  setupLocationRoutes,
 } from './routes';
