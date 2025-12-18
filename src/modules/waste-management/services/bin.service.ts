@@ -43,6 +43,15 @@ export class BinService {
     return bin;
   }
 
+  static async getBinsByUser(userId: number) {
+    if (!userId || isNaN(userId)) {
+      throw new ValidationError('Valid user ID is required');
+    }
+
+    const bins = await BinModel.findBinsByUserId(userId);
+    return bins;
+  }
+
   static async createBin(data: CreateBinRequest, userId: number | null) {
     if (!data.bin_name || !data.bin_type) {
       throw new ValidationError('Bin name and type are required');

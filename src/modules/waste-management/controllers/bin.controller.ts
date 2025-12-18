@@ -28,6 +28,18 @@ const getBinById = async (c: Context) => {
   return successResponse(c, { bin });
 };
 
+const getBinsByUser = async (c: Context) => {
+  const user = c.get('user');
+  const userId = user?.userId ?? user?.id;
+
+  if (userId === undefined || userId === null) {
+    throw new UnauthorizedError('User ID not found in authentication context');
+  }
+
+  const bins = await BinService.getBinsByUser(Number(userId));
+  return successResponse(c, { bins });
+};
+
 const createBin = async (c: Context) => {
   const body = await c.req.json();
   const user = c.get('user');
@@ -76,4 +88,11 @@ const isValidBinType = (value?: string): value is BinType => {
   return BIN_TYPES.includes(value as BinType);
 };
 
-export { getAllBins, getBinById, createBin, deleteBin, getNearbyBins };
+export {
+  getAllBins,
+  getBinById,
+  getBinsByUser,
+  createBin,
+  deleteBin,
+  getNearbyBins,
+};
