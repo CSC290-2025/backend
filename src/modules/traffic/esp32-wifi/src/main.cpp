@@ -1,4 +1,3 @@
-// Define what Firebase features to enable BEFORE including FirebaseClient.h
 #define ENABLE_USER_AUTH
 #define ENABLE_DATABASE
 
@@ -8,6 +7,7 @@
 #include <FirebaseClient.h>
 #include <WebServer.h>
 #include <Preferences.h>
+#include <LittleFS.h>
 #include "TM1637Display.h"
 
 // ================= PIN CONFIGURATION =================
@@ -31,11 +31,11 @@ String wifiPass = "";
 String teamId = "10";
 String trafficLightId = "10";
 
-// Firebase Configuration
-#define API_KEY "AIzaSyCsJQMhxz-av8Dyl2l-jduR2zDJK1mv_rs"
-#define DATABASE_URL "https://sit-integrated-proj-2025-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define USER_EMAIL "arduino@smartcity.sit.kmutt.ac.th"
-#define USER_PASSWORD "board123"
+// Firebase Configuration (loaded from .env file)
+String API_KEY = "";
+String DATABASE_URL = "";
+String USER_EMAIL = "";
+String USER_PASSWORD = "";
 
 // Firebase objects
 WiFiClientSecure ssl_client;
@@ -45,18 +45,19 @@ AsyncClient aClient(ssl_client);
 WiFiClientSecure stream_ssl_client;
 AsyncClient streamClient(stream_ssl_client);
 
-UserAuth user_auth(API_KEY, USER_EMAIL, USER_PASSWORD, 3000);
+UserAuth *user_auth = nullptr;
 FirebaseApp app;
 RealtimeDatabase Database;
 AsyncResult aResult;
 
 bool firebaseReady = false;
 bool configMode = false;
+bool isOnline = true; // Track WiFi connection status
 
 // Current state from Firebase (updated via stream)
 int currentColor = 1; // 1=red, 2=yellow, 3=green
 int remainingTime = 0;
-int currentStatus = 0; // 0=active, 1=broken, 2=fixing
+int currentStatus = 0;  // 0=active, 1=broken, 2=fixing
 int yellowDuration = 0; // yellow_duration from Firebase
 
 // --- Helper: sanitize non-ASCII characters ---
@@ -188,6 +189,24 @@ const char *configPage = R"rawliteral(
                     <label>Traffic Light ID</label>
                     <input type="text" name="lightid" value="%LIGHT_ID%" required>
                 </div>
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+                <h3 style="margin-bottom: 20px;">Firebase Configuration</h3>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" name="fb_key" value="%FB_KEY%" required>
+                </div>
+                <div class="form-group">
+                    <label>Database URL</label>
+                    <input type="text" name="fb_url" value="%FB_URL%" required>
+                </div>
+                <div class="form-group">
+                    <label>User Email</label>
+                    <input type="text" name="fb_email" value="%FB_EMAIL%" required>
+                </div>
+                <div class="form-group">
+                    <label>User Password</label>
+                    <input type="password" name="fb_pass" value="%FB_PASS%" required>
+                </div>
                 <button type="submit" class="btn-primary">Save & Restart</button>
             </form>
             <form action="/reset" method="POST">
@@ -208,10 +227,92 @@ String processTemplate(const char *html)
   result.replace("%LIGHT_ID%", htmlEscape(trafficLightId));
   result.replace("%LAT%", "");
   result.replace("%LNG%", "");
+  result.replace("%FB_KEY%", htmlEscape(API_KEY));
+  result.replace("%FB_URL%", htmlEscape(DATABASE_URL));
+  result.replace("%FB_EMAIL%", htmlEscape(USER_EMAIL));
+  result.replace("%FB_PASS%", htmlEscape(USER_PASSWORD));
   return result;
 }
 
 // ================= CONFIGURATION FUNCTIONS =================
+
+void loadFirebaseConfig()
+{
+  // Priority 1: Try to load from Preferences (saved via config mode)
+  preferences.begin("traffic-light", false);
+  API_KEY = preferences.getString("fb_key", "");
+  DATABASE_URL = preferences.getString("fb_url", "");
+  USER_EMAIL = preferences.getString("fb_email", "");
+  USER_PASSWORD = preferences.getString("fb_pass", "");
+  preferences.end();
+
+  bool loadedFromPreferences = (API_KEY.length() > 0 && DATABASE_URL.length() > 0 &&
+                                 USER_EMAIL.length() > 0 && USER_PASSWORD.length() > 0);
+
+  // Priority 2: Try to load from .env file if not in preferences
+  if (!loadedFromPreferences && LittleFS.begin(true))
+  {
+    File file = LittleFS.open("/.env", "r");
+    if (file)
+    {
+      Serial.println("Reading .env file...");
+      while (file.available())
+      {
+        String line = file.readStringUntil('\n');
+        line.trim();
+
+        // Skip empty lines and comments
+        if (line.length() == 0 || line.startsWith("#"))
+          continue;
+
+        int separatorIndex = line.indexOf('=');
+        if (separatorIndex == -1)
+          continue;
+
+        String key = line.substring(0, separatorIndex);
+        String value = line.substring(separatorIndex + 1);
+
+        key.trim();
+        value.trim();
+
+        // Remove quotes if present
+        if (value.startsWith("\"") && value.endsWith("\""))
+        {
+          value = value.substring(1, value.length() - 1);
+        }
+
+        // Assign values to configuration variables
+        if (key == "API_KEY")
+          API_KEY = value;
+        else if (key == "DATABASE_URL")
+          DATABASE_URL = value;
+        else if (key == "USER_EMAIL")
+          USER_EMAIL = value;
+        else if (key == "USER_PASSWORD")
+          USER_PASSWORD = value;
+      }
+
+      file.close();
+      loadedFromPreferences = (API_KEY.length() > 0 && DATABASE_URL.length() > 0 &&
+                               USER_EMAIL.length() > 0 && USER_PASSWORD.length() > 0);
+    }
+    LittleFS.end();
+  }
+
+  // Display config source
+  if (loadedFromPreferences)
+  {
+    Serial.println("Firebase config loaded successfully");
+    Serial.println("API_KEY: " + API_KEY.substring(0, min(10, (int)API_KEY.length())) + "...");
+    Serial.println("DATABASE_URL: " + DATABASE_URL);
+    Serial.println("USER_EMAIL: " + USER_EMAIL);
+  }
+  else
+  {
+    Serial.println("WARNING: No Firebase configuration found");
+    Serial.println("Please configure in config mode or upload .env file");
+  }
+}
 
 void loadConfiguration()
 {
@@ -237,6 +338,9 @@ void startConfigMode()
 {
   Serial.println("\n=== ENTERING CONFIG MODE ===");
   configMode = true;
+
+  // Load Firebase config so it shows in the form
+  loadFirebaseConfig();
 
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
@@ -264,7 +368,21 @@ void startConfigMode()
               teamId = server.arg("team");
               trafficLightId = server.arg("lightid");
 
+              // Save Firebase credentials
+              API_KEY = server.arg("fb_key");
+              DATABASE_URL = server.arg("fb_url");
+              USER_EMAIL = server.arg("fb_email");
+              USER_PASSWORD = server.arg("fb_pass");
+
               saveConfiguration();
+
+              // Save Firebase config to preferences
+              preferences.begin("traffic-light", false);
+              preferences.putString("fb_key", API_KEY);
+              preferences.putString("fb_url", DATABASE_URL);
+              preferences.putString("fb_email", USER_EMAIL);
+              preferences.putString("fb_pass", USER_PASSWORD);
+              preferences.end();
 
               server.send(200, "text/html; charset=utf-8",
                           "<html><body style='text-align:center;padding:50px;background:#2c3e50;color:white;'>"
@@ -586,15 +704,21 @@ void setup()
 
   Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
 
+  // Load Firebase configuration from .env file (with fallback to defaults)
+  loadFirebaseConfig();
+
   Firebase.printf("Firebase Client v%s\n", FIREBASE_CLIENT_VERSION);
 
   ssl_client.setInsecure();
 
   Serial.println("Initializing Firebase...");
 
-  initializeApp(aClient, app, getAuth(user_auth));
+  // Initialize UserAuth with loaded credentials
+  user_auth = new UserAuth(API_KEY.c_str(), USER_EMAIL.c_str(), USER_PASSWORD.c_str(), 3000);
+
+  initializeApp(aClient, app, getAuth(*user_auth));
   app.getApp<RealtimeDatabase>(Database);
-  Database.url(DATABASE_URL);
+  Database.url(DATABASE_URL.c_str());
 
   attempts = 0;
   while (!app.ready() && attempts < 30)
@@ -688,15 +812,68 @@ void loop()
     return;
   }
 
-  // CRITICAL: Process authentication and streaming in real-time
-  app.loop();
-  Database.loop();
+  // Check WiFi connection status
+  static unsigned long lastWiFiCheck = 0;
+  if (millis() - lastWiFiCheck > 5000) // Check every 5 seconds
+  {
+    bool wasOnline = isOnline;
+    isOnline = (WiFi.status() == WL_CONNECTED);
 
-  // Handle broken/fixing status with blinking behavior
+    if (wasOnline && !isOnline)
+    {
+      Serial.println("WiFi disconnected! Entering offline mode...");
+    }
+    else if (!wasOnline && isOnline)
+    {
+      Serial.println("WiFi reconnected! Restoring normal operation...");
+      // Restore normal state
+      setLight(currentColor);
+      int displayTime = (currentColor == 3) ? max(0, remainingTime - yellowDuration) : remainingTime;
+      display.showNumberDec(displayTime);
+    }
+
+    lastWiFiCheck = millis();
+  }
+
+  // CRITICAL: Process authentication and streaming in real-time (only when online)
+  if (isOnline)
+  {
+    app.loop();
+    Database.loop();
+  }
+
+  // Handle offline status with blinking behavior (HIGHEST PRIORITY)
   static unsigned long lastBlinkTime = 0;
   static bool blinkState = false;
 
-  if (currentStatus == 1 || currentStatus == 2) // broken or fixing
+  if (!isOnline) // Offline - blink all lights
+  {
+    // Blink every 300ms (faster to indicate urgency)
+    if (millis() - lastBlinkTime > 300)
+    {
+      blinkState = !blinkState;
+
+      if (blinkState)
+      {
+        // Turn on all lights and show "----"
+        digitalWrite(RED_PIN, HIGH);
+        digitalWrite(YELLOW_PIN, HIGH);
+        digitalWrite(GREEN_PIN, HIGH);
+        display.setSegments(new uint8_t[4]{0x40, 0x40, 0x40, 0x40}); // Show ----
+      }
+      else
+      {
+        // Turn off all lights and clear display
+        digitalWrite(RED_PIN, LOW);
+        digitalWrite(YELLOW_PIN, LOW);
+        digitalWrite(GREEN_PIN, LOW);
+        display.clear();
+      }
+
+      lastBlinkTime = millis();
+    }
+  }
+  else if (currentStatus == 1 || currentStatus == 2) // broken or fixing
   {
     // Blink every 500ms
     if (millis() - lastBlinkTime > 500)
