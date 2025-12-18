@@ -76,11 +76,6 @@ const BookmarkedUserSchema = z.object({
   email: z.string().email(),
   full_name: z.string(),
 });
-const BookmarkedUserSchema = z.object({
-  id: z.number().int().positive(),
-  email: z.string().email(),
-  full_name: z.string(),
-});
 
 const GetBookmarkedUsersResponse = z.object({
   data: z.array(BookmarkedUserSchema),
