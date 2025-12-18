@@ -9,6 +9,7 @@ Choose ONE approach per module that you're comfortable with:
 
 // Auth
 import { setupAuthRoutes } from '@/modules/Auth/routes';
+import { setupResetRoutes } from '@/modules/Auth/routes';
 
 // Apartment
 import {
@@ -19,6 +20,7 @@ import {
   setupUploadRoutes,
   setupBookingRoutes,
   setupAPTOwnerRoutes,
+  setupAPTLocationIQRoutes,
 } from '@/modules/ApartmentListing';
 
 // Citizen
@@ -29,6 +31,7 @@ import {
   setupRoleUserRoutes,
   setupUserRoutes,
   setupUserSpecialistRoutes,
+  setupUserG1Routes,
 } from '@/modules/citizens/routes';
 
 // Clean Air
@@ -53,14 +56,16 @@ import {
   setupMetroCardRoutes,
   setupTransactionRoutes,
   setupInsuranceCardRoutes,
+  setupLocationRoutes,
 } from '@/modules/Financial';
 
-//Free Cycle
+// Free Cycle
 import {
   setupFreecyclePostsRoutes,
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
   setupReceiverRequestsRoutes,
+  setupUploadFreecycleRoutes,
 } from '@/modules/freecycle';
 
 //Healthcare
@@ -75,6 +80,10 @@ import {
   setupPaymentRoutes,
   setupDoctorsRoutes,
   setupMedicineInventoryRoutes,
+  setupDepartmentRoutes,
+  setupHealthcareAuthRoutes,
+  setupStaffRoutes,
+  setupEmergencyRoutes,
 } from '@/modules/healthcare/routes';
 
 // Know AI
@@ -87,18 +96,24 @@ import {
 } from '@/modules/Know_AI/routes';
 
 // Power BI
-// import { reportRoutes } from '@/modules/power-bi';
+import { setupReportsRoutes } from '@/modules/power-bi';
 
 // Support Map
 import {
   detectRoutes,
   markerRoutes,
   distanceRoutes,
-  markerTypeRoutes,
 } from '@/modules/G-16/routes';
 
-import { setupMarkerOpenApiRoutes } from '@/modules/G-16/routes/marker.openapi.routes';
-import { setupMarkerTypeOpenApiRoutes } from '@/modules/G-16/routes/markerType.openapi.routes';
+// Traffic
+import {
+  setupIntersectionRoutes,
+  setupLightRequestRoutes,
+  setupRoadRoutes,
+  setupTrafficEmergencyRoutes,
+  setupTrafficLightRoutes,
+  setupLightReportRoutes,
+} from '@/modules/traffic';
 
 // Volunteer
 import { eventRoutes, setupVolunteerRoutes } from '@/modules/Volunteer';
@@ -129,11 +144,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
 
   // Auth
   setupAuthRoutes(app);
-
-  //Emergency
-  setupReportRoutes(app);
-  setupFcmRoutes(app);
-  setupTokenRoutes(app);
+  setupResetRoutes(app);
 
   // Apartment
   setupAddressRoutes(app);
@@ -143,6 +154,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUploadRoutes(app);
   setupBookingRoutes(app);
   setupAPTOwnerRoutes(app);
+  setupAPTLocationIQRoutes(app);
   // Clean Air
   setupCleanAirRoutes(app);
 
@@ -152,6 +164,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUserG8Routes(app);
   setupRoleUserRoutes(app);
   setupUserRoutes(app);
+  setupUserG1Routes(app);
 
   //Emergency
   setupReportRoutes(app);
@@ -169,6 +182,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
   setupScbRoutes(app);
+  setupLocationRoutes(app);
 
   //Healthcare
   setupPatientRoutes(app);
@@ -181,12 +195,18 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupPaymentRoutes(app);
   setupDoctorsRoutes(app);
   setupMedicineInventoryRoutes(app);
+  setupDepartmentRoutes(app);
+  setupAddressRoutes(app);
+  setupHealthcareAuthRoutes(app);
+  setupStaffRoutes(app);
+  setupEmergencyRoutes(app);
 
   // Free Cycle
   setupFreecyclePostsRoutes(app);
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
   setupReceiverRequestsRoutes(app);
+  setupUploadFreecycleRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
@@ -195,13 +215,20 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupQuestionRoutes(app);
   setupLevelRoutes(app);
 
+  // Power BI
+  setupReportsRoutes(app);
+
+  // Traffic
+  setupIntersectionRoutes(app);
+  setupTrafficLightRoutes(app);
+  setupLightReportRoutes(app);
+  setupLightRequestRoutes(app);
+  setupRoadRoutes(app);
+  setupTrafficEmergencyRoutes(app);
+
   // Waste
   setupWasteRoutes(app);
   setupBinRoutes(app);
-
-  // SupportMap
-  setupMarkerOpenApiRoutes(app);
-  setupMarkerTypeOpenApiRoutes(app);
 
   // SupportMap
 
@@ -218,9 +245,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-
-  // Power BI
-  // app.route('/reports', reportRoutes);
 
   // Support Map
   app.route('/api', detectRoutes);

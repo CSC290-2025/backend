@@ -1,6 +1,7 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { BookmarkSchemas } from '../schemas';
 import { BookmarkController } from '../controllers';
+import { authMiddleware } from '@/middlewares/auth'; // Importing the middleware
 
 const setupBookmarkRoutes = (app: OpenAPIHono) => {
   // Bookmark Routes
@@ -27,6 +28,11 @@ const setupBookmarkRoutes = (app: OpenAPIHono) => {
   app.openapi(
     BookmarkSchemas.checkBookmarkStatusRoute,
     BookmarkController.checkBookmarkStatus
+  );
+
+  app.openapi(
+    BookmarkSchemas.getBookmarkedUsersRoute,
+    BookmarkController.getBookmarkedUsers
   );
 };
 

@@ -892,6 +892,8 @@ model users {
   last_login                    DateTime?                       @db.Timestamptz(6)
   alerts                        alerts[]
   apartment_booking             apartment_booking[]
+  apartment_owner               apartment_owner[]
+  bin                           bin[]
   conversation_participants     conversation_participants[]
   courses                       courses[]
   digital_cards                 digital_cards[]

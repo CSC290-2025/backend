@@ -37,10 +37,19 @@ const createRequest = async (
   const post = await PostsService.getPostById(data.post_id);
   if (!post) throw new NotFoundError('Post not found');
 
-  // if (post.donater_id === receiverId) {
-  //   throw new ValidationError('You cannot request your own post.');
-  // }
+  if (post.donater_id === receiverId) {
+    throw new ValidationError('You cannot request your own post.');
+  }
 
+  const existingRequest =
+    await ReceiverRequestsModel.findRequestByPostAndReceiver(
+      data.post_id,
+      receiverId
+    );
+
+  if (existingRequest) {
+    throw new ValidationError('You have already requested this item.');
+  }
   return await ReceiverRequestsModel.createRequest(data, receiverId);
 };
 
