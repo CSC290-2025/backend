@@ -23,6 +23,9 @@ const setupUserRoutes = (app: OpenAPIHono) => {
     UserSchemas.updateCurrentUserAccount,
     UserG2.updateCurrentUserAccount
   );
+
+  app.openapi(UserSchemas.updateProfilePicture, UserG2.updateProfilePicture);
+  app.openapi(UserSchemas.updatePassword, UserG2.updatePassword);
 };
 
 export { setupUserRoutes };

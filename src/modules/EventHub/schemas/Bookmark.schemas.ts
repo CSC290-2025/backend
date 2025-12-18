@@ -4,11 +4,13 @@ import {
   createPostRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-
+import { authMiddleware } from '@/middlewares';
+import { EventSchemas } from './Event.schemas';
 const EventBookmarkSchema = z.object({
   user_id: z.number().int(),
   event_id: z.number().int(),
   created_at: z.coerce.date(),
+  event: EventSchemas.EventSchema.optional(),
 });
 
 const CreateBookmarkSchema = z.object({
@@ -37,6 +39,7 @@ const listBookmarksRoute = createGetRoute({
   query: Pagination,
   responseSchema: ListBookmarksResponse,
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const createBookmarkRoute = createPostRoute({
@@ -47,13 +50,15 @@ const createBookmarkRoute = createPostRoute({
     bookmark: EventBookmarkSchema,
   }),
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const deleteBookmarkRoute = createDeleteRoute({
-  path: '/bookmarks/{event_id}',
+  path: '/bookmarks/{eve    nt_id}',
   summary: 'Delete bookmark',
   params: EventIdParam,
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
 });
 
 const checkBookmarkStatusRoute = createGetRoute({
@@ -64,8 +69,25 @@ const checkBookmarkStatusRoute = createGetRoute({
     bookmarked: z.boolean(),
   }),
   tags: ['Bookmarks'],
+  middleware: [authMiddleware],
+});
+const BookmarkedUserSchema = z.object({
+  id: z.number().int().positive(),
+  email: z.string().email(),
+  full_name: z.string(),
 });
 
+const GetBookmarkedUsersResponse = z.object({
+  data: z.array(BookmarkedUserSchema),
+});
+
+const getBookmarkedUsersRoute = createGetRoute({
+  path: '/bookmarks/events/{event_id}/users', // New, clear endpoint
+  summary: 'Get all users who bookmarked a specific event',
+  params: EventIdParam,
+  responseSchema: GetBookmarkedUsersResponse,
+  tags: ['Bookmarks'],
+});
 export const BookmarkSchemas = {
   EventBookmarkSchema,
   CreateBookmarkSchema,
@@ -77,4 +99,6 @@ export const BookmarkSchemas = {
   createBookmarkRoute,
   deleteBookmarkRoute,
   checkBookmarkStatusRoute,
+  BookmarkedUserSchema,
+  getBookmarkedUsersRoute,
 };

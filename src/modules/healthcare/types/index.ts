@@ -8,3 +8,5 @@ export * from './payment.types';
 export * from './prescription.types';
 export * from './doctors.types';
 export * from './medicine_inventory.types';
+export * from './department.types';
+export * from './address.types';

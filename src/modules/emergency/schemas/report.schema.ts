@@ -1,21 +1,15 @@
 import { isReportStatus } from '@/modules/emergency/schemas/branded.schema.ts';
 import { z } from 'zod';
 
-export const ReportStatusEnum = z
-  .enum(['pending', 'resolved', 'verified'])
-  .refine(isReportStatus);
+export const ReportStatusEnum = z.enum(['pending', 'resolved', 'verified']);
 
 const CreateReportSchema = z.object({
   user_id: z.number().int().nullable().optional(),
   title: z.string(),
   image_url: z.string().optional().nullable(),
   description: z.string().min(5).max(1000),
-  location: z
-    .object({
-      lat: z.number().min(-90).max(90),
-      lng: z.number().gte(-180).lte(180),
-    })
-    .optional(),
+  lat: z.string().nullable(),
+  long: z.string().nullable(),
   ambulance_service: z.boolean().default(false),
   report_category: z
     .enum(['traffic', 'accident', 'disaster'])
@@ -28,7 +22,8 @@ const ReportResponseSchema = z.object({
   user_id: z.number().int().nullable().optional(),
   image_url: z.string().nullable(),
   description: z.string().min(5).max(1000).nullable(),
-  location: z.any().nullable().optional(),
+  lat: z.string().nullable(),
+  long: z.string().nullable(),
   ambulance_service: z.boolean().nullable(),
   contact_center_service: z.boolean().nullable().optional(),
   level: z
@@ -59,6 +54,25 @@ const ReportDeleteResponseSchema = z.object({
   id: z.number().int(),
 });
 
+const ReportFindResponseByIdSchema = z.object({
+  id: z.number().int(),
+  user_id: z.number().int().nullable().optional(),
+  image_url: z.string().nullable(),
+  description: z.string().min(5).max(1000).nullable(),
+  lat: z.string().nullable(),
+  long: z.string().nullable(),
+  ambulance_service: z.boolean().nullable(),
+  contact_center_service: z.boolean().nullable().optional(),
+  level: z
+    .enum(['near_miss', 'minor', 'moderate', 'major', 'lethal'])
+    .nullable(),
+  title: z.string().min(1).optional(),
+  report_category: z
+    .enum(['traffic', 'accident', 'disaster'])
+    .optional()
+    .nullable(),
+});
+
 export {
   CreateReportSchema,
   ReportResponseSchema,
@@ -66,4 +80,5 @@ export {
   FindReportResponseSchema,
   UpdateReportByIdSchema,
   ReportDeleteResponseSchema,
+  ReportFindResponseByIdSchema,
 };

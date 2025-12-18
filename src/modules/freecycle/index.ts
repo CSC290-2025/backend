@@ -18,3 +18,7 @@ export { ReceiverRequestsModel } from './models';
 export { ReceiverRequestsService } from './services';
 export { FreecycleReceiverRequestSchemas } from './schemas';
 export { setupReceiverRequestsRoutes } from './routes';
+
+export { setupUploadFreecycleRoutes } from './routes';
+export { UploadSchemas } from './schemas';
+export { UploadService } from './services';

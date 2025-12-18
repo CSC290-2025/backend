@@ -21,6 +21,7 @@ const AppointmentHistoryItemSchema = z
 // Zod schemas
 const PatientSchema = z.object({
   id: z.number().int(),
+  userId: z.number().int().nullable(),
   emergencyContact: z.string().max(200).nullable(),
   createdAt: z.date(),
   dateOfBirth: z.date().nullable(),
@@ -33,6 +34,7 @@ const PatientSchema = z.object({
 });
 
 const CreatePatientSchema = z.object({
+  userId: z.number().int().optional(),
   emergencyContact: z.string().max(200).optional(),
   dateOfBirth: z.coerce.date().optional(),
   bloodType: z.string().max(5).optional(),
@@ -40,6 +42,7 @@ const CreatePatientSchema = z.object({
 });
 
 const UpdatePatientSchema = z.object({
+  userId: z.number().int().nullable().optional(),
   emergencyContact: z.string().max(200).nullable().optional(),
   dateOfBirth: z.coerce.date().nullable().optional(),
   bloodType: z.string().max(5).nullable().optional(),

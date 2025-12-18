@@ -42,8 +42,6 @@ const BinSchema = z.object({
   longitude: z.number(),
   address: z.string().nullable(),
   capacity_kg: z.number().nullable(),
-  last_collected_at: z.string(),
-  total_collected_weight: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -91,6 +89,13 @@ const getBinByIdRoute = createGetRoute({
   summary: 'Get bin by ID',
   responseSchema: BinResponseSchema,
   params: BinIdParamSchema,
+  tags: ['Bins'],
+});
+
+const getBinsByUserRoute = createGetRoute({
+  path: '/bins/user',
+  summary: 'Get bins created by the authenticated user',
+  responseSchema: BinsResponseSchema,
   tags: ['Bins'],
 });
 
@@ -143,6 +148,7 @@ export const BinSchemas = {
   BinTypeEnum,
   getAllBinsRoute,
   getBinByIdRoute,
+  getBinsByUserRoute,
   createBinRoute,
   deleteBinRoute,
   getNearestBinsRoute,

@@ -44,6 +44,7 @@ const TransferFundsSchema = z.object({
   from_user_id: z.number(),
   to_user_id: z.number(),
   amount: z.number().positive('Amount must be positive'),
+  isVol: z.boolean().optional().default(false),
 });
 
 const OrganizationTypeSchema = z.object({

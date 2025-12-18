@@ -11,199 +11,109 @@ import type {
 
 // GET /api/markers
 export const getAllMarkers = async (c: Context) => {
-  try {
-    const query = c.req.query();
-    const filters: Partial<MarkerQuery> = {
-      marker_type_id: query.marker_type_id
-        ? Number(query.marker_type_id)
-        : undefined,
-      marker_type_ids: query.marker_type_ids
-        ? query.marker_type_ids.split(',').map(Number)
-        : undefined,
-      limit: query.limit ? Number(query.limit) : 100,
-      offset: query.offset ? Number(query.offset) : 0,
-      sortBy: query.sortBy as any,
-      sortOrder: query.sortOrder as any,
-    };
+  const query = c.req.query();
 
-    const markers = await MarkerService.getAllMarkers(filters as MarkerQuery);
+  const filters: Partial<MarkerQuery> = {
+    marker_type_id: query.marker_type_id
+      ? Number(query.marker_type_id)
+      : undefined,
 
-    return c.json({
-      success: true,
-      data: markers,
+    marker_type_ids: query.marker_type_ids
+      ? query.marker_type_ids.split(',').map(Number)
+      : undefined,
+
+    limit: query.limit ? Number(query.limit) : 100,
+    offset: query.offset ? Number(query.offset) : 0,
+
+    sortBy: query.sortBy as MarkerQuery['sortBy'],
+    sortOrder: query.sortOrder as MarkerQuery['sortOrder'],
+  };
+
+  const markers = await MarkerService.getAllMarkers(filters as MarkerQuery);
+
+  return successResponse(
+    c,
+    {
+      markers: markers,
       count: markers.length,
       filters: filters,
-    });
-  } catch (error) {
-    console.error('Error fetching markers:', error);
-    return c.json(
-      {
-        success: false,
-        error: 'Failed to fetch markers',
-      },
-      500
-    );
-  }
+    },
+    200,
+    'Markers retrieved successfully.'
+  );
 };
 
 export const getMarkerById = async (c: Context) => {
-  try {
-    const id = c.req.param('id');
+  const id = c.req.param('id');
+  const marker = await MarkerService.getMarker(id);
 
-    const marker = await MarkerService.getMarker(id);
-
-    if (!marker) {
-      return c.json(
-        {
-          success: false,
-          error: 'Marker not found',
-        },
-        404
-      );
-    }
-    return c.json({
-      success: true,
-      data: marker,
-    });
-  } catch (error) {
-    console.error('Error fetching marker:', error);
+  if (!marker) {
     return c.json(
       {
         success: false,
-        error: 'Failed to fetch marker',
+        message: 'Marker not found',
       },
-      500
+      404
     );
   }
+  return successResponse(c, { marker }, 200, 'Marker retrieved successfully.');
 };
 
 export const createMarker = async (c: Context) => {
-  try {
-    const markerData = await c.req.json<CreateMarkerInput>();
+  const markerData = await c.req.json<CreateMarkerInput>();
 
-    const newMarker = await MarkerService.addtheMarker(markerData);
-
-    return c.json(
-      {
-        success: true,
-        data: newMarker,
-        message: 'Marker created successfully',
-      },
-      201
-    );
-  } catch (error) {
-    console.error('Error creating marker:', error);
-    return c.json(
-      {
-        success: false,
-        error: 'Failed to create marker',
-      },
-      500
-    );
-  }
+  const newMarker = await MarkerService.addtheMarker(markerData);
+  return successResponse(
+    c,
+    {
+      marker: newMarker,
+    },
+    201,
+    'Marker created successfully'
+  );
 };
 
 // PUT /api/markers/:id
 
 export const updateMarker = async (c: Context) => {
-  try {
-    const id = c.req.param('id');
-    const markerData = await c.req.json<UpdateMarkerInput>();
+  const id = c.req.param('id');
+  const markerData = await c.req.json<UpdateMarkerInput>();
 
-    // console.log('Updating marker:', id, markerData);
-
-    const updatedMarker = await MarkerService.updateMarker(id, markerData);
-
-    return c.json({
-      success: true,
-      data: updatedMarker,
-      message: 'Marker updated successfully',
-    });
-  } catch (error: any) {
-    console.error('Error updating marker:', error);
-
-    if (error.message && error.message.includes('not found')) {
-      return c.json(
-        {
-          success: false,
-          error: error.message,
-        },
-        404
-      );
-    }
-
-    return c.json(
-      {
-        success: false,
-        error: error.message || 'Failed to update marker',
-      },
-      500
-    );
-  }
+  const updatedMarker = await MarkerService.updateMarker(id, markerData);
+  return successResponse(
+    c,
+    {
+      marker: updatedMarker,
+    },
+    200,
+    'Marker updated successfully'
+  );
 };
 
 //Delete Marker
 export const deleteMarker = async (c: Context) => {
-  try {
-    const id = c.req.param('id');
-
-    // console.log('Deleting marker:', id);
-
-    await MarkerService.deleteMarker(id);
-
-    return c.json({
-      success: true,
-      message: 'Marker deleted successfully',
-    });
-  } catch (error: any) {
-    console.error('Error deleting marker:', error);
-
-    if (error.message && error.message.includes('not found')) {
-      return c.json(
-        {
-          success: false,
-          error: error.message,
-        },
-        404
-      );
-    }
-
-    return c.json(
-      {
-        success: false,
-        error: error.message || 'Failed to delete marker',
-      },
-      500
-    );
-  }
+  const id = c.req.param('id');
+  await MarkerService.deleteMarker(id);
+  return successResponse(c, null, 200, 'Marker deleted successfully');
 };
 
 // GET /api/markers/bounds
 export const getMarkersByBounds = async (c: Context) => {
-  try {
-    const query = c.req.query();
-    const bounds: BoundingBox = {
-      north: Number(query.north),
-      south: Number(query.south),
-      east: Number(query.east),
-      west: Number(query.west),
-    };
-
-    const markers = await MarkerService.getMarkersByBounds(bounds);
-
-    return c.json({
-      success: true,
-      data: markers,
+  const query = c.req.query();
+  const bounds: BoundingBox = {
+    north: Number(query.north),
+    south: Number(query.south),
+    east: Number(query.east),
+    west: Number(query.west),
+  };
+  const markers = await MarkerService.getMarkersByBounds(bounds);
+  return successResponse(
+    c,
+    {
+      markers: markers,
       count: markers.length,
-    });
-  } catch (error) {
-    console.error('Error fetching markers by bounds:', error);
-    return c.json(
-      {
-        success: false,
-        error: 'Failed to fetch markers by bounds',
-      },
-      500
-    );
-  }
+    },
+    200,
+    'Markers retrieved by bounds successfully.'
+  );
 };

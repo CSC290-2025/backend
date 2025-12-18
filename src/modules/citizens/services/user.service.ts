@@ -1,6 +1,6 @@
 import { UserModel } from '../models';
 import { AddressModel } from '../models';
-import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 import type {
   User,
@@ -258,43 +258,44 @@ const updateAccountInfo = async (
 //   return crypto.createHash('sha256').update(password).digest('hex');
 // };
 
-// const updatePassword = async (
-//   id: number,
-//   data: UpdatePasswordData
-// ): Promise<User | null> => {
-//   const user = await getUserById(id);
+const updatePassword = async (
+  id: number,
+  data: UpdatePasswordData
+): Promise<User | null> => {
+  const user = await getUserById(id);
 
-//   // Verify current password
-//   if (!data.currentPassword) {
-//     throw new ValidationError('Current password is required');
-//   }
+  // Verify current password
+  if (!data.currentPassword) {
+    throw new ValidationError('Current password is required');
+  }
 
-//   const currentHashed = hashPassword(data.currentPassword);
-//   const isPasswordValid = currentHashed === user.password_hash;
+  const isPasswordValid = await bcrypt.compare(
+    data.currentPassword,
+    user.password_hash
+  );
 
-//   if (!isPasswordValid) {
-//     throw new UnauthorizedError('Current password is incorrect');
-//   }
+  if (!isPasswordValid) {
+    throw new UnauthorizedError('Current password is incorrect');
+  }
 
-//   // Validate new password
-//   if (!data.newPassword) {
-//     throw new ValidationError('New password is required');
-//   }
+  // Validate new password
+  if (!data.newPassword) {
+    throw new ValidationError('New password is required');
+  }
 
-//   if (data.newPassword.length < 8) {
-//     throw new ValidationError('New password must be at least 8 characters');
-//   }
+  if (data.newPassword.length < 6) {
+    throw new ValidationError('New password must be at least 6 characters');
+  }
 
-//   // Check if passwords match
-//   if (data.newPassword !== data.confirmNewPassword) {
-//     throw new ValidationError('New passwords do not match');
-//   }
+  // Check if passwords match
+  if (data.newPassword !== data.confirmNewPassword) {
+    throw new ValidationError('New passwords do not match');
+  }
 
-//   // “Hash” new password (SHA-256 for demo; not secure for production)
-//   const hashedPassword = hashPassword(data.newPassword);
+  const hashedPassword = await bcrypt.hash(data.newPassword, 10);
 
-//   return await UserModel.updatePassword(id, hashedPassword);
-// };
+  return await UserModel.updatePassword(id, hashedPassword);
+};
 
 const getUsersByRole = async (
   roleName: string
@@ -361,7 +362,7 @@ export {
   deleteEmergencyContact,
   getEmergencyContacts,
   updateAccountInfo,
-  // updatePassword,
+  updatePassword,
   getUsersByRole,
   getUserProflie,
   updateUserPersonalData,
