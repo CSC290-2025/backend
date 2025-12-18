@@ -68,7 +68,7 @@ export const createMarker = async (c: Context) => {
     {
       marker: newMarker,
     },
-    201, 
+    201,
     'Marker created successfully'
   );
 };

@@ -121,7 +121,6 @@ import {
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
 
-
 export const LocationMarkerSchema = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
@@ -129,7 +128,7 @@ export const LocationMarkerSchema = z.object({
 
 export const CreateMarkerSchema = z.object({
   description: z.string().optional().nullable(),
-  marker_type_id: z.coerce.number().int().positive().optional().nullable(), 
+  marker_type_id: z.coerce.number().int().positive().optional().nullable(),
   location: LocationMarkerSchema.optional().nullable(),
 });
 
@@ -162,7 +161,7 @@ export const MarkerQuerySchema = z.object({
     .transform((val) => val.split(',').map(Number))
     .optional(),
   limit: z.coerce.number().default(100).optional(), // แก้
-  offset: z.coerce.number().default(0).optional(),  // แก้
+  offset: z.coerce.number().default(0).optional(), // แก้
   sortBy: z
     .enum(['created_at', 'updated_at', 'id'])
     .default('created_at')
@@ -171,24 +170,22 @@ export const MarkerQuerySchema = z.object({
 });
 
 export const MarkerIdParamSchema = z.object({
-  id: z.coerce.number(), 
+  id: z.coerce.number(),
 });
 
 export const BoundingBoxSchema = z.object({
-  north: z.coerce.number(), 
-  south: z.coerce.number(), 
-  east: z.coerce.number(), 
-  west: z.coerce.number(),  
+  north: z.coerce.number(),
+  south: z.coerce.number(),
+  east: z.coerce.number(),
+  west: z.coerce.number(),
 });
-
-
 
 export const getAllMarkersRoute = createGetRoute({
   path: '/api/markers',
   summary: 'Get all markers',
   query: MarkerQuerySchema,
   responseSchema: z.object({
-    markers: z.array(MarkerResponseSchema), 
+    markers: z.array(MarkerResponseSchema),
     count: z.number(),
     filters: z.any(),
   }),
