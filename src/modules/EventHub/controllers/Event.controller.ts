@@ -52,12 +52,19 @@ export const deleteEvent = async (c: Context) => {
     'Event deleted successfully'
   );
 };
+export const getEventByDay = async (c: Context) => {
+  const dateParam = c.req.query('date');
 
-export const getDayEventCount = async (c: Context) => {
-  const from = c.req.query('from')!;
-  const to = c.req.query('to')!;
+  if (!dateParam) {
+    throw new Error('Date parameter is required');
+  }
 
-  const data = await EventService.getDayEventCount(from, to);
+  const from = new Date(dateParam);
 
-  return successResponse(c, { data });
+  const to = new Date(from);
+  to.setDate(to.getDate() + 1);
+
+  const data = await EventService.getEventByDay(from, to);
+
+  return successResponse(c, { data: data });
 };

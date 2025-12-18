@@ -29,6 +29,7 @@ import {
   setupRoleUserRoutes,
   setupUserRoutes,
   setupUserSpecialistRoutes,
+  setupUserG1Routes,
 } from '@/modules/citizens/routes';
 
 // Clean Air
@@ -153,6 +154,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUserG8Routes(app);
   setupRoleUserRoutes(app);
   setupUserRoutes(app);
+  setupUserG1Routes(app);
 
   //Emergency
   setupReportRoutes(app);
