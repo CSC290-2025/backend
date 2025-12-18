@@ -535,6 +535,7 @@ model freecycle_posts {
   is_given                   Boolean                      @default(false)
   created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  size                       String?
   departments                departments?                 @relation(fields: [donate_to_department_id], references: [id], onUpdate: NoAction)
   users                      users?                       @relation(fields: [donater_id], references: [id], onUpdate: NoAction)
   freecycle_posts_categories freecycle_posts_categories[]
