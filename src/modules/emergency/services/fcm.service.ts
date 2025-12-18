@@ -3,6 +3,7 @@ import { firebaseMessaging } from '@/config/firebase.ts';
 import { ValidationError } from '@/errors';
 import type {
   CreateNotification,
+  CreateNotificationByToken,
   NotificationResponse,
   SendFcmResponse,
 } from '@/modules/emergency/types/fcm.type.ts';
@@ -37,25 +38,27 @@ export const sendAllNotificationService = async (
 
 export const sendNotificationToToken = async (
   token: string,
-  data: CreateNotification
+  data: CreateNotificationByToken
 ): Promise<SendFcmResponse> => {
   try {
     const notification = data.notification;
     const message = {
       notification: {
-        title: notification.title || 'Notification Title',
-        body: notification.body || 'Notification Body',
+        title: notification.title || 'Notification Titlerrr',
+        body: notification.body || 'Notification Bodyrrr',
       },
       token,
     };
+    console.log(message);
 
     const messageId = await firebaseMessaging.send({
       ...message,
       webpush: {
         notification: {
           icon: 'https://www.google.com/favicon.ico',
-          title: 'Notification Title',
-          body: 'Notification Body',
+          title: notification.title,
+          body: notification.body,
+          token: token,
         },
       },
     });

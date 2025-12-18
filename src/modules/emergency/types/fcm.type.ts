@@ -4,6 +4,14 @@ import type { FcmSchemas } from '@/modules/emergency/schemas';
 
 type SendFcmResponse = z.infer<typeof FcmSchemas.SendFcmResponseSchema>;
 type CreateNotification = z.infer<typeof FcmSchemas.CreateNotificationSchema>;
+type CreateNotificationByToken = z.infer<
+  typeof FcmSchemas.CreateNotificationByTokenSchema
+>;
 type NotificationResponse = BatchResponse;
 
-export type { SendFcmResponse, CreateNotification, NotificationResponse };
+export type {
+  SendFcmResponse,
+  CreateNotification,
+  NotificationResponse,
+  CreateNotificationByToken,
+};
