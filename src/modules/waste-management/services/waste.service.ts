@@ -1,7 +1,8 @@
-import { NotFoundError, ValidationError } from '@/errors';
+import { ForbiddenError, NotFoundError, ValidationError } from '@/errors';
 import { WasteModel } from '../models';
-import type { WasteLogRequest, WasteStats } from '../types';
+import type { WasteLogInternal, WasteStats } from '../types';
 import type { Prisma } from '@/generated/prisma';
+import { date } from 'zod';
 
 export class WasteService {
   static async getWasteTypes() {
@@ -9,16 +10,17 @@ export class WasteService {
     return wasteTypes;
   }
 
-  static async logWaste(data: WasteLogRequest) {
+  static async logWaste(data: WasteLogInternal) {
     if (!data.waste_type_name || !data.weight) {
       throw new NotFoundError('waste_type_name and weight are required');
     }
     if (data.weight <= 0)
       throw new ValidationError('Weight must be greater than 0');
 
-    const wasteLog = await WasteModel.createOrUpdateDailyWasteLog(
+    const wasteLog = await WasteModel.createWasteLog(
       data.waste_type_name,
-      data.weight
+      data.weight,
+      data.user_id
     );
 
     return {
@@ -28,6 +30,7 @@ export class WasteService {
   }
 
   static async getMonthlyStats(
+    user_id: number,
     month?: number,
     year?: number
   ): Promise<WasteStats> {
@@ -40,11 +43,12 @@ export class WasteService {
 
     const stats = (await WasteModel.getWasteStatsByMonth(
       startDate,
-      endDate
+      endDate,
+      user_id
     )) as Array<{
       waste_type_id: number;
       _sum: {
-        total_collection_weight: number | null;
+        weight_kg: number | null;
       };
       _count: {
         id: number;
@@ -57,14 +61,14 @@ export class WasteService {
         const wasteType = await WasteModel.getWasteTypeById(stat.waste_type_id);
         return {
           waste_type: wasteType?.type_name,
-          total_weight: Number(stat._sum.total_collection_weight) || 0,
+          total_weight: Number(stat._sum.weight_kg) || 0,
           entry_count: stat._count.id,
         };
       })
     );
 
     const totalWeight = stats.reduce(
-      (sum, stat) => sum + (Number(stat._sum.total_collection_weight) || 0),
+      (sum, stat) => sum + (Number(stat._sum.weight_kg) || 0),
       0 as number
     );
 
@@ -76,14 +80,37 @@ export class WasteService {
     };
   }
 
-  static async getDailyStats(date: Date) {
-    const stats = await WasteModel.getWasteStatsByDay(date);
+  static async getDailyStats(user_id: number, date: Date) {
+    const stats = (await WasteModel.getWasteStatsByDay(
+      user_id,
+      date
+    )) as Array<{
+      waste_type_id: number;
+      _sum: {
+        weight_kg: number | null;
+      };
+      _count: {
+        id: number;
+      };
+    }>;
 
-    const byType = stats.map((stat) => ({
-      waste_type: stat.waste_types?.type_name,
-      total_weight: Number(stat.total_collection_weight) || 0,
-      log_id: stat.id,
-    }));
+    const byType = await Promise.all(
+      stats
+        .filter((stat) => stat.waste_type_id !== null)
+        .map(async (stat) => {
+          const wasteType = await WasteModel.getWasteTypeById(
+            stat.waste_type_id!
+          );
+
+          const totalWeightByType = Number(stat._sum.weight_kg) || 0;
+
+          return {
+            waste_type: wasteType?.type_name,
+            total_weight: totalWeightByType,
+            entry_count: stat._count.id,
+          };
+        })
+    );
 
     const totalWeight = byType.reduce(
       (sum, stat) => sum + stat.total_weight,
@@ -94,6 +121,29 @@ export class WasteService {
       date: date.toISOString().split('T')[0],
       total_weight_kg: totalWeight,
       by_type: byType,
+    };
+  }
+
+  static async deleteLogById(id: number, user_id: number) {
+    if (!id || isNaN(id)) {
+      throw new ValidationError('Valid log ID is required');
+    }
+
+    const existingLog = await WasteModel.findLogByUserById(id);
+    if (!existingLog) {
+      throw new NotFoundError(`Log with ID ${id} not found`);
+    }
+
+    if (existingLog.user_id != user_id) {
+      throw new ForbiddenError(
+        `This user does not have access to this waste log`
+      );
+    }
+
+    await WasteModel.deleteLogById(id);
+
+    return {
+      message: `Waste log deleted successfully`,
     };
   }
 }

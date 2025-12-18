@@ -76,6 +76,16 @@ const register = async (data: RegisterRequest): Promise<AuthTokens> => {
     email: data.email,
     username: data.username,
     password_hash: hashedPassword,
+    phone: data.phone,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    dob: data.dob,
+    gender: data.gender,
+    addressLine: data.addressLine,
+    subDistrict: data.subDistrict,
+    district: data.district,
+    province: data.province,
+    postalCode: data.postalCode,
   });
 
   if (!user) {

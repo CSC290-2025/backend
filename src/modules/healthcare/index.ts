@@ -7,6 +7,7 @@ export type * from './types';
 export * as PatientModel from './models';
 export * as BedModel from './models/bed.model';
 export * as FacilityModel from './models/facility.model';
+export * as AddressModel from './models/address.model';
 export * as AppointmentModel from './models/appointment.model';
 export * as PrescriptionModel from './models/prescription.model';
 export * as AmbulanceModel from './models/ambulance.model';
@@ -14,6 +15,7 @@ export * as EmergencyCallModel from './models/emergency_call.model';
 export * as PaymentModel from './models/payment.model';
 export * as DoctorModel from './models/doctors.model';
 export * as MedicineInventoryModel from './models/medicine_inventory.model';
+export * as DepartmentModel from './models/department.model';
 
 // Export schemas for OpenAPI usage and validation
 export {
@@ -27,6 +29,9 @@ export {
   PaymentSchemas,
   DoctorSchemas,
   MedicineInventorySchemas,
+  DepartmentSchemas,
+  AddressSchemas,
+  StaffSchemas,
 } from './schemas';
 
 // Export routes (OpenAPI setup functions)
@@ -41,4 +46,8 @@ export {
   setupPaymentRoutes,
   setupDoctorsRoutes,
   setupMedicineInventoryRoutes,
+  setupDepartmentRoutes,
+  setupAddressRoutes,
+  setupHealthcareAuthRoutes,
+  setupStaffRoutes,
 } from './routes';

@@ -21,13 +21,16 @@ export const createBookmark = async (c: Context) => {
   const body = await c.req.json();
   const eventId = Number(body.event_id);
 
+  if (!Number.isInteger(eventId)) {
+    throw new Error('Invalid event_id');
+  }
+
   const bookmark = await BookmarkService.createBookmark(userId, {
     event_id: eventId,
   });
 
   return successResponse(c, bookmark, 201, 'Event bookmarked successfully');
 };
-
 export const deleteBookmark = async (c: Context) => {
   const user = c.get('user') as { id: number };
   const userId = user.id;
@@ -48,4 +51,15 @@ export const checkBookmarkStatus = async (c: Context) => {
   const bookmarked = await BookmarkService.checkBookmarkStatus(userId, eventId);
 
   return successResponse(c, { bookmarked });
+};
+export const getBookmarkedUsers = async (c: Context) => {
+  const eventId = Number(c.req.param('event_id'));
+
+  if (Number.isNaN(eventId)) {
+    throw new Error('Invalid event ID');
+  }
+
+  const users = await BookmarkService.getBookmarkedUsers(eventId);
+
+  return successResponse(c, { data: users });
 };
