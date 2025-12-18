@@ -8,30 +8,38 @@ import {
 
 const DoctorSchema = z.object({
   id: z.number().int(),
+  doctorName: z.string().max(255).nullable(),
   specialization: z.string().max(100).nullable(),
   currentStatus: z.string().max(50).nullable(),
-  consultationFee: z
-    .string()
-    .transform((val) => Number(val))
-    .nullable(),
+  consultationFee: z.number().nullable(),
+  facilityId: z.number().int().nullable(),
+  departmentId: z.number().int().nullable(),
   createdAt: z.date(),
 });
 
 const CreateDoctorSchema = z.object({
+  doctorName: z.string().max(255).optional(),
   specialization: z.string().max(100).optional(),
   currentStatus: z.string().max(50).optional(),
   consultationFee: z.number().optional(),
+  facilityId: z.number().int().optional(),
+  departmentId: z.number().int().optional(),
 });
 
 const UpdateDoctorSchema = z.object({
+  doctorName: z.string().max(255).nullable().optional(),
   specialization: z.string().max(100).nullable().optional(),
   currentStatus: z.string().max(50).nullable().optional(),
   consultationFee: z.number().nullable().optional(),
+  facilityId: z.number().int().nullable().optional(),
+  departmentId: z.number().int().nullable().optional(),
 });
 
 const DoctorFilterSchema = z.object({
   specialization: z.string().optional(),
   currentStatus: z.string().optional(),
+  facilityId: z.coerce.number().int().optional(),
+  departmentId: z.coerce.number().int().optional(),
   search: z.string().optional(),
 });
 

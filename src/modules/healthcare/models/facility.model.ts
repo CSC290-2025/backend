@@ -15,6 +15,15 @@ const facilitySelect = {
   name: true,
   facility_type: true,
   address_id: true,
+  addresses: {
+    select: {
+      address_line: true,
+      province: true,
+      district: true,
+      subdistrict: true,
+      postal_code: true,
+    },
+  },
   phone: true,
   emergency_services: true,
   department_id: true,
@@ -30,6 +39,15 @@ const mapFacility = (facility: FacilityRecord): Facility => ({
   name: facility.name,
   facilityType: facility.facility_type ?? null,
   addressId: facility.address_id ?? null,
+  address: facility.addresses
+    ? {
+        address_line: facility.addresses.address_line ?? '',
+        province: facility.addresses.province ?? '',
+        district: facility.addresses.district ?? '',
+        subdistrict: facility.addresses.subdistrict ?? '',
+        postal_code: facility.addresses.postal_code ?? '',
+      }
+    : undefined,
   phone: facility.phone ?? null,
   location: null,
   emergencyServices: facility.emergency_services ?? null,
@@ -119,11 +137,27 @@ const findById = async (id: number): Promise<Facility | null> => {
 
 const create = async (data: CreateFacilityData): Promise<Facility> => {
   try {
+    let addressIdToUse = data.addressId ?? null;
+
+    if (data.address) {
+      const address = await prisma.addresses.create({
+        data: {
+          address_line: data.address.address_line,
+          province: data.address.province,
+          district: data.address.district,
+          subdistrict: data.address.subdistrict,
+          postal_code: data.address.postal_code,
+        },
+        select: { id: true },
+      });
+      addressIdToUse = address.id;
+    }
+
     const facility = await prisma.facilities.create({
       data: {
         name: data.name,
         facility_type: data.facilityType ?? null,
-        address_id: data.addressId ?? null,
+        address_id: addressIdToUse,
         phone: data.phone ?? null,
         emergency_services: data.emergencyServices ?? null,
         department_id: data.departmentId ?? null,
@@ -142,6 +176,20 @@ const update = async (
 ): Promise<Facility> => {
   try {
     const updateData: Prisma.facilitiesUncheckedUpdateInput = {};
+
+    if (data.address) {
+      const address = await prisma.addresses.create({
+        data: {
+          address_line: data.address.address_line ?? null,
+          province: data.address.province ?? null,
+          district: data.address.district ?? null,
+          subdistrict: data.address.subdistrict ?? null,
+          postal_code: data.address.postal_code ?? null,
+        },
+        select: { id: true },
+      });
+      updateData.address_id = address.id;
+    }
 
     if (data.name !== undefined) {
       updateData.name = data.name;
