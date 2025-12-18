@@ -5,22 +5,8 @@ import {
   createPutRoute,
   createDeleteRoute,
 } from '@/utils/openapi-helpers';
-
-const EventSchema = z.object({
-  id: z.number().int(),
-  host_user_id: z.number().int().nullable(),
-  organization_id: z.number().int().nullable(),
-  image_url: z.string().nullable(),
-  title: z.string(),
-  description: z.string().nullable(),
-  total_seats: z.number().int().default(0),
-  start_at: z.coerce.date(),
-  end_at: z.coerce.date(),
-  address_id: z.number().int().nullable(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
-});
-
+import { requireRole, adminMiddleware, authMiddleware } from '@/middlewares';
+import { ROLES } from '@/constants/roles';
 const OrganizationSchema = z.object({
   name: z.string(),
   email: z.string().email(),
@@ -34,14 +20,34 @@ const AddressSchema = z.object({
   subdistrict: z.string().optional(),
   postal_code: z.string().optional(),
 });
+const EventSchema = z.object({
+  id: z.number().int(),
+  host_user_id: z.number().int().nullable(),
+  organization_id: z.number().int().nullable(),
+  address_id: z.number().int().nullable(),
 
-// ✅ updated using z.iso.date() + z.iso.time()
+  image_url: z.string().nullable(),
+  title: z.string(),
+  description: z.string().nullable(),
+  total_seats: z.number().int().default(0),
+
+  start_at: z.coerce.date(),
+  end_at: z.coerce.date(),
+
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+
+  organization: OrganizationSchema.nullable().optional(),
+  address: AddressSchema.nullable().optional(),
+});
+
 const CreateEventSchema = z.object({
   host_user_id: z.number().int().positive(),
 
   title: z.string().min(1),
   description: z.string().optional(),
   total_seats: z.number().int().min(0).optional(),
+  image_url: z.string().optional(),
 
   start_date: z.iso.date(),
   start_time: z.iso.time(),
@@ -64,7 +70,7 @@ const UpdateEventSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
   total_seats: z.number().int().min(0).optional(),
-
+  image_url: z.string().optional(),
   start_date: z.iso.date().optional(),
   start_time: z.iso.time().optional(),
 
@@ -88,7 +94,10 @@ const EventListQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
-
+const Pagination = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
 const ListEventsResponse = z.object({
   items: z.array(EventSchema),
   page: z.number().int(),
@@ -124,6 +133,7 @@ const createEventRoute = createPostRoute({
   requestSchema: CreateEventSchema,
   responseSchema: z.object({ event: EventSchema }),
   tags: ['Events'],
+  middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
 });
 
 const updateEventRoute = createPutRoute({
@@ -133,6 +143,12 @@ const updateEventRoute = createPutRoute({
   responseSchema: z.object({ event: EventSchema }),
   params: IdParam,
   tags: ['Events'],
+  middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
+});
+const DayEventItem = z.object({
+  title: z.string(),
+  start_date: z.string(),
+  start_time: z.string(),
 });
 
 const deleteEventRoute = createDeleteRoute({
@@ -140,17 +156,35 @@ const deleteEventRoute = createDeleteRoute({
   summary: 'Delete event',
   params: IdParam,
   tags: ['Events'],
+  middleware: [authMiddleware, requireRole(ROLES.ADMIN)],
 });
 
-const dayEventCountRoute = createGetRoute({
-  path: '/events/day-count',
-  summary: 'Day event count',
+const getEventByDayRoute = createGetRoute({
+  path: '/events/by-day',
+  summary: 'Get events in a specific day',
   query: z.object({
-    from: z.iso.date(),
-    to: z.iso.date(),
+    date: z.coerce.date(),
   }),
   responseSchema: z.object({
-    data: z.array(DayEventCountItem),
+    data: z.array(EventSchema),
+  }),
+  tags: ['Events'],
+});
+const listPastBookmarkedEventsRoute = createGetRoute({
+  path: '/events/bookmarked-history',
+  summary: 'List events that have ended and are bookmarked by the user.',
+  query: Pagination,
+  responseSchema: ListEventsResponse,
+  tags: ['Events'],
+  middleware: [authMiddleware],
+});
+// Event.schemas.ts
+const listWasteEventsRoute = createGetRoute({
+  path: '/events/waste',
+  summary: 'List all waste management events',
+  responseSchema: z.object({
+    success: z.boolean(),
+    data: z.array(EventSchema),
   }),
   tags: ['Events'],
 });
@@ -168,5 +202,7 @@ export const EventSchemas = {
   createEventRoute,
   updateEventRoute,
   deleteEventRoute,
-  dayEventCountRoute,
+  getEventByDayRoute,
+  listPastBookmarkedEventsRoute,
+  listWasteEventsRoute,
 };

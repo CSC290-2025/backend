@@ -56,15 +56,27 @@ const deleteEvent = async (id: number) => {
   return deleted;
 };
 
-const getDayEventCount = async (from: string, to: string) => {
-  return await EventModel.countByDay(from, to);
+const getEventByDay = async (from: Date, to: Date) => {
+  return await EventModel.getEventByDay(from, to);
 };
 
+const listPastBookmarkedEvents = async (
+  userId: number,
+  page: number,
+  limit: number
+) => {
+  return await EventModel.listPastBookmarkedEvents(userId, page, limit);
+};
+const listWasteEvents = async () => {
+  return await EventModel.listWasteEvents();
+};
 export {
   getEventById,
   listEvents,
   createEvent,
   updateEvent,
   deleteEvent,
-  getDayEventCount,
+  getEventByDay,
+  listPastBookmarkedEvents,
+  listWasteEvents,
 };

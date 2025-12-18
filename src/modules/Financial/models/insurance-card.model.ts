@@ -2,6 +2,7 @@ import prisma from '@/config/client';
 import { handlePrismaError } from '@/errors';
 import type { insurance_cards } from '@/generated/prisma';
 import type { InsuranceCard } from '../types';
+import type { Prisma } from '@prisma/client/scripts/default-index';
 
 // Helper to transform Prisma model to app type
 const transformInsuranceCard = (card: insurance_cards): InsuranceCard => ({
@@ -89,13 +90,17 @@ const findCardByCardNumber = async (
 
 const updateCardBalance = async (
   id: number,
-  balance: number
+  amount: number,
+  operation: 'increment' | 'decrement',
+  trx?: Prisma.TransactionClient
 ): Promise<InsuranceCard> => {
   try {
-    const card = await prisma.insurance_cards.update({
+    const card = await (trx ?? prisma).insurance_cards.update({
       where: { id },
       data: {
-        balance,
+        balance: {
+          [operation]: amount,
+        },
         updated_at: new Date(),
       },
     });
@@ -107,10 +112,11 @@ const updateCardBalance = async (
 
 const updateCard = async (
   id: number,
-  data: { status?: 'active' | 'suspended' }
+  data: { status?: 'active' | 'suspended' },
+  trx?: Prisma.TransactionClient
 ): Promise<InsuranceCard> => {
   try {
-    const card = await prisma.insurance_cards.update({
+    const card = await (trx ?? prisma).insurance_cards.update({
       where: { id },
       data: {
         ...data,

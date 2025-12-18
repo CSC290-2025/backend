@@ -1,22 +1,30 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { BinSchemas } from '../schemas';
 import { BinController } from '../controllers';
+import { optionalAuthMiddleware } from '@/middlewares/optionalAuth';
+import { authMiddleware } from '@/middlewares/auth';
 
 const setupBinRoutes = (app: OpenAPIHono) => {
-  // Get nearby bins with filters
   app.openapi(BinSchemas.getNearbyBinsRoute, BinController.getNearbyBins);
 
-  // Get all bins with optional filters
   app.openapi(BinSchemas.getAllBinsRoute, BinController.getAllBins);
 
-  // Create a new bin
-  app.openapi(BinSchemas.createBinRoute, BinController.createBin);
+  app.openapi(BinSchemas.getBinsByUserRoute, async (c) => {
+    await authMiddleware(c, async () => {});
+    return BinController.getBinsByUser(c);
+  });
 
-  // Get bin by ID
+  app.openapi(BinSchemas.createBinRoute, async (c) => {
+    await optionalAuthMiddleware(c, async () => {});
+    return BinController.createBin(c);
+  });
+
   app.openapi(BinSchemas.getBinByIdRoute, BinController.getBinById);
 
-  // Delete bin
-  app.openapi(BinSchemas.deleteBinRoute, BinController.deleteBin);
+  app.openapi(BinSchemas.deleteBinRoute, async (c) => {
+    await authMiddleware(c, async () => {});
+    return BinController.deleteBin(c);
+  });
 };
 
 export { setupBinRoutes };

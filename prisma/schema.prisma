@@ -1027,7 +1027,6 @@ model users {
   wallets                       wallets[]
   waste_logs                    waste_logs[]
   waste_logs_event              waste_logs_event[]
-  weather_rating                weather_rating[]
 
   @@index([email], map: "idx_users_email")
   @@index([phone], map: "idx_users_phone")
@@ -1157,6 +1156,7 @@ model waste_logs {
 
   @@index([waste_type_id], map: "fki_waste_type_fkey")
   @@index([waste_type_id], map: "fki_waste_type_id_fkey")
+  @@index([waste_type_id], map: "fki_waste_type_fkey")
 }
 
 model waste_logs_event {

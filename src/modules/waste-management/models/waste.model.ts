@@ -11,62 +11,56 @@ export class WasteModel {
     });
   }
 
-  static async createOrUpdateDailyWasteLog(
+  static async createWasteLog(
     wasteTypeName: string,
-    weight: number
+    weight: number,
+    user_id: number
   ) {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
-
-    let wasteLog = await prisma.waste_event_statistics.findFirst({
+    let wasteType = await prisma.waste_types.findFirst({
       where: {
-        collection_date: { gte: todayStart, lte: todayEnd },
-        waste_types: { type_name: wasteTypeName },
-        event_id: null,
+        type_name: wasteTypeName,
       },
-      include: { waste_types: true },
     });
 
-    if (wasteLog) {
-      wasteLog = await prisma.waste_event_statistics.update({
-        where: { id: wasteLog.id },
-        data: { total_collection_weight: { increment: weight } },
-        include: { waste_types: true },
-      });
-    } else {
-      const wasteType = await prisma.waste_types.create({
-        data: { type_name: wasteTypeName },
-      });
-
-      wasteLog = await prisma.waste_event_statistics.create({
+    if (!wasteType) {
+      wasteType = await prisma.waste_types.create({
         data: {
-          waste_type_id: wasteType.id,
-          total_collection_weight: weight,
-          collection_date: new Date(),
-          event_id: null,
+          type_name: wasteTypeName,
         },
-        include: { waste_types: true },
       });
     }
+
+    const wasteLog = await prisma.waste_logs.create({
+      data: {
+        user_id: user_id,
+        waste_type_id: wasteType.id,
+        log_date: new Date(),
+        weight_kg: weight,
+      },
+      include: {
+        waste_types: true,
+      },
+    });
 
     return wasteLog;
   }
 
-  static async getWasteStatsByMonth(startDate: Date, endDate: Date) {
-    return await prisma.waste_event_statistics.groupBy({
+  static async getWasteStatsByMonthByUser(
+    startDate: Date,
+    endDate: Date,
+    user_id: number
+  ) {
+    return await prisma.waste_logs.groupBy({
       by: ['waste_type_id'],
       where: {
-        collection_date: {
+        log_date: {
           gte: startDate,
           lte: endDate,
         },
-        event_id: null,
+        user_id: user_id,
       },
       _sum: {
-        total_collection_weight: true,
+        weight_kg: true,
       },
       _count: {
         id: true,
@@ -81,28 +75,66 @@ export class WasteModel {
     });
   }
 
-  static async getWasteStatsByDay(targetDate: Date) {
+  static async getWasteStatsByDay(user_id: number, targetDate: Date) {
     const dayStart = new Date(targetDate);
     dayStart.setHours(0, 0, 0, 0);
 
     const dayEnd = new Date(targetDate);
     dayEnd.setHours(23, 59, 59, 999);
 
-    return await prisma.waste_event_statistics.findMany({
+    return await prisma.waste_logs.groupBy({
+      by: ['waste_type_id'],
       where: {
-        collection_date: {
+        log_date: {
           gte: dayStart,
           lte: dayEnd,
         },
-        event_id: null,
+        user_id: user_id,
+      },
+      _sum: {
+        weight_kg: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+  }
+
+  static async getWasteLogsByDay(user_id: number, targetDate: Date) {
+    const dayStart = new Date(targetDate);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(targetDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    return await prisma.waste_logs.findMany({
+      where: {
+        log_date: {
+          gte: dayStart,
+          lte: dayEnd,
+        },
+        user_id: user_id,
       },
       include: {
         waste_types: {
           select: {
+            id: true,
             type_name: true,
           },
         },
       },
+    });
+  }
+
+  static async findLogByUserById(id: number) {
+    return prisma.waste_logs.findUnique({
+      where: { id: id },
+    });
+  }
+
+  static async deleteLogById(id: number) {
+    return prisma.waste_logs.delete({
+      where: { id },
     });
   }
 }

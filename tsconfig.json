@@ -29,6 +29,7 @@
     "dist",
     "src/generated",
     "*.config.*",
-    "src/modules/_example"
+    "src/modules/_example",
+    "**/esp32-wifi/**"
   ]
 }
