@@ -24,7 +24,7 @@ const EmergencyContactSchema = z.object({
 });
 
 const AddressSchema = z.object({
-  id: z.number(),
+  id: z.number().nullable().optional(),
   address_line: z.string().nullable(),
   province: z.string().nullable(),
   district: z.string().nullable(),
