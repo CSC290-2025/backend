@@ -64,7 +64,7 @@ const transferFunds = async (
   if (isVol) {
     const feePer = amount * 0.03;
     detuctedAmount = amount - feePer;
-    const toAdmin = amount * feePer;
+    const toAdmin = feePer;
 
     await WalletModel.atomicTransferFunds(fromWallet.id, 19, toAdmin);
   }
