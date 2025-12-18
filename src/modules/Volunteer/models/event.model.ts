@@ -11,6 +11,7 @@ import { NotFoundError } from '../../../errors';
 interface EventFilterOptions extends PaginationOptions {
   search?: string;
   department_id?: number;
+  tag?: string;
 }
 
 const findMany = async (
@@ -28,6 +29,11 @@ const findMany = async (
         { title: { contains: filters.search, mode: 'insensitive' } },
         { description: { contains: filters.search, mode: 'insensitive' } },
       ];
+    }
+    if (typeof filters.tag === 'string') {
+      where.tag = {
+        equals: filters.tag,
+      };
     }
     if (filters.department_id) {
       where.department_id = filters.department_id;
@@ -54,9 +60,10 @@ const findMany = async (
           //status: true,
           created_at: true,
           updated_at: true,
-          //created_by_user_id: true,
+          created_by_user_id: true,
           department_id: true,
-          //address_id: true,
+          tag: true,
+          address_id: true,
         },
       }),
       prisma.volunteer_events.count({
@@ -89,7 +96,7 @@ const create = async (data: CreateEventInput) => {
         start_at: new Date(data.start_at),
         end_at: new Date(data.end_at),
         total_seats: data.total_seats,
-        //created_by_user_id: data.created_by_user_id,
+        created_by_user_id: data.created_by_user_id,
         image_url: data.image_url,
         //department_id: data.department_id, not done
         registration_deadline: data.registration_deadline
@@ -97,6 +104,7 @@ const create = async (data: CreateEventInput) => {
           : undefined,
         //address_id: data.address_id,
         //status: data.status,
+        tag: data.tag,
       },
     });
   } catch (error) {
@@ -121,6 +129,7 @@ const update = async (id: number, data: UpdateEventInput) => {
           : data.registration_deadline === null
             ? null
             : undefined,
+        tag: data?.tag,
         //address_id: data.address_id,
         //status: data.status,
       },
@@ -221,12 +230,14 @@ const findParticipantsByEventId = async (eventId: number) => {
 
 const findParticipation = async (eventId: number, userId: number) => {
   try {
-    return await prisma.volunteer_event_participation.findFirst({
+    const events = await prisma.volunteer_event_participation.findFirst({
       where: {
         volunteer_event_id: eventId,
         user_id: userId,
       },
     });
+
+    return events;
   } catch (error) {
     handlePrismaError(error);
   }
@@ -255,16 +266,19 @@ const findEventsByUserId = async (userId: number) => {
         //status: true,
         created_at: true,
         updated_at: true,
-        //created_by_user_id: true,
+        created_by_user_id: true,
         department_id: true,
-        //address_id: true,
+        address_id: true,
       },
       orderBy: {
-        start_at: 'asc', // Show upcoming events first
+        start_at: 'asc',
       },
     });
+
     return events;
   } catch (error) {
+    console.log(error, ' THIS is erorr');
+
     handlePrismaError(error);
   }
 };

@@ -29,6 +29,7 @@ import {
   setupRoleUserRoutes,
   setupUserRoutes,
   setupUserSpecialistRoutes,
+  setupUserG1Routes,
 } from '@/modules/citizens/routes';
 
 // Clean Air
@@ -39,13 +40,7 @@ import {
   setupReportRoutes,
   setupFcmRoutes,
   setupTokenRoutes,
-} from '@/modules/emergency';
-
-import {
-  reportRoutes,
-  fcmRoutes,
-  tokenRoutes,
-  contactRoutes,
+  setupContactRoutes,
 } from '@/modules/emergency';
 
 // Event Hub
@@ -58,6 +53,7 @@ import {
   setupMetroCardRoutes,
   setupTransactionRoutes,
   setupInsuranceCardRoutes,
+  setupLocationRoutes,
 } from '@/modules/Financial';
 
 // Free Cycle
@@ -66,6 +62,7 @@ import {
   setupCategoryRoutes,
   setupFreecyclePostCategoriesPostRoutes,
   setupReceiverRequestsRoutes,
+  setupUploadFreecycleRoutes,
 } from '@/modules/freecycle';
 
 //Healthcare
@@ -108,6 +105,7 @@ import {
   setupRoadRoutes,
   setupTrafficEmergencyRoutes,
   setupTrafficLightRoutes,
+  setupLightReportRoutes,
 } from '@/modules/traffic';
 
 // Volunteer
@@ -157,11 +155,13 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupUserG8Routes(app);
   setupRoleUserRoutes(app);
   setupUserRoutes(app);
+  setupUserG1Routes(app);
 
   //Emergency
   setupReportRoutes(app);
   setupFcmRoutes(app);
   setupTokenRoutes(app);
+  setupContactRoutes(app);
 
   // Event Hub
   setupEventRoutes(app);
@@ -173,6 +173,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupTransactionRoutes(app);
   setupInsuranceCardRoutes(app);
   setupScbRoutes(app);
+  setupLocationRoutes(app);
 
   //Healthcare
   setupPatientRoutes(app);
@@ -191,6 +192,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   setupCategoryRoutes(app);
   setupFreecyclePostCategoriesPostRoutes(app);
   setupReceiverRequestsRoutes(app);
+  setupUploadFreecycleRoutes(app);
 
   // Know AI
   setupEnrollmentRoutes(app);
@@ -205,6 +207,7 @@ export const setupRoutes = (app: OpenAPIHono) => {
   // Traffic
   setupIntersectionRoutes(app);
   setupTrafficLightRoutes(app);
+  setupLightReportRoutes(app);
   setupLightRequestRoutes(app);
   setupRoadRoutes(app);
   setupTrafficEmergencyRoutes(app);
@@ -228,10 +231,6 @@ export const setupRoutes = (app: OpenAPIHono) => {
   Normal Hono Routes (not in Swagger docs)
   ============================================
   */
-  //Emergency
-  app.route('/emergency', reportRoutes());
-  app.route('/emergency', contactRoutes());
-  app.route('/emergency', fcmRoutes());
 
   // Support Map
   app.route('/api', detectRoutes);

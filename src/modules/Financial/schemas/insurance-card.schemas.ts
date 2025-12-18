@@ -53,6 +53,11 @@ const UpdateInsuranceCardResponseSchema = z.object({
   card: InsuranceCardSchema,
 });
 
+const TransferToHealthCareSchema = z.object({
+  cardNumber: z.string(),
+  amount: z.number(),
+});
+
 // Parameter schemas
 const UserIdParam = z.object({
   userId: z.coerce.number(),
@@ -143,10 +148,24 @@ const deleteMyInsuranceCardRoute = createDeleteRoute({
   operationId: 'useDeleteMyInsuranceCard',
 });
 
+const transferToHealthCareRoute = createPostRoute({
+  path: '/insurance-cards/transfer-to-healthcare',
+  summary: 'Transfer insurance card balance to healthcare organization',
+  requestSchema: TransferToHealthCareSchema,
+  responseSchema: z.object({
+    insuranceCard: InsuranceCardSchema,
+    cardTransactionId: z.number().optional(),
+  }),
+  tags: ['Insurance Cards'],
+  middleware: [authMiddleware],
+  operationId: 'useTransferToHealthCare',
+});
+
 export const InsuranceCardSchemas = {
   InsuranceCardSchema,
   CreateInsuranceCardSchema,
   TopUpInsuranceCardSchema,
+  TransferToHealthCareSchema,
   UpdateInsuranceCardSchema,
   GetInsuranceCardResponseSchema,
   GetInsuranceCardsResponseSchema,
@@ -163,4 +182,5 @@ export const InsuranceCardSchemas = {
   getUserInsuranceCardsRoute,
   updateInsuranceCardRoute,
   deleteMyInsuranceCardRoute,
+  transferToHealthCareRoute,
 };

@@ -18,14 +18,26 @@ const CreateContactSchema = ContactResponseSchema.omit({
 });
 
 const UpdateContactSchema = z.object({
-  id: z.number().int(),
-  contact_name: z.string().nullable(),
+  contact_name: z.string().optional(),
   phone: z
     .string()
     .regex(phoneRegex, {
       message: 'Invalid phone number',
     })
-    .nullable(),
+    .optional(),
 });
 
-export { ContactResponseSchema, CreateContactSchema, UpdateContactSchema };
+const FindContactByUserIdSchema = z.object({
+  contact: z.array(CreateContactSchema),
+});
+
+const DeleteContactResponseSchema = z.object({
+  id: z.number().int(),
+});
+export {
+  ContactResponseSchema,
+  CreateContactSchema,
+  UpdateContactSchema,
+  FindContactByUserIdSchema,
+  DeleteContactResponseSchema,
+};

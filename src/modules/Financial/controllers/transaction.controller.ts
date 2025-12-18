@@ -28,6 +28,7 @@ const getAllTransactions = async (c: Context) => {
   const transactions = await TransactionService.getAllTransactions();
   return successResponse(c, transactions);
 };
+
 export {
   getWalletTransaction,
   getCardTransaction,

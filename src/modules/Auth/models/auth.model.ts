@@ -151,6 +151,9 @@ const createUser = async (
         username: data.username,
         password_hash: data.password_hash,
         phone: data.phone,
+        user_profiles: {
+          create: {},
+        },
       },
       select: {
         id: true,

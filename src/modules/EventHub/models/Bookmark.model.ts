@@ -63,10 +63,28 @@ const remove = async (userId: number, eventId: number) => {
     handlePrismaError(err);
   }
 };
+const listUsersByEvent = async (
+  eventId: number
+): Promise<{ id: number }[] | undefined> => {
+  try {
+    const bookmarks = await prisma.event_bookmarks.findMany({
+      where: { event_id: eventId },
+      select: {
+        user_id: true,
+      },
+    });
 
+    return bookmarks.map((bookmark) => ({
+      id: bookmark.user_id,
+    }));
+  } catch (err) {
+    handlePrismaError(err);
+  }
+};
 export const BookmarkModel = {
   listByUser,
   findByUserAndEvent,
   create,
   remove,
+  listUsersByEvent,
 };
