@@ -65,12 +65,6 @@ src/generated/
 *.db
 *.db-journal
 
-# Package Manager Lock File
-package-lock.json
-yarn.lock
-bun.lockb
-pnpm-lock.yaml
-
 # Caches
 .npm
 .eslintcache

@@ -3,7 +3,7 @@ import prisma from '@/config/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { MetroCardService, WalletService } from '@/modules/Financial';
 
-const GOOGLE_API_KEY = process.env.G16_VITE_GOOGLE_MAPS_API_KEY;
+const GOOGLE_API_KEY = process.env.G08_GOOGLE_MAPS_API_KEY;
 
 // 💡 ฟังก์ชันใหม่: Reverse Geocoding เพื่อดึงชื่อสถานที่จากพิกัด
 async function reverseGeocode(lat: string, lng: string): Promise<string> {

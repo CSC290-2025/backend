@@ -1,5 +1,5 @@
-// console.log(process.env.G16_VITE_GOOGLE_MAPS_API_KEY);
-const GOOGLE_MAPS_API_KEY = process.env.G16_VITE_GOOGLE_MAPS_API_KEY;
+// console.log(process.env.G16_GOOGLE_MAPS_API_KEY);
+const GOOGLE_MAPS_API_KEY = process.env.G16_GOOGLE_MAPS_API_KEY;
 // // const DISTANCE_MATRIX_URL =
 // //   'https://maps.googleapis.com/maps/api/distancematrix/json';
 
